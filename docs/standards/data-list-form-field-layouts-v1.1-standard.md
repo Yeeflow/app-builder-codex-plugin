@@ -106,6 +106,22 @@ When mapping a business Sub list field, generation may update only:
 
 All table, header, row, card, border, padding, typography, and zero-margin settings must remain template-derived. Generated forms must not use simplified `list` controls for Sub list fields.
 
+The host Data List field is the schema authority. A persisted Sub list must be emitted as a real Data List field with `Type: "list"`, `FieldType: "Text"`, and stringified `Defs[].Rules` containing `list-variables`. The custom form builder must rebuild `attrs.list-variables` and `attrs.list-fields` from that target field schema. It must not retain row fields from the cloned golden reference template.
+
+For every `attrs.list-fields[]` entry:
+
+- `control.label` must contain the visible business column title;
+- `control.binding` must equal the row field `id`;
+- `control.attrs.list_field_binding` must equal the parent Sub list field binding;
+- `control.attrs.list_control_id` must equal the parent Sub list control ID;
+- nested control IDs must be unique;
+- `list-fields` and `list-variables` must contain the same row field IDs in the same order;
+- the form row schema must match the host field's stringified `Rules["list-variables"]` schema.
+
+Unlike Approval Form Sub list exports, the official Data List export shape does not require nested column controls to include `label_var: null`. Do not add an Approval-only hard gate to Data List forms. The required Data List title contract is the non-empty `control.label`.
+
+Data List Sub List summaries are planned in `Sub List Summaries` and materialized into `attrs.list-fields-summary[]`. Each Summary must use a UUID, reference an existing numeric row field, and use the export-proven `total` or `avg` type. Bind a persisted result with `__list_` to a real numeric host Data List field; bind a page-session result with `__temp_` to a declared form-resource `tempVars[]` entry. A visible Summary may omit binding. Never use the Approval-only `__variables_` prefix on a Data List form.
+
 ## One Control Per Grid Cell
 
 Each Grid cell should contain one direct control.
@@ -134,6 +150,8 @@ Rules:
 
 - Select `data_list_form_fields_grid_v1_1` for every generated current-record field group on a New, Edit, or View custom Data List form.
 - The App Plan should identify field groups and responsive column intent, but it must not include generated `ListID`, `LayoutID`, field runtime IDs, JSON property paths, or copied control JSON.
+- For every Sub list field, add a `Sub List Row Fields` column to the Data List field table. Use either JSON or `rowFieldId:Column Title:fieldType:controlType` entries separated by semicolons. These row fields drive both the stringified field Rules and the custom-form Sub list columns.
+- Add `Sub List Summaries` when totals or averages are required. Use `sourceRowField:summaryType:targetKind:targetId` entries separated by semicolons.
 - If a New/Edit/View custom Data List form intentionally has no current-record field controls, state that explicitly with the business reason and proof boundary.
 
 ## Required Gates

@@ -40,6 +40,7 @@ export function buildApprovalFormLayoutDef({
   setTemplateText(resource, "section_title_text", normalizedRole === "task" ? "Review Details" : "Request Details");
   setTemplateText(resource, "section_title_description", normalizedRole === "task" ? `Review submitted ${safeTitle} information before taking action.` : `Complete the required ${safeTitle} information.`);
   materializeApprovalFieldControls(resource, { fields, title: safeTitle, role: normalizedRole, rootDir });
+  ensureApprovalSubListColumnTitles(resource);
   ensureApprovalBusinessSection(resource, { title: safeTitle, role: normalizedRole });
   removeOperationsWithoutActions(resource);
   removeUnusedApprovalTemplateSections(resource);
@@ -56,8 +57,37 @@ export function approvalVariableTypeForField(field) {
   if (type === "currency" || type === "input_number") return "number";
   if (type === "switch") return "boolean";
   if (type === "identity-picker") return "user";
-  if (type === "list") return "sublist";
+  if (type === "list") return "list";
   return "text";
+}
+
+export function ensureApprovalSubListColumnTitles(root) {
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+    if (value.type === "list" && Array.isArray(value.attrs?.["list-fields"])) {
+      for (const rowField of value.attrs["list-fields"]) {
+        const nestedControl = rowField?.control;
+        if (!nestedControl || typeof nestedControl !== "object") continue;
+        const columnTitle = firstNonEmpty(
+          rowField.columnTitle,
+          rowField.displayName,
+          rowField.label,
+          rowField.title,
+          rowField.name,
+        );
+        if (!firstNonEmpty(nestedControl.label) && columnTitle) nestedControl.label = columnTitle;
+        if (!Object.prototype.hasOwnProperty.call(nestedControl, "label_var")) nestedControl.label_var = null;
+        if (!Array.isArray(nestedControl.displayLabel)) nestedControl.displayLabel = [null, true];
+      }
+    }
+    for (const child of Object.values(value)) visit(child);
+  };
+  visit(root);
+  return root;
 }
 
 function scrubApprovalSourceDomainResidue(node, title) {
@@ -180,8 +210,45 @@ function buildApprovalFormFieldControl({ field, index, formName, role, columns }
     control.attrs.choices = inferChoiceValues(field);
     control.attrs.color_choices = control.attrs.choices.map((value) => ({ value, key: deterministicUuid(`${control.id}-${value}`) }));
   }
+  if (type === "list") materializeApprovalSubListControl(control, field, role);
   if (fullRow) control.attrs.common.grid = { position: [null, { cSpan: columns }, { cSpan: Math.min(columns, 2) }, { cSpan: 1 }] };
   return control;
+}
+
+function materializeApprovalSubListControl(control, field, role) {
+  const rowFields = normalizeApprovalSubListRowFields(field);
+  control.attrs["list-fields"] = rowFields.map((rowField) => ({
+    id: rowField.id,
+    idx: rowField.idx,
+    name: rowField.displayName,
+    type: rowField.type,
+    editable: role !== "task" && rowField.editable !== false,
+    control: {
+      type: rowField.controlType,
+      binding: rowField.id,
+      label: rowField.columnTitle,
+      label_var: null,
+      displayLabel: [null, true],
+      attrs: {
+        list_field: true,
+        list_field_binding: control.binding,
+        list_control_id: control.id,
+        ...(role === "task" ? { readonly: true, readOnly: true } : {}),
+      },
+      ...(role === "task" ? { readonly: true, readOnly: true } : {}),
+    },
+  }));
+  control.attrs["list-variables"] = rowFields.map((rowField) => ({
+    id: rowField.variableId,
+    idx: rowField.variableId,
+    name: rowField.displayName,
+    type: rowField.type,
+    editable: role !== "task" && rowField.editable !== false,
+  }));
+  const summaries = normalizeApprovalSubListSummaries(field, rowFields, control.id);
+  if (summaries.length) control.attrs["list-fields-summary"] = summaries;
+  control.attrs.fallback ||= { et: "Click the following button to add a new item." };
+  ensureApprovalSubListColumnTitles(control);
 }
 
 function normalizeApprovalControlType(field) {
@@ -211,7 +278,8 @@ function uniqueApprovalFieldSpecs(fields) {
   for (const field of fields || []) {
     const displayName = cleanResourceName(field?.displayName);
     if (!displayName || isNonResourceName(displayName)) continue;
-    const fieldName = cleanResourceName(field?.fieldName || inferFieldKey(displayName, field?.fieldType || "Text", normalized.length));
+    let fieldName = cleanResourceName(field?.fieldName || inferFieldKey(displayName, field?.fieldType || "Text", normalized.length));
+    if (canonicalApprovalVariableId(fieldName) === "requesttitle" || canonicalApprovalVariableId(displayName) === "requesttitle") fieldName = "requestTitle";
     const key = normKey(fieldName || displayName);
     if (seen.has(key)) continue;
     seen.add(key);
@@ -221,9 +289,87 @@ function uniqueApprovalFieldSpecs(fields) {
       fieldType: cleanResourceName(field?.fieldType) || "Text",
       controlType: cleanResourceName(field?.controlType) || inferControlType(field?.fieldType || ""),
       choiceValues: cleanResourceName(field?.choiceValues),
+      listRefId: cleanResourceName(field?.listRefId || field?.complexTypeId),
+      listFields: normalizeApprovalSubListRowFields(field),
+      listSummaries: normalizeApprovalSubListSummaries(field),
     });
   }
   return normalized;
+}
+
+function canonicalApprovalVariableId(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function normalizeApprovalSubListSummaries(field, rowFields = normalizeApprovalSubListRowFields(field), controlId = "approval-sublist") {
+  const candidates = field?.listSummaries || field?.summaries || field?.subListSummaries || [];
+  if (!Array.isArray(candidates)) return [];
+  return candidates.map((summary, index) => {
+    const sourceField = firstNonEmpty(summary?.field, summary?.sourceField);
+    if (!sourceField) return null;
+    const prefix = ["__variables_", "__temp_"].includes(summary?.binding?.prefix)
+      ? summary.binding.prefix
+      : "";
+    const target = firstNonEmpty(summary?.binding?.value, summary?.target);
+    return {
+      id: deterministicUuid(`${controlId}-summary-${sourceField}-${index + 1}`),
+      field: sourceField,
+      type: firstNonEmpty(summary?.type, summary?.summaryType, "total"),
+      display: summary?.display !== false,
+      binding: prefix && target ? { prefix, value: target } : null,
+    };
+  }).filter(Boolean);
+}
+
+function normalizeApprovalSubListRowFields(field) {
+  const candidates = field?.listFields || field?.rowFields || field?.subListFields || [];
+  if (!Array.isArray(candidates)) return [];
+  const normalized = [];
+  const seen = new Set();
+  for (const [index, rowField] of candidates.entries()) {
+    if (!rowField || typeof rowField !== "object") continue;
+    const displayName = firstNonEmpty(rowField.displayName, rowField.columnTitle, rowField.label, rowField.title, rowField.name);
+    const id = firstNonEmpty(rowField.id, rowField.idx, rowField.fieldName, rowField.binding) || `RowField${index + 1}`;
+    if (!displayName || seen.has(id)) continue;
+    seen.add(id);
+    const type = normalizeApprovalRowFieldType(rowField.type || rowField.fieldType || rowField.controlType);
+    normalized.push({
+      id,
+      idx: firstNonEmpty(rowField.idx, id),
+      variableId: firstNonEmpty(rowField.variableId, `${id}Variable`),
+      displayName,
+      columnTitle: firstNonEmpty(rowField.columnTitle, rowField.controlLabel, displayName),
+      type,
+      controlType: firstNonEmpty(rowField.controlType, approvalRowControlType(type)),
+      editable: rowField.editable !== false,
+    });
+  }
+  return normalized;
+}
+
+function normalizeApprovalRowFieldType(value) {
+  const raw = normKey(value);
+  if (/date|time/.test(raw)) return "date";
+  if (/number|decimal|currency|amount|integer/.test(raw)) return "number";
+  if (/boolean|bit|switch|yes no/.test(raw)) return "boolean";
+  if (/user|identity|person/.test(raw)) return "user";
+  return "text";
+}
+
+function approvalRowControlType(type) {
+  if (type === "date") return "datepicker";
+  if (type === "number") return "input_number";
+  if (type === "boolean") return "switch";
+  if (type === "user") return "identity-picker";
+  return "input";
+}
+
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    const text = String(value ?? "").trim();
+    if (text) return text;
+  }
+  return "";
 }
 
 function inferChoiceValues(field) {

@@ -172,6 +172,7 @@ function validatePackage(packagePath, context) {
       source: `${form.listTitle} / ${form.title}`,
       requirePlacement: true,
       requireWrapperWhenFieldsExist: true,
+      hostFields: form.fields,
     });
   }
 }
@@ -243,6 +244,7 @@ function validateResource(rawResource, context) {
     context.findings.push(error("DATA_LIST_FORM_FIELDS_RESOURCE_INVALID", "Data List Form field-layout resource must parse as an object.", { source: context.source }));
     return;
   }
+  context.currentResource = resource;
   const wrappers = findAllByIdentity(resource, ROOT_WRAPPER_ID);
   const fieldControls = flatten(resource).filter((entry) => isFieldControl(entry.node) && !isInsideRelatedCollectionSurface(entry));
   if (!wrappers.length && context.requireWrapperWhenFieldsExist && fieldControls.length) {
@@ -365,6 +367,69 @@ function validateSubListControl(control, context) {
   if (!Array.isArray(control?.attrs?.["list-variables"]) || !Array.isArray(control?.attrs?.["list-fields"])) {
     context.findings.push(error("DATA_LIST_FORM_SUBLIST_FIELDS_MISSING", "Sub list controls must include list-variables and list-fields metadata.", { source: context.source, identities: identityCandidates(control) }));
   }
+  const listVariables = asArray(control?.attrs?.["list-variables"]);
+  const listFields = asArray(control?.attrs?.["list-fields"]);
+  const variableIds = listVariables.map((row) => String(row?.id || "").trim()).filter(Boolean);
+  const fieldIds = listFields.map((row) => String(row?.id || "").trim()).filter(Boolean);
+  if (JSON.stringify(fieldIds) !== JSON.stringify(variableIds)) {
+    context.findings.push(error("DATA_LIST_FORM_SUBLIST_ROW_SCHEMA_MISMATCH", "Sub list list-fields must match list-variables in the same order.", {
+      source: context.source,
+      identities: identityCandidates(control),
+      listVariableIds: variableIds,
+      listFieldIds: fieldIds,
+    }));
+  }
+  const nestedControlIds = new Set();
+  for (const [index, listField] of listFields.entries()) {
+    const nested = listField?.control;
+    const columnId = String(listField?.id || "").trim();
+    if (!isObject(nested) || !String(nested?.label || "").trim()) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_COLUMN_CONTROL_LABEL_MISSING", "Every Data List Sub list column control must have a non-empty business title in control.label.", {
+        source: context.source,
+        identities: identityCandidates(control),
+        columnIndex: index,
+        columnId,
+      }));
+    }
+    if (String(nested?.binding || "").trim() !== columnId) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_COLUMN_BINDING_MISMATCH", "Every Data List Sub list column control binding must equal its list-field id.", {
+        source: context.source,
+        identities: identityCandidates(control),
+        columnIndex: index,
+        columnId,
+        actualBinding: nested?.binding ?? null,
+      }));
+    }
+    if (String(nested?.attrs?.list_field_binding || "").trim() !== String(control?.binding || "").trim()) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_COLUMN_PARENT_BINDING_MISMATCH", "Every Data List Sub list column control must reference the parent Sub list field binding.", {
+        source: context.source,
+        identities: identityCandidates(control),
+        columnIndex: index,
+        columnId,
+      }));
+    }
+    if (String(nested?.attrs?.list_control_id || "").trim() !== String(control?.id || "").trim()) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_COLUMN_CONTROL_ID_MISMATCH", "Every Data List Sub list column control must reference the parent Sub list control id.", {
+        source: context.source,
+        identities: identityCandidates(control),
+        columnIndex: index,
+        columnId,
+      }));
+    }
+    const nestedId = String(nested?.id || "").trim();
+    if (nestedId && nestedControlIds.has(nestedId)) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_COLUMN_CONTROL_ID_DUPLICATE", "Data List Sub list nested column controls must use unique control ids.", {
+        source: context.source,
+        identities: identityCandidates(control),
+        columnIndex: index,
+        columnId,
+        controlId: nestedId,
+      }));
+    }
+    if (nestedId) nestedControlIds.add(nestedId);
+  }
+  validateSubListFieldRulesSchema(control, fieldIds, context);
+  validateDataListSubListSummaries(control, listFields, context);
   for (const attrPath of SUBLIST_LOCKED_ATTR_PATHS) {
     const expected = getPath(template?.attrs, attrPath);
     const actual = getPath(control?.attrs, attrPath);
@@ -375,6 +440,79 @@ function validateSubListControl(control, context) {
         attrPath: `attrs.${attrPath.join(".")}`,
       }));
     }
+  }
+}
+
+function validateDataListSubListSummaries(control, listFields, context) {
+  const summaries = asArray(control?.attrs?.["list-fields-summary"]);
+  if (!summaries.length) return;
+  const rowFields = new Map(listFields.map((field) => [String(field?.id || "").trim(), field]));
+  const hostFields = asArray(context.hostFields);
+  const tempIds = new Set(asArray(context.currentResource?.tempVars).map((item) => String(item?.id || "").trim()).filter(Boolean));
+  const summaryIds = new Set();
+  for (const [index, summary] of summaries.entries()) {
+    const detail = { source: context.source, identities: identityCandidates(control), summaryIndex: index };
+    const summaryId = String(summary?.id || "").trim();
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(summaryId)) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_ID_INVALID", "Every Data List Sub list summary must use a UUID id.", { ...detail, summaryId }));
+    } else if (summaryIds.has(summaryId)) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_ID_DUPLICATE", "Data List Sub list summary ids must be unique.", { ...detail, summaryId }));
+    }
+    if (summaryId) summaryIds.add(summaryId);
+    const sourceField = rowFields.get(String(summary?.field || "").trim());
+    if (!sourceField) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_SOURCE_FIELD_MISSING", "Data List Sub list summary field must reference an existing row field.", { ...detail, field: summary?.field ?? null }));
+      continue;
+    }
+    if (!/number|decimal|currency|percent|integer/i.test(String(sourceField?.type || sourceField?.control?.type || ""))) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_SOURCE_FIELD_NOT_NUMERIC", "Total and average Data List Sub list summaries require a numeric row field.", { ...detail, field: summary.field, fieldType: sourceField?.type || sourceField?.control?.type || null }));
+    }
+    if (!["total", "avg"].includes(String(summary?.type || ""))) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_TYPE_UNSUPPORTED", "Generated Data List Sub list summaries currently support only export-proven total and avg types.", { ...detail, summaryType: summary?.type ?? null }));
+    }
+    if (!summary?.binding) continue;
+    const prefix = String(summary?.binding?.prefix || "");
+    const target = String(summary?.binding?.value || "").trim();
+    if (!["__list_", "__temp_"].includes(prefix)) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_BINDING_PREFIX_INVALID", "Data List Sub list summaries may bind only to a current-list field (__list_) or a page temporary variable (__temp_).", { ...detail, prefix }));
+      continue;
+    }
+    if (!target) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_BINDING_TARGET_MISSING", "Data List Sub list summary binding must include a target value.", detail));
+      continue;
+    }
+    if (prefix === "__temp_" && !tempIds.has(target)) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_TEMP_VARIABLE_MISSING", "Data List Sub list summary temporary target must exist in the form resource tempVars array.", { ...detail, target }));
+    }
+    if (prefix === "__list_") {
+      const targetField = hostFields.find((field) => String(field?.FieldName || "").trim() === target);
+      if (!targetField) {
+        context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_LIST_FIELD_MISSING", "Data List Sub list summary persisted target must reference a real host Data List field.", { ...detail, target }));
+      } else if (!/decimal|number|currency|percent|integer/i.test(`${targetField?.FieldType || ""} ${targetField?.Type || ""}`)) {
+        context.findings.push(error("DATA_LIST_FORM_SUBLIST_SUMMARY_TARGET_TYPE_MISMATCH", "Numeric Data List Sub list summaries must bind to a numeric host field.", { ...detail, target, targetFieldType: targetField?.FieldType || targetField?.Type || null }));
+      }
+    }
+  }
+}
+
+function validateSubListFieldRulesSchema(control, formFieldIds, context) {
+  const fields = asArray(context.hostFields);
+  if (!fields.length) return;
+  const hostField = fields.find((field) => (
+    String(field?.FieldID || field?.id || "").trim() === String(control?.fieldID || "").trim()
+    || String(field?.FieldName || field?.fieldName || "").trim() === String(control?.binding || "").trim()
+  ));
+  if (!hostField) return;
+  const rules = parseJsonMaybe(hostField?.Rules ?? hostField?.rules);
+  const ruleIds = asArray(rules?.["list-variables"]).map((row) => String(row?.id || "").trim()).filter(Boolean);
+  if (ruleIds.length && JSON.stringify(ruleIds) !== JSON.stringify(formFieldIds)) {
+    context.findings.push(error("DATA_LIST_FORM_SUBLIST_FIELD_RULES_SCHEMA_MISMATCH", "Data List Sub list form columns must be rebuilt from the host field Rules list-variables schema.", {
+      source: context.source,
+      identities: identityCandidates(control),
+      fieldName: hostField?.FieldName || hostField?.fieldName || null,
+      rulesFieldIds: ruleIds,
+      formFieldIds,
+    }));
   }
 }
 
@@ -472,11 +610,12 @@ function collectDataListForms(decoded) {
   const forms = [];
   for (const [childIndex, child] of asArray(decoded?.Childs || decoded?.Data?.Childs).entries()) {
     const listTitle = child?.List?.Title || child?.ListModel?.Title || child?.Title || child?.Name || `Childs[${childIndex}]`;
+    const fields = asArray(child?.Fields || child?.Defs || child?.Item?.Defs || child?.Item?.Fields);
     for (const [layoutIndex, layout] of asArray(child?.Layouts || child?.Item?.Layouts).entries()) {
       if (Number(layout?.Type) !== 1) continue;
       const resource = parseResource(asArray(layout?.LayoutInResources)[0]?.Resource);
       if (!resource) continue;
-      forms.push({ listTitle, title: layout?.Title || `Layouts[${layoutIndex}]`, resource });
+      forms.push({ listTitle, title: layout?.Title || `Layouts[${layoutIndex}]`, resource, fields });
     }
   }
   return forms;

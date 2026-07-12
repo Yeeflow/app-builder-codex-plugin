@@ -129,6 +129,37 @@ When several controls share the same Dynamic display rule, prefer grouping them 
 
 ## App Plan Requirements
 
+### Sub List Column Titles
+
+Every visible Approval Form Sub List row field must materialize a nested field control with a non-empty business title:
+
+```json
+{
+  "id": "ItineraryDate",
+  "name": "Date",
+  "control": {
+    "type": "datepicker",
+    "binding": "ItineraryDate",
+    "label": "Itinerary Date",
+    "label_var": null
+  }
+}
+```
+
+The column title comes from the App Plan row-column title when present, otherwise from the ListRef/Complex Type row-field display name. Never use an internal field ID as the visible title when a business display name exists. `list-fields[].name` alone is insufficient.
+
+When an Approval Form field table includes the optional `Sub List Row Fields` column, serialize rows as `FieldID:Display Name:Field Type:Control Type`, separated by semicolons. Example: `ItineraryDate:Itinerary Date:date:datepicker; FromLocation:From Location:text:input`. The same parsed row schema must feed both standalone `.ywf` and full-app `.yapk` generation.
+
+Approval Sub List summaries are planned in an optional `Sub List Summaries` column and materialized into `attrs.list-fields-summary[]`. Use `sourceRowField:summaryType:targetKind:targetId` entries separated by semicolons. Each Summary must use a UUID, reference an existing numeric row field, and use the export-proven `total` or `avg` type. Bind persisted/business values with `__variables_` to a declared numeric Approval variable; bind page-session values with `__temp_` to a declared `variables.tempVars[]` entry. A visible Summary may omit binding when no downstream value is needed. Never use the Data List-only `__list_` prefix in an Approval Form.
+
+Final validation must fail with `APPROVAL_SUBLIST_COLUMN_CONTROL_LABEL_MISSING` or `APPROVAL_SUBLIST_COLUMN_CONTROL_LABEL_VAR_MISSING` before signing when any visible column is incomplete.
+
+### Approval Variable Identity
+
+All variable ids inside one Approval Form share one Yeeflow resource namespace across `variables.basic[]`, `variables.tempVars[]`, and `variables.filter[]`. IDs and `idx` values must be unique both literally and after canonical normalization: remove system prefixes where applicable, lowercase, and remove spaces, punctuation, and other non-alphanumeric characters. Thus `requestTitle`, `Request Title`, and `Request-Title` conflict.
+
+`Applicant`, `ApplicantUserID`, and `requestTitle` are built-in reserved Approval variables. A planned business field named Request Title must reuse the exact built-in `requestTitle`; the shared builder must not create a second `Request Title` variable. Generated-final validation must fail with `DUPLICATE_VARIABLE_ID`, `DUPLICATE_VARIABLE_ID_CANONICAL`, `DUPLICATE_VARIABLE_IDX`, or `DUPLICATE_VARIABLE_IDX_CANONICAL` before signing when this resource-level contract is violated.
+
 The App Plan Approval Forms Plan must select the field layout template for generated Approval form field groups.
 
 Add an Approval Form Fields Layout Template Selection table under each relevant Approval form plan:

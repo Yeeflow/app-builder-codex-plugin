@@ -1,0 +1,27 @@
+{
+  "referenceId": "sublist_summary_binding_golden_reference_v1",
+  "sources": ["Business Travel Request Approval (2).ywf", "Campaign (1).ydl"],
+  "summaryShape": {
+    "id": "UUID",
+    "field": "existing numeric Sub list row field id",
+    "type": "total or avg",
+    "display": true,
+    "binding": { "prefix": "surface-specific prefix", "value": "declared target id" }
+  },
+  "approvalFormExamples": [
+    { "field": "Nights", "type": "total", "display": true, "binding": { "prefix": "__temp_", "value": "var_TotalNights" } },
+    { "field": "EstimatedCost", "type": "total", "display": true, "binding": { "prefix": "__variables_", "value": "TotalEstimatedCost" } }
+  ],
+  "dataListFormExamples": [
+    { "field": "field_4", "type": "total", "display": true, "binding": { "prefix": "__list_", "value": "Decimal1" } },
+    { "field": "field_5", "type": "total", "display": true, "binding": { "prefix": "__temp_", "value": "var_TotalNumber" } }
+  ],
+  "rules": {
+    "bindingOptional": true,
+    "approvalAllowedPrefixes": ["__variables_", "__temp_"],
+    "dataListAllowedPrefixes": ["__list_", "__temp_"],
+    "generatedSupportedTypes": ["total", "avg"],
+    "numericSourceRequired": true,
+    "numericPersistedTargetRequired": true
+  }
+}

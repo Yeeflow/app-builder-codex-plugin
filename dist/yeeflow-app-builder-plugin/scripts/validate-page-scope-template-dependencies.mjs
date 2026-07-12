@@ -60,9 +60,36 @@ function collectPageSurfaces(decoded) {
 function validateSurface(surface, findings) {
   checkDuplicateDeclarations(surface, "filterVars", canonicalFilterName, "PAGE_SCOPE_FILTER_VAR_DUPLICATE", findings);
   checkDuplicateDeclarations(surface, "tempVars", canonicalTempName, "PAGE_SCOPE_TEMP_VAR_DUPLICATE", findings);
+  checkVariableNamespaceUniqueness(surface, findings);
   checkDuplicateDeclarations(surface, "actions", canonicalActionName, "PAGE_SCOPE_ACTION_DUPLICATE", findings);
   checkDuplicateFormActions(surface, findings);
   checkFilterProducers(surface, findings);
+}
+
+function checkVariableNamespaceUniqueness(surface, findings) {
+  const seen = new Map();
+  for (const key of ["filterVars", "tempVars"]) {
+    for (const [index, item] of asArray(surface.resource?.[key]).entries()) {
+      const rawId = dependencyName(item);
+      const canonicalId = canonicalVariableIdentity(rawId);
+      if (!canonicalId) continue;
+      const pointer = `${surface.pointer}.${key}[${index}]`;
+      if (seen.has(canonicalId)) {
+        const first = seen.get(canonicalId);
+        findings.push(error("PAGE_SCOPE_VARIABLE_ID_DUPLICATE", "All variable ids must be unique within one Approval Form, Data List form, or Dashboard resource after Yeeflow canonical normalization.", {
+          surface: surface.name,
+          surfaceKind: surface.kind,
+          pointer,
+          id: rawId,
+          canonicalId,
+          firstId: first.id,
+          firstPointer: first.pointer,
+        }));
+      } else {
+        seen.set(canonicalId, { id: rawId, pointer });
+      }
+    }
+  }
 }
 
 function checkDuplicateDeclarations(surface, key, canonicalize, code, findings) {
@@ -149,6 +176,14 @@ function canonicalFilterName(value) {
 function canonicalTempName(value) {
   const name = String(value || "").trim().replace(/^__temp_/, "");
   return name || "";
+}
+
+function canonicalVariableIdentity(value) {
+  return String(value || "")
+    .trim()
+    .replace(/^__(?:filter|temp)_/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 }
 
 function canonicalActionName(value) {

@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   approvalVariableTypeForField,
   buildApprovalFormLayoutDef,
+  ensureApprovalSubListColumnTitles,
 } from "./lib/approval-form-layout-builder.mjs";
 import {
   approvalWorkflowGraphPosition,
@@ -1105,6 +1106,8 @@ function collectDataListFieldSpecs(planText) {
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "yeeflow type", "control type", "control"]);
     const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "values"]);
     const lookupTargetColumn = findHeaderIndex(normalizedHeaders, ["lookup target", "target list", "lookup data list", "lookup list", "related list"]);
+    const subListFieldsColumn = findHeaderIndex(normalizedHeaders, ["sub list row fields", "sublist row fields", "sub list columns", "sublist columns", "row fields"]);
+    const subListSummariesColumn = findHeaderIndex(normalizedHeaders, ["sub list summaries", "sublist summaries", "sub list summary", "sublist summary", "summary fields"]);
     const purposeColumn = findHeaderIndex(normalizedHeaders, ["purpose", "business purpose", "description", "notes"]);
     if (displayColumn === -1 || (fieldTypeColumn === -1 && controlTypeColumn === -1)) continue;
     let rowIndex = index + 2;
@@ -1137,6 +1140,8 @@ function collectDataListFieldSpecs(planText) {
         controlType,
         choiceValues,
         lookupTarget: lookupTargetColumn === -1 ? lookupTargetFromPurpose(purpose) : cleanResourceName(cells[lookupTargetColumn]) || lookupTargetFromPurpose(purpose),
+        listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn]),
+        listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cells[subListSummariesColumn]),
       });
       rowIndex += 1;
     }
@@ -1287,6 +1292,8 @@ function collectApprovalFormFieldSpecs(planText) {
     const keyColumn = findHeaderIndex(normalizedHeaders, ["field name", "field id / variable id", "variable id", "field key", "internal id field key"]);
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow variable type", "exact yeeflow field type", "field type", "variable type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "control type", "control"]);
+    const subListFieldsColumn = findHeaderIndex(normalizedHeaders, ["sub list row fields", "sublist row fields", "sub list columns", "sublist columns", "row fields"]);
+    const subListSummariesColumn = findHeaderIndex(normalizedHeaders, ["sub list summaries", "sublist summaries", "sub list summary", "sublist summary", "summary fields"]);
     if (displayColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
@@ -1302,6 +1309,8 @@ function collectApprovalFormFieldSpecs(planText) {
         fieldName: cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, cleanResourceName(cells[fieldTypeColumn]) || "Text", list.length),
         fieldType: cleanResourceName(cells[fieldTypeColumn]) || "Text",
         controlType: cleanResourceName(cells[controlTypeColumn]),
+        listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn]),
+        listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cells[subListSummariesColumn]),
       });
       byForm[normKey(currentApprovalForm)][currentRole] = uniqueApprovalFieldSpecs(list);
       rowIndex += 1;
@@ -1309,6 +1318,65 @@ function collectApprovalFormFieldSpecs(planText) {
     index = rowIndex;
   }
   return byForm;
+}
+
+function parseSubListRowFields(value) {
+  const text = String(value || "").trim();
+  if (!text || /^(?:none|n\/a|not applicable)$/i.test(text)) return [];
+  if (text.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      return [];
+    }
+  }
+  return text.split(/\s*;\s*/).map((entry) => {
+    const [id, displayName, fieldType, controlType] = entry.split(/\s*:\s*/);
+    return {
+      id: cleanResourceName(id),
+      displayName: cleanResourceName(displayName || id),
+      columnTitle: cleanResourceName(displayName || id),
+      fieldType: cleanResourceName(fieldType) || "Text",
+      controlType: cleanResourceName(controlType),
+    };
+  }).filter((field) => field.id && field.displayName);
+}
+
+function parseSubListSummaries(value) {
+  const text = String(value || "").trim();
+  if (!text || /^(?:none|n\/a|not applicable)$/i.test(text)) return [];
+  if (text.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) return parsed.map(normalizePlannedSubListSummary).filter(Boolean);
+    } catch {
+      return [];
+    }
+  }
+  return text.split(/\s*;\s*/).map((entry) => {
+    const [field, type, targetKind, target] = entry.split(/\s*:\s*/);
+    return normalizePlannedSubListSummary({ field, type, targetKind, target });
+  }).filter(Boolean);
+}
+
+function normalizePlannedSubListSummary(summary) {
+  const field = cleanResourceName(summary?.field || summary?.sourceField);
+  const type = normKey(summary?.type || summary?.summaryType) || "total";
+  const target = cleanResourceName(summary?.target || summary?.bindingValue || summary?.value);
+  const kind = normKey(summary?.targetKind || summary?.bindingKind || summary?.prefix);
+  const prefix = kind === "__temp_" || /temp/.test(kind)
+    ? "__temp_"
+    : kind === "__list_" || /list|field|record/.test(kind)
+      ? "__list_"
+      : "__variables_";
+  if (!field) return null;
+  return {
+    field,
+    type,
+    display: summary?.display !== false,
+    binding: target ? { prefix, value: target } : null,
+  };
 }
 
 function collectApprovalWorkflowNodeSpecs(planText) {
@@ -2056,6 +2124,8 @@ function fieldSpecsForList(planDemand, listName) {
       controlType: cleanResourceName(field.controlType) || inferControlType(field.fieldType),
       choiceValues: cleanResourceName(field.choiceValues),
       lookupTarget: cleanResourceName(field.lookupTarget),
+      listFields: Array.isArray(field.listFields) ? field.listFields : [],
+      listSummaries: Array.isArray(field.listSummaries) ? field.listSummaries : [],
     });
   };
   add({ displayName: "Title", fieldName: "Title", fieldType: "Text", controlType: "input" });
@@ -2099,7 +2169,8 @@ function uniqueApprovalFieldSpecs(fields) {
   for (const field of fields) {
     const displayName = cleanResourceName(field?.displayName);
     if (!displayName || isNonResourceName(displayName)) continue;
-    const fieldName = cleanResourceName(field?.fieldName || inferFieldKey(displayName, field?.fieldType || "Text", normalized.length));
+    let fieldName = cleanResourceName(field?.fieldName || inferFieldKey(displayName, field?.fieldType || "Text", normalized.length));
+    if (canonicalApprovalVariableId(fieldName) === "requesttitle" || canonicalApprovalVariableId(displayName) === "requesttitle") fieldName = "requestTitle";
     const key = normKey(fieldName || displayName);
     if (seen.has(key)) continue;
     seen.add(key);
@@ -2108,9 +2179,22 @@ function uniqueApprovalFieldSpecs(fields) {
       fieldName,
       fieldType: cleanResourceName(field?.fieldType) || "Text",
       controlType: cleanResourceName(field?.controlType) || inferControlType(field?.fieldType || ""),
+      listRefId: cleanResourceName(field?.listRefId || field?.complexTypeId),
+      listFields: Array.isArray(field?.listFields)
+        ? field.listFields.map((rowField) => ({ ...rowField }))
+        : Array.isArray(field?.rowFields)
+          ? field.rowFields.map((rowField) => ({ ...rowField }))
+          : [],
+      listSummaries: Array.isArray(field?.listSummaries)
+        ? field.listSummaries.map((summary) => ({ ...summary, binding: summary?.binding ? { ...summary.binding } : null }))
+        : [],
     });
   }
   return normalized;
+}
+
+function canonicalApprovalVariableId(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function uniqueApprovalWorkflowNodes(nodes) {
@@ -2379,7 +2463,7 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
   const fieldName = isTitle ? "Title" : schemaSafeFieldName(field.fieldName) || `${fieldPrefix(field.fieldType || fieldType)}${fieldIndex}`;
   const schemaFieldIndex = isTitle ? 0 : fieldIndexFromName(fieldName) || fieldIndex;
   const rules = buildFieldRules({ field, type, lookupTargetListId });
-  return {
+  const record = {
     FieldID: fieldId,
     ListID: listId,
     FieldName: fieldName,
@@ -2400,6 +2484,13 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
     Ext2: "",
     Ext3: "",
   };
+  if (Array.isArray(field.listSummaries) && field.listSummaries.length) {
+    Object.defineProperty(record, "__plannedListSummaries", {
+      value: field.listSummaries.map((summary) => clone(summary)),
+      enumerable: false,
+    });
+  }
+  return record;
 }
 
 function buildDocumentLibraryFieldRecords({ listId, ids, childIndex }) {
@@ -2718,6 +2809,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   if (slot) {
     slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
+  ensureDataListSubListSummaryTempVars(resource);
   removeAllByIdentity(resource, "Operations");
   removeAllByIdentity(resource, "kpi_metrics_wrapper");
   if (templateKind === "view" || templateKind === "workbench") {
@@ -3435,13 +3527,161 @@ function buildDataListFormSubListControl({ field, index, formName, listId, listN
     fieldName: field.FieldName,
     fieldId: field.FieldID,
   };
-  for (const listField of Array.isArray(control.attrs["list-fields"]) ? control.attrs["list-fields"] : []) {
-    if (listField?.control?.attrs) {
-      listField.control.attrs.list_field_binding = field.FieldName;
-      listField.control.attrs.list_control_id = id;
-    }
+  const listVariables = dataListSubListVariables(field, `${formName}:${field.FieldName}`);
+  if (listVariables.length) {
+    control.attrs["list-variables"] = listVariables;
+    control.attrs["list-fields"] = listVariables.map((variable, columnIndex) => buildDataListSubListColumn({
+      variable,
+      columnIndex,
+      parentBinding: field.FieldName,
+      parentControlId: id,
+      seed: `${formName}:${field.FieldName}`,
+    }));
   }
+  const summaries = normalizeDataListSubListSummaries(field?.__plannedListSummaries, control, `${formName}:${field.FieldName}`);
+  if (summaries.length) control.attrs["list-fields-summary"] = summaries;
+  else delete control.attrs["list-fields-summary"];
+  ensureDataListSubListColumnTitles(control);
   return control;
+}
+
+function normalizeDataListSubListSummaries(summaries, control, seed) {
+  return (Array.isArray(summaries) ? summaries : []).map((summary, index) => {
+    const field = cleanResourceName(summary?.field);
+    if (!field) return null;
+    const prefix = ["__list_", "__temp_"].includes(summary?.binding?.prefix) ? summary.binding.prefix : "";
+    const value = cleanResourceName(summary?.binding?.value);
+    return {
+      id: deterministicUuid(`${seed}:summary:${field}:${index}`),
+      field,
+      type: normKey(summary?.type) || "total",
+      display: summary?.display !== false,
+      binding: prefix && value ? { prefix, value } : null,
+    };
+  }).filter(Boolean);
+}
+
+function ensureDataListSubListSummaryTempVars(resource) {
+  const tempIds = new Set();
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+    for (const summary of Array.isArray(value?.attrs?.["list-fields-summary"]) ? value.attrs["list-fields-summary"] : []) {
+      if (summary?.binding?.prefix === "__temp_" && cleanResourceName(summary?.binding?.value)) tempIds.add(cleanResourceName(summary.binding.value));
+    }
+    Object.values(value).forEach(visit);
+  };
+  visit(resource);
+  if (!tempIds.size) return;
+  resource.tempVars = Array.isArray(resource.tempVars) ? resource.tempVars : [];
+  const existing = new Set(resource.tempVars.map((item) => cleanResourceName(item?.id)).filter(Boolean));
+  for (const id of tempIds) {
+    if (existing.has(id)) continue;
+    resource.tempVars.push({ idx: deterministicUuid(`${resource.id || resource.title}:temp:${id}`), id });
+  }
+}
+
+function dataListSubListVariables(field, seed) {
+  const rules = parseJsonMaybe(field?.Rules);
+  const rows = Array.isArray(rules?.["list-variables"])
+    ? rules["list-variables"]
+    : Array.isArray(field?.listFields)
+      ? field.listFields
+      : [];
+  return rows.map((row, index) => {
+    const id = cleanResourceName(row?.id || row?.fieldName || row?.name) || `field_${index + 1}`;
+    const type = normalizeSubListRowType(row?.type || row?.fieldType);
+    return {
+      idx: cleanResourceName(row?.idx) || deterministicUuid(`${seed}:row:${id}:${index}`),
+      id,
+      name: cleanResourceName(row?.name || row?.displayName || row?.columnTitle || row?.label) || id,
+      displayName: cleanResourceName(row?.columnTitle || row?.displayName || row?.label || row?.name || id),
+      type,
+      editable: row?.editable !== false,
+      controlType: cleanResourceName(row?.controlType || row?.control?.type),
+    };
+  }).filter((row) => row.id && row.displayName);
+}
+
+function buildDataListSubListColumn({ variable, columnIndex, parentBinding, parentControlId, seed }) {
+  const controlType = normalizeSubListColumnControlType(variable.controlType, variable.type);
+  const control = {
+    id: deterministicUuid(`${seed}:column:${variable.id}:${columnIndex}`),
+    label: variable.displayName,
+    binding: variable.id,
+    attrs: {
+      list_field: true,
+      list_field_binding: parentBinding,
+      list_control_id: parentControlId,
+    },
+    type: controlType,
+    displayLabel: [null, true],
+  };
+  if (controlType === "datepicker") control.value = null;
+  if (controlType === "switch") control.value = false;
+  return {
+    idx: variable.idx,
+    id: variable.id,
+    name: variable.name,
+    type: variable.type,
+    editable: variable.editable,
+    control,
+  };
+}
+
+function ensureDataListSubListColumnTitles(control) {
+  const variables = new Map((Array.isArray(control?.attrs?.["list-variables"]) ? control.attrs["list-variables"] : [])
+    .map((row) => [String(row?.id || ""), row]));
+  for (const [index, listField] of (Array.isArray(control?.attrs?.["list-fields"]) ? control.attrs["list-fields"] : []).entries()) {
+    const variable = variables.get(String(listField?.id || ""));
+    listField.control ||= {};
+    listField.control.id ||= deterministicUuid(`${control.id}:column:${listField?.id || index}:${index}`);
+    listField.control.binding = listField?.id || variable?.id || listField.control.binding;
+    listField.control.label = cleanResourceName(
+      listField.control.label
+      || listField.columnTitle
+      || listField.displayName
+      || variable?.displayName
+      || listField.name
+      || variable?.name
+      || listField.id,
+    );
+    listField.control.displayLabel = [null, true];
+    listField.control.attrs ||= {};
+    listField.control.attrs.list_field = true;
+    listField.control.attrs.list_field_binding = control.binding;
+    listField.control.attrs.list_control_id = control.id;
+  }
+}
+
+function normalizeSubListRowType(value) {
+  const type = normKey(value);
+  if (/user|identity|person/.test(type)) return "user";
+  if (/date|time/.test(type)) return "date";
+  if (/bool|switch|yes no/.test(type)) return "boolean";
+  if (/number|decimal|currency|integer/.test(type)) return "number";
+  if (/file|attachment/.test(type)) return "file";
+  return "text";
+}
+
+function normalizeSubListColumnControlType(controlType, rowType) {
+  const explicit = normKey(controlType);
+  if (/identity|user picker/.test(explicit)) return "identity-picker";
+  if (/date/.test(explicit)) return "datepicker";
+  if (/number/.test(explicit)) return "input_number";
+  if (/switch|toggle/.test(explicit)) return "switch";
+  if (/file|upload/.test(explicit)) return "file-upload";
+  if (/input/.test(explicit)) return "input";
+  return {
+    user: "identity-picker",
+    date: "datepicker",
+    number: "input_number",
+    boolean: "switch",
+    file: "file-upload",
+  }[rowType] || "input";
 }
 
 function isFullRowFormField(field, controlType) {
@@ -3468,6 +3708,11 @@ function buildFieldRules({ field, type, lookupTargetListId = "" }) {
       fieldName: "Title",
       listtype: "select",
     });
+  }
+  if (type === "list") {
+    const listVariables = dataListSubListVariables(field, `field-rules:${field?.fieldName || field?.displayName || "sublist"}`)
+      .map(({ idx, id, name, type: rowType, editable }) => ({ idx, id, name, type: rowType, editable }));
+    return listVariables.length ? JSON.stringify({ "list-variables": listVariables }) : "";
   }
   const choiceTypes = new Set(["select", "radio", "checkbox", "tag"]);
   if (!choiceTypes.has(type)) return "";
@@ -8147,19 +8392,54 @@ function buildApprovalVariables(approvalFieldSpecs = {}) {
     { id: "ApplicantUserID", idx: "ApplicantUserID", name: "ApplicantUserID", title: "Applicant", type: "user", source: "ApplicantUserID" },
     { id: "requestTitle", idx: "requestTitle", name: "requestTitle", title: "Request Title", type: "text", source: "Title" },
   ];
+  const listref = [];
+  const tempVars = [];
   for (const field of fields) {
     const id = String(field.fieldName || slugify(field.displayName));
+    const variableType = approvalVariableType(field);
+    const listRefId = variableType === "list" ? cleanResourceName(field.listRefId) || `${id}ListRef` : "";
     basic.push({
       id,
       idx: id,
       name: id,
       title: field.displayName,
       label: field.displayName,
-      type: approvalVariableType(field),
+      type: variableType,
+      ...(listRefId ? { value: listRefId } : {}),
       source: field.fieldName,
     });
+    if (listRefId) {
+      listref.push({
+        id: listRefId,
+        idx: listRefId,
+        name: `${field.displayName} Rows`,
+        fields: (field.listFields || []).map((rowField, index) => {
+          const rowFieldId = cleanResourceName(rowField.id || rowField.idx || rowField.fieldName) || `RowField${index + 1}`;
+          return {
+            id: rowFieldId,
+            idx: cleanResourceName(rowField.idx) || rowFieldId,
+            name: cleanResourceName(rowField.displayName || rowField.columnTitle || rowField.name || rowField.id) || `Column ${index + 1}`,
+            type: approvalListRefFieldType(rowField.fieldType || rowField.type || rowField.controlType),
+            editable: rowField.editable !== false,
+          };
+        }),
+      });
+    }
+    for (const summary of field.listSummaries || []) {
+      const tempId = summary?.binding?.prefix === "__temp_" ? cleanResourceName(summary?.binding?.value) : "";
+      if (tempId) tempVars.push({ idx: deterministicUuid(`${id}:summary-temp:${tempId}`), id: tempId });
+    }
   }
-  return { basic: uniqueVariablesById(basic), listref: [], filter: [], tempVars: [] };
+  return { basic: uniqueVariablesById(basic), listref: uniqueVariablesById(listref), filter: [], tempVars: uniqueVariablesById(tempVars) };
+}
+
+function approvalListRefFieldType(value) {
+  const raw = normKey(value);
+  if (/date|time/.test(raw)) return "date";
+  if (/number|decimal|currency|amount|integer/.test(raw)) return "number";
+  if (/boolean|bit|switch|yes no/.test(raw)) return "boolean";
+  if (/user|identity|person/.test(raw)) return "user";
+  return "text";
 }
 
 function addApprovalWorkflowActionVariables(variables, childshapes) {
@@ -8249,7 +8529,7 @@ function uniqueVariablesById(variables) {
   const seen = new Set();
   const out = [];
   for (const variable of variables) {
-    const key = String(variable?.id || "");
+    const key = canonicalApprovalVariableId(variable?.id);
     if (!key || seen.has(key)) continue;
     seen.add(key);
     out.push(variable);
@@ -8258,7 +8538,8 @@ function uniqueVariablesById(variables) {
 }
 
 function approvalFormDef(id, title, role, fields = []) {
-  return buildApprovalFormLayoutDef({ rootDir: ROOT, id, title, role, fields });
+  const resource = buildApprovalFormLayoutDef({ rootDir: ROOT, id, title, role, fields });
+  return ensureApprovalSubListColumnTitles(resource);
 }
 
 function scrubApprovalSourceDomainResidue(node, title) {

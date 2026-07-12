@@ -1,6 +1,8 @@
 # Yeeflow Sublist Summary Generation Rules
 
-Use these rules when generating approval-form `list` / `listref` controls with calculated row fields and summary values.
+Use these rules when generating Approval Form or Data List Form `list` controls with calculated row fields and summary values.
+
+Data List distinction: persisted Data List Sub list fields store their row schema in stringified field `Rules["list-variables"]`, and custom Data List forms rebuild `attrs.list-variables/list-fields` from that schema. Their nested column controls require `control.label`, but the official Data List export does not require Approval Form's fixed-title `label_var: null`. See `docs/standards/data-list-form-field-layouts-v1.1-standard.md`.
 
 Source evidence:
 
@@ -33,9 +35,13 @@ The top-level form variable for the list uses `type: "list"` and `value` equal t
 Each row field rendered by the list control lives in `attrs["list-fields"][]`. Each field must have a child `control` object with:
 
 - `binding`: row field id
+- `label`: non-empty business-facing table column title
+- `label_var: null` when the title is fixed text
 - `attrs.list_field: true`
 - `attrs.list_field_binding`: top-level list variable id
 - `attrs.list_control_id`: parent list control id
+
+`list-fields[].name` is row-field metadata and does not render the table header by itself. The Designer Title setting for a Sub List column serializes to `list-fields[].control.label`; `displayLabel` only controls visibility and cannot replace a missing label. Submission, Task, and Print pages must preserve the same column-title contract, including readonly mirrors.
 
 For calculated row fields, use a `calculated` control and store the expression at `control.attrs.calculated`.
 
@@ -126,9 +132,19 @@ Summary binding:
 }
 ```
 
+Surface-specific binding prefixes:
+
+- Approval Form persisted/business variable: `__variables_`
+- Approval Form page temporary variable: `__temp_` and a matching `variables.tempVars[]` entry
+- Data List current-record field: `__list_` and a matching host list field
+- Data List page temporary variable: `__temp_` and a matching form-resource `tempVars[]` entry
+
+Do not use `__variables_` on Data List forms or `__list_` on Approval Forms. Summary binding is optional when the value only needs to be displayed in the Sub List footer.
+
 Rules:
 
 - Numeric summaries should bind to `number` variables.
+- Data List persisted summary targets must be numeric fields such as `Decimal*`.
 - Use readable names such as `TotalAmount`, `TotalQuantity`, and `AverageUnitPrice`.
 - Use summary-bound variables for dynamic display, custom validation, ContentList persistence, and workflow routing.
 - Do not manually recalculate list totals with top-level expressions when list summary binding is available.

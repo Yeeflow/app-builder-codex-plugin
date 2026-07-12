@@ -19,6 +19,7 @@ try {
   expectCode("two filter producers sharing one variable fail", ["--resource", writeJson("duplicate-filter-producers.json", pageResource({ duplicateFilterProducers: true }))], "PAGE_SCOPE_FILTER_VAR_MULTIPLE_PRODUCERS");
   expectCode("duplicate filterVars declaration fails", ["--resource", writeJson("duplicate-filter-vars.json", pageResource({ duplicateFilterVars: true }))], "PAGE_SCOPE_FILTER_VAR_DUPLICATE");
   expectCode("duplicate tempVars declaration fails", ["--resource", writeJson("duplicate-temp-vars.json", pageResource({ duplicateTempVars: true }))], "PAGE_SCOPE_TEMP_VAR_DUPLICATE");
+  expectCode("canonical variable id collision across filterVars and tempVars fails", ["--resource", writeJson("cross-variable-collision.json", pageResource({ crossVariableCollision: true }))], "PAGE_SCOPE_VARIABLE_ID_DUPLICATE");
   expectCode("duplicate formAction declaration fails", ["--resource", writeJson("duplicate-form-actions.json", pageResource({ duplicateFormActions: true }))], "PAGE_SCOPE_FORM_ACTION_DUPLICATE");
   printSummary(0);
 } catch (err) {
@@ -39,6 +40,7 @@ function pageResource(options = {}) {
     tempVars: [
       { id: "vCurrentItemID", name: "vCurrentItemID" },
       { id: "var_comments_SelectedItems", name: "var_comments_SelectedItems" },
+      ...(options.crossVariableCollision ? [{ id: "Filter Left Panel Keywords", name: "Filter Left Panel Keywords" }] : []),
       ...(options.duplicateTempVars ? [{ id: "var_comments_SelectedItems", name: "var_comments_SelectedItems" }] : []),
     ],
     actions: [{ id: "left_panel_select_item", name: "left_panel_select_item" }],
