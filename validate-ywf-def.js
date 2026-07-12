@@ -25,6 +25,9 @@ const {
   graphRefId,
   inspectCanonicalGraphRef,
 } = require("./scripts/lib/approval-workflow-graph-reference-utils.cjs");
+const {
+  approvalWorkflowInitialViewportExtent,
+} = require("./scripts/lib/approval-workflow-designer-shape-utils.cjs");
 
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
 const NUMERIC_OPS = new Set(["n.>", "n.>=", "n.<", "n.<=", "n.=", "n.!=", ">", ">=", "<", "<="]);
@@ -1916,25 +1919,23 @@ function validateDecodedDef(def, options = {}) {
 
     const graph = def.graphposition || {};
     if ([graph.x, graph.y, graph.width, graph.height].every((value) => Number.isFinite(Number(value)))) {
-      const graphRight = Number(graph.x) + Number(graph.width);
-      const graphBottom = Number(graph.y) + Number(graph.height);
-      childshapes.forEach((shape, index) => {
-        if (!shape || isSequenceFlow(shape)) return;
-        const bounds = workflowNodeDesignerBounds(shape);
-        if (!bounds) return;
-        if (
-          bounds.upperLeft.x < Number(graph.x)
-          || bounds.upperLeft.y < Number(graph.y)
-          || bounds.lowerRight.x > graphRight
-          || bounds.lowerRight.y > graphBottom
-        ) {
-          addIssue(errors, "APPROVAL_WORKFLOW_GRAPHPOSITION_BOUNDS_INCOMPLETE", "Workflow graphposition must contain every workflow node bounds rectangle.", `$.childshapes[${index}].bounds`, {
-            nodeId: shapeId(shape),
-            bounds,
-            graphposition: graph,
-          });
-        }
-      });
+      if (Number(graph.width) <= 0 || Number(graph.height) <= 0) {
+        addIssue(errors, "APPROVAL_WORKFLOW_GRAPHPOSITION_DIMENSIONS_INVALID", "Workflow graphposition width and height must be positive scaled content dimensions.", "$.graphposition", { graphposition: graph });
+      }
+      const viewportExtent = approvalWorkflowInitialViewportExtent(childshapes, graph, def.graphzoom);
+      if (viewportExtent && (
+        viewportExtent.right <= 40
+        || viewportExtent.bottom <= 80
+        || viewportExtent.left >= 1880
+        || viewportExtent.top >= 1000
+      )) {
+        addIssue(errors, "APPROVAL_WORKFLOW_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN", "Workflow graphposition is a Designer viewport translation, not a model-coordinate bounding-box origin. The saved initial viewport places every workflow node outside the visible canvas.", "$.graphposition", {
+          graphposition: graph,
+          graphzoom: def.graphzoom,
+          transformedNodeExtent: viewportExtent,
+          expectedVisibleCanvas: { left: 40, top: 80, right: 1880, bottom: 1000 },
+        });
+      }
     }
   }
 

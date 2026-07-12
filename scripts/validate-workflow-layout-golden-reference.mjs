@@ -5,6 +5,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 import { asArray, isObject, readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
+import { approvalWorkflowInitialViewportExtent } from "./lib/approval-workflow-designer-shape-utils.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_REFERENCE = path.join(ROOT, "docs/reference/workflow-layout-golden-references.json");
@@ -1580,20 +1581,32 @@ function clusterColumns(positioned, tolerance) {
 function validateGraphPosition(resource, nodes, findings) {
   const graph = resource.def?.graphposition;
   if (!isObject(graph) || nodes.length < 2) return;
-  const positioned = nodes.filter((node) => node.position);
-  if (!positioned.length) return;
-  const minX = Math.min(...positioned.map((node) => node.position.x));
-  const maxX = Math.max(...positioned.map((node) => node.position.x));
-  const minY = Math.min(...positioned.map((node) => node.position.y));
-  const maxY = Math.max(...positioned.map((node) => node.position.y));
-  const graphMaxX = Number(graph.x || 0) + Number(graph.width || 0);
-  const graphMaxY = Number(graph.y || 0) + Number(graph.height || 0);
-  if (Number.isFinite(graphMaxX) && Number.isFinite(graphMaxY) && (graphMaxX + 40 < maxX || graphMaxY + 40 < maxY || Number(graph.x || 0) - 40 > minX || Number(graph.y || 0) - 40 > minY)) {
-    findings.push(issue("WORKFLOW_LAYOUT_GRAPHPOSITION_BOUNDS_INVALID", "Workflow graphposition must cover generated node bounds with padding so Designer opens to a readable canvas.", {
+  const width = Number(graph.width);
+  const height = Number(graph.height);
+  if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
+    findings.push(issue("WORKFLOW_LAYOUT_GRAPHPOSITION_DIMENSIONS_INVALID", "Workflow graphposition width and height must contain positive scaled content dimensions.", {
       source: resource.source,
       workflowName: resource.workflowName,
       graphposition: graph,
-      nodeBounds: { minX, maxX, minY, maxY },
+    }));
+    return;
+  }
+
+  const extent = approvalWorkflowInitialViewportExtent(resource.def.childshapes, graph, resource.def.graphzoom);
+  if (!extent) return;
+  const visibleCanvas = { left: 40, top: 80, right: 1880, bottom: 1000 };
+  const entirelyOffscreen = extent.right <= visibleCanvas.left
+    || extent.bottom <= visibleCanvas.top
+    || extent.left >= visibleCanvas.right
+    || extent.top >= visibleCanvas.bottom;
+  if (entirelyOffscreen) {
+    findings.push(issue("WORKFLOW_LAYOUT_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN", "Workflow graphposition is a viewport translation; transformed nodes must intersect the initial Designer canvas so opening the workflow does not show a blank page.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      graphzoom: resource.def.graphzoom,
+      graphposition: graph,
+      transformedNodeExtent: extent,
+      expectedVisibleCanvas: visibleCanvas,
     }));
   }
 }

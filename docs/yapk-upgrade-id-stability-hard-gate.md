@@ -95,6 +95,8 @@ The upgrade scope JSON must declare:
 
 Field-only and list-only upgrades must fail when they mutate dashboards, approval forms, workflows, navigation, `FormNewReports`, or `DataReports` unless those resource types are explicitly declared in scope. If reports are intentionally included, each report must be proven new or update-safe; duplicate existing reports fail before live upgrade.
 
+For every non-Report upgrade, already-installed unchanged Form reports must be omitted from the upgrade payload's `FormNewReports[]`. Version Management can interpret a carried report as a duplicate create and fail with `Form report: <name> (is in application)`. The payload may omit only navigation items that resolve to those omitted reports; unrelated navigation changes still fail. This omission does not delete the installed report and requires final Version Management and runtime/resource-preservation proof.
+
 Upgrade wrapper identity should be Version Management-compatible: UUID-like `PackageId`, real tenant `TenantID`, stable root app/list IDs, and real author metadata where available. Generated numeric content IDs must not be used as upgrade `PackageId` or tenant identity.
 
 When a visible field is added to a default data-list view, `LayoutView.layout[]` and `LayoutView.query[]` must both include the field, and the `FieldName`/`FieldID` values must match.

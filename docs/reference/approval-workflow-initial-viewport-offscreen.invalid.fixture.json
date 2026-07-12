@@ -1,0 +1,28 @@
+{
+  "incident": "generated workflow opens on an empty Designer canvas until the user pans down and right",
+  "graphzoom": 1,
+  "graphposition": {
+    "x": -330,
+    "y": -245,
+    "width": 2671,
+    "height": 620
+  },
+  "modelNodeExtent": {
+    "left": -170,
+    "top": -85,
+    "right": 2181,
+    "bottom": 126
+  },
+  "transformedInitialViewportExtent": {
+    "left": -500,
+    "top": -330,
+    "right": 1851,
+    "bottom": -119
+  },
+  "expectedError": "APPROVAL_WORKFLOW_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN",
+  "correctedContract": {
+    "safeLeft": 80,
+    "safeTop": 120,
+    "formula": "screenCoordinate = modelCoordinate * graphzoom + graphpositionOffset"
+  }
+}

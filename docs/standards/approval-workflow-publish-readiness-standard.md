@@ -19,6 +19,7 @@ Required root sections:
 - `pageurls[]` with exactly one submission/request page and at least one task page.
 - `childshapes[]` with a complete Start -> planned workflow node(s) -> Approved End and Rejected End workflow graph.
 - `graphposition`, `graphzoom`, and `graphver` metadata.
+- `graphposition.x/y` must place at least part of the transformed workflow node extent inside the initial Designer viewport; an entirely offscreen graph is a signing blocker.
 
 ## App Plan Workflow Node Parity
 

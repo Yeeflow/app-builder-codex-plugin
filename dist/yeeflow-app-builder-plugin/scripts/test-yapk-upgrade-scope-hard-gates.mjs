@@ -103,7 +103,7 @@ function wrapper(decoded, overrides = {}) {
 
 function approvalDef({ uuid = true, duplicateControls = false, graphPositions = true, assignee = true, routes = true } = {}) {
   const pageId = uuid ? "11111111-1111-4111-8111-111111111111" : "12345";
-  const contentId = duplicateControls ? "Content" : "page1_Content";
+  const contentId = "Content";
   const def = {
     key: "approval-key",
     defkey: "approval-key",
@@ -113,7 +113,8 @@ function approvalDef({ uuid = true, duplicateControls = false, graphPositions = 
       type: 1,
       formdef: {
         children: [
-          { id: "Main", name: "Main", type: "container", children: [{ id: contentId, name: "Content", type: "container", children: [] }] },
+          { id: "Main", name: "Main", type: "container", children: [] },
+          { id: contentId, name: "Content", type: "container", children: [] },
         ],
       },
     }],
@@ -212,6 +213,37 @@ try {
   }));
   expectPass("dashboard-only runtime fix may omit unchanged installed FormNewReports", "scripts/validate-yapk-upgrade-scope.mjs", ["--previous-package", writeJson(tempDir, "previous-dashboard-with-report.json", previousDashboardWithReport), "--new-package", writeJson(tempDir, "dashboard-runtime-fix-omits-formreports.json", dashboardRuntimeFix), "--scope", dashboardScopeFile]);
   cases.push("pass: dashboard-only runtime fix omits unchanged installed FormNewReports to avoid duplicate live creation");
+
+  const previousApprovalWithReport = clone(previous);
+  previousApprovalWithReport.FormNewReports = [{ ID: id(302), Title: "Business Travel Request Report", DefKey: "business-travel-approval" }];
+  previousApprovalWithReport.ListSet.LayoutView = JSON.stringify({ sort: [{ Type: "classes", Title: "Travel", list: [{ Type: 32, ListID: id(302), Title: "Business Travel Request Report" }] }] });
+  const approvalUpgradeOmitsReport = clone(previousApprovalWithReport);
+  approvalUpgradeOmitsReport.Forms = [{ Key: "business-travel-approval", Title: "Business Travel Request Approval", DefResource: approvalDef() }];
+  approvalUpgradeOmitsReport.FormNewReports = [];
+  approvalUpgradeOmitsReport.ListSet.LayoutView = JSON.stringify({ sort: [{ Type: "classes", Title: "Travel", list: [] }] });
+  const approvalScopeFile = writeJson(tempDir, "approval-report-omission-scope.json", scope({
+    upgradeType: "approval",
+    targetResourceType: "approval-form",
+    targetLists: [],
+    allowedResourceTypes: ["approval"],
+    allowedChanges: ["modify approval form"],
+    disallowedChanges: ["dashboard", "workflow", "navigation", "report"],
+  }));
+  const previousApprovalWithReportFile = writeJson(tempDir, "previous-approval-with-report.json", previousApprovalWithReport);
+  const approvalUpgradeOmitsReportFile = writeJson(tempDir, "approval-upgrade-omits-report.json", approvalUpgradeOmitsReport);
+  expectPass("approval upgrade may omit unchanged installed FormNewReports and only its navigation item", "scripts/validate-yapk-upgrade-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--new-package", approvalUpgradeOmitsReportFile, "--scope", approvalScopeFile]);
+  expectPass("approval report omission passes report-scope validation", "scripts/validate-yapk-upgrade-report-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--new-package", approvalUpgradeOmitsReportFile, "--scope", approvalScopeFile]);
+  cases.push("pass: approval upgrade omits unchanged installed Form report and its navigation payload item");
+
+  const approvalUpgradeCarriesReport = clone(approvalUpgradeOmitsReport);
+  approvalUpgradeCarriesReport.FormNewReports = clone(previousApprovalWithReport.FormNewReports);
+  expectFail("approval upgrade carrying unchanged installed Form report fails", "scripts/validate-yapk-upgrade-report-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--new-package", writeJson(tempDir, "approval-upgrade-carries-installed-report.json", approvalUpgradeCarriesReport), "--scope", approvalScopeFile], "UPGRADE_UNCHANGED_INSTALLED_FORM_REPORT_INCLUDED");
+  cases.push("fail: approval upgrade cannot carry unchanged installed Form report");
+
+  const approvalUpgradeUnrelatedNavigation = clone(approvalUpgradeOmitsReport);
+  approvalUpgradeUnrelatedNavigation.ListSet.LayoutView = JSON.stringify({ sort: [{ Type: "classes", Title: "Changed Travel", list: [] }] });
+  expectFail("report omission cannot hide unrelated navigation changes", "scripts/validate-yapk-upgrade-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--new-package", writeJson(tempDir, "approval-report-omission-unrelated-navigation.json", approvalUpgradeUnrelatedNavigation), "--scope", approvalScopeFile], "UPGRADE_NAVIGATION_MUTATION_OUTSIDE_SCOPE");
+  cases.push("fail: report omission permits only matching Form report navigation cleanup");
 
   const dashboardReportMutation = clone(previousDashboardWithReport);
   dashboardReportMutation.Pages[0].Title = "Asset Dashboard Runtime Fix";

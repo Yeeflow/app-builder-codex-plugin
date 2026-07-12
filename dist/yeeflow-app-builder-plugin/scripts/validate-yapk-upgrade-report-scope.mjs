@@ -32,6 +32,16 @@ export function validateYapkUpgradeReportScope({ previousPackage, newPackage, sc
     || asArray(scopeManifest.allowedChanges).map((item) => String(item).toLowerCase()).some((item) => item.includes("report"));
   const previousReports = collectReports(previous.decoded);
   const nextReports = collectReports(next.decoded);
+  const previousFormReportKeys = new Set(previousReports.filter((item) => item.type === "FormNewReports").map(reportIdentity));
+
+  if (!reportsInScope) {
+    for (const report of nextReports.filter((item) => item.type === "FormNewReports")) {
+      const existing = previousFormReportKeys.has(reportIdentity(report));
+      findings.push(finding("error", existing ? "UPGRADE_UNCHANGED_INSTALLED_FORM_REPORT_INCLUDED" : "UPGRADE_FORM_REPORT_OUT_OF_SCOPE", existing
+        ? "An installed unchanged Form report must be omitted from a non-Report upgrade payload; carrying it can be interpreted as duplicate report creation by Version Management."
+        : "A new Form report cannot be included unless report changes are explicitly declared in upgrade scope.", { report: reportKey(report) }));
+    }
+  }
 
   if (["field-only", "list-only"].includes(upgradeType) && !reportsInScope) {
     for (const report of nextReports) {
@@ -73,6 +83,10 @@ function collectReports(decoded) {
 
 function reportKey(item) {
   return `${item.type || item.reportType || "report"}:${item.id || item.reportId || item.title || item.name || item.Title || ""}`;
+}
+
+function reportIdentity(item) {
+  return String(item.id || item.reportId || item.ID || item.title || item.name || item.Title || "").trim().toLowerCase();
 }
 
 function readPackageLike(file) {
