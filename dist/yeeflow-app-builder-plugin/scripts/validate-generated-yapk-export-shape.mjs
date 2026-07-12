@@ -158,7 +158,7 @@ function validateApprovalWorkflow(def, formPath, findings) {
   const nodeShapes = shapes.filter((shape) => String(shape?.stencil?.id || "").toLowerCase() !== "sequenceflow");
   const flows = shapes.filter((shape) => String(shape?.stencil?.id || "").toLowerCase() === "sequenceflow");
   if (!flows.length) findings.push(error("APPROVAL_WORKFLOW_SEQUENCE_LINKS_MISSING", "Approval workflow must include incoming/outgoing SequenceFlow links.", { path: `${formPath}.DefResource.childshapes` }));
-  const taskNodes = nodeShapes.filter((shape) => /task/i.test(String(shape?.stencil?.id || "")));
+  const taskNodes = nodeShapes.filter(isHumanApprovalTask);
   if (!taskNodes.some((shape) => String(shape?.stencil?.id || "") === "MultiAssignmentTask")) {
     findings.push(error("APPROVAL_MULTIASSIGNMENT_TASK_REQUIRED", "Generated-final approval workflows must use a real MultiAssignmentTask reviewer step, not a thin or ambiguous task placeholder.", { path: `${formPath}.DefResource.childshapes` }));
   }
@@ -202,8 +202,7 @@ function hasTaskAssigneeMetadata(task) {
 
 function validateWorkflowTaskUrls(def, formPath, pageIds, findings) {
   for (const [shapeIndex, shape] of asArray(def?.childshapes).entries()) {
-    const stencil = String(shape?.stencil?.id || "");
-    if (!/task/i.test(stencil)) continue;
+    if (!isHumanApprovalTask(shape)) continue;
     const taskUrl = shape?.properties?.taskurl || shape?.properties?.taskUrl || shape?.properties?.TaskUrl;
     if (!present(taskUrl)) {
       findings.push(error("APPROVAL_WORKFLOW_TASKURL_MISSING", "Approval task workflow nodes must include task URL metadata.", { path: `${formPath}.DefResource.childshapes[${shapeIndex}].properties.taskurl` }));
@@ -211,6 +210,10 @@ function validateWorkflowTaskUrls(def, formPath, pageIds, findings) {
       findings.push(error("APPROVAL_WORKFLOW_TASKURL_PAGE_NOT_FOUND", "Approval task URL must resolve to a registered pageurls[] entry.", { path: `${formPath}.DefResource.childshapes[${shapeIndex}].properties.taskurl`, taskUrl }));
     }
   }
+}
+
+function isHumanApprovalTask(shape) {
+  return new Set(["MultiAssignmentTask", "CandidateTask"]).has(String(shape?.stencil?.id || ""));
 }
 
 function hasGraphPosition(shape) {

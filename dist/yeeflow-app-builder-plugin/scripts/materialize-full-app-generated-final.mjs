@@ -35,7 +35,7 @@ const {
   graphRefId: canonicalGraphRefId,
   normalizeApprovalWorkflowGraphReferences,
 } = workflowGraphReferenceUtils;
-const { buildWorkflowVariableSetting } = setVariableContractUtils;
+const { buildWorkflowVariableSetting, normalizeSetVariableHostType } = setVariableContractUtils;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
@@ -857,9 +857,13 @@ function collectFormActionSetVariableRecords(planText) {
     for (const row of table.rows) {
       const hostResource = cleanResourceName(cell(row, hostResourceColumn));
       const hostPage = cleanResourceName(cell(row, hostPageColumn));
-      const hostType = cleanResourceName(cell(row, hostTypeColumn));
+      const rawHostType = cleanResourceName(cell(row, hostTypeColumn));
+      const hostType = normalizeSetVariableHostType(rawHostType);
       const actionName = cleanResourceName(cell(row, actionColumn));
       if (!hostResource || !hostPage || !actionName || [hostResource, hostPage, actionName].some(isPlanningPlaceholder)) continue;
+      if (rawHostType && !hostType) {
+        throw new Error(`FORM_ACTION_SETVAR_HOST_TYPE_UNSUPPORTED: ${hostResource} / ${hostPage} / ${rawHostType}`);
+      }
       records.push({
         hostResource,
         hostPage,
@@ -885,9 +889,18 @@ function collectFormActionSetVariableRecords(planText) {
 
 export function materializePlannedFormActionSetVariables(resource, { records = [], hostResource = "", hostPage = "", hostType = "" } = {}) {
   if (!resource || typeof resource !== "object") return resource;
+  const requestedHostType = normalizeSetVariableHostType(hostType);
+  if (hostType && !requestedHostType) throw new Error(`FORM_ACTION_SETVAR_HOST_TYPE_UNSUPPORTED: ${hostResource} / ${hostPage} / ${hostType}`);
+  const sameHostRecords = records.filter((record) => normKey(record.hostResource) === normKey(hostResource)
+    && normKey(record.hostPage) === normKey(hostPage));
+  const incompatibleHostTypes = sameHostRecords.filter((record) => record.hostType
+    && normalizeSetVariableHostType(record.hostType) !== requestedHostType);
+  if (incompatibleHostTypes.length) {
+    throw new Error(`FORM_ACTION_SETVAR_HOST_TYPE_MISMATCH: ${hostResource} / ${hostPage} expected ${requestedHostType || "unspecified"}; planned ${incompatibleHostTypes.map((record) => record.hostType).join(", ")}`);
+  }
   const selected = records.filter((record) => normKey(record.hostResource) === normKey(hostResource)
     && normKey(record.hostPage) === normKey(hostPage)
-    && (!hostType || !record.hostType || normKey(record.hostType) === normKey(hostType)));
+    && (!requestedHostType || !record.hostType || normalizeSetVariableHostType(record.hostType) === requestedHostType));
   if (!selected.length) return resource;
   resource.actions = Array.isArray(resource.actions) ? resource.actions : [];
   resource.formAction = resource.formAction && typeof resource.formAction === "object" && !Array.isArray(resource.formAction) ? resource.formAction : {};

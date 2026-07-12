@@ -5,6 +5,10 @@ description: generate, inspect, validate, package, and improve yeeflow approval 
 
 # Yeeflow Approval Form Generator
 
+## Approval Workflow Set Variable
+
+`SetVariableTask` is a system action, not an Assignment Task. Never add fake assignee or `taskurl` metadata to satisfy a broad task-name check. Human-task assignee/task-page requirements apply only to exact human task stencils such as `MultiAssignmentTask` and `CandidateTask`. Form Action Set Variable planning must use the shared canonical Host Type aliases; unsupported or contradictory host values are blocking errors, not records to silently skip.
+
 ## Workflow Designer Editability Contract
 
 Apply `docs/standards/approval-workflow-designer-editability-standard.md` to every standalone `.ywf` and Approval workflow embedded in `.yapk`. Every non-SequenceFlow workflow node must have numeric `position`, positive-area `bounds.upperLeft/lowerRight`, and `bounds.upperLeft` equal to `position`. Treat `graphposition.x/y` as initial viewport translation offsets under `screen = model * graphzoom + graphposition`, not as the model-coordinate bounding-box origin; generated workflows place the leftmost/topmost node at safe `80px/120px` insets. Use the shared CJS/ESM Designer-shape utility from both full materialization and standalone wrapper generation. A blank initial canvas, offscreen node extent, or canvas that renders without selectable/editable nodes is a failure, not Designer proof.

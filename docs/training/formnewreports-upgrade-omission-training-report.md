@@ -29,12 +29,15 @@ When building any existing-application upgrade whose declared scope does not inc
 - If the upgrade intentionally creates or changes a Form report, the scope must explicitly include report changes and provide report new/update-safe proof.
 - Never treat the omission of unchanged installed `FormNewReports[]` from a non-Report upgrade payload as deletion of the installed report. Final preservation must still be proven by Version Management and runtime/resource proof for the exact upgraded app.
 
+Use `scripts/materialize-yapk-focused-upgrade-scope.mjs` before signing a focused non-Report upgrade. It compares each candidate Form report with the previous installed package, omits only identity-matched and byte-equivalent report definitions, removes only matching report navigation payload items, clears the wrapper signature after mutation, and leaves new or changed reports in the candidate so scope validation can fail. Then run both upgrade scope validators on the materialized output.
+
 ## Validator Rule
 
 `validate-yapk-upgrade-scope.mjs` must distinguish these cases:
 
 - Pass: any non-Report upgrade where the previous package has installed `FormNewReports[]`, the upgrade payload omits them with `FormNewReports: []`, and report changes are not in scope.
 - Fail: a non-Report upgrade that carries an unchanged installed Form report (`UPGRADE_UNCHANGED_INSTALLED_FORM_REPORT_INCLUDED`).
+- Fail: a new or changed Form report remains in a non-Report upgrade (`UPGRADE_FORM_REPORT_OUT_OF_SCOPE`).
 - Fail: any non-Report upgrade mutates or carries existing `FormNewReports[]` contents.
 - Fail: field-only/list-only upgrade includes `FormNewReports[]` unless report changes are explicitly in scope and update-safe proof is provided through the report-scope validator.
 
