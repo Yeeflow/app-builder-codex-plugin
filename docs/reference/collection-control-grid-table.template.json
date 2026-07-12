@@ -120,6 +120,16 @@
       {
         "idx": "9a5fc05b-9430-4107-9403-2eb273a1fe9d",
         "id": "var_isDeleteConfirmed"
+      },
+      {
+        "idx": "a825d5de-2021-4f13-8761-702020331ef5",
+        "id": "var_SelectedItemsAmount",
+        "type": "number"
+      },
+      {
+        "idx": "52fc7a5a-9180-4ac6-bdf2-76fe060a53d8",
+        "id": "var_task-view",
+        "type": "string"
       }
     ],
     "filter": [

@@ -1,0 +1,21 @@
+{
+  "reference": "sanitized Business Travel Request Approval runtime proof",
+  "proofBoundary": "Version Management upgrade succeeded and a fresh Workflow Designer tab opened with Start and the first approval task visible",
+  "graphzoom": 1,
+  "contentBounds": {
+    "upperLeft": { "x": -170, "y": -85 },
+    "lowerRight": { "x": 2181, "y": 126 }
+  },
+  "graphposition": {
+    "x": -80,
+    "y": -40,
+    "width": 2351,
+    "height": 211
+  },
+  "contract": {
+    "leftInsetFromContentMinimum": 90,
+    "topInsetFromContentMinimum": 45,
+    "widthEqualsContentSpan": true,
+    "heightEqualsContentSpan": true
+  }
+}

@@ -5,7 +5,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 import { asArray, isObject, readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
-import { approvalWorkflowInitialViewportExtent } from "./lib/approval-workflow-designer-shape-utils.mjs";
+import { inspectApprovalWorkflowGraphPosition } from "./lib/approval-workflow-designer-shape-utils.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_REFERENCE = path.join(ROOT, "docs/reference/workflow-layout-golden-references.json");
@@ -1592,21 +1592,24 @@ function validateGraphPosition(resource, nodes, findings) {
     return;
   }
 
-  const extent = approvalWorkflowInitialViewportExtent(resource.def.childshapes, graph, resource.def.graphzoom);
-  if (!extent) return;
-  const visibleCanvas = { left: 40, top: 80, right: 1880, bottom: 1000 };
-  const entirelyOffscreen = extent.right <= visibleCanvas.left
-    || extent.bottom <= visibleCanvas.top
-    || extent.left >= visibleCanvas.right
-    || extent.top >= visibleCanvas.bottom;
-  if (entirelyOffscreen) {
-    findings.push(issue("WORKFLOW_LAYOUT_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN", "Workflow graphposition is a viewport translation; transformed nodes must intersect the initial Designer canvas so opening the workflow does not show a blank page.", {
+  const graphContract = inspectApprovalWorkflowGraphPosition(resource.def.childshapes, graph);
+  if (!graphContract) return;
+  if (!graphContract.originMatches) {
+    findings.push(issue("WORKFLOW_LAYOUT_GRAPHPOSITION_ORIGIN_MISMATCH", "Workflow graphposition.x/y must follow the runtime-proven content-boundary inset contract.", {
       source: resource.source,
       workflowName: resource.workflowName,
-      graphzoom: resource.def.graphzoom,
       graphposition: graph,
-      transformedNodeExtent: extent,
-      expectedVisibleCanvas: visibleCanvas,
+      contentBounds: graphContract.content,
+      expectedGraphposition: graphContract.expected,
+    }));
+  }
+  if (!graphContract.dimensionsMatch) {
+    findings.push(issue("WORKFLOW_LAYOUT_GRAPHPOSITION_CONTENT_SPAN_MISMATCH", "Workflow graphposition.width/height must match the workflow content span.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      graphposition: graph,
+      contentBounds: graphContract.content,
+      expectedGraphposition: graphContract.expected,
     }));
   }
 }

@@ -60,10 +60,55 @@ function collectPageSurfaces(decoded) {
 function validateSurface(surface, findings) {
   checkDuplicateDeclarations(surface, "filterVars", canonicalFilterName, "PAGE_SCOPE_FILTER_VAR_DUPLICATE", findings);
   checkDuplicateDeclarations(surface, "tempVars", canonicalTempName, "PAGE_SCOPE_TEMP_VAR_DUPLICATE", findings);
+  checkTempVariableContracts(surface, findings);
   checkVariableNamespaceUniqueness(surface, findings);
   checkDuplicateDeclarations(surface, "actions", canonicalActionName, "PAGE_SCOPE_ACTION_DUPLICATE", findings);
   checkDuplicateFormActions(surface, findings);
   checkFilterProducers(surface, findings);
+}
+
+function checkTempVariableContracts(surface, findings) {
+  const declarations = asArray(surface.resource?.tempVars);
+  const declared = new Map();
+  for (const [index, item] of declarations.entries()) {
+    const id = String(item?.id || "").trim();
+    if (!id) {
+      findings.push(error("PAGE_SCOPE_TEMP_VAR_ID_MISSING", "Every page temp variable must include a non-empty id; name-only declarations render as blank variables in Designer.", {
+        surface: surface.name,
+        surfaceKind: surface.kind,
+        pointer: `${surface.pointer}.tempVars[${index}]`,
+        declaration: item,
+      }));
+      continue;
+    }
+    declared.set(canonicalTempName(id), { id, index });
+  }
+
+  const body = { ...(surface.resource || {}) };
+  delete body.tempVars;
+  const bodyText = JSON.stringify(body);
+  const referenced = new Set([...bodyText.matchAll(/__temp_([A-Za-z0-9_-]+)/g)].map((match) => canonicalTempName(match[1])));
+  for (const reference of referenced) {
+    if (declared.has(reference)) continue;
+    findings.push(error("PAGE_SCOPE_TEMP_VAR_REFERENCE_UNDECLARED", "Every __temp_ reference must resolve to a tempVars declaration with a real id.", {
+      surface: surface.name,
+      surfaceKind: surface.kind,
+      reference,
+    }));
+  }
+
+  const generatedFinal = Boolean(surface.resource?.generatedFinalDashboardMaterialization);
+  if (!generatedFinal) return;
+  for (const [canonicalId, declaration] of declared) {
+    const rawId = declaration.id;
+    if (referenced.has(canonicalId) || bodyText.includes(rawId)) continue;
+    findings.push(error("PAGE_SCOPE_TEMP_VAR_UNREFERENCED_TEMPLATE_RESIDUE", "Generated-final Dashboard temp variables must be consumed by page controls, actions, filters, or analytics metadata; remove unused template residue.", {
+      surface: surface.name,
+      surfaceKind: surface.kind,
+      pointer: `${surface.pointer}.tempVars[${declaration.index}]`,
+      id: rawId,
+    }));
+  }
 }
 
 function checkVariableNamespaceUniqueness(surface, findings) {
@@ -279,7 +324,8 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   let result;
   if (args.resourcePath) {
-    const resource = JSON.parse(fs.readFileSync(args.resourcePath, "utf8"));
+    const input = JSON.parse(fs.readFileSync(args.resourcePath, "utf8"));
+    const resource = parseResource(input?.LayoutView) || parseResource(input?.Resource) || input;
     const findings = [];
     validateSurface({ kind: "resource", name: path.basename(args.resourcePath), pointer: "$", resource }, findings);
     result = report(findings);

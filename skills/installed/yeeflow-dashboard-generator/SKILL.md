@@ -113,6 +113,8 @@ When combining a Dashboard page-layout golden reference with component templates
 
 All `filterVars[]` and `tempVars[]` IDs in one Dashboard page share one namespace. Validate literal and canonical uniqueness after removing system prefixes, lowercasing, and stripping spaces/punctuation. Do not let component-template variables collide across regions or between filter/temp collections; `PAGE_SCOPE_VARIABLE_ID_DUPLICATE` is a pre-signing blocker.
 
+Dashboard temp-variable dependency rule: every generated `tempVars[]` entry requires complete `id`, `name`, `idx`, and `type`. Golden template dependencies must be namespaced together with every `__temp_` consumer, and unused declarations must be removed after control/action cleanup. Never append generic `var_SelectedItems`, `var_SelectedItemsAmount`, or `var_isDeleteConfirmed` variables to unrelated dashboards. Run the page-scope dependency gate directly on standalone `.ydp` and packaged `.yapk`; missing IDs, undeclared references, and unreferenced generated-template residue block handoff.
+
 Generated-final dashboard materialization completeness: when an approved App Plan declares dashboard KPI/Summary metrics, filters, Collection/Data table/Kanban/Timeline regions, or dynamic item-template display needs, the generated Type 103 dashboard must contain corresponding non-empty controls. A `Main > Content` shell with `Content.children = []`, or a container-only dashboard with no business controls, is not a generated-final dashboard. Run `scripts/validate-dashboard-generation-hard-gates.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>` and `scripts/validate-generated-final-resource-completeness.mjs --plan <yeeflow-app-plan.md> --package <app.yapk|decoded.json>` before signing readiness.
 
 

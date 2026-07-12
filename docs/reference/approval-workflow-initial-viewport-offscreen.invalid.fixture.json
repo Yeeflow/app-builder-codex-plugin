@@ -13,16 +13,11 @@
     "right": 2181,
     "bottom": 126
   },
-  "transformedInitialViewportExtent": {
-    "left": -500,
-    "top": -330,
-    "right": 1851,
-    "bottom": -119
-  },
-  "expectedError": "APPROVAL_WORKFLOW_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN",
+  "expectedError": "APPROVAL_WORKFLOW_GRAPHPOSITION_ORIGIN_MISMATCH",
   "correctedContract": {
-    "safeLeft": 80,
-    "safeTop": 120,
-    "formula": "screenCoordinate = modelCoordinate * graphzoom + graphpositionOffset"
+    "leftInset": 90,
+    "topInset": 45,
+    "expectedGraphposition": { "x": -80, "y": -40, "width": 2351, "height": 211 },
+    "formula": "graphposition.x = minNodeX + 90; graphposition.y = minNodeY + 45"
   }
 }

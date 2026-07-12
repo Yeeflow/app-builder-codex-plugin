@@ -26,7 +26,7 @@ const {
   inspectCanonicalGraphRef,
 } = require("./scripts/lib/approval-workflow-graph-reference-utils.cjs");
 const {
-  approvalWorkflowInitialViewportExtent,
+  inspectApprovalWorkflowGraphPosition,
 } = require("./scripts/lib/approval-workflow-designer-shape-utils.cjs");
 
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
@@ -1922,18 +1922,19 @@ function validateDecodedDef(def, options = {}) {
       if (Number(graph.width) <= 0 || Number(graph.height) <= 0) {
         addIssue(errors, "APPROVAL_WORKFLOW_GRAPHPOSITION_DIMENSIONS_INVALID", "Workflow graphposition width and height must be positive scaled content dimensions.", "$.graphposition", { graphposition: graph });
       }
-      const viewportExtent = approvalWorkflowInitialViewportExtent(childshapes, graph, def.graphzoom);
-      if (viewportExtent && (
-        viewportExtent.right <= 40
-        || viewportExtent.bottom <= 80
-        || viewportExtent.left >= 1880
-        || viewportExtent.top >= 1000
-      )) {
-        addIssue(errors, "APPROVAL_WORKFLOW_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN", "Workflow graphposition is a Designer viewport translation, not a model-coordinate bounding-box origin. The saved initial viewport places every workflow node outside the visible canvas.", "$.graphposition", {
+      const graphContract = inspectApprovalWorkflowGraphPosition(childshapes, graph);
+      if (graphContract && !graphContract.originMatches) {
+        addIssue(errors, "APPROVAL_WORKFLOW_GRAPHPOSITION_ORIGIN_MISMATCH", "Workflow graphposition.x/y must follow the runtime-proven content-boundary inset contract so the workflow opens in the initial Designer canvas.", "$.graphposition", {
           graphposition: graph,
-          graphzoom: def.graphzoom,
-          transformedNodeExtent: viewportExtent,
-          expectedVisibleCanvas: { left: 40, top: 80, right: 1880, bottom: 1000 },
+          contentBounds: graphContract.content,
+          expectedGraphposition: graphContract.expected,
+        });
+      }
+      if (graphContract && !graphContract.dimensionsMatch) {
+        addIssue(errors, "APPROVAL_WORKFLOW_GRAPHPOSITION_CONTENT_SPAN_MISMATCH", "Workflow graphposition.width/height must match the workflow content span.", "$.graphposition", {
+          graphposition: graph,
+          contentBounds: graphContract.content,
+          expectedGraphposition: graphContract.expected,
         });
       }
     }
