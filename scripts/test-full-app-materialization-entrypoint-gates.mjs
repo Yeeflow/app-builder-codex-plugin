@@ -184,11 +184,11 @@ try {
     "| 2 | Asset | Asset | Text | input | Generated-final validation |",
     "| 3 | Business Purpose | BusinessPurpose | Multiple line | textarea | Generated-final validation |",
     "| 4 | Purpose | Purpose | Multiple line text | textarea | Generated-final validation |",
-    "| 5 | Payment Terms | PaymentTerms | Text | radio dropdown | Generated-final validation |",
+    "| 5 | Payment Terms | PaymentTerms | Choice | radio dropdown | Generated-final validation |",
     "| 6 | Tax Number | TaxNumber | Text | input | Generated-final validation |",
     "| 7 | Bank Name | BankName | Text | input | Generated-final validation |",
     "| 8 | Bank Account | BankAccount | Text | input | Generated-final validation |",
-    "| 9 | Risk Self Assessment | RiskSelfAssessment | Text | radio dropdown | Generated-final validation |",
+    "| 9 | Risk Self Assessment | RiskSelfAssessment | Choice | radio dropdown | Generated-final validation |",
     "| 10 | Risk Explanation | RiskExplanation | Multiple line | textarea | Generated-final validation |",
     "| 11 | Business License Attachment | BusinessLicenseAttachment | File | file upload | Generated-final validation |",
     "| 12 | Bank Proof Attachment | BankProofAttachment | File | file upload | Generated-final validation |",
@@ -222,6 +222,7 @@ try {
     "| --- | --- | --- | --- | --- | --- |",
     "| 1 | Loan Number | LoanNumber | Text | input | Generated-final validation |",
     "| 2 | Return Condition | ReturnCondition | Choice | radio | Generated-final validation |",
+    "| 3 | Workflow Proof Status | WorkflowProofStatus | Text | input | Generated-final validation |",
     "",
     "##### Task Form Fields",
     "",
@@ -230,6 +231,7 @@ try {
     "| 1 | Loan Number | LoanNumber | Text | input | Yes | Generated-final validation |",
     "| 2 | Return Condition | ReturnCondition | Choice | radio | Yes | Generated-final validation |",
     "| 3 | Reviewer Decision | ReviewerDecision | Choice | radio | No | Generated-final validation |",
+    "| 4 | Workflow Proof Status | WorkflowProofStatus | Text | input | Yes | Generated-final validation |",
     "",
     "#### Approval Form Fields Layout Template Selection",
     "| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |",
@@ -448,6 +450,15 @@ try {
   const assetReturnDefText = JSON.stringify(assetReturnDef);
   assert.match(assetReturnDefText, /Loan Number/, "approval formdef preserves planned Loan Number visible label");
   assert.match(assetReturnDefText, /LoanNumber/, "approval formdef preserves planned LoanNumber field binding");
+  const workflowProofStatusControls = (assetReturnDef.pageurls || [])
+    .flatMap((page) => collectApprovalFieldControls(page.formdef))
+    .filter((field) => field.key === "workflowproofstatus");
+  assert.ok(workflowProofStatusControls.length >= 1, "Workflow Proof Status is materialized from the App Plan");
+  assert.equal(
+    workflowProofStatusControls.every((field) => field.type === "input"),
+    true,
+    "Text field names ending in Status remain input controls",
+  );
   assert.doesNotMatch(assetReturnDefText, /Request Number/, "approval source-domain cleanup must not rewrite planned Loan Number into Request Number");
   assert.equal(Array.isArray(assetLoanDef.flowPage), true, "approval workflow includes flowPage for Designer publish readiness");
   assert.equal(Array.isArray(assetLoanDef.variables?.basic), true, "approval workflow variables.basic is an array");
@@ -705,7 +716,8 @@ function consumedDashboardFilterVars(root) {
   return consumed;
 }
 } finally {
-  fs.rmSync(tempDir, { recursive: true, force: true });
+  if (process.env.KEEP_FULL_APP_TEST_TEMP === "1") console.error(`Preserved full-app test temp: ${tempDir}`);
+  else fs.rmSync(tempDir, { recursive: true, force: true });
 }
 
 function expectPass(name, args, options = {}) {
@@ -823,7 +835,11 @@ function collectApprovalFieldControls(root) {
     const type = String(node.type || "");
     if (/^(input|textarea|richtext|rich-text|radio|checkbox|switch|date|datetime|datepicker|number|input_number|currency|lookup|people|user|identity-picker|image-upload|file-upload|list)$/i.test(type)) {
       const key = String(node.binding || node.fieldName || node.attrs?.data?.fieldName || node.attrs?.data?.field || "").trim().toLowerCase();
-      if (key) out.push({ key, readonly: node.attrs?.readonly === true || node.attrs?.readOnly === true || node.readonly === true || node.readOnly === true });
+      if (key) out.push({
+        key,
+        type: String(node.type || "").trim().toLowerCase(),
+        readonly: node.attrs?.readonly === true || node.attrs?.readOnly === true || node.readonly === true || node.readOnly === true,
+      });
     }
     for (const child of node.children || []) visit(child);
   };
