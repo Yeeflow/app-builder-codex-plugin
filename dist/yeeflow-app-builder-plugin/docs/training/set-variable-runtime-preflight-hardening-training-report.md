@@ -11,12 +11,15 @@ The same run also showed that the App Plan used `Approval Submission` / `Approva
 1. Human task validation is stencil-specific. Only `MultiAssignmentTask` and `CandidateTask` require assignee and task-page metadata. A `SetVariableTask` requires workflow-variable settings, never fabricated human-task metadata.
 2. Form Action Set Variable Host Type uses one shared alias-to-canonical contract across planning and materialization. Unknown or contradictory host values are hard errors; planned records cannot be silently ignored because of vocabulary drift.
 3. Focused non-Report upgrades materialize scope before signing. Only unchanged installed Form reports are omitted automatically. New or changed reports remain present and are rejected unless report scope and proof are declared.
+4. Every approval-aware validator must share the same human-task classification. Upgrade scope validation must not reintroduce broad `/task/i` matching; it resolves `MultiAssignmentTask` / `CandidateTask` routes through referenced SequenceFlows and treats `SetVariableTask` as a system action.
+5. Approval page shell checks inspect semantic `name` / `nv_label` recursively so canonical `Main > Content` nesting with UUID control IDs passes. Focused upgrade wrappers replace missing or numeric PackageId metadata with a new UUID and clear the stale signature before signing.
 
 ## Regression Proof
 
 - `test-generated-yapk-export-shape-materialization-gates.mjs` proves a real `MultiAssignmentTask` still requires assignee metadata while `SetVariableTask` does not require assignee or `taskurl`.
 - `test-set-variable-golden-reference-gates.mjs` proves Approval aliases materialize, unsupported Host Type fails planning, and conflicting canonical hosts fail materialization.
 - `test-yapk-upgrade-scope-hard-gates.mjs` proves unchanged report/navigation omission and proves changed reports are not hidden.
+- The upgrade-scope suite also proves nested UUID-ID `Main > Content`, SequenceFlow-resolved Approved/Rejected paths, SetVariableTask exclusion from human-task gates, and numeric PackageId replacement.
 - The original runtime candidate `query-data-runtime-baseline-0951-20260712.set-variable-v1.3-report-omitted.yapk` passes the corrected generated-export-shape validator.
 
 ## Proof Boundary
