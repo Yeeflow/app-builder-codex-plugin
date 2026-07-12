@@ -20,6 +20,11 @@ try {
   expectPass("readable workflow resource passes layout gate", ["--resource", writeResource("good-workflow.json", readableWorkflow())]);
   cases.push({ case: "pass: readable lane-based workflow resource", status: "pass" });
 
+  expectCode("initial viewport with all nodes above the canvas fails", mutateReadable("initial-viewport-offscreen.json", (def) => {
+    def.graphposition = { x: -330, y: -700, width: 2671, height: 620 };
+  }), "WORKFLOW_LAYOUT_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN");
+  cases.push({ case: "fail: transformed workflow nodes cannot open entirely above the initial canvas", status: "pass" });
+
   expectCode("default workflow action name fails", mutateReadable("default-action-name.json", (def) => {
     const review = def.childshapes.find((shape) => shape.id === "review");
     review.properties.name = "Assignment Task";

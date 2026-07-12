@@ -2,7 +2,7 @@
 
 ## Scope
 
-This training covers a Dashboard/runtime-only upgrade failure where an unchanged installed Form report was carried in the upgrade payload and Yeeflow Version Management rejected the package with:
+This training covers non-Report upgrades where an unchanged installed Form report was carried in the upgrade payload and Yeeflow Version Management rejected the package with an `is in application` duplicate-resource error. The rule was first proven on a Dashboard fix and later reproduced on an Approval form upgrade.
 
 ```text
 Form report: Asset Loan Request Approval Report (is in application)
@@ -16,22 +16,26 @@ For an upgrade of an existing application, an unchanged installed Form report in
 
 The verified repair was to remove the unchanged installed `FormNewReports[]` entries from the Dashboard-only upgrade payload while preserving Forms, Data Lists, Dashboards, Navigation, root identity, and the target Dashboard changes. Version Management then reached `Succeed` and the Dashboard runtime smoke proof passed.
 
+The Approval-upgrade regression was verified on Business Travel Request. The failed payload carried `Business Travel Request Report`; Version Management returned `Form report: Business Travel Request Report (is in application)`. The repaired payload retained the Approval `requestTitle` and seven Sub List column-title fixes, changed `FormNewReports` from one entry to zero, removed only that report's navigation payload item, preserved all existing IDs, passed scope/ID/schema/signature checks, and reached Version Management `Upgrade application -> Succeed`. Runtime proof showed the Approval form opened with all seven expected Sub List headers. Submission and approve/reject execution remained outside that proof.
+
 ## Generator Rule
 
-When building an upgrade package for a Dashboard/runtime-only fix:
+When building any existing-application upgrade whose declared scope does not include Form report creation or modification:
 
-- Preserve non-Dashboard resources that are required for app identity and runtime continuity.
+- Preserve non-target resources that are required for app identity and runtime continuity.
 - Do not blindly carry unchanged installed `FormNewReports[]` entries into the upgrade payload.
-- If a Form report is not part of the declared upgrade scope and is already installed, omit it from `FormNewReports[]` in the upgrade payload to avoid duplicate live creation.
+- If a Form report is not part of the declared upgrade scope and is already installed, omit it from `FormNewReports[]` in the upgrade payload to avoid duplicate live creation. This applies to Approval, Dashboard, Data List, workflow, navigation, and other non-Report upgrades.
+- Remove only navigation payload items that resolve to the omitted installed Form reports. Any unrelated navigation drift remains an error.
 - If the upgrade intentionally creates or changes a Form report, the scope must explicitly include report changes and provide report new/update-safe proof.
-- Never treat the omission of unchanged installed `FormNewReports[]` from a Dashboard-only upgrade payload as deletion of the installed report. Final preservation must still be proven by Version Management and runtime/resource proof for the exact upgraded app.
+- Never treat the omission of unchanged installed `FormNewReports[]` from a non-Report upgrade payload as deletion of the installed report. Final preservation must still be proven by Version Management and runtime/resource proof for the exact upgraded app.
 
 ## Validator Rule
 
 `validate-yapk-upgrade-scope.mjs` must distinguish these cases:
 
-- Pass: Dashboard-only upgrade where previous package has installed `FormNewReports[]`, new package omits them with `FormNewReports: []`, and report changes are not in scope.
-- Fail: Dashboard-only upgrade mutates `FormNewReports[]` contents.
+- Pass: any non-Report upgrade where the previous package has installed `FormNewReports[]`, the upgrade payload omits them with `FormNewReports: []`, and report changes are not in scope.
+- Fail: a non-Report upgrade that carries an unchanged installed Form report (`UPGRADE_UNCHANGED_INSTALLED_FORM_REPORT_INCLUDED`).
+- Fail: any non-Report upgrade mutates or carries existing `FormNewReports[]` contents.
 - Fail: field-only/list-only upgrade includes `FormNewReports[]` unless report changes are explicitly in scope and update-safe proof is provided through the report-scope validator.
 
 This keeps the duplicate-report install blocker covered without weakening out-of-scope report mutation gates.

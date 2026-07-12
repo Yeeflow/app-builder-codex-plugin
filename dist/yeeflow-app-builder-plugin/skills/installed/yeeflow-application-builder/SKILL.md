@@ -5,9 +5,13 @@ description: build real Yeeflow business applications from requirements, process
 
 # Yeeflow Application Builder
 
+Planning placeholders are absence decisions, never resource names. Before allocating IDs or materializing any optional resource, normalize labels using the planning-placeholder contract. Values such as `Not applicable.`, `Not planned`, `N/A`, `None`, `No Dashboard required`, and `Dashboard not required` must produce no Page, Dashboard, report, workflow, navigation item, provenance entry, or visible resource label. Do not create a shell resource to represent an omitted optional feature. Generated-final YAPK work must pass `scripts/validate-planning-placeholder-materialization.mjs`; `PLANNING_PLACEHOLDER_MATERIALIZED_AS_RESOURCE` blocks signing and install.
+
 ## Approval Workflow Designer Readiness
 
 When a full application includes Approval workflows, use the same shared workflow graph generation path as standalone `.ywf` output and apply `docs/standards/approval-workflow-designer-editability-standard.md`. Do not materialize position-only nodes, undeclared QueryData outputs, empty ContentList field mappings, or Update/Edit actions with add semantics. The generated-final package is not signing-ready until `scripts/validate-approval-workflow-publish-readiness.mjs` passes for every embedded Approval DefResource.
+
+Workflow initial viewport rule: `graphposition.x/y` are Designer viewport translations, not node-bounds origins. Full-app materialization must use the shared Designer-shape utility so the transformed topmost/leftmost workflow nodes open inside the visible canvas; block `APPROVAL_WORKFLOW_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN` before signing.
 
 Before encoding any standalone or packaged Approval workflow, normalize every graph reference to canonical matching `id` + lowercase `resourceid`. This applies to SequenceFlow source/target/incoming/outgoing and each node incoming/outgoing reference. Do not preserve or generate camel-case `resourceId` aliases, and never treat a graph reconstructed indirectly from neighboring refs as Designer-ready.
 
@@ -638,6 +642,12 @@ Use the current Yeeflow generation foundation by default:
 - latest workflow transition condition operand wrappers for direct selectors, direct values, and expression-editor operands
 - form actions Phase 1 and Phase 2
 - correct `attrs.querydata_filters`
+- explicit Form Action Query Data mode, source, filters/sorts, result target, field mapping, count target, and persistence/page-lifetime contract from `docs/standards/form-action-query-data-golden-reference-standard.md`
+- Query Data business-selection proof before mode selection: direct Collection/Data Table for read-only multi-row display, temp variables for one-record page context, persisted variables/current fields for saved values, current-record Sub List only for editable working copies, and count-only when rows are not consumed
+- exact Query Data result consumer/use; temp JSON/temp collections may feed `JSONStringfy`, calculations, or explicitly justified Custom Code, but never Collection/Data Table
+- target-record `ListDataID` semantics for Lookup-backed filters and chained query IDs; display titles are not stored Lookup identities
+- mandatory Query Data plan validation inside Generation Readiness whenever Form Action Query Data intent is present; resource-order validation alone is not planning-ready proof
+- for Custom Data List Form Query Data, exact trigger binding plus current-field (`____customListFields_`), current Sub list (`__list_`), temp declaration, and editable-working-copy rationale; read-only reverse relations use Collection/Data Table
 - expression-editor token arrays with `showCus: false` for Query data filter values that reference workflow variables or calculations
 - `arraySum`
 - `JSONStringfy`
@@ -810,3 +820,11 @@ Validation and proof boundaries:
 <!-- advanced-controls-runtime-proof:end -->
 
 For `collection_control_grid_table`, use `docs/reference/collection-control-grid-table.template.json` as the export-shaped source of truth. Copy `grid_table_col_wrapper` and all descendants, not a simplified header-plus-Collection lookalike. Business mapping may edit only `grid_table_col_title_wrapper`, `op_normal`, `grid_table_col_header`, `grid_col_item`, and optional `grid_table_col_item_operations`. Preserve style/layout/typography outside those regions, keep `grid_table_col_header` and `grid_col_item` column count/width/property parity, map field types to Dynamic user/image/file/field controls, and omit item operation menus for Form Report/Data Report display-only sources. If item operations are present, every button must bind to a valid action; edit/delete require matching Collection actions, and delete requires the confirmation temp variable/conditional delete flow.
+
+Plan and materialize Dashboard Query Data with v1.3/v1.4 temp-only outputs, exact page/action binding, ordered chained queries, not-empty guards, count-driven display, and selected-field temp JSON where required. Query Data pagination is shared on Approval, Data List, Document Library, and Dashboard hosts: Page Size defaults to 100 and is capped at 1000; Page Number defaults to 1 and non-default values serialize as `querydata_pageindex`. Temp JSON cannot directly feed Collection/Data Table. Form Report/Data Report cannot host independent Form Actions.
+
+Workflow Query Data v1.6 is a separate server-side workflow capability. Plan every Approval, Data List, or Scheduled Workflow `QueryData` node in the App Plan `Workflow Query Data Planning` table and validate it through Generation Readiness. Use count-only for existence/count branching, single-to-variables for one related record, and multiple-to-List-variable for row iteration. Workflow Query Data never writes page temp variables. List results require a declared List variable plus `variables.listref`/Complex Type field mappings; Loop through list items must resolve that List variable and `bodyRef`. Query-derived User assignees require a single-result User mapping before Assignment Task use. Follow `docs/standards/workflow-query-data-golden-reference-standard.md`.
+
+V1.10 Query Data source coverage includes Data List (`1`), Document Library (`16`), and Form Report (`32`) for Workflow nodes and host-supported Form Actions. Form Report is a source, not a Form Action host. Preserve positive Page Number, Page Size `1..1000`, and no more than two sort fields. Data Report remains `focused-learning-required` until its dedicated training round.
+Plan every Workflow Loop in `Workflow Loop Planning`. V1.7 proves `list`, `values`, and `number` modes, Data List Sub List iteration, current iteration/row expressions, and nested LoopBody actions. State ordered body actions and mark repeated email, mutation, Delay, service, or external side effects runtime-proof-required. For count-based Data List Workflow upsert, plan complete positive and zero/non-positive branches before ContentList edit/add.
+Before planning a Dashboard multiple-row Query Data result, decide whether a normal Collection/Data Table can bind directly to the source Data List with the required filter, sort, and visible row limit. Prefer that native path for read-only recent-record and reverse-related regions. Only plan a temp JSON result when its consumer is explicitly `JSONStringfy`, a calculation, or justified Custom Code. Run the Query Data plan validator through Generation Readiness before materialization.

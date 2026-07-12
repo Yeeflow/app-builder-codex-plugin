@@ -16,6 +16,7 @@ const WRAPPER_BUILDER = fs.existsSync(path.join(ROOT, "build-ywf-wrapper.js"))
   ? path.join(ROOT, "build-ywf-wrapper.js")
   : path.join(ROOT, "scripts/build-ywf-wrapper.js");
 const SOURCE_ID_MISSING_FIXTURE = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/approval-workflow-sequenceflow-endpoint-id-missing.invalid.fixture"), "utf8"));
+const OFFSCREEN_VIEWPORT_FIXTURE = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/approval-workflow-initial-viewport-offscreen.invalid.fixture.json"), "utf8"));
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "approval-workflow-publish-"));
 const cases = [];
 
@@ -25,6 +26,12 @@ try {
   cases.push({ case: "pass: materialized package workflow is publish-ready", status: "pass" });
 
   const materializedDef = decodeFirstApprovalDef(packagePath);
+  const materializedNodeBounds = materializedDef.childshapes.filter((shape) => shape?.stencil?.id !== "SequenceFlow").map((shape) => shape.bounds);
+  const materializedMinX = Math.min(...materializedNodeBounds.map((bounds) => bounds.upperLeft.x));
+  const materializedMinY = Math.min(...materializedNodeBounds.map((bounds) => bounds.upperLeft.y));
+  assert.equal(materializedMinX * materializedDef.graphzoom + materializedDef.graphposition.x, 80, "materializer must place the leftmost workflow node at the safe initial viewport inset");
+  assert.equal(materializedMinY * materializedDef.graphzoom + materializedDef.graphposition.y, 120, "materializer must place the topmost workflow node at the safe initial viewport inset");
+  cases.push({ case: "pass: materializer emits a visible initial Designer viewport", status: "pass" });
   for (const flow of materializedDef.childshapes.filter((shape) => shape?.stencil?.id === "SequenceFlow")) {
     for (const ref of [flow.source, flow.target, ...(flow.incoming || []), ...(flow.outgoing || [])]) {
       assert.deepEqual(Object.keys(ref).sort(), ["id", "resourceid"], "materializer must emit canonical graph references without resourceId aliases");
@@ -82,6 +89,7 @@ try {
 
   const malformedDef = structuredClone(validDef);
   malformedDef.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow").source = structuredClone(SOURCE_ID_MISSING_FIXTURE.sequenceFlow.source);
+  malformedDef.graphposition = structuredClone(OFFSCREEN_VIEWPORT_FIXTURE.graphposition);
   const malformedDefPath = path.join(tempDir, "wrapper-malformed-source-def.json");
   fs.writeFileSync(malformedDefPath, `${JSON.stringify(malformedDef, null, 2)}\n`);
   const normalizedWrapperPath = path.join(tempDir, "wrapper-normalized-source.ywf");
@@ -99,7 +107,12 @@ try {
   const normalizedSource = normalizedDef.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow").source;
   assert.deepEqual(Object.keys(normalizedSource).sort(), ["id", "resourceid"]);
   assert.equal(normalizedSource.id, normalizedSource.resourceid);
-  cases.push({ case: "pass: standalone YWF wrapper builder repairs the sanitized source-id incident shape", status: "pass" });
+  const normalizedBounds = normalizedDef.childshapes.filter((shape) => shape?.stencil?.id !== "SequenceFlow").map((shape) => shape.bounds);
+  const normalizedMinX = Math.min(...normalizedBounds.map((bounds) => bounds.upperLeft.x));
+  const normalizedMinY = Math.min(...normalizedBounds.map((bounds) => bounds.upperLeft.y));
+  assert.equal(normalizedMinX * normalizedDef.graphzoom + normalizedDef.graphposition.x, 80, "standalone wrapper must normalize the initial viewport left inset");
+  assert.equal(normalizedMinY * normalizedDef.graphzoom + normalizedDef.graphposition.y, 120, "standalone wrapper must normalize the initial viewport top inset");
+  cases.push({ case: "pass: standalone YWF wrapper repairs graph references and the initial Designer viewport", status: "pass" });
 
   expectCode("SequenceFlow target id/resourceid mismatch fails", mutateResource(validDef, (def) => {
     const flow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow");
@@ -188,11 +201,16 @@ try {
   }), "APPROVAL_WORKFLOW_NODE_BOUNDS_POSITION_MISMATCH");
   cases.push({ case: "fail: workflow node bounds do not match position", status: "pass" });
 
-  expectCode("graphposition that excludes node bounds fails", mutateResource(validDef, (def) => {
-    def.graphposition.width = 100;
-    def.graphposition.height = 100;
-  }), "APPROVAL_WORKFLOW_GRAPHPOSITION_BOUNDS_INCOMPLETE");
-  cases.push({ case: "fail: graphposition does not contain workflow node bounds", status: "pass" });
+  expectCode("graphposition that pans every node above the visible canvas fails", mutateResource(validDef, (def) => {
+    def.graphposition = structuredClone(OFFSCREEN_VIEWPORT_FIXTURE.graphposition);
+    for (const shape of def.childshapes) {
+      if (shape?.stencil?.id === "SequenceFlow") continue;
+      shape.position.y = Math.min(shape.position.y, 40);
+      shape.bounds.upperLeft.y = shape.position.y;
+      shape.bounds.lowerRight.y = shape.position.y + (shape.stencil.id.endsWith("Event") ? 36 : shape.stencil.id.endsWith("Gateway") ? 46 : 86);
+    }
+  }), OFFSCREEN_VIEWPORT_FIXTURE.expectedError);
+  cases.push({ case: "fail: initial Designer viewport places all workflow nodes above the visible canvas", status: "pass" });
 
   expectCode("QueryData undeclared result variable fails", mutateResource(validDef, (def) => {
     const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");

@@ -11,6 +11,8 @@ Planning placeholders are absence decisions, never resource names. Before alloca
 
 When a full application includes Approval workflows, use the same shared workflow graph generation path as standalone `.ywf` output and apply `docs/standards/approval-workflow-designer-editability-standard.md`. Do not materialize position-only nodes, undeclared QueryData outputs, empty ContentList field mappings, or Update/Edit actions with add semantics. The generated-final package is not signing-ready until `scripts/validate-approval-workflow-publish-readiness.mjs` passes for every embedded Approval DefResource.
 
+Workflow initial viewport rule: `graphposition.x/y` are Designer viewport translations, not node-bounds origins. Full-app materialization must use the shared Designer-shape utility so the transformed topmost/leftmost workflow nodes open inside the visible canvas; block `APPROVAL_WORKFLOW_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN` before signing.
+
 Before encoding any standalone or packaged Approval workflow, normalize every graph reference to canonical matching `id` + lowercase `resourceid`. This applies to SequenceFlow source/target/incoming/outgoing and each node incoming/outgoing reference. Do not preserve or generate camel-case `resourceId` aliases, and never treat a graph reconstructed indirectly from neighboring refs as Designer-ready.
 
 ## Functional Specification And App Plan Stage Gates

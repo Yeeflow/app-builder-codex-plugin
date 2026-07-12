@@ -105,6 +105,7 @@ yeeflow-data-list-generator/
 !docs/reference/public-form-field-layout-templates.json
 !docs/reference/data-list-form-sublist-campaign-export-reference.json
 !docs/reference/sublist-summary-binding-golden-reference.json
+!docs/reference/approval-workflow-initial-viewport-offscreen.invalid.fixture.json
 !docs/reference/public-form-fields-1col.template.json
 !docs/reference/document-library-native-field-runtime-metadata.normalized.json
 !docs/reference/service-portal-yapk-example.normalized.json

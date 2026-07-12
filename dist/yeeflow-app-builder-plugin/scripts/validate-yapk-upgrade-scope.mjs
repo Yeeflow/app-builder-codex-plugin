@@ -153,18 +153,54 @@ function validateUnrelatedCollections(previous, next, rules, findings) {
   }
   const previousNavigation = stableJson(previous?.ListSet?.LayoutView || previous?.Navigation || null);
   const nextNavigation = stableJson(next?.ListSet?.LayoutView || next?.Navigation || null);
-  if (previousNavigation !== nextNavigation && !rules.allowedChangeTypes.has("navigation")) {
+  const reportOmissionNavigationOnly = isInstalledFormNewReportsOmission(previous, next, rules)
+    && navigationMatchesAfterOmittedFormReports(previous, next);
+  if (previousNavigation !== nextNavigation && !rules.allowedChangeTypes.has("navigation") && !reportOmissionNavigationOnly) {
     findings.push(finding("error", "UPGRADE_NAVIGATION_MUTATION_OUTSIDE_SCOPE", "Navigation changed outside declared upgrade scope."));
   }
 }
 
 function isInstalledFormNewReportsOmission(previous, next, rules) {
-  const isDashboardUpgrade = rules.upgradeType === "dashboard" || rules.upgradeType === "dashboard-only" || rules.allowedChangeTypes.has("dashboard");
-  if (!isDashboardUpgrade) return false;
   if (rules.allowedChangeTypes.has("report") || rules.allowedChangeTypes.has("formnewreports")) return false;
   const previousReports = asArray(previous?.FormNewReports);
   const nextReports = asArray(next?.FormNewReports);
   return previousReports.length > 0 && nextReports.length === 0;
+}
+
+function navigationMatchesAfterOmittedFormReports(previous, next) {
+  const reports = asArray(previous?.FormNewReports);
+  const reportIds = new Set(reports.flatMap((report) => [report?.ID, report?.ReportID, report?.LayoutID]).map(scalar).filter(Boolean));
+  const reportTitles = new Set(reports.flatMap((report) => [report?.Title, report?.Name, report?.ReportName]).map((value) => scalar(value).toLowerCase()).filter(Boolean));
+  const previousNavigation = previous?.ListSet?.LayoutView || previous?.Navigation || null;
+  const nextNavigation = next?.ListSet?.LayoutView || next?.Navigation || null;
+  return stableJson(stripOmittedReportNavigation(previousNavigation, reportIds, reportTitles)) === stableJson(parseNavigation(nextNavigation));
+}
+
+function stripOmittedReportNavigation(value, reportIds, reportTitles) {
+  const parsed = parseNavigation(value);
+  return stripNavigationNode(parsed, reportIds, reportTitles);
+}
+
+function parseNavigation(value) {
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+function stripNavigationNode(value, reportIds, reportTitles) {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripNavigationNode(item, reportIds, reportTitles)).filter((item) => item !== undefined);
+  }
+  if (!isObject(value)) return value;
+  const ids = [value.ID, value.Id, value.id, value.ListID, value.LayoutID, value.ReportID, value.RefId, value.RefID].map(scalar).filter(Boolean);
+  const titles = [value.Title, value.title, value.Name, value.name, value.Text, value.text, value.Label, value.label].map((item) => scalar(item).toLowerCase()).filter(Boolean);
+  const type = scalar(value.Type ?? value.type ?? value.ResourceType ?? value.resourceType).toLowerCase();
+  const matchesReport = ids.some((id) => reportIds.has(id)) || titles.some((title) => reportTitles.has(title));
+  if (matchesReport && (type === "32" || type.includes("report") || ids.some((id) => reportIds.has(id)))) return undefined;
+  return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, stripNavigationNode(child, reportIds, reportTitles)]).filter(([, child]) => child !== undefined));
 }
 
 function validateApprovalDefResourceScope(previous, next, rules, findings) {
