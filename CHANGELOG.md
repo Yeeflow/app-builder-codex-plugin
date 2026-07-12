@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.59
+
+- Align upgrade-scope Approval validation with generated-export validation so only `MultiAssignmentTask` / `CandidateTask` require assignee and task-page metadata; `SetVariableTask` remains a system action.
+- Resolve human-task Approved/Rejected routes through referenced SequenceFlows and recognize nested UUID-ID `Main > Content` Approval page shells through semantic labels.
+- Regenerate missing or numeric focused-upgrade wrapper PackageId metadata as UUID and clear stale signatures while preserving decoded application identity through ID-lineage validation.
+
 ## 0.9.58
 
 - Classify Approval workflow human tasks by exact stencil so `SetVariableTask` no longer receives false assignee or task-page requirements while real `MultiAssignmentTask` / `CandidateTask` nodes remain protected.
