@@ -738,13 +738,8 @@ function validateSetVariableTask(issues, shape, pointer, options) {
             detail: exprIssue.detail,
           });
         }
-        const text = JSON.stringify(setting.value);
-        if (text.includes("\"exprType\":\"list_field\"")) {
-          issue(issues, "warning", "SET_VARIABLE_LIST_FIELD_VALUE_RUNTIME_UNPROVEN", "Set variable value uses a data-list field expression. Preserve this right-side expression shape and runtime-test before claiming variable mutation.", {
-            path: `${itemPath}.value`,
-            nodeId: shapeId(shape),
-          });
-        }
+        // Data List Workflow exports prove current-list fields as Set Variable RHS expressions.
+        // Host-field resolution remains the generated-final package validator's responsibility.
       }
     }
   });

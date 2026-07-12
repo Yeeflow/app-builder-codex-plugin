@@ -21,6 +21,7 @@ const {
   validateWorkflowAssigneeExpression,
 } = require("./scripts/lib/workflow-assignee-expression-utils.cjs");
 const { validateDataViewFixedFilters } = require("./scripts/lib/data-list-view-filter-utils.cjs");
+const { validateFormActionSetVariableStep, variableAliases } = require("./scripts/lib/set-variable-contract-utils.cjs");
 const {
   PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES,
   PUBLIC_FORM_ALLOWED_VISUAL_CONTROL_TYPES,
@@ -310,7 +311,7 @@ function taskNodeLabel(type) {
 function isDefaultWorkflowActionName(value) {
   const text = safeString(value).trim();
   if (!text) return true;
-  return /^(assignment\s*task|candidate\s*task|claim\s*task|content\s*list|inclusive\s*gateway|gateway|task|workflow\s*task(?:\s*\d+)?|sequence\s*flow(?:[_\s-]*\d+)?)$/i.test(text);
+  return /^(assignment\s*task|candidate\s*task|claim\s*task|content\s*list|set\s*variable(?:[_\s-]*\d+)?|set\s*data\s*list(?:[_\s-]*\d+)?|query\s*data(?:[_\s-]*\d+)?|inclusive\s*gateway|gateway|task|workflow\s*task(?:\s*\d+)?|sequence\s*flow(?:[_\s-]*\d+)?)$/i.test(text);
 }
 
 function isDefaultWorkflowConnectorDescription(value) {
@@ -2470,6 +2471,12 @@ function validateDashboardCollectionControls(page, title, layoutId, listsById, f
       }
     }
     if (stepType === "setvar") {
+      for (const finding of validateFormActionSetVariableStep(step, {
+        host: "dashboard",
+        declaredTempVariables: asArray(page && page.tempVars),
+      })) {
+        issue(report, severity, finding.code, finding.message, { title, layoutId, pointer: stepPath, ...finding });
+      }
       const entries = attrs.setvar_multi === true ? asArray(attrs.setvar_array) : [{ var: attrs.setvar_var, value: attrs.setvar_val }];
       entries.forEach((entry, index) => {
         const target = entry && entry.var;
@@ -3775,6 +3782,15 @@ function validateCustomFormActions(form, fieldsByName, pathPrefix, report, title
         if (safeString(attrs.printtype) && safeString(attrs.printtype) !== "select") issue(report, "warning", "CUSTOM_FORM_PRINT_ACTION_PRINTTYPE_UNSTUDIED", "The studied Print page action uses attrs.printtype = \"select\".", { title, actionName: action.name || null, stepIndex, printtype: attrs.printtype });
         if (!asArray(attrs.listdataid).length) issue(report, report.mode === "generator" ? "error" : "warning", "CUSTOM_FORM_PRINT_ACTION_LISTDATAID_MISSING", "Print page action should pass current record context through attrs.listdataid.", { title, actionName: action.name || null, stepIndex });
       }
+      if (safeString(step && step.type) === "setvar") {
+        for (const finding of validateFormActionSetVariableStep(step, {
+          host: "data-list-form",
+          declaredTempVariables: asArray(form.tempVars),
+          declaredListFields: [...fieldsByName.keys()],
+        })) {
+          issue(report, report.mode === "generator" ? "error" : "warning", finding.code, finding.message, { title, actionName: action.name || null, stepIndex, ...finding });
+        }
+      }
       const refs = collectCustomFormActionRefs(step);
       refs.fields.forEach((fieldRef) => {
         if (!fieldsByName.has(fieldRef) && !KNOWN_SYSTEM_FIELDS.has(fieldRef)) issue(report, report.mode === "generator" ? "error" : "warning", "CUSTOM_FORM_ACTION_FIELD_REF_NOT_FOUND", "Custom form action references an unknown list field.", { title, actionName: action.name || null, fieldRef });
@@ -4056,8 +4072,9 @@ function validateForms(data, listsById, fieldsByList, replaceIds, localIds, repo
     if (def.defkey && key && String(def.defkey) !== key) issue(report, "warning", "FORM_DEFKEY_MISMATCH", "Form Key and decoded Def defkey differ.", { form: formName, key, defkey: def.defkey });
     validateWorkflowDesignerCompatibility(form, def, report);
     if (scheduledLike) validateScheduledWorkflow(form, def, report);
-    else validateListWorkflowRegistration(form, listsById, fieldsByList, report);
+    else validateListWorkflowRegistration(form, def, listsById, fieldsByList, report);
     if (approvalLike) validateApprovalDef(def, form, report, listsById, fieldsByList);
+    if (approvalLike) validateApprovalFormSetVariableActions(def, form, report);
     validateFormLookupControls(def, form, listsById, fieldsByList, report);
     validateWorkflowGraph(def, form, report);
     validateWorkflowActionConfigurations(def, form, report);
@@ -4066,6 +4083,64 @@ function validateForms(data, listsById, fieldsByList, replaceIds, localIds, repo
     if (Object.prototype.hasOwnProperty.call(nodeTypes, "HttpRequest")) issue(report, "dependency", "HTTP_REQUEST_NODE_PRESENT", "HTTP request node present; external connection/credential dependency must be resolved.", { form: formName, key });
     if (Object.prototype.hasOwnProperty.call(nodeTypes, "GenerateDocument")) issue(report, "dependency", "GENERATE_DOCUMENT_NODE_PRESENT", "Document generation node present; template/library dependencies must be resolved.", { form: formName, key });
   });
+}
+
+function validateApprovalFormSetVariableActions(def, form, report) {
+  const severity = generatorFinalSeverity(report);
+  const workflowVariables = Array.isArray(def && def.variables)
+    ? def.variables
+    : Object.values(def && def.variables || {}).flatMap(asArray);
+  for (const [pageIndex, page] of asArray(def && def.pageurls).entries()) {
+    const formdef = typeof page?.formdef === "string" ? tryParseJson(page.formdef) : page?.formdef;
+    if (!formdef) continue;
+    const declarations = [...workflowVariables, ...asArray(formdef.tempVars)];
+    const declarationAliases = new Set(declarations.flatMap(variableAliases));
+    const actionIds = new Set(asArray(formdef.actions).map((action) => safeString(action && action.id)).filter(Boolean));
+    for (const [actionIndex, action] of asArray(formdef.actions).entries()) {
+      for (const [stepIndex, step] of asArray(action && action.steps).entries()) {
+        if (safeString(step && step.type) === "otheraction") {
+          const target = safeString(step && step.attrs && step.attrs.control_action);
+          if (!target || !actionIds.has(target)) {
+            issue(report, severity, "APPROVAL_FORM_START_ANOTHER_ACTION_UNRESOLVED", "Approval Form Start another action must resolve to another action on the same page.", { form: safeString(form && form.Name), pageIndex, actionIndex, stepIndex, target });
+          }
+        }
+        if (safeString(step && step.type) !== "setvar") continue;
+        for (const finding of validateFormActionSetVariableStep(step, {
+          host: "approval",
+          declaredTempVariables: declarations,
+        })) {
+          issue(report, severity, finding.code, finding.message, {
+            form: safeString(form && form.Name),
+            page: safeString(page && (page.title || page.name)),
+            path: `DefResource.pageurls[${pageIndex}].formdef.actions[${actionIndex}].steps[${stepIndex}]`,
+            ...finding,
+          });
+        }
+      }
+    }
+    for (const [hook, actionId] of Object.entries(formdef.formAction || {})) {
+      if (actionId && !actionIds.has(String(actionId))) {
+        issue(report, severity, "APPROVAL_FORM_SETVAR_ACTION_HOOK_UNRESOLVED", "Approval Form action hook must resolve to a page action id.", { form: safeString(form && form.Name), pageIndex, hook, actionId });
+      }
+    }
+    asArray(formdef.children).forEach((child, childIndex) => walkControls(child, (control, pointer) => {
+      const eventAction = safeString(control && control.attrs && control.attrs.control_event_rule);
+      if (eventAction && !actionIds.has(eventAction)) {
+        issue(report, severity, "APPROVAL_FORM_FIELD_CHANGE_ACTION_UNRESOLVED", "Approval Form field-change control_event_rule must resolve to a page action id.", { form: safeString(form && form.Name), pageIndex, controlId: safeString(control && control.id), actionId: eventAction, path: `formdef.children[${childIndex}]${pointer.slice(1)}` });
+      }
+      for (const [ruleIndex, rule] of asArray(control && control.attrs && control.attrs.control_display).entries()) {
+        if (safeString(rule && rule.controlId) && safeString(rule.controlId) !== safeString(control.id)) {
+          issue(report, severity, "APPROVAL_DYNAMIC_DISPLAY_CONTROL_ID_MISMATCH", "Approval Form Dynamic Display rule controlId must reference its containing control.", { form: safeString(form && form.Name), pageIndex, controlId: safeString(control && control.id), ruleControlId: safeString(rule && rule.controlId), ruleIndex });
+        }
+        for (const token of asArray(rule && rule.formulas)) {
+          if (!isObject(token) || token.exprType !== "variable") continue;
+          if (!variableAliases(token).some((alias) => declarationAliases.has(alias))) {
+            issue(report, severity, "APPROVAL_DYNAMIC_DISPLAY_VARIABLE_UNDECLARED", "Approval Form Dynamic Display variable must be declared as a workflow/form variable or page temp variable.", { form: safeString(form && form.Name), pageIndex, controlId: safeString(control && control.id), variableId: safeString(token.id), ruleIndex });
+          }
+        }
+      }
+    }));
+  }
 }
 
 function validateWorkflowDesignerCompatibility(form, def, report) {
@@ -4129,7 +4204,7 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
       }
       validateWorkflowOutcomeConditionShape(shape, report, { form: formName, key, index });
       validateSequenceFlowConditionVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.conditioninfo` });
-    } else if (["MultiAssignmentTask", "CandidateTask", "ContentList", "ExclusiveGateway", "InclusiveGateway", "QueryData"].includes(type)) {
+    } else if (["MultiAssignmentTask", "CandidateTask", "ContentList", "ExclusiveGateway", "InclusiveGateway", "QueryData", "SetVariableTask"].includes(type)) {
       const actionName = safeString(shape.properties && (shape.properties.name || shape.properties.title || shape.properties.label)).trim();
       if (!actionName) {
         issue(report, severity, "WORKFLOW_ACTION_NAME_MISSING", "Workflow action nodes must have a concise business-specific Action name.", { form: formName, key, index, type });
@@ -4141,8 +4216,9 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
       if (type === "MultiAssignmentTask" || type === "CandidateTask") {
         validateTaskAssignmentVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.usertaskassignment` });
       }
-    } else if (type === "SetVariableTask") {
-      validateSetVariableTaskTargets(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.variablesetting` });
+      if (type === "SetVariableTask") {
+        validateSetVariableTaskTargets(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.variablesetting` });
+      }
     } else if (!isObject(shape.position)) {
       issue(report, severity, "WORKFLOW_NODE_POSITION_MISSING", "Workflow designer expects non-sequence workflow nodes to include position metadata.", { form: formName, key, index, type });
     }
@@ -4301,6 +4377,15 @@ function validateSetVariableTaskTargets(shape, workflowVariables, report, contex
         variableIdx: idx,
         declaredIdx: declared.idx,
       });
+    } else if (declared && safeString(setting && setting.type) && declared.type && safeString(setting.type) !== declared.type) {
+      issue(report, generatorFinalSeverity(report), "SETVARIABLE_TARGET_TYPE_MISMATCH", "SetVariableTask target type must match the declared workflow variable type.", {
+        ...context,
+        path: `${context.path}[${settingIndex}].type`,
+        node: safeString(shape && shape.properties && shape.properties.name) || shapeId(shape),
+        variableId: id,
+        targetType: safeString(setting.type),
+        declaredType: declared.type,
+      });
     }
   });
 }
@@ -4321,7 +4406,7 @@ function validateTaskAssignmentVariables(shape, workflowVariables, report, conte
   });
 }
 
-function validateListWorkflowRegistration(form, listsById, fieldsByList, report) {
+function validateListWorkflowRegistration(form, def, listsById, fieldsByList, report) {
   const workflowType = safeString(form.WorkflowType);
   if (workflowType !== "1") return;
   const formName = safeString(form.Name);
@@ -4366,6 +4451,28 @@ function validateListWorkflowRegistration(form, listsById, fieldsByList, report)
         fieldName,
         fieldType: normalizeType(field),
       });
+    }
+  }
+  const hostFields = fieldsByList.get(listId) || new Map();
+  for (const [shapeIndex, shape] of collectShapes(def).entries()) {
+    if (shapeType(shape) === "SetVariableTask") {
+      for (const [settingIndex, setting] of asArray(shape && shape.properties && shape.properties.variablesetting).entries()) {
+        walk(setting && setting.value, (node, pointer) => {
+          if (!isObject(node) || node.exprType !== "list_field") return;
+          const field = safeString(node.id || node.prop);
+          if (field && !hostFields.has(field) && !KNOWN_SYSTEM_FIELDS.has(field)) {
+            issue(report, generatorFinalSeverity(report), "DATALIST_WORKFLOW_SETVARIABLE_RHS_FIELD_UNRESOLVED", "Data List Workflow Set Variable may read only fields from its current host list on the RHS.", { form: formName, key, shapeIndex, settingIndex, field, path: pointer });
+          }
+        });
+      }
+    }
+    if (shapeType(shape) === "ContentList" && safeString(shape && shape.properties && shape.properties.listtype) === "current") {
+      for (const [mappingIndex, mapping] of asArray(shape.properties.listdatas).entries()) {
+        const field = safeString(mapping && (mapping.Columns || mapping.FieldName));
+        if (field && !hostFields.has(field) && !KNOWN_SYSTEM_FIELDS.has(field)) {
+          issue(report, generatorFinalSeverity(report), "DATALIST_WORKFLOW_CURRENT_LIST_FIELD_UNRESOLVED", "Set Data List current-list mapping target must resolve to a field on the workflow host list.", { form: formName, key, shapeIndex, mappingIndex, field });
+        }
+      }
     }
   }
 }

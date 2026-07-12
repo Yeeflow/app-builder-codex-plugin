@@ -169,6 +169,8 @@ Submission form rules:
 
 When an Assignment Task uses a direct Job Position assignee, add or include Job Position proof columns before generation: `Required Job Position`, `Job Position ID`, `Job Position Source`, `Job Position Proof Status`, `Job Position OAuth Status`, `OAuth Refresh Status`, `Job Position Lookup Status`, `Job Position Lookup Attempted`, `Job Position Create Attempt Count`, `Job Position Create Response ID Recorded`, `Job Position Duplicate Scan`, `Job Position Creation Confirmed`, and `Job Position Admin Confirmed`. API-assisted Job Position routing is not generation-ready if OAuth refresh/lookup proof is missing.
 
+When `Node Type = SetVariableTask`, add a `Set Variable Assignments` column using `VariableId :: variableType :: Business Name :: JSON expression token array`, separated by `;;` for multiple assignments. Exact assignments are mandatory; never use an empty/default placeholder.
+
 Workflow rules:
 
 - Node types must come from the active plugin workflow-node knowledge base.
@@ -229,6 +231,26 @@ Approval form field-layout rules:
 | Action Name | Step Name | Host Resource | Host Form | Host Surface / Page | Trigger | Exact Step Type | Query Mode | Source Resource Type | Source Resource | Filters | Sorts | Result Target Type | Result Target | Field Mapping | Count Target Type | Count Target | Page Size | Page Number | Persistence / Lifetime | Bound Control | Result Consumer / Use | Proof Boundary | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Action> | <Step> | <Approval form / Data List / Dashboard name> | <Submission / Task / Print / Custom form / Dashboard page> | Approval Submission / Task / Print / Data List New / Edit / View / Dashboard | Page Load / Field Change / Submission / Button | Query Data / Set variable / Confirm / Submit / other proven type | single_to_variables / single_to_temp_variables / single_to_list_fields / single_to_list_fields_and_temp_variables / multiple_to_sublist / multiple_to_list_sublist / multiple_to_temp_collection / multiple_count_only / N/A | Data List / Document Library / Form Report / Data Report / N/A | <Resource> | <Field/operator/value or None> | <Field asc/desc or None> | Workflow variables / Temp variables / Current Data List fields / Current fields + Temp variables / Approval Sub list / Current record Sub list / Temp collection / None | <Target id/name or None> | <Source field -> target id; ... or None> | Workflow number / Temp variable / None | <Target id/name or None> | 100 default / 1..1000 | 1 default / positive integer | Persisted instance / Current page session / N/A | <Control or trigger> | Text / calculation / Custom Code / persisted field / editable Sub list / None | export-proven / runtime-proven / focused-proof-required | <Notes and business rationale> |
+
+Set Variable rows must additionally state in `Notes and business rationale`: exact target kind and ID, RHS fixed value or expression, optional condition, `continue` behavior, and the Dynamic Display/field/control consumer. Follow `docs/standards/set-variable-golden-reference-standard.md`.
+
+##### Form Action Set Variable Planning
+
+Required whenever a Form Action contains `Set variable` or `Start another action`. One row represents one assignment. Repeat `Action Name` and `Step Order` to build a multi-variable step.
+
+| Host Resource | Host Form / Page | Host Type | Action Name | Step Order | Step Name | Trigger | Bound Control / Field | Target Kind | Target ID | Target Value Type | RHS Expression Tokens | Condition Tokens | Continue | Start Another Action Target | Result Consumer / Use | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Resource> | <Submission form / Task form / Custom form / Dashboard> | Approval / Data List Form / Dashboard | <Business action name> | 1 | <Business step name> | Page Load / Field Change / Button Click / Container Click / None | <Control binding, nv_label, or None> | Workflow variable / Temp variable / Current list field / None | <Exact target ID or None> | <Exact Yeeflow value type or N/A> | <JSON expression token array or N/A> | <JSON expression token array or None> | true / false | <Action name or None> | <Dynamic Display, readonly derived field, persisted field, or other consumer> | export-proven / validator-backed / runtime-proof-required |
+
+Rules:
+
+- `RHS Expression Tokens` must be a JSON array. Do not replace `currentUser`, `getUserAttr`, `getOrgAttr`, `isInGroup`, or nested expressions with prose.
+- `Temp variable` targets are declared on the same page and serialized with the `__temp_` runtime prefix. Approval workflow-variable targets keep their exact workflow variable ID.
+- `Current list field` is allowed only on a Data List custom form. Dashboard and Approval Form Actions cannot target Data List fields.
+- `Page Load` binds through `formAction.onLoad`; `Field Change` binds through the source control's `attrs.control_event_rule`; button/container triggers bind through `attrs.control_action`.
+- `Start Another Action Target` must resolve to another action on the same page. Use it to chain derived-value actions such as Requester -> Department/Department name.
+- Approval field rows that consume Set Variable output must set `Read Only = Yes` for derived display values. When generated Dynamic Display behavior is required, the field row's `Dynamic Display` cell must contain an exact JSON rule array; generation rewrites every rule `controlId` to the containing control ID and rejects undeclared variable references.
+- Data List Workflow `SetVariableTask` cannot update the current record. Use a `ContentList` / Set Data List node with `listtype = "current"` for current-item field writes.
 
 Query Data planning rules:
 
@@ -316,6 +338,7 @@ Rules:
 - State where the action is triggered.
 - Temp variables are frontend-only.
 - Query data and Set data list actions must identify target application/list/fields.
+- Data List Workflow Set Variable rows must target declared workflow variables only. A current-list field may appear only in the RHS expression. Plan current-record field mutation as Set Data List / `ContentList` with `Current list`, exact field mappings, and business values.
 - If a form includes a Sub List, explicitly state whether custom List actions are required.
 - If custom Sub List actions are required, list each action and its steps.
 - Supported list action types must come from plugin-known/export-proven Sub List action shapes, such as add item, duplicate item, delete item, import items, move up/down, insert before/after, or supported custom action patterns.

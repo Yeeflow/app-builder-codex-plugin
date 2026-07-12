@@ -5,6 +5,7 @@ import path from "node:path";
 import { validateFormActionQueryDataPlan } from "./validate-form-action-query-data-plan.mjs";
 import { validateWorkflowQueryDataPlan } from "./validate-workflow-query-data-plan.mjs";
 import { validateWorkflowLoopPlan } from "./validate-workflow-loop-plan.mjs";
+import { validateSetVariablePlan } from "./validate-set-variable-plan.mjs";
 
 const AREAS = [
   { key: "dataLists", title: "Data Lists and Document Libraries Plan", code: "GENERATION_READINESS_AREA_EMPTY", required: /data list|document library|not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required/i, extra: validateDataLists },
@@ -478,6 +479,11 @@ function validate(file) {
   for (const finding of validateControlActionPropertyGates(text, sections)) findings.push(finding);
   for (const finding of validateAmbiguousImplementationWording(text, sections)) findings.push(finding);
 
+  const setVariablePlan = validateSetVariablePlan(text);
+  for (const finding of setVariablePlan.findings) {
+    findings.push({ level: "error", area: "Set Variable Planning", ...finding });
+  }
+
   const queryDataPlan = validateFormActionQueryDataPlan(text);
   const hasFormActionQueryDataIntent = queryDataPlan.queryDataRows > 0 || text.split(/\r?\n/).some((line) =>
     /\bQuery\s*Data\b/i.test(line)
@@ -570,6 +576,12 @@ function validate(file) {
       detectedIntent: hasWorkflowLoopIntent,
       loopRows: workflowLoopPlan.loopRows,
       status: workflowLoopPlan.status,
+    },
+    setVariablePlan: {
+      validatorRan: true,
+      formActionRows: setVariablePlan.formActionRows,
+      workflowRows: setVariablePlan.workflowRows,
+      status: setVariablePlan.status,
     },
     proofBoundary: "Generation readiness review checks planning completeness only; it does not prove package generation, schema validity, signing, API acceptance, or runtime behavior.",
   };

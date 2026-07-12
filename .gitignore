@@ -103,6 +103,8 @@ yeeflow-data-list-generator/
 !yeeflow-expression-functions.normalized.json
 !yeeflow-expression-function-knowledge-base.normalized.json
 !docs/reference/public-form-field-layout-templates.json
+!docs/reference/set-variable-cross-surface.normalized.json
+!dist/yeeflow-app-builder-plugin/docs/reference/set-variable-cross-surface.normalized.json
 !docs/reference/data-list-form-sublist-campaign-export-reference.json
 !docs/reference/sublist-summary-binding-golden-reference.json
 !docs/reference/approval-workflow-initial-viewport-offscreen.invalid.fixture.json

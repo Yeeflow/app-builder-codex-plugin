@@ -1,0 +1,70 @@
+{
+  "proof": "export-proven-redacted",
+  "sources": [
+    "Business Travel Request-v1.1.yapk",
+    "Business Travel Request-v1.2.yapk"
+  ],
+  "dashboard": {
+    "allowedTargets": ["declared temp variable"],
+    "triggers": ["page load", "button or container click", "collection action"],
+    "modes": ["single", "multiple"]
+  },
+  "dataListForm": {
+    "allowedTargets": ["declared temp variable", "current list field"],
+    "features": ["single", "multiple", "condition", "continue", "dynamic display consumer"]
+  },
+  "approvalForm": {
+    "allowedTargets": ["declared workflow variable", "declared page temp variable"],
+    "triggers": ["page load", "field change", "start another action"],
+    "derivedValues": ["current user", "requester department", "department name", "group membership"],
+    "pageLoadBinding": { "formAction": { "onLoad": "<action-id>" } },
+    "fieldChangeBinding": { "attrs": { "control_event_rule": "<action-id>" } },
+    "startAnotherActionStep": { "type": "otheraction", "attrs": { "control_action": "<action-id>" } },
+    "singleSetVariableStep": {
+      "type": "setvar",
+      "attrs": {
+        "setvar_var": { "exprType": "variable", "valueType": "user", "id": "Requester", "type": "expr" },
+        "setvar_val": [{ "type": "func", "func": "currentUser", "params": [] }]
+      }
+    },
+    "multipleSetVariableStep": {
+      "type": "setvar",
+      "attrs": {
+        "setvar_multi": true,
+        "setvar_array": [
+          {
+            "var": { "exprType": "variable", "valueType": "groupselect", "id": "Department", "type": "expr" },
+            "value": [{ "type": "func", "func": "getUserAttr", "params": ["<Requester expression>", { "key": "DepartmentID", "label": "Department" }, []] }]
+          },
+          {
+            "var": { "exprType": "variable", "valueType": "text", "id": "DepartmentName", "type": "expr" },
+            "value": [{ "type": "func", "func": "getOrgAttr", "params": ["<Department expression>", { "key": "Name", "label": "Name" }, []] }]
+          }
+        ]
+      }
+    },
+    "dynamicDisplay": "producer declaration and consumer must share the same variable id; rule controlId must equal host control id"
+  },
+  "workflow": {
+    "hosts": ["approval", "data list", "scheduled"],
+    "stencil": "SetVariableTask",
+    "assignmentContainer": "properties.variablesetting[]",
+    "singleMultipleDiscriminator": "array length",
+    "dataListWorkflowBoundary": {
+      "setVariableTarget": "declared workflow variable only",
+      "listFieldUsage": "RHS read only",
+      "currentItemFieldWrite": "ContentList with listtype current",
+      "currentItemWriteShape": {
+        "stencil": { "id": "ContentList" },
+        "properties": {
+          "listtype": "current",
+          "listdatas": [{ "Columns": "<current-list-field>", "Per": "0", "Data": "<expression-token-array>" }]
+        }
+      }
+    }
+  },
+  "negativeEvidence": {
+    "copiedDynamicDisplayControlId": "Do not copy a sibling controlId; generated rules must self-reference their containing control.",
+    "setVariableFieldMutationInDataListWorkflow": "Forbidden; use Set Data List with Current list."
+  }
+}

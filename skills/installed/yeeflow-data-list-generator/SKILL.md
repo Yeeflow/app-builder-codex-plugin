@@ -5,6 +5,14 @@ description: generate, inspect, validate, package, debug, and improve yeeflow da
 
 # Yeeflow Data List Generator
 
+## Data List Form Set Variable
+
+Use `docs/standards/set-variable-golden-reference-standard.md`. A custom Data List Form `setvar` step may target a declared page temp variable or a real current-list field. Preserve expression-array conditions and boolean `continue` semantics for ordered alternative steps. When a temp variable controls Dynamic Display or read-only state, declaration, producer target, and consumer expression must resolve to the same ID.
+
+Data List Workflow is different: `SetVariableTask` targets declared workflow variables only. Current-list fields are export-proven on the RHS, but field mutation must use Set Data List / `ContentList`. For the current item, serialize `listtype = "current"` and validate every `listdatas[]` target against the host list. Never materialize a planned Data List field write as a Set Variable target.
+
+Custom Data List Form Set Variable actions must materialize from `Form Action Set Variable Planning` through the shared page-action helper. Data List Workflow node shapes are export-proven and validator-backed, but full-app WorkflowType 1 generation remains an explicit blocker until the host workflow envelope and FlowMappings registration are implemented.
+
 ## Generated-Final YAPK ID And Navigation Hard Gates
 
 Generated-final `.yapk` output must use API-issued numeric content IDs from `GET /utils/generate/ids?count=<n>` and must emit a redacted `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`, path-to-purpose mappings, duplicate checks, unused-ID accounting, generator provenance metadata, and no non-API IDs. Local ID generation, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds are forbidden for generated-final `.yapk`. Runtime navigation groups must include API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; children must include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`, with data lists as `Type: 1` and `ListID = Childs[].List.ListID`. Run `scripts/validate-yapk-id-provenance.mjs` and `scripts/validate-yapk-navigation-runtime-metadata.mjs`; stop before signing, install, upgrade-check, or handoff if either gate fails. `setsign`/`verifysign` and install acceptance do not prove ID provenance or navigation runtime metadata completeness.
