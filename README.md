@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.59`
+- Version: `0.9.60`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.59` completes Set Variable upgrade preflight hardening across upgrade scope validation, SequenceFlow route resolution, nested Approval page shells, and UUID wrapper PackageId materialization.
+Current release `0.9.60` hardens schema-authoritative Approval controls and Dashboard Collection schema/dependency closure, including namespaced operation variables and unplanned Workbench template-residue cleanup.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.59
+Version: 0.9.60
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.59
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.60
 ```
 
 ## What Is Included

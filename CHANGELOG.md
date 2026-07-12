@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.60
+
+- Make Approval Form control materialization schema-authoritative so Text variables whose names contain `Status`, `Category`, `Type`, or `Priority` cannot silently become Radio/Select controls.
+- Recursively remap or remove source-template `__ctx_coll` bindings after Dashboard Collection cloning and preserve target-schema-safe Grid/progress contracts.
+- Close namespaced Delete/multiselect temp-variable dependencies, remove unplanned Workbench KPI residue, and require full page-scope dependency closure before signing readiness.
+
 ## 0.9.59
 
 - Align upgrade-scope Approval validation with generated-export validation so only `MultiAssignmentTask` / `CandidateTask` require assignee and task-page metadata; `SetVariableTask` remains a system action.
