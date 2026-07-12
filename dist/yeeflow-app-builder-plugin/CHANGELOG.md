@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.52
+
+- Normalize planning-only no-resource labels before ID allocation and full-app materialization, including punctuation variants such as `Not applicable.`.
+- Prevent `Not applicable`, `Not planned`, `N/A`, `None`, and explicit no-resource decisions from becoming Pages, reports, workflows, child resources, or navigation identities.
+- Add `validate-planning-placeholder-materialization.mjs` to first-generation YAPK preflight with the signing-blocking `PLANNING_PLACEHOLDER_MATERIALIZED_AS_RESOURCE` finding.
+- Add source/dist regressions based on the Query Data Runtime Baseline 0.9.51 incident while preserving legitimate names such as `Not Applicable Cases`.
+
 ## 0.9.51
 
 - Add export-proven Workflow Query Data modes for Approval, Data List, and Scheduled workflows, including count-only, single-variable, List/Complex Type, and text-result contracts.
