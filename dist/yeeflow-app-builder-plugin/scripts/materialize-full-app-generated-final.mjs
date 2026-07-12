@@ -14,6 +14,7 @@ import {
   withApprovalWorkflowDesignerBounds,
 } from "./lib/approval-workflow-designer-shape-utils.mjs";
 import { encodeYapkResourceOfficial } from "./lib/yapk-decode-utils.mjs";
+import { cleanPlanningLabel, isPlanningPlaceholder } from "./lib/planning-placeholder-utils.mjs";
 import {
   buildWorkflowQueryDataProperties,
   normalizeWorkflowQueryDataMode,
@@ -3553,13 +3554,13 @@ function unique(values) {
 }
 
 function cleanResourceName(value) {
-  return String(value || "").replace(/`/g, "").replace(/\*\*/g, "").trim();
+  return cleanPlanningLabel(value);
 }
 
 function isNonResourceName(value) {
   const text = cleanResourceName(value);
-  if (!text) return true;
-  if (/^(not applicable|not planned|n\/a|none|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (isPlanningPlaceholder(text)) return true;
+  if (/^(status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
   if (/^no\s+(?:form\s+)?reports?\b/i.test(text)) return true;
   if (/^no custom\b/i.test(text)) return true;
   if (/^(dashboard|dashboard page|dashboard page name|page|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;

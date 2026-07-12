@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
+import { isPlanningPlaceholder } from "./lib/planning-placeholder-utils.mjs";
 
 const DASHBOARD_RECORD_CONTROLS = new Set(["collection", "data-table", "datatable", "kanban", "vertical-timeline", "horizontal-timeline", "timeline"]);
 const DASHBOARD_FILTER_CONTROLS = new Set(["data-filter", "select-filter", "radio-filter", "checkbox-filter", "filter", "search-filter"]);
@@ -919,9 +920,8 @@ function cleanName(value) {
 
 function isPlaceholder(value) {
   const text = cleanName(value);
-  return !text
+  return isPlanningPlaceholder(text)
     || /^x$/i.test(text)
-    || /^(not planned|not applicable|n\/a|none|no|deferred)$/i.test(text)
     || /^no\s+(?:form\s+)?reports?\b/i.test(text)
     || /^(name|dashboard|form|report|workflow|section|filter|metric|list|library|item)$/i.test(text)
     || /^<.*>$/.test(String(value || "").trim());

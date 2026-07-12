@@ -5,6 +5,8 @@ description: build real Yeeflow business applications from requirements, process
 
 # Yeeflow Application Builder
 
+Planning placeholders are absence decisions, never resource names. Before allocating IDs or materializing any optional resource, normalize labels using the planning-placeholder contract. Values such as `Not applicable.`, `Not planned`, `N/A`, `None`, `No Dashboard required`, and `Dashboard not required` must produce no Page, Dashboard, report, workflow, navigation item, provenance entry, or visible resource label. Do not create a shell resource to represent an omitted optional feature. Generated-final YAPK work must pass `scripts/validate-planning-placeholder-materialization.mjs`; `PLANNING_PLACEHOLDER_MATERIALIZED_AS_RESOURCE` blocks signing and install.
+
 ## Approval Workflow Designer Readiness
 
 When a full application includes Approval workflows, use the same shared workflow graph generation path as standalone `.ywf` output and apply `docs/standards/approval-workflow-designer-editability-standard.md`. Do not materialize position-only nodes, undeclared QueryData outputs, empty ContentList field mappings, or Update/Edit actions with add semantics. The generated-final package is not signing-ready until `scripts/validate-approval-workflow-publish-readiness.mjs` passes for every embedded Approval DefResource.
