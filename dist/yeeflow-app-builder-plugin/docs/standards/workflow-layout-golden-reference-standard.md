@@ -63,7 +63,7 @@ It does not prove business behavior, assignment correctness, workflow execution,
 30. Long connector vertical segments must not pass through intermediate workflow node bounds. If the column gap is too narrow or occupied, increase column spacing, choose an adjacent column-gap midpoint, or use a justified external lane.
 31. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap/column-gap midpoint is unsafe, crowded, or too narrow.
 32. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
-33. `graphposition.x/y` are viewport translation offsets, not the model-coordinate node-bounds origin. Compute them with `screen = model * graphzoom + graphposition` so the leftmost/topmost generated node starts inside the visible canvas. Use scaled node-span dimensions for `graphposition.width/height`; never use `minNode - margin` as the translation.
+33. `graphposition` follows the runtime-proven content-boundary contract: `x = minNodeX + 90`, `y = minNodeY + 45`, and `width/height` equal the unscaled node-content span with a `470 x 185` minimum for very small workflows. Do not derive it from browser DOM stage translation. Reject both legacy `minNode - margin` values and the obsolete `safeInset - minNode * graphzoom` formula.
 34. Inclusive Gateway branches must be local fan-out motifs. Branch targets should sit in a nearby branch column, normally about `195px` from the gateway and never as a far-right target that requires long labels or detour connectors.
 35. Normal End nodes with multiple incoming branches must be local merge points beside the incoming source group. Do not place a final End far from the source group and then wrap long completion connectors into it.
 36. Local rejected connectors to a nearby `EndRejectEvent` should not carry explicit vertices. If the rejection endpoint is correctly placed above/below the source group, rounded auto-routing is sufficient.
@@ -286,7 +286,7 @@ The gate must fail generated packages that contain:
 - compressed complex workflow canvas
 - unresolved SequenceFlow endpoints
 - rejected/cross-lane flows without readable routing
-- invalid `graphposition` dimensions or an initial viewport whose transformed node extent is completely offscreen
+- invalid `graphposition` dimensions, content-span mismatch, or origin mismatch against the runtime-proven boundary inset
 - shared End with Rejection nodes collecting sources from different horizontal lanes
 - workflows with more than five vertical rows
 - large workflows compressed into one overly wide horizontal row

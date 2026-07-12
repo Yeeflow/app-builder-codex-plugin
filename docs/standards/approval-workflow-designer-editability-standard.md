@@ -16,9 +16,9 @@ Every non-`SequenceFlow` node must include:
 - numeric `position.x` and `position.y`;
 - `bounds.upperLeft` and `bounds.lowerRight` with positive width and height;
 - `bounds.upperLeft` equal to `position`;
-- a root `graphposition` whose `x/y` are initial viewport translation offsets derived from all node bounds and `graphzoom`, not model-coordinate bounding-box origins.
+- a root `graphposition` whose `x/y` follow the runtime-proven content-boundary inset contract.
 
-For generated workflows, use `screen = model * graphzoom + graphposition`. Place the leftmost/topmost node at safe initial canvas insets (`80px` left and `120px` top by default). `graphposition.width/height` describe scaled content dimensions. Do not write `minNode - margin` into `graphposition.x/y`; that pans negative-coordinate workflows above and left of the visible canvas.
+For generated workflows, use `graphposition.x = minNodeX + 90` and `graphposition.y = minNodeY + 45`. `graphposition.width/height` equal the unscaled node-content span, subject only to the established `470 x 185` minimum for very small workflows. Do not infer saved `graphposition` from the browser DOM stage translation: fresh-tab runtime proof shows those are different coordinate concepts. Both legacy `minNode - margin` values and the obsolete `safeInset - minNode * graphzoom` formula are signing blockers.
 
 Default export-observed sizes used by the shared builder are:
 
@@ -97,7 +97,8 @@ Generated-final blockers include:
 
 - `APPROVAL_WORKFLOW_NODE_BOUNDS_MISSING`
 - `APPROVAL_WORKFLOW_NODE_BOUNDS_POSITION_MISMATCH`
-- `APPROVAL_WORKFLOW_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN`
+- `APPROVAL_WORKFLOW_GRAPHPOSITION_ORIGIN_MISMATCH`
+- `APPROVAL_WORKFLOW_GRAPHPOSITION_CONTENT_SPAN_MISMATCH`
 - `APPROVAL_WORKFLOW_GRAPHPOSITION_DIMENSIONS_INVALID`
 - `APPROVAL_WORKFLOW_SEQUENCEFLOW_SOURCE_ID_MISSING`
 - `APPROVAL_WORKFLOW_SEQUENCEFLOW_SOURCE_IDENTITY_MISMATCH`

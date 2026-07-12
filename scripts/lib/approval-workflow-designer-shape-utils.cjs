@@ -52,51 +52,58 @@ function approvalWorkflowContentBounds(childshapes) {
 }
 
 function approvalWorkflowGraphPosition(childshapes, options = {}) {
-  const zoom = Number.isFinite(Number(options.zoom)) && Number(options.zoom) > 0 ? Number(options.zoom) : 1;
-  const safeLeft = Number.isFinite(Number(options.safeLeft)) ? Number(options.safeLeft) : 80;
-  const safeTop = Number.isFinite(Number(options.safeTop)) ? Number(options.safeTop) : 120;
+  const leftInset = Number.isFinite(Number(options.leftInset)) ? Number(options.leftInset) : 90;
+  const topInset = Number.isFinite(Number(options.topInset)) ? Number(options.topInset) : 45;
   const minimumWidth = Number.isFinite(Number(options.minimumWidth)) ? Number(options.minimumWidth) : 470;
   const minimumHeight = Number.isFinite(Number(options.minimumHeight)) ? Number(options.minimumHeight) : 185;
   const content = approvalWorkflowContentBounds(childshapes);
-  if (!content) return { x: safeLeft, y: safeTop, width: minimumWidth, height: minimumHeight };
-  const contentWidth = (content.lowerRight.x - content.upperLeft.x) * zoom;
-  const contentHeight = (content.lowerRight.y - content.upperLeft.y) * zoom;
+  if (!content) return { x: leftInset, y: topInset, width: minimumWidth, height: minimumHeight };
+  const contentWidth = content.lowerRight.x - content.upperLeft.x;
+  const contentHeight = content.lowerRight.y - content.upperLeft.y;
   return {
-    x: safeLeft - content.upperLeft.x * zoom,
-    y: safeTop - content.upperLeft.y * zoom,
+    x: content.upperLeft.x + leftInset,
+    y: content.upperLeft.y + topInset,
     width: Math.max(minimumWidth, contentWidth),
     height: Math.max(minimumHeight, contentHeight),
   };
 }
 
-function approvalWorkflowInitialViewportExtent(childshapes, graphposition, graphzoom = 1) {
+function inspectApprovalWorkflowGraphPosition(childshapes, graphposition, options = {}) {
   const content = approvalWorkflowContentBounds(childshapes);
   if (!content) return null;
-  const zoom = Number.isFinite(Number(graphzoom)) && Number(graphzoom) > 0 ? Number(graphzoom) : 1;
-  const offsetX = finiteNumber(graphposition?.x);
-  const offsetY = finiteNumber(graphposition?.y);
-  if (offsetX === null || offsetY === null) return null;
+  const expected = approvalWorkflowGraphPosition(childshapes, options);
+  const actual = {
+    x: finiteNumber(graphposition?.x),
+    y: finiteNumber(graphposition?.y),
+    width: finiteNumber(graphposition?.width),
+    height: finiteNumber(graphposition?.height),
+  };
+  if (Object.values(actual).some((value) => value === null)) return null;
+  const originTolerance = Number.isFinite(Number(options.originTolerance)) ? Number(options.originTolerance) : 1;
+  const dimensionTolerance = Number.isFinite(Number(options.dimensionTolerance)) ? Number(options.dimensionTolerance) : 1;
   return {
-    left: content.upperLeft.x * zoom + offsetX,
-    top: content.upperLeft.y * zoom + offsetY,
-    right: content.lowerRight.x * zoom + offsetX,
-    bottom: content.lowerRight.y * zoom + offsetY,
+    content,
+    actual,
+    expected,
+    originMatches: Math.abs(actual.x - expected.x) <= originTolerance
+      && Math.abs(actual.y - expected.y) <= originTolerance,
+    dimensionsMatch: Math.abs(actual.width - expected.width) <= dimensionTolerance
+      && Math.abs(actual.height - expected.height) <= dimensionTolerance,
   };
 }
 
 function normalizeApprovalWorkflowDesignerViewport(def, options = {}) {
   if (!def || typeof def !== "object") return def;
-  const graphzoom = Number.isFinite(Number(def.graphzoom)) && Number(def.graphzoom) > 0 ? Number(def.graphzoom) : 1;
   return {
     ...def,
-    graphposition: approvalWorkflowGraphPosition(def.childshapes, { ...options, zoom: graphzoom }),
+    graphposition: approvalWorkflowGraphPosition(def.childshapes, options),
   };
 }
 
 module.exports = {
   approvalWorkflowContentBounds,
   approvalWorkflowGraphPosition,
-  approvalWorkflowInitialViewportExtent,
+  inspectApprovalWorkflowGraphPosition,
   approvalWorkflowNodeSize,
   approvalWorkflowShapeBounds,
   normalizeApprovalWorkflowDesignerViewport,

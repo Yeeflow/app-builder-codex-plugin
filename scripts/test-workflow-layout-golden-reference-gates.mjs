@@ -20,10 +20,16 @@ try {
   expectPass("readable workflow resource passes layout gate", ["--resource", writeResource("good-workflow.json", readableWorkflow())]);
   cases.push({ case: "pass: readable lane-based workflow resource", status: "pass" });
 
-  expectCode("initial viewport with all nodes above the canvas fails", mutateReadable("initial-viewport-offscreen.json", (def) => {
+  expectCode("legacy negative graphposition fails the runtime-proven origin contract", mutateReadable("initial-viewport-offscreen.json", (def) => {
     def.graphposition = { x: -330, y: -700, width: 2671, height: 620 };
-  }), "WORKFLOW_LAYOUT_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN");
-  cases.push({ case: "fail: transformed workflow nodes cannot open entirely above the initial canvas", status: "pass" });
+  }), "WORKFLOW_LAYOUT_GRAPHPOSITION_ORIGIN_MISMATCH");
+  cases.push({ case: "fail: legacy negative graphposition violates the runtime-proven origin contract", status: "pass" });
+
+  expectCode("obsolete translation formula graphposition fails", mutateReadable("translation-formula-graphposition.json", (def) => {
+    def.graphposition.x = 250;
+    def.graphposition.y = 205;
+  }), "WORKFLOW_LAYOUT_GRAPHPOSITION_ORIGIN_MISMATCH");
+  cases.push({ case: "fail: obsolete viewport-translation graphposition is rejected", status: "pass" });
 
   expectCode("default workflow action name fails", mutateReadable("default-action-name.json", (def) => {
     const review = def.childshapes.find((shape) => shape.id === "review");
@@ -437,7 +443,7 @@ function readableWorkflow() {
     lineType: "rounded",
     graphver: 2,
     graphzoom: 1,
-    graphposition: { x: -60, y: 60, width: 1240, height: 640 },
+    graphposition: { x: 190, y: 125, width: 956, height: 366 },
     childshapes: [
       nodes.start,
       flow("flow-submit", nodes.start, nodes.review, "Submit"),
@@ -457,7 +463,7 @@ function readableWideFoldedWorkflow() {
     lineType: "rounded",
     graphver: 2,
     graphzoom: 1,
-    graphposition: { x: -80, y: 40, width: 3300, height: 760 },
+    graphposition: { x: 190, y: 185, width: 2990, height: 426 },
     childshapes: Array.from({ length: 17 }, (_, index) => {
       const row = Math.floor(index / 6);
       const col = index % 6;
@@ -477,7 +483,7 @@ function mediumWideWarningOnlyWorkflow() {
     lineType: "rounded",
     graphver: 2,
     graphzoom: 1,
-    graphposition: { x: -80, y: 40, width: 3950, height: 760 },
+    graphposition: { x: 190, y: 165, width: 3710, height: 426 },
     childshapes,
   };
 }
@@ -496,7 +502,7 @@ function sameColumnVerticalRouteWorkflow() {
     lineType: "rounded",
     graphver: 2,
     graphzoom: 1,
-    graphposition: { x: -60, y: 0, width: 1420, height: 680 },
+    graphposition: { x: 190, y: 125, width: 1056, height: 406 },
     childshapes: [
       nodes.start,
       flow("same-column-submit", nodes.start, nodes.review, "Submit"),

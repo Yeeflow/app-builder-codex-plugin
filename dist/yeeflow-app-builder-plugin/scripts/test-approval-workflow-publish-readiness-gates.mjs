@@ -29,9 +29,9 @@ try {
   const materializedNodeBounds = materializedDef.childshapes.filter((shape) => shape?.stencil?.id !== "SequenceFlow").map((shape) => shape.bounds);
   const materializedMinX = Math.min(...materializedNodeBounds.map((bounds) => bounds.upperLeft.x));
   const materializedMinY = Math.min(...materializedNodeBounds.map((bounds) => bounds.upperLeft.y));
-  assert.equal(materializedMinX * materializedDef.graphzoom + materializedDef.graphposition.x, 80, "materializer must place the leftmost workflow node at the safe initial viewport inset");
-  assert.equal(materializedMinY * materializedDef.graphzoom + materializedDef.graphposition.y, 120, "materializer must place the topmost workflow node at the safe initial viewport inset");
-  cases.push({ case: "pass: materializer emits a visible initial Designer viewport", status: "pass" });
+  assert.equal(materializedDef.graphposition.x, materializedMinX + 90, "materializer must apply the runtime-proven horizontal content-boundary inset");
+  assert.equal(materializedDef.graphposition.y, materializedMinY + 45, "materializer must apply the runtime-proven vertical content-boundary inset");
+  cases.push({ case: "pass: materializer emits the runtime-proven initial Designer graphposition", status: "pass" });
   for (const flow of materializedDef.childshapes.filter((shape) => shape?.stencil?.id === "SequenceFlow")) {
     for (const ref of [flow.source, flow.target, ...(flow.incoming || []), ...(flow.outgoing || [])]) {
       assert.deepEqual(Object.keys(ref).sort(), ["id", "resourceid"], "materializer must emit canonical graph references without resourceId aliases");
@@ -110,8 +110,8 @@ try {
   const normalizedBounds = normalizedDef.childshapes.filter((shape) => shape?.stencil?.id !== "SequenceFlow").map((shape) => shape.bounds);
   const normalizedMinX = Math.min(...normalizedBounds.map((bounds) => bounds.upperLeft.x));
   const normalizedMinY = Math.min(...normalizedBounds.map((bounds) => bounds.upperLeft.y));
-  assert.equal(normalizedMinX * normalizedDef.graphzoom + normalizedDef.graphposition.x, 80, "standalone wrapper must normalize the initial viewport left inset");
-  assert.equal(normalizedMinY * normalizedDef.graphzoom + normalizedDef.graphposition.y, 120, "standalone wrapper must normalize the initial viewport top inset");
+  assert.equal(normalizedDef.graphposition.x, normalizedMinX + 90, "standalone wrapper must normalize the runtime-proven horizontal inset");
+  assert.equal(normalizedDef.graphposition.y, normalizedMinY + 45, "standalone wrapper must normalize the runtime-proven vertical inset");
   cases.push({ case: "pass: standalone YWF wrapper repairs graph references and the initial Designer viewport", status: "pass" });
 
   expectCode("SequenceFlow target id/resourceid mismatch fails", mutateResource(validDef, (def) => {
@@ -201,7 +201,7 @@ try {
   }), "APPROVAL_WORKFLOW_NODE_BOUNDS_POSITION_MISMATCH");
   cases.push({ case: "fail: workflow node bounds do not match position", status: "pass" });
 
-  expectCode("graphposition that pans every node above the visible canvas fails", mutateResource(validDef, (def) => {
+  expectCode("legacy negative graphposition fails the runtime-proven origin contract", mutateResource(validDef, (def) => {
     def.graphposition = structuredClone(OFFSCREEN_VIEWPORT_FIXTURE.graphposition);
     for (const shape of def.childshapes) {
       if (shape?.stencil?.id === "SequenceFlow") continue;
@@ -210,7 +210,13 @@ try {
       shape.bounds.lowerRight.y = shape.position.y + (shape.stencil.id.endsWith("Event") ? 36 : shape.stencil.id.endsWith("Gateway") ? 46 : 86);
     }
   }), OFFSCREEN_VIEWPORT_FIXTURE.expectedError);
-  cases.push({ case: "fail: initial Designer viewport places all workflow nodes above the visible canvas", status: "pass" });
+  cases.push({ case: "fail: legacy negative graphposition violates the runtime-proven origin contract", status: "pass" });
+
+  expectCode("translation-formula graphposition also fails the runtime-proven origin contract", mutateResource(validDef, (def) => {
+    def.graphposition.x = 250;
+    def.graphposition.y = 205;
+  }), "APPROVAL_WORKFLOW_GRAPHPOSITION_ORIGIN_MISMATCH");
+  cases.push({ case: "fail: obsolete viewport-translation formula is rejected", status: "pass" });
 
   expectCode("QueryData undeclared result variable fails", mutateResource(validDef, (def) => {
     const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");

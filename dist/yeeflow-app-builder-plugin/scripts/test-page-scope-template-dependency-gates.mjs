@@ -19,6 +19,10 @@ try {
   expectCode("two filter producers sharing one variable fail", ["--resource", writeJson("duplicate-filter-producers.json", pageResource({ duplicateFilterProducers: true }))], "PAGE_SCOPE_FILTER_VAR_MULTIPLE_PRODUCERS");
   expectCode("duplicate filterVars declaration fails", ["--resource", writeJson("duplicate-filter-vars.json", pageResource({ duplicateFilterVars: true }))], "PAGE_SCOPE_FILTER_VAR_DUPLICATE");
   expectCode("duplicate tempVars declaration fails", ["--resource", writeJson("duplicate-temp-vars.json", pageResource({ duplicateTempVars: true }))], "PAGE_SCOPE_TEMP_VAR_DUPLICATE");
+  expectCode("name-only temp variable fails", ["--resource", writeJson("temp-var-id-missing.json", pageResource({ missingTempVarId: true }))], "PAGE_SCOPE_TEMP_VAR_ID_MISSING");
+  expectCode("standalone YDP LayoutView name-only temp variable fails", ["--resource", writeYdp("temp-var-id-missing.ydp", pageResource({ missingTempVarId: true }))], "PAGE_SCOPE_TEMP_VAR_ID_MISSING");
+  expectCode("undeclared temp variable reference fails", ["--resource", writeJson("temp-var-reference-undeclared.json", pageResource({ undeclaredTempReference: true }))], "PAGE_SCOPE_TEMP_VAR_REFERENCE_UNDECLARED");
+  expectCode("generated Dashboard unused template temp variable fails", ["--resource", writeJson("unused-template-temp-var.json", pageResource({ generatedFinal: true }))], "PAGE_SCOPE_TEMP_VAR_UNREFERENCED_TEMPLATE_RESIDUE");
   expectCode("canonical variable id collision across filterVars and tempVars fails", ["--resource", writeJson("cross-variable-collision.json", pageResource({ crossVariableCollision: true }))], "PAGE_SCOPE_VARIABLE_ID_DUPLICATE");
   expectCode("duplicate formAction declaration fails", ["--resource", writeJson("duplicate-form-actions.json", pageResource({ duplicateFormActions: true }))], "PAGE_SCOPE_FORM_ACTION_DUPLICATE");
   printSummary(0);
@@ -40,9 +44,11 @@ function pageResource(options = {}) {
     tempVars: [
       { id: "vCurrentItemID", name: "vCurrentItemID" },
       { id: "var_comments_SelectedItems", name: "var_comments_SelectedItems" },
+      ...(options.missingTempVarId ? [{ name: "var_SelectedItemsAmount", type: "number" }] : []),
       ...(options.crossVariableCollision ? [{ id: "Filter Left Panel Keywords", name: "Filter Left Panel Keywords" }] : []),
       ...(options.duplicateTempVars ? [{ id: "var_comments_SelectedItems", name: "var_comments_SelectedItems" }] : []),
     ],
+    ...(options.generatedFinal ? { generatedFinalDashboardMaterialization: { shellTemplate: "fixture" } } : {}),
     actions: [{ id: "left_panel_select_item", name: "left_panel_select_item" }],
     formAction: options.duplicateFormActions
       ? [
@@ -62,7 +68,10 @@ function pageResource(options = {}) {
       {
         type: "container",
         nv_label: "content_panel",
-        children: [searchFilter("comments_search", componentFilterName)],
+        children: [
+          searchFilter("comments_search", componentFilterName),
+          ...(options.undeclaredTempReference ? [{ type: "heading", attrs: { headc: { title: { variable: [{ exprType: "variable", id: "__temp_var_missing", type: "expr" }] } } } }] : []),
+        ],
       },
     ],
   };
@@ -121,6 +130,17 @@ function writeYapk(name, resource) {
   };
   fs.writeFileSync(file, JSON.stringify(wrapper, null, 2));
   return file;
+}
+
+function writeYdp(name, resource) {
+  return writeJson(name, {
+    AppID: 41,
+    ListID: "10001",
+    LayoutID: "10002",
+    Type: 103,
+    Title: "Fixture Dashboard",
+    LayoutView: JSON.stringify(resource),
+  });
 }
 
 function printSummary(exitCode) {

@@ -424,7 +424,7 @@ function validDef() {
     lineType: "rounded",
     graphver: 2,
     graphzoom: 1,
-    graphposition: { x: 0, y: 0, width: 1100, height: 700 },
+    graphposition: { x: 190, y: 205, width: 696, height: 196 },
     flowPage: [],
     variables: {
       basic: [{ id: "requestTitle", idx: "requestTitle", name: "requestTitle", title: "Request Title", type: "text" }],

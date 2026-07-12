@@ -1,39 +1,30 @@
-# Approval Workflow Initial Viewport Focused Training
+# Approval Workflow Graphposition Runtime Contract Training
 
-## Incident
+## Runtime Evidence
 
-The generated Business Travel Request Approval workflow opened to a blank Designer canvas. The workflow became visible only after manually panning the canvas down and right.
+The Business Travel Request Approval workflow originally opened on a blank canvas with `graphposition = {-330,-245,2671,620}`. Plugin 0.9.55 replaced that with a viewport-translation formula that generated `{250,205,2351,211}`, but the successful runtime upgrade required `{ -80,-40,2351,211 }`.
 
-The decoded generated workflow used:
+The successful package had node bounds `x=-170..2181`, `y=-85..126`. A fresh Workflow Designer tab opened with Start and the first approval task visible, and Version Management reported Upgrade application Succeed.
 
-```json
-{
-  "graphposition": { "x": -330, "y": -245, "width": 2671, "height": 620 },
-  "graphzoom": 1
-}
-```
+## Corrected Root Cause
 
-Its node model extent was `x=-170..2181`, `y=-85..126`. Under the Designer transform `screen = model * zoom + graphposition`, the complete node screen extent was `y=-330..-119`: every node was above the visible canvas.
+The prior training incorrectly equated saved `graphposition.x/y` with the browser-rendered workflow stage translation. Runtime inspection proves those are different coordinate concepts. Therefore `screen = model * graphzoom + graphposition` must not be used to generate or validate saved workflow metadata.
 
-## Root Cause
+## Runtime-Proven Contract
 
-The shared helper treated `graphposition.x/y` as the model-coordinate bounding-box origin and wrote `minNode - margin`. Current Designer exports prove that `x/y` are initial viewport translation offsets. The old validator repeated the same misconception by requiring `graphposition` to contain node model bounds, so the generator and validator agreed with each other while the runtime canvas was blank.
+- `graphposition.x = minNodeX + 90`
+- `graphposition.y = minNodeY + 45`
+- `graphposition.width = max(470, maxNodeX - minNodeX)`
+- `graphposition.height = max(185, maxNodeY - minNodeY)`
+- The same shared helper is mandatory for standalone `.ywf` and Approval workflows embedded in `.yapk`.
 
-`graphposition.width/height` are scaled content dimensions. They must not be used to infer the viewport origin.
+For the proven bounds, this yields exactly `{ "x": -80, "y": -40, "width": 2351, "height": 211 }`.
 
-## Correct Contract
+## Hard Gates
 
-- Preserve node `position` and positive-area `bounds` in model coordinates.
-- Preserve a positive `graphzoom`.
-- Compute the initial viewport translation so the topmost and leftmost node bounds render at safe visible insets:
-  - `graphposition.x = safeLeft - minNodeX * graphzoom`
-  - `graphposition.y = safeTop - minNodeY * graphzoom`
-- Generated defaults use `safeLeft=80` and `safeTop=120`.
-- Compute `width/height` from scaled node content span, with small minimum dimensions for simple workflows.
-- Apply the same normalizer in full `.yapk` materialization and standalone `.ywf` wrapper generation.
+- `APPROVAL_WORKFLOW_GRAPHPOSITION_ORIGIN_MISMATCH`
+- `APPROVAL_WORKFLOW_GRAPHPOSITION_CONTENT_SPAN_MISMATCH`
+- `WORKFLOW_LAYOUT_GRAPHPOSITION_ORIGIN_MISMATCH`
+- `WORKFLOW_LAYOUT_GRAPHPOSITION_CONTENT_SPAN_MISMATCH`
 
-## Hard Gate
-
-`APPROVAL_WORKFLOW_INITIAL_VIEWPORT_NODE_EXTENT_OFFSCREEN` fails when the transformed node extent lies completely above, below, left, or right of the expected initial Designer canvas. `APPROVAL_WORKFLOW_GRAPHPOSITION_DIMENSIONS_INVALID` rejects non-positive scaled content dimensions.
-
-Designer-open proof remains distinct from structural validation, but a generated workflow that is mathematically outside the initial viewport cannot proceed to signing readiness.
+Regression requires the legacy negative incident and the obsolete `250/205` translation-formula output to fail, while the runtime-proven `-80/-40` shape passes. Structural validation remains distinct from fresh-tab Designer proof.

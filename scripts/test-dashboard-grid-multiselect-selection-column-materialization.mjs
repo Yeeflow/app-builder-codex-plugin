@@ -84,6 +84,18 @@ Business defaults approval status: user-default-approved-for-generation.
 | Dashboard Page | Dataset Region | Source List | Selected Collection Template | Selection Reason |
 | --- | --- | --- | --- | --- |
 | Legal Intake Workbench | Triage Queue | Legal Requests | collection_control_grid_table_with_multiselect | Dense row and column scanning with multi-row selection and future bulk assignment operations. |
+| My Travel Requests | Request Queue | Legal Requests | collection_control_grid_table | Read-only dense request tracking without multiselect operations. |
+
+### 14.2 My Travel Requests
+- Page name: My Travel Requests
+- Business purpose: Review the current user's travel requests.
+- Layout template: dashboard-page-layouts-workbench
+
+#### Dashboard Sections
+
+| Section Order | Section Name | Business Purpose | Source Data List or Business Object | Required Fields or Metrics | Selected Yeeflow Control Type Category | Why This Control Type Is Appropriate | User Actions Needed | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Request Queue | Review current-user requests | Legal Requests | Title, Business Unit, Priority | Collection | Dense read-only request table | Open request | generated-final validation |
 
 ## 15. Application Navigation Plan
 
@@ -91,6 +103,7 @@ Business defaults approval status: user-default-approved-for-generation.
 | --- | --- | --- | --- | --- |
 | Legal Operations | Legal Intake Workbench | Legal Intake Workbench | Dashboard | fa-solid fa-scale-balanced |
 | Legal Operations | Legal Requests | Legal Requests | Data list | fa-solid fa-list-check |
+| Legal Operations | My Travel Requests | My Travel Requests | Dashboard | fa-solid fa-plane |
 `);
 
   const idManifest = path.join(tempDir, "api-issued-ids.json");
@@ -128,12 +141,48 @@ Business defaults approval status: user-default-approved-for-generation.
   assert.ok(identities(header.children[1]).includes("grid_table_col_header_title_column"), "primary header cell must follow selection cell");
   assert.ok(identities(item.children[1]).includes("grid_table_col_item_title_column"), "primary item cell must follow selection cell");
 
+  assert.ok(resource.tempVars.length > 0, "multiselect Dashboard must declare its consumed template temp variables");
+  for (const tempVar of resource.tempVars) {
+    assert.ok(String(tempVar.id || "").trim(), "every generated Dashboard temp variable must include id");
+    assert.ok(String(tempVar.name || "").trim(), "every generated Dashboard temp variable must include name");
+    assert.ok(String(tempVar.idx || "").trim(), "every generated Dashboard temp variable must include idx");
+  }
+  const tempIds = resource.tempVars.map((item) => String(item.id));
+  assert.equal(tempIds.some((id) => ["var_SelectedItems", "var_SelectedItemsAmount", "var_isDeleteConfirmed"].includes(id)), false, "generic template temp variable ids must not survive generated-final materialization");
+  assert.equal(tempIds.some((id) => /selecteditemsamount/i.test(id)), true, "consumed selected-count temp variable must be declared with a scoped id");
+  assert.equal(resource.tempVars.find((item) => /SelectedItems$/i.test(item.id))?.type, "array", "selected-items temp variable must retain array type");
+  assert.equal(resource.tempVars.find((item) => /SelectedItemsAmount$/i.test(item.id))?.type, "number", "selected-count temp variable must retain number type");
+  assert.equal(resource.tempVars.find((item) => /isDeleteConfirmed$/i.test(item.id))?.type, "boolean", "delete-confirmation temp variable must retain boolean type");
+  const body = structuredClone(resource);
+  delete body.tempVars;
+  const bodyText = JSON.stringify(body);
+  for (const id of tempIds) {
+    const unprefixed = id.replace(/^__temp_/, "");
+    assert.equal(bodyText.includes(id) || bodyText.includes(`__temp_${unprefixed}`), true, `temp variable ${id} must be consumed by the generated Dashboard`);
+  }
+
+  const plainDashboard = decoded.Pages.find((page) => page.Title === "My Travel Requests");
+  assert.ok(plainDashboard, "plain grid-table Dashboard must materialize");
+  const plainResource = JSON.parse(plainDashboard.LayoutInResources[0].Resource);
+  assert.ok(plainResource.tempVars.length > 0, "plain grid template must declare its consumed temp variables");
+  assert.equal(plainResource.tempVars.every((item) => item.id && item.name && item.idx), true, "plain grid temp variables must be complete Designer declarations");
+  assert.equal(plainResource.tempVars.some((item) => ["var_SelectedItems", "var_SelectedItemsAmount", "var_isDeleteConfirmed"].includes(item.id)), false, "plain grid template variables must be namespaced");
+  assert.equal(plainResource.tempVars.some((item) => /SelectedItems$/.test(item.id)), false, "plain grid must not retain unused multiselect selected-items array");
+  const plainBody = structuredClone(plainResource);
+  delete plainBody.tempVars;
+  const plainBodyText = JSON.stringify(plainBody);
+  for (const item of plainResource.tempVars) {
+    const unprefixed = item.id.replace(/^__temp_/, "");
+    assert.equal(plainBodyText.includes(item.id) || plainBodyText.includes(`__temp_${unprefixed}`), true, `plain grid temp variable ${item.id} must be consumed`);
+  }
+
   console.log(JSON.stringify({
     status: "pass",
     dashboard: dashboard.Title,
     headerTracks,
     itemTracks,
-    assertion: "checkbox-only leading column remains fixed at 46px after schema pruning",
+    tempVars: resource.tempVars,
+    assertion: "checkbox column and scoped, complete, consumed temp-variable dependencies remain valid after materialization",
   }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });

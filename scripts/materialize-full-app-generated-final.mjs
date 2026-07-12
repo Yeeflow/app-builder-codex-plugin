@@ -4361,9 +4361,6 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     ...(isMasterDetailWorkspace ? [
       { id: "__temp_vCurrentItemID", name: "vCurrentItemID", type: "string", source: "left_panel_data_items_wrapper" },
     ] : []),
-    { name: "var_SelectedItems", type: "array", source: collectionId },
-    { name: "var_SelectedItemsAmount", type: "number", source: collectionId },
-    { name: "var_isDeleteConfirmed", type: "boolean", source: "delete-confirmation" },
   ]);
   const summaryRuntimeExts = kpiContracts.map((contract) => ({
     i: contract.summaryId,
@@ -4442,6 +4439,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     detailLayoutId: sourceListMeta.detailLayoutId,
   });
   enforceCollectionTemplateStyleContracts(resource);
+  normalizeAndPruneDashboardTempVars(resource);
   return resource;
 }
 
@@ -6342,6 +6340,37 @@ function uniqueByName(items) {
     out.push(item);
   }
   return out;
+}
+
+function normalizeAndPruneDashboardTempVars(resource) {
+  const candidates = uniqueByName(normalizeDependencyArray(resource?.tempVars).map((item, index) => {
+    const id = cleanResourceName(item?.id || item?.name);
+    if (!id) return null;
+    const name = cleanResourceName(item?.name) || id.replace(/^__temp_/, "");
+    return {
+      ...item,
+      idx: cleanResourceName(item?.idx) || deterministicUuid(`${resource.id || resource.title}:temp:${id}:${index}`),
+      id,
+      name,
+      type: cleanResourceName(item?.type) || inferDashboardTempVarType(id),
+    };
+  }).filter(Boolean));
+  const body = clone(resource || {});
+  delete body.tempVars;
+  const bodyText = JSON.stringify(body);
+  resource.tempVars = candidates.filter((item) => {
+    const id = String(item.id || "");
+    const unprefixed = id.replace(/^__temp_/, "");
+    return bodyText.includes(id) || bodyText.includes(`__temp_${unprefixed}`);
+  });
+}
+
+function inferDashboardTempVarType(id) {
+  const value = String(id || "");
+  if (/SelectedItems$/i.test(value)) return "array";
+  if (/Amount$|Count$/i.test(value)) return "number";
+  if (/is[A-Z_]|Confirmed$/i.test(value)) return "boolean";
+  return "string";
 }
 
 function loadCollectionTemplate(templateId) {
