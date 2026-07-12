@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.57`
+- Version: `0.9.58`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.57` adds export-backed Set Variable planning, shared Form Action materialization, and generated-final hard gates across Dashboard, Approval Form, Data List Form, and workflow surfaces. Data List Workflow current-record writes remain strictly separated into Set Data List with Current list.
+Current release `0.9.58` hardens Set Variable runtime preflight: system `SetVariableTask` nodes are no longer mistaken for human approval tasks, Form Action Host Type aliases share one planning/materialization contract, and focused non-Report upgrades can safely omit unchanged installed Form reports before signing.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.57
+Version: 0.9.58
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.57
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.58
 ```
 
 ## What Is Included
