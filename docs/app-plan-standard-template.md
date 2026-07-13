@@ -268,6 +268,29 @@ Rules:
 - Data List Workflow `SetVariableTask` cannot update the current record. Use a `ContentList` / Set Data List node with `listtype = "current"` for current-item field writes.
 - A bulk Sub list write is an export-proven `ContentList` `add` action, not a Loop substitute: use `key: "_list.<childField>"` in each row-derived mapping. Approval Form and Scheduled workflows use `exprType: "variable"` from a declared Workflow List variable; Data List workflows use `exprType: "list_field"` from a current-record Sub list field. Declare the corresponding Batch Source columns above, use an explicit selected target, and include a parent-form/list association mapping such as Applicant, Employee, or instance ID whenever the target rows need to remain traceable to their source.
 
+##### Form Action Set Data List Planning
+
+Required whenever an Approval Submission/Task form, Data List or Document Library custom form, or Dashboard Form Action contains `Set Data List`. One row represents one step and `Step Order` is the order inside the named action. Approval Print Page Set Data List remains `focused-export-proof-required`.
+
+| Host Resource | Host Form / Page | Host Type | Action Name | Step Order | Step Name | Trigger | Bound Control | Exact Step Type | Operation | Target Mode | Target Resource Type | Target Resource | Field Mapping JSON | Filter JSON | Execution Condition Tokens | Continue When Not Met | Status Target Kind | Status Target ID | Item Result Target Kind | Item Result Target ID | Item Result Attribute | Proof Boundary | Business Rationale |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Resource> | <Submission form / Task form / New/Edit/View form / Dashboard> | Approval Submission / Approval Task / Data List New / Data List Edit / Data List View / Document Library New / Document Library Edit / Document Library View / Dashboard | <Business action> | 1 | <Business step> | Page Load / Field Change / Button Click / Container Click | <Control identity or None> | Set Data List | add / edit / remove | current / select | Data List / Document Library / None | <Exact resource or None> | <JSON listdatas array or None for remove> | <JSON wheres array or None for add/current> | <JSON expression token array or None> | true / false | Temp variable / Workflow variable / None | <Exact ID or None> | Temp variable / Workflow variable / None | <Exact ID or None> | itemid / totalcount / None | export-proven / validator-backed / runtime-proof-required | <Persistence intent and risk rationale> |
+
+Rules:
+
+- `current` is valid only on Data List/Document Library custom forms and means an immediate update of the current record. It does not require a selected target resource or filters.
+- On New/Edit forms, prefer `Set Variable` plus `Submit Form` for ordinary field changes. A direct current-record Set Data List write is allowed only with an explicit immediate-side-effect rationale.
+- View Item forms cannot persist through Submit Form; use `current + edit` when a business command must update the viewed record.
+- `select + add` requires field mappings. `select + edit/remove` requires explicit non-empty filters so the mutation scope is bounded.
+- Target resources are Data Lists or Document Libraries. Form Report/Data Report are not Set Data List mutation targets.
+- `Per` in `Field Mapping JSON` is `0` Value, `1` Increase, `2` Decrease, `3` Multiply, or `4` Divide. Arithmetic modes are valid only for compatible numeric target fields.
+- `Status Target` and `Item Result Target` are optional. When configured, they must resolve to declared variables. Dashboard result targets must be page temp variables.
+- Mutually exclusive conditional Add/Update steps normally set `Continue When Not Met = true`, allowing the next branch step to be evaluated.
+- Form Action Set Data List cannot expand Sub List rows into multiple target records. Use Workflow Set Data List for bulk Sub List-to-Data List/Document Library writes.
+- Document Library Add must map one single-file value to native Upload File `Text4`. `_Path` is the export-proven folder pseudo-field. Multi-file, array, List, and Sub List upload sources require Workflow Set Data List.
+- Public Forms cannot contain Set Data List Form Action steps.
+- Use `docs/standards/form-action-set-data-list-golden-reference-standard.md`, run `validate-form-action-set-data-list-plan.mjs` before materialization, and run `validate-form-action-set-data-list.mjs --strict-generated` before signing.
+
 Query Data planning rules:
 
 - One table row represents one Form Action step. Repeat `Action Name` for multi-step actions and preserve row order.

@@ -1,0 +1,11 @@
+{
+  "templateId": "form_action_set_data_list_approval_task_conditional_crud_v1",
+  "hostSurface": "approval_task",
+  "sharedContract": "form_action_set_data_list_approval_conditional_crud_v1",
+  "rules": {
+    "sameSerializationAsSubmission": true,
+    "operations": ["add", "edit", "remove"],
+    "conditionalBranchContinue": true,
+    "resultTargets": ["workflow-variable", "temp-variable"]
+  }
+}

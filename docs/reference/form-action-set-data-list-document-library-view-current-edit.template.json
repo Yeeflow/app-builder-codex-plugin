@@ -1,0 +1,25 @@
+{
+  "templateId": "form_action_set_data_list_document_library_view_current_edit_v1",
+  "hostSurface": "document_library_view",
+  "step": {
+    "type": "setdatalist",
+    "name": "Update document info",
+    "attrs": {
+      "listtype": "current",
+      "type": "edit",
+      "listdatas": [
+        {
+          "Per": "0",
+          "Columns": "Datetime1",
+          "Data": [
+            { "type": "str", "value": "2026-07-13 00:00:00" }
+          ]
+        }
+      ]
+    }
+  },
+  "rules": {
+    "sameCurrentRecordContractAsDataList": true,
+    "filtersRequired": false
+  }
+}

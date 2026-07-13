@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.62`
+- Version: `0.9.63`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.62` scopes Approval Form layout validation to Approval workflow envelopes so mixed Approval, Data List, and Scheduled workflow packages can pass signing readiness without weakening Approval page checks.
+Current release `0.9.63` adds export-backed Form Action Set Data List generation across Approval submission/task forms, Data List and Document Library custom forms, and Dashboard pages, with strict CRUD, condition, result-output, current-record, Document Library path/upload, and single-file boundaries.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.62
+Version: 0.9.63
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.62
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.63
 ```
 
 ## What Is Included

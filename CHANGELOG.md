@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.63
+
+- Add export-backed Form Action Set Data List golden references for Approval submission/task forms, Data List and Document Library custom forms, and Dashboard pages, covering conditional add/update/delete, current-record updates, execution results, and trigger bindings.
+- Materialize planned Set Data List steps through one shared builder and validate host, operation, target, mappings, filters, execution conditions, continue behavior, status/item-ID outputs, and bound controls before signing readiness.
+- Enforce Document Library Add contracts: `_Path` is Type 16-only, Upload File (`Text4`) is required, and Form Actions accept one selected file while multi-file/List/Sub List writes remain Workflow + Loop responsibilities.
+- Add source/dist planning, materialization, package, and cache regressions with 61 focused cases, including Approval Task Form parity and Document Library current-record updates.
+
 ## 0.9.62
 
 - Scope Approval Form layout-template validation to Approval workflow envelopes (`WorkflowType = 2`) while skipping Data List and Scheduled workflow envelopes serialized in the shared `Forms[]` collection.

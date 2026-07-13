@@ -1,0 +1,33 @@
+{
+  "templateId": "form_action_set_data_list_approval_conditional_crud_v1",
+  "hostSurface": "approval_submission",
+  "steps": [
+    {
+      "type": "setdatalist",
+      "name": "Add usage",
+      "attrs": {
+        "listtype": "select",
+        "type": "add",
+        "listdatas": [{ "Per": "0", "Columns": "Text2", "Data": [{ "exprType": "variable", "valueType": "user", "id": "Applicant", "type": "expr" }] }],
+        "code": "var_AddStatus",
+        "codeparent": "__temp_",
+        "itemid": "var_NewItemID",
+        "itemidparent": "__temp_"
+      },
+      "condition": [{ "exprType": "variable", "id": "__temp_var_ResultCount", "type": "expr" }, { "type": "op", "op": "==" }, { "type": "num", "value": "0" }],
+      "continue": true
+    },
+    {
+      "type": "setdatalist",
+      "name": "Update usage",
+      "attrs": {
+        "listtype": "select",
+        "type": "edit",
+        "listdatas": [{ "Per": "1", "Columns": "Decimal1", "Data": [{ "exprType": "variable", "valueType": "number", "id": "RequestedDays", "type": "expr" }] }],
+        "wheres": [{ "pre": "and", "left": "Text2", "op": "0", "right": [{ "exprType": "variable", "id": "Applicant", "type": "expr" }], "showCus": false }]
+      },
+      "condition": [{ "exprType": "variable", "id": "__temp_var_ResultCount", "type": "expr" }, { "type": "op", "op": ">" }, { "type": "num", "value": "0" }],
+      "continue": true
+    }
+  ]
+}
