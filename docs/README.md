@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.8.5`
+- Version: `0.9.64`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.5` releases Dashboard Golden Reference enforcement from PR #147. It registers the Event Portfolio dashboard as the default golden reference with reusable header, filter, KPI, content, and grid-table region references; adds dashboard golden-reference conformance validation; registers the conformance gate in dashboard hard gates and YAPK preflight; enforces generated dashboard provenance; blocks copying Event-specific fields into unrelated apps; and documents the dashboard golden-reference selection and consumption lifecycle.
+Current release `0.9.64` adds export-backed Form Action Open Item Form, Open Approval Form, and Open Dashboard generation with shared planning, materialization, strict target/form/ID/query/default validation, and safe render-only runtime proof boundaries.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
