@@ -315,7 +315,7 @@ function summaryPackage({ includeTopLevelReportIds = false, omitLayoutReportIds 
   const root = {
     type: "page",
     ReportIds: omitLayoutReportIds ? [] : [SUMMARY_ID],
-    exts: [{ i: SUMMARY_ID, category: "___Pivot___", key: "summary" }],
+    exts: [summaryExtRegistration()],
     tempVars: [{ id: saveVar.id, name: saveVar.name }],
     children: [
       {
@@ -340,6 +340,39 @@ function summaryPackage({ includeTopLevelReportIds = false, omitLayoutReportIds 
       List: { ListID: "events", Title: "Events" },
       Fields: [field("ListDataID", "Text", "Record ID"), field("Title", "Text", "Event Name")],
     }],
+  };
+}
+
+function summaryExtRegistration() {
+  const source = { AppID: 41, ListSetID: LIST_SET_ID, ListID: "events", Type: 1, Title: "Events" };
+  return {
+    i: SUMMARY_ID,
+    id: SUMMARY_ID,
+    category: "___Pivot___",
+    key: "summary",
+    attr: {
+      AppID: 41,
+      ListSetID: LIST_SET_ID,
+      ListID: "events",
+      list: source,
+      source,
+      settings: {
+        values: [{
+          fieldName: "ListDataID",
+          field: "ListDataID",
+          FieldName: "ListDataID",
+          id: "ListDataID",
+          func: "COUNT",
+          aggregate: "COUNT",
+          label: "Event count",
+          type: "Text",
+          fieldType: "Text",
+          attr: { FieldName: "ListDataID", FieldType: "Text", DisplayName: "Record ID" },
+          preConditions: [],
+          Conditions: [],
+        }],
+      },
+    },
   };
 }
 

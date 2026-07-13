@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.64
+
 - Add V1.7 export-backed Form Action Open Item Form, Open Approval Form, and Open Dashboard golden references across Approval Submission/Task, Data List/Document Library custom forms, and Dashboard.
 - Materialize `listitem`, `openform`, and `opendashboard` through one shared App Plan contract and builder, including current/selected item targeting, optional target-owned custom forms, defaults, query parameters, returned item IDs, and shared open-mode sizing.
 - Block Public Form usage, unresolved targets/layouts, missing selected Item/Form IDs, submitted-form input leakage, Dashboard non-temp expressions, and invalid Slide/Pop-up/Full page/New window sizing before signing readiness.

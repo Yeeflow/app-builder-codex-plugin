@@ -1,21 +1,19 @@
-# App Builder Codex Plugin
+# App Builder Codex Plugin Docs
 
-Official Yeeflow App Builder Codex plugin repository.
+These docs support the Yeeflow App Builder Codex plugin.
 
-This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It preserves the useful scripts, schemas, validators, studies, generated skills, and plugin distribution assets while using a new non-colliding Codex plugin identity.
-
-## Identity
+Current install identity:
 
 - Marketplace: Yeeflow
-- Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
-- Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.95`
-- Active dist path: `dist/yeeflow-app-builder-plugin`
+- Version: `0.9.64`
+- Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.95` releases Dashboard navigator-label, expression-binding, and business-residue cleanup hardening from PR #332: generated master-detail workspace pages recursively assign business-specific `nv_label` metadata inside copied Collection item templates, reject visible raw formula strings, remove source-template loan/Office Asset business copy from Service Tickets-style pages, prune optional `section_title_area` modules when both `section_title_header` and configured `Operations` are absent, and prevent Data List View forms from inheriting unplanned KPI rows or title-only copied sections before signing readiness.
+Current release `0.9.64` adds export-backed Form Action Open Item Form, Open Approval Form, and Open Dashboard generation with shared planning, materialization, strict target/form/ID/query/default validation, and safe render-only runtime proof boundaries.
 
-## Install In Codex App
+Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
+
+Install source:
 
 ```text
 Source: https://github.com/Yeeflow/app-builder-codex-plugin.git
@@ -25,100 +23,48 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected installed identity:
+## Start Here
 
-```text
-Marketplace: Yeeflow
-Plugin: Yeeflow App Builder
-Version: 0.8.95
-```
+- [Plugin installation](plugin-installation.md)
+- [Quick start](quick-start.md)
+- [Environment configuration](environment-configuration.md)
+- [Workspace discovery and selection](workspace-discovery-and-selection.md)
+- [Browser OAuth login](browser-oauth-login.md)
+- [Yeeflow REST API capability map](yeeflow-rest-api-capability-map.md)
+- [Local development policy](local-development-policy.md)
+- [YAPK generation guardrails](yapk-generation-guardrails.md)
+- [YAPK ID provenance hard gate](yapk-id-provenance-hard-gate.md)
+- [YAPK upgrade ID stability hard gate](yapk-upgrade-id-stability-hard-gate.md)
+- [Yeeflow control property knowledge base](standards/yeeflow-control-property-knowledge-base.md)
+- [YAPK navigation runtime metadata gate](yapk-navigation-runtime-metadata-gate.md)
+- [Dashboard grid-table Collection pattern](dashboard-grid-table-collection-pattern.md)
+- [Generated dashboard UI quality gates](generated-dashboard-ui-quality-gates.md)
+- [Redacted runtime evidence template](examples/runtime-evidence.redacted.example.json)
+- [Application navigation generation rules](application-navigation-generation-rules.md)
+- [Package signing and runtime proof boundaries](package-signing-and-runtime-proof-boundaries.md)
+- [Release hygiene](release-hygiene.md)
+- [Managed app connector design](yeeflow-codex-managed-app-connector.md)
 
-Verify metadata from a checkout:
+## Skill Routing
 
-```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.95
-```
+- `yeeflow-ui-generation-hard-gates`: use before claiming high-quality dashboard/UI output, generating Summary/KPI dashboards, relying on runtime screenshot evidence, proving uncertain UI/control/style patterns on sandbox pages, or upgrading existing UI packages where ListSetID/app identity must remain stable. This skill owns the reusable page-by-page implementation contract, export-proven style/control shape, Summary/KPI proof-boundary, fallback KPI labeling, runtime screenshot, and UI upgrade lineage standards.
 
-## What Is Included
+This routing means high-quality UI requires a page-by-page implementation contract; uncertain UI/runtime patterns should be proven on a sandbox page first; use export-proven Yeeflow control/style shapes; Summary/KPI controls require designer-shaped hidden Summary configuration; Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, layout-resource `Resource.ReportIds`, matching layout-resource `Resource.exts`, and layout-resource `Resource.tempVars`; top-level `Pages[].ReportIds` is optional compatibility metadata; dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape with before/after mutation proof and refreshed/recalculated runtime evidence; Summary recalculation can be asynchronous or cache-delayed; semantic/non-UUID Summary IDs and other unsupported shapes remain unproven; for every other shape, visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled as fallback; runtime screenshot evidence is required before claiming UI quality; install/signing/API acceptance is not runtime UI proof; UI upgrades must preserve ListSetID, app identity, existing IDs, and declared change scope; broad scaffold-like UI must not be claimed as high-quality UI. Data Analytics controls require UUID/runtime-safe IDs for Pie chart, Column chart, Line chart, Gauge, Funnel chart, Color block heatmap, Summary, and Pivot table. Preserve existing Data Analytics control IDs during upgrades.
 
-- `.agents/plugins/marketplace.json` for Codex marketplace installation.
-- `dist/yeeflow-app-builder-plugin` with bundled skills and plugin metadata.
-- `skills/` and `generated-skills/` source mirrors for ongoing development.
-- `scripts/` and root development helpers for YAP/YAPK/YDL/YWF generation, inspection, validation, and package automation dry-runs.
-- `schemas/yap-schema.json`, `schemas/yapk-schema.json`, and `schemas/yapk-schema-codex.json`.
-- Sanitized docs, studies, standards, templates, examples, and historical notes.
-- OAuth helpers and the documented Yeeflow REST API capability map.
+Dashboard/app page root content-area padding is a hard gate: Type 103 dashboard/app page roots must use `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`; scalar/object/numeric padding is rejected, and inner layout containers may keep intentional spacing. Data-list custom form root content-area padding uses the same hard gate for every New, Edit, View, Detail, or custom form under `Data.Childs[].Layouts[].LayoutInResources[].Resource` or `Childs[].Layouts[].LayoutInResources[].Resource`; inner form sections, cards, grids, controls, and content wrappers may keep intentional spacing.
 
-## Key Workflows
+Use `examples/runtime-evidence.redacted.example.json` as the starting point for runtime proof reports consumed by `scripts/inspect-runtime-evidence.mjs` and `scripts/inspect-visible-kpi-runtime-bindings.mjs`. Run `node scripts/test-ui-hard-gates-all.mjs` before claiming UI quality. The KPI Runtime Binding Proof v1.0.1 proves only the exact UUID Summary shape: UUID Summary IDs, matching `Resource.ReportIds[]`, matching `Resource.exts[]` with `category: "___Pivot___"` and `key: "summary"`, dashboard `Resource.tempVars[]`, designer-shaped `attrs.save_var`, visible `attrs.headc.title.variable[]`, and complete Summary field metadata. Runtime proof must include before/after source data mutation evidence, expected-value notes, inspector output, and refreshed/recalculated after-evidence because Summary recalculation can be asynchronous or cache-delayed. Semantic/non-UUID Summary IDs, approval forms, public forms, unsupported surfaces, and other visible binding shapes remain unproven unless focused runtime proof exists. Marketing Event dashboards may use this shape, but still need their own before/after mutation proof before claiming dynamic KPI success.
 
-Use the plugin to plan, generate, inspect, validate, and harden Yeeflow application packages. The current package preserves support for:
+## Development Areas
 
-- Browser OAuth login, status, refresh, logout, and OAuth/API auth wrapper helpers.
-- Legacy API-key fallback for internal/package automation scenarios.
-- Documented REST API capability listing and guarded read-only capability calls.
-- Package API automation with dry-run defaults and explicit confirmation gates.
-- YAP/YAPK/YDL/YWF validators and wrapper helpers.
-- Application plan conformance, navigation checks, runtime-binding lessons, and release hygiene.
-- Generated-final YAPK hard gates for API-issued ID provenance, complete navigation runtime metadata, and App Plan resource completeness.
-- Dashboard grid-table Collection hard gate for dashboard record-list wrapper structure, detail links, title/header metadata, and runtime/designer proof boundaries.
-- UI/Summary/KPI runtime hard gates for page-by-page UI contracts, export-proven style shapes, Summary metadata, visible KPI evidence or labeled fallback, grid-table quality, and upgrade ListSetID/app identity stability.
-- Supplier runtime/design fidelity gates and validation-layer proof gates for installed `ListSetID` runtime URL proof, design section/KPI/page chrome mapping, real Data Filter and Collection bindings, analytics/progress/Summary/KPI fidelity, canonical one-PNG-per-page design artifacts, and separated proof layers from schema validation through runtime browser proof and pixel comparison.
-- Managed app connector design notes and safe example metadata.
+- `../scripts/` contains reusable validation, OAuth/API, package automation, and schema utilities.
+- `../schemas/` contains YAP/YAPK canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, plus the Codex YAPK overlay.
+- `../skills/` and `../generated-skills/` contain source skill material.
+- `studies/`, `standards/`, and `templates/` preserve sanitized research and generation rules.
+- `legacy/yeeflow-codex-plugins/` preserves safe historical release notes and old investigation docs. It is not current install guidance.
 
-## Safety Boundaries
+## Safety
 
-Never commit tenant credentials, OAuth tokens, API keys, private tenant URLs, raw Yeeflow exports, decoded package payloads, generated runtime packages, screenshots, cert/key files, or local cache folders.
+Do not commit `.env.local`, OAuth token files, cert/key files, private tenant URLs, raw API responses, decoded package payloads, generated runtime packages, screenshots, or local cache folders.
 
-API work must use documented Yeeflow endpoints only. Do not guess paths, do not make arbitrary raw API calls, and do not run mutating/package operations without explicit confirmation. Stronger confirmation is required for package upload, import, install, upgrade, create, update, and delete operations.
-
-Proof boundaries remain separate:
-
-- Local validation is not import proof.
-- API acceptance is not runtime proof.
-- Runtime proof applies only to the exact tested scope.
-
-## Local Environment
-
-Normal user-facing API work is OAuth-based. `.env.local` may be absent or empty for OAuth login, API access, and workspace discovery. Fixed API/OAuth defaults are bundled by the plugin, and legacy API-key mode remains available only as a deprecated fallback for older internal workflows.
-
-```env
-# No required values for normal OAuth + workspace discovery.
-```
-
-OAuth login is required before API access. Package import/install/upgrade automation still requires an explicit target workspace, but local `YEEFLOW_WORKSPACE_ID` is ignored for package write target selection. Discover app/package workspaces with `node scripts/yeeflow-workspace-list.mjs --category flowcraft`, ask the current user to choose from the redacted API-discovered list, then pass `--selected-workspace-id` or `--workspace-id` only as that explicit user-selected target. The documented workspace categories are `settings` and `flowcraft`; current app/package workflows use `flowcraft` unless product/API docs change. The plugin uses Authorization Code with PKCE S256 and generates the `code_verifier`; no OAuth client secret is required for normal login/refresh. Raw tokens, full decoded token payloads, tenant IDs, tenant URLs, raw workspace responses, and full workspace IDs are never printed. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only.
-
-Do not paste secrets, authorization codes, cookies, bearer tokens, or passwords into chat.
-
-## Useful Commands
-
-```sh
-node scripts/yeeflow-oauth-status.mjs
-node scripts/yeeflow-oauth-refresh.mjs
-node scripts/yeeflow-api-list-capabilities.mjs --read-only
-node scripts/yeeflow-api-call-capability.mjs --name locations.list
-node scripts/yeeflow-workspace-list.mjs --all
-node scripts/yeeflow-workspace-list.mjs --category flowcraft
-node scripts/test-yeeflow-oauth-auth.mjs
-node scripts/test-yeeflow-api-capabilities.mjs
-node scripts/test-package-api-dry-run-env.mjs
-```
-
-The read-only capability helper executes only mapped read-only `GET` capabilities and never accepts arbitrary raw paths.
-
-## Development Assets
-
-The new repo intentionally keeps more than the minimal plugin distribution:
-
-- root-level generation and inspection scripts restored from the legacy repo
-- sanitized runtime study docs and normalized references
-- plugin release hygiene and legacy release notes under `docs/legacy/`
-- managed app connector design and `.app.example.json`
-- safe examples and generated-folder guidance
-
-Generated runtime packages and raw proof payloads remain excluded.
-
-## Migration Note
-
-The legacy repository used marketplace `yeeflow-internal`, plugin `yeeflow-builder`, and dist path `dist/yeeflow-builder-plugin`. That identity has repeatedly materialized stale Codex App cache entries such as `0.5.8`. This repository intentionally uses `yeeflow` / `yeeflow-app-builder` and `dist/yeeflow-app-builder-plugin`.
-
-Do not use the legacy repo or legacy identity for current installs unless explicitly testing migration behavior.
+Use documented Yeeflow endpoints only. Mutating APIs and package operations require explicit confirmation.
