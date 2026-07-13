@@ -216,6 +216,10 @@ const SET_VARIABLE_TYPES = new Set(["text", "number", "date", "user", "boolean"]
 const CONTENTLIST_LISTTYPES = new Set(["current", "select"]);
 const CONTENTLIST_OPERATION_TYPES = new Set(["add", "edit", "remove"]);
 const CONTENTLIST_NUMERIC_OPERATION_CODES = new Set(["0", "1", "2", "3", "4"]);
+const CONTENTLIST_NUMERIC_MUTATION_CODES = new Set(["1", "2", "3", "4"]);
+const CONTENTLIST_HOST_TYPES = new Set(["approval", "data-list", "scheduled"]);
+const CONTENTLIST_DOCUMENT_LIBRARY_ADD_FIELDS = new Set(["Title", "Text4", "_Path"]);
+const CONTENTLIST_DOCUMENT_LIBRARY_SPECIAL_FIELDS = new Set(["_Path"]);
 const SIGNAL_EVENT_DEFINITIONS = new Set(["CancelEventDefinition", "RevokeEventDefinition"]);
 
 function validateMultiAssignmentTaskAssignees(issues, shape, pointer, options) {
@@ -978,6 +982,11 @@ function validateContentList(issues, shape, pointer, options) {
   const severity = strictLevel(options, "warning");
   const type = safeString(props.type);
   const listtype = safeString(props.listtype);
+  const workflowHostType = safeString(options.workflowHostType).toLowerCase();
+  const targetFieldTypes = options.targetFieldTypes || {};
+  const targetFieldNames = options.targetFieldNames ? new Set(options.targetFieldNames) : null;
+  const documentLibraryTarget = isDocumentLibraryTarget(options.targetResourceType);
+  const isFinalGeneration = severity === "error";
   if (!CONTENTLIST_LISTTYPES.has(listtype)) {
     issue(issues, severity, "CONTENTLIST_LISTTYPE_UNKNOWN", "Set data list / ContentList listtype should be current or select in the studied exports.", {
       path: `${pointer}.properties.listtype`,
@@ -1005,9 +1014,35 @@ function validateContentList(issues, shape, pointer, options) {
       });
     }
   }
+  if (workflowHostType && !CONTENTLIST_HOST_TYPES.has(workflowHostType)) {
+    issue(issues, "warning", "CONTENTLIST_WORKFLOW_HOST_UNKNOWN", "Set data list validator received an unrecognized workflow host type; host-specific safety rules were not applied.", {
+      path: pointer,
+      nodeId: shapeId(shape),
+      workflowHostType,
+      allowed: [...CONTENTLIST_HOST_TYPES],
+    });
+  }
+  if (listtype === "current" && ["approval", "scheduled"].includes(workflowHostType)) {
+    issue(issues, severity, "CONTENTLIST_CURRENT_TARGET_HOST_INVALID", "Current list mode is export-proven only for Data List workflows. Approval and Scheduled workflows must use an explicitly selected target resource.", {
+      path: `${pointer}.properties.listtype`,
+      nodeId: shapeId(shape),
+      workflowHostType,
+    });
+  }
+  if (listtype === "current" && workflowHostType === "data-list" && type === "remove") {
+    issue(issues, isFinalGeneration ? "error" : "warning", "CONTENTLIST_CURRENT_REMOVE_NOT_EXPORT_PROVEN", "Removing the current host record is not proven by the Set Data List workflow references. Use a selected target with an explicit filter, or obtain an export/runtime reference before generation.", {
+      path: `${pointer}.properties.type`,
+      nodeId: shapeId(shape),
+    });
+  }
   if (["add", "edit"].includes(type)) {
     if (!Array.isArray(props.listdatas)) {
       issue(issues, severity, "CONTENTLIST_LISTDATAS_INVALID", "ContentList add/edit operation requires properties.listdatas array.", {
+        path: `${pointer}.properties.listdatas`,
+        nodeId: shapeId(shape),
+      });
+    } else if (props.listdatas.length === 0) {
+      issue(issues, severity, "CONTENTLIST_LISTDATAS_EMPTY", "ContentList add/edit operation requires at least one explicit field mapping.", {
         path: `${pointer}.properties.listdatas`,
         nodeId: shapeId(shape),
       });
@@ -1026,6 +1061,25 @@ function validateContentList(issues, shape, pointer, options) {
             studied: [...CONTENTLIST_NUMERIC_OPERATION_CODES],
           });
         }
+        if (target && targetFieldNames && !targetFieldNames.has(safeString(target)) && !(documentLibraryTarget && CONTENTLIST_DOCUMENT_LIBRARY_SPECIAL_FIELDS.has(safeString(target)))) {
+          issue(issues, severity, "CONTENTLIST_MAPPING_TARGET_UNKNOWN", "Set data list mapping targets a field that is absent from the resolved target schema.", {
+            path: `${pointer}.properties.listdatas[${index}].Columns`,
+            nodeId: shapeId(shape),
+            targetField: safeString(target),
+          });
+        }
+        if (target && entry && CONTENTLIST_NUMERIC_MUTATION_CODES.has(safeString(entry.Per))) {
+          const targetType = safeString(targetFieldTypes[safeString(target)]).toLowerCase();
+          if (targetType && !["number", "decimal", "integer", "bigint", "currency"].includes(targetType)) {
+            issue(issues, severity, "CONTENTLIST_NUMERIC_OPERATION_TARGET_NOT_NUMBER", "Increase, decrease, multiply, and divide are valid only for a numeric target field.", {
+              path: `${pointer}.properties.listdatas[${index}].Per`,
+              nodeId: shapeId(shape),
+              targetField: safeString(target),
+              targetType,
+              Per: safeString(entry.Per),
+            });
+          }
+        }
         if (!entry || !Object.prototype.hasOwnProperty.call(entry, "Data")) issue(issues, severity, "CONTENTLIST_MAPPING_VALUE_MISSING", "ContentList mapping is missing Data value/expression.", {
           path: `${pointer}.properties.listdatas[${index}].Data`,
           nodeId: shapeId(shape),
@@ -1034,6 +1088,7 @@ function validateContentList(issues, shape, pointer, options) {
           const result = validateExpressionTokens(entry.Data, { path: `${pointer}.properties.listdatas[${index}].Data` });
           for (const exprIssue of result.issues || []) {
             if (exprIssue.code === "EXPRESSION_TOKEN_UNKNOWN_SHAPE" && exprIssue.detail && exprIssue.detail.exprType === "list_field") continue;
+            if (exprIssue.code === "EXPRESSION_VARIABLE_BAD_VALUETYPE" && entry.Data.some((token) => token?.exprType === "variable" && safeString(token?.valueType).toLowerCase() === "file")) continue;
             const level = exprIssue.level === "error" ? severity : "warning";
             issue(issues, level, `CONTENTLIST_${exprIssue.code}`, "Set data list mapping expression did not fully match the expression reference.", {
               path: exprIssue.path,
@@ -1047,8 +1102,12 @@ function validateContentList(issues, shape, pointer, options) {
             nodeId: shapeId(shape),
           });
         }
+        validateContentListBatchSubListToken(issues, entry, `${pointer}.properties.listdatas[${index}]`, workflowHostType, severity, shape);
       });
     }
+  }
+  if (documentLibraryTarget && listtype === "select" && type === "add" && Array.isArray(props.listdatas)) {
+    validateDocumentLibraryAddMappings(issues, props.listdatas, pointer, shape, options);
   }
   if (["edit", "remove"].includes(type) && !Array.isArray(props.wheres)) {
     issue(issues, severity, "CONTENTLIST_WHERES_INVALID", "ContentList edit/remove operation requires properties.wheres array.", {
@@ -1057,13 +1116,84 @@ function validateContentList(issues, shape, pointer, options) {
     });
   }
   if (["edit", "remove"].includes(type) && Array.isArray(props.wheres) && props.wheres.length === 0) {
-    issue(issues, "warning", "CONTENTLIST_BROAD_MUTATION_FILTER_MISSING", "Set data list update/delete has no filter conditions. Product behavior can affect many records; require explicit safe intent before generation or runtime execution.", {
+    issue(issues, isFinalGeneration ? "error" : "warning", "CONTENTLIST_BROAD_MUTATION_FILTER_MISSING", "Set data list update/delete has no filter conditions. Product behavior can affect many records; require explicit safe intent before generation or runtime execution.", {
       path: `${pointer}.properties.wheres`,
       nodeId: shapeId(shape),
       type,
     });
   }
+  if (Array.isArray(props.wheres) && targetFieldNames) {
+    props.wheres.forEach((condition, index) => {
+      const target = safeString(condition && (condition.left || condition.field || condition.FieldName || condition.fieldName));
+      if (target && !targetFieldNames.has(target) && !(documentLibraryTarget && CONTENTLIST_DOCUMENT_LIBRARY_SPECIAL_FIELDS.has(target))) {
+        issue(issues, severity, "CONTENTLIST_WHERE_FIELD_UNKNOWN", "Set data list filter references a field that is absent from the resolved target schema.", {
+          path: `${pointer}.properties.wheres[${index}].left`,
+          nodeId: shapeId(shape),
+          targetField: target,
+        });
+      }
+    });
+  }
   validateConditionArray(issues, props.wheres, `${pointer}.properties.wheres`, "CONTENTLIST_WHERE_CONDITION_INVALID", severity);
+}
+
+function isDocumentLibraryTarget(value) {
+  return value === 16 || safeString(value).toLowerCase() === "16" || /document\s*library/i.test(safeString(value));
+}
+
+function validateDocumentLibraryAddMappings(issues, mappings, pointer, shape, options) {
+  const severity = strictLevel(options, "warning");
+  const byColumn = new Map(mappings.map((mapping) => [safeString(mapping?.Columns || mapping?.Column || mapping?.FieldName || mapping?.fieldName), mapping]));
+  for (const field of CONTENTLIST_DOCUMENT_LIBRARY_ADD_FIELDS) {
+    if (!byColumn.has(field)) {
+      issue(issues, severity, "CONTENTLIST_DOCUMENT_LIBRARY_ADD_FIELD_MISSING", "Document Library add requires explicit Title, Upload file (Text4), and _Path mappings.", {
+        path: `${pointer}.properties.listdatas`,
+        nodeId: shapeId(shape),
+        field,
+      });
+    }
+  }
+  const upload = byColumn.get("Text4");
+  if (upload && !hasFileValueExpression(upload.Data)) {
+    issue(issues, severity, "CONTENTLIST_DOCUMENT_LIBRARY_UPLOAD_FILE_INVALID", "Document Library Upload file (Text4) must be populated from a file field or current Loop item; it cannot be empty or a fixed text value.", {
+      path: `${pointer}.properties.listdatas`,
+      nodeId: shapeId(shape),
+    });
+  }
+  const title = byColumn.get("Title");
+  if (title && !hasDynamicDocumentNameToken(title.Data)) {
+    issue(issues, severity, "CONTENTLIST_DOCUMENT_LIBRARY_TITLE_UNIQUENESS_UNPROVEN", "Document Library Title must include a dynamic unique component such as request/instance identity or LoopIndex; fixed names can collide inside the library.", {
+      path: `${pointer}.properties.listdatas`,
+      nodeId: shapeId(shape),
+    });
+  }
+  const path = byColumn.get("_Path");
+  const staticPath = Array.isArray(path?.Data) && path.Data.length === 1 && path.Data[0]?.type === "str" ? safeString(path.Data[0].value) : "";
+  if (staticPath && (/^\//.test(staticPath) || /\/$/.test(staticPath) || /\/\//.test(staticPath))) {
+    issue(issues, severity, "CONTENTLIST_DOCUMENT_LIBRARY_PATH_FORMAT_INVALID", "Document Library _Path must use folder/subfolder format without a leading, trailing, or repeated slash.", {
+      path: `${pointer}.properties.listdatas`,
+      nodeId: shapeId(shape),
+      value: staticPath,
+    });
+  }
+}
+
+function hasFileValueExpression(value) {
+  return Array.isArray(value) && value.some((token) => isObject(token) && (
+    token.exprType === "loop_ctx"
+    || (token.exprType === "variable" && safeString(token.valueType).toLowerCase() === "file")
+    || (token.exprType === "list_field" && /file|upload|attachment/i.test(safeString(token.valueType)))
+  ));
+}
+
+function hasDynamicDocumentNameToken(value) {
+  return Array.isArray(value) && value.some((token) => isObject(token) && (
+    token.exprType === "variable"
+    || token.exprType === "application"
+    || token.exprType === "loop_ctx"
+    || token.exprType === "list_field"
+    || token.type === "func"
+  ));
 }
 
 function validateQueryData(issues, shape, pointer, options) {
@@ -1246,8 +1376,8 @@ function validateConditionArray(issues, value, pointer, code, severity, requireP
       issue(issues, entry.level === "error" ? severity : "warning", entry.code, entry.message, {
         path: entry.path,
         detail: entry.detail || null,
+        });
       });
-    });
     return;
   }
   value.forEach((condition, index) => {
@@ -1272,6 +1402,23 @@ function validateConditionArray(issues, value, pointer, code, severity, requireP
     validateConditionOperandShape(issues, condition.left, `${pointer}[${index}].left`, "left");
     validateConditionOperandShape(issues, condition.right, `${pointer}[${index}].right`, "right");
   });
+}
+
+function validateContentListBatchSubListToken(issues, entry, path, workflowHostType, severity, shape) {
+  for (const token of Array.isArray(entry?.Data) ? entry.Data : []) {
+    const key = safeString(token?.key);
+    if (!key.startsWith("_list.")) continue;
+    const childField = key.slice("_list.".length);
+    if (!childField) issue(issues, severity, "CONTENTLIST_BATCH_SUBLIST_KEY_INVALID", "Bulk Sub list mappings must use key _list.<child field>.", {
+      path: `${path}.Data`, nodeId: shapeId(shape),
+    });
+    if (["approval", "scheduled"].includes(workflowHostType) && token?.exprType !== "variable") issue(issues, severity, "CONTENTLIST_BATCH_SUBLIST_VARIABLE_TOKEN_INVALID", "Approval Form and Scheduled workflow bulk Sub list mappings must read from a Workflow List variable.", {
+      path: `${path}.Data`, nodeId: shapeId(shape), exprType: token?.exprType,
+    });
+    if (workflowHostType === "data-list" && token?.exprType !== "list_field") issue(issues, severity, "CONTENTLIST_BATCH_SUBLIST_LIST_FIELD_TOKEN_INVALID", "Data List workflow bulk Sub list mappings must read from a current List field.", {
+      path: `${path}.Data`, nodeId: shapeId(shape), exprType: token?.exprType,
+    });
+  }
 }
 
 function looksLikeExpressionTokenArray(value) {

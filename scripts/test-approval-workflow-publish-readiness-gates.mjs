@@ -70,6 +70,7 @@ try {
   assert.equal(contentListNode.properties.listtype, "select", "ContentList uses select application mode instead of current/Uncategorized");
   assert.equal(String(contentListNode.properties.listsetid), rootListSetId, "ContentList listsetid resolves to the current application ListSet");
   assert.equal(contentListNode.properties.appid, 41, "ContentList appid resolves to the current Yeeflow application context");
+  assert.equal(contentListNode.properties.listdatas[0].Data[0].key, "_list.rowTitle", "Approval workflow bulk mapping preserves the List-variable child field key");
   cases.push({ case: "pass: App Plan workflow nodes and ContentList target selection materialize into DefResource graph", status: "pass" });
 
   expectCode("planned workflow node parity fails when a planned task is missing", mutateResource(materializedDef, (def) => {
@@ -439,6 +440,12 @@ function approvalPlanMarkdown() {
     "| Business Travel Request Approval | Approval Workflow | Count Travel Records | multiple_count_only | Data List | Travel Records | None | Created desc | None | None | None | None | TravelRecordCount | 100 | 1 | Branch on count | TravelRecordCount > 0; TravelRecordCount <= 0 | Generated-final validation | Count only |",
     "| Business Travel Request Approval | Approval Workflow | Get Travel Title | single_to_variables | Data List | Travel Records | None | Created desc | queriedTitle | Workflow text variable | None | Title -> queriedTitle | None | 100 | 1 | Workflow variable | N/A | Generated-final validation | Single result |",
     "| Business Travel Request Approval | Approval Workflow | Query Travel Rows | multiple_to_list_variable | Data List | Travel Records | None | Created desc | travelRows | List workflow variable | TravelRows | Title -> rowTitle | None | 1000 | 1 | Loop through list items | N/A | Generated-final validation | List result |",
+    "",
+    "#### Workflow Set Data List Action Plan",
+    "",
+    "| Workflow Host | Workflow Name | Node Name | Target Mode | Target Resource | Target Resource Type | Operation | Mappings JSON | Filters JSON | Batch Source Type | Batch Source | Batch Source Fields JSON | Parent Loop | Proof Boundary | Notes |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Approval Form | Business Travel Request Approval | Create Travel Record | select | Travel Records | Data List | add | `[{\"Columns\":\"Title\",\"TargetType\":\"text\",\"Per\":\"0\",\"Data\":[{\"exprType\":\"variable\",\"valueType\":\"text\",\"id\":\"travelRows\",\"key\":\"_list.rowTitle\",\"type\":\"expr\",\"name\":\"Workflow Variables:Travel rows:Title\"}]}]` | `[]` | Workflow List Variable | travelRows | `[\"rowTitle\"]` |  | Generated-final validation | Persist one travel record for each queried row. |",
     "",
     "## 6. Form Reports Plan",
     "",

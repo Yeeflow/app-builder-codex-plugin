@@ -110,6 +110,9 @@ function collectPackageApprovalDefs(packagePath, resources, findings) {
     return;
   }
   for (const [formIndex, form] of asArray(decoded?.Forms || decoded?.Data?.Forms).entries()) {
+    // Forms[] also carries Data List and Scheduled workflows. Approval publish
+    // requirements apply only to the Approval Form workflow envelope.
+    if ([1, 3].includes(Number(form?.WorkflowType))) continue;
     const source = `$.Forms[${formIndex}].DefResource`;
     const decodedDef = decodeDefResource(form?.DefResource);
     if (!decodedDef) {

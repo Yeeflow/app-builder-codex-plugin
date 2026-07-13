@@ -1,0 +1,30 @@
+{
+  "stencil": "ContentList",
+  "proof": "export-proven-shape-runtime-proof-required",
+  "bulkSource": {
+    "host": "Approval Form or Scheduled Workflow",
+    "type": "Workflow List Variable",
+    "id": "<workflow-list-variable-id>",
+    "childFields": ["<child-field-id>"]
+  },
+  "properties": {
+    "name": "Save Sub list to Data list",
+    "listtype": "select",
+    "type": "add",
+    "appid": 41,
+    "listsetid": "<application-list-set-id>",
+    "listid": "<target-data-list-id>",
+    "listdatas": [
+      {
+        "Columns": "<parent-association-target-field>",
+        "Per": "0",
+        "Data": [{ "exprType": "variable", "valueType": "user", "id": "<applicant-or-parent-id>", "type": "expr" }]
+      },
+      {
+        "Columns": "<target-detail-field>",
+        "Per": "0",
+        "Data": [{ "exprType": "variable", "valueType": "string", "id": "<workflow-list-variable-id>", "key": "_list.<child-field-id>", "type": "expr" }]
+      }
+    ]
+  }
+}

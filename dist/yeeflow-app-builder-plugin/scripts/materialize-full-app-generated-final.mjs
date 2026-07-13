@@ -19,6 +19,7 @@ import { cleanPlanningLabel, isPlanningPlaceholder } from "./lib/planning-placeh
 import { resolveSchemaAuthoritativeFormControlType } from "./lib/form-control-type-authority.mjs";
 import {
   buildWorkflowQueryDataProperties,
+  buildWorkflowLoopProperties,
   normalizeWorkflowQueryDataMode,
   parseWorkflowFieldMap,
   parseWorkflowSorts,
@@ -26,6 +27,7 @@ import {
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
 import workflowGraphReferenceUtils from "./lib/approval-workflow-graph-reference-utils.cjs";
 import setVariableContractUtils from "./lib/set-variable-contract-utils.cjs";
+import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-list-plan.mjs";
 
 const {
   buildWorkflowExpressionButton,
@@ -221,6 +223,12 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 
   const specText = fs.readFileSync(specPath, "utf8");
   const planText = fs.readFileSync(planPath, "utf8");
+  const workflowSetDataListPlan = validateWorkflowSetDataListPlan(planText);
+  for (const finding of workflowSetDataListPlan.findings) {
+    if (finding.severity !== "error") continue;
+    findings.push(error(`FULL_APP_${finding.code}`, finding.message, { planningPath: finding.path }));
+  }
+  if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
   const planDemand = analyzeAppPlanResourceDemand(planText);
   fs.mkdirSync(outDir, { recursive: true });
   const appTitle = sanitizeTitle(options.title || extractApplicationName(planText) || extractTitle(planText) || extractTitle(specText) || "Generated Yeeflow Application");
@@ -726,7 +734,7 @@ function analyzeAppPlanResourceDemand(planText) {
     { key: "dataLists", marker: /^##\s+4\.\s+Data Lists and Document Libraries Plan/im, tableHeaders: ["List Name", "Data List Name", "Document Library Name", "List", "Data List"], outputSurface: "$.Childs[]" },
     { key: "approvalForms", marker: /^##\s+5\.\s+Approval Forms Plan/im, tableHeaders: ["Approval Form Name", "Form Name"], outputSurface: "$.Forms[]" },
     { key: "formReports", marker: /^##\s+6\.\s+Form Reports Plan/im, tableHeaders: ["Form Report Name"], outputSurface: "$.FormNewReports[]" },
-    { key: "scheduleWorkflows", marker: /^##\s+7\.\s+Schedule Workflows Plan/im, tableHeaders: ["Workflow Name", "Scheduled Workflow Name", "Schedule Workflow Name"], outputSurface: "$.Forms[] WorkflowType 3" },
+    { key: "scheduleWorkflows", marker: /^##\s+7\.\s+(?:Schedule|Scheduled) Workflows Plan/im, tableHeaders: ["Workflow Name", "Scheduled Workflow Name", "Schedule Workflow Name"], outputSurface: "$.Forms[] WorkflowType 3" },
     { key: "customForms", marker: /^##\s+10\.\s+Custom Data List Forms Plan/im, tableHeaders: ["Form Name"], outputSurface: "$.Childs[].Layouts[]" },
     { key: "dataListWorkflows", marker: /^##\s+11\.\s+Data List Workflows Plan/im, tableHeaders: ["Workflow Name", "Data List Workflow Name"], outputSurface: "$.Forms[] WorkflowType 1 + $.Childs[].FlowMappings[]" },
     { key: "dashboards", marker: /^##\s+14\.\s+Dashboard Pages Plan/im, tableHeaders: ["Dashboard Page Name", "Dashboard Page", "Page Name"], outputSurface: "$.Pages[] Type 103" },
@@ -780,6 +788,9 @@ function analyzeAppPlanResourceDemand(planText) {
   const dashboardPageLayoutTemplateRecords = collectDashboardPageLayoutTemplateRecords(planText);
   const reverseRelatedRecords = collectReverseRelatedPlanRows(planText);
   const formActionSetVariableRecords = collectFormActionSetVariableRecords(planText);
+  const workflowSetDataListRecords = collectWorkflowSetDataListRecords(planText);
+  const workflowLoopRecords = collectWorkflowLoopRecords(planText);
+  const workflowHostRecords = collectWorkflowHostRecords(planText);
   const explicitDashboardNames = resources.dashboards || [];
   const dashboardNamesFromTemplates = [
     ...dashboardPageLayoutTemplateRecords,
@@ -819,6 +830,9 @@ function analyzeAppPlanResourceDemand(planText) {
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
     workflowQueryDataConfigs: collectWorkflowQueryDataConfigs(planText),
+    workflowSetDataListRecords,
+    workflowLoopRecords,
+    workflowHostRecords,
     formActionSetVariableRecords,
     dashboardPageLayoutTemplateRecords,
     dashboardFilterRecords,
@@ -1739,6 +1753,98 @@ function collectWorkflowQueryDataConfigs(planText) {
   return byWorkflow;
 }
 
+function collectWorkflowSetDataListRecords(planText) {
+  const records = [];
+  for (const table of parseMarkdownTables(planText)) {
+    const headers = table.headers.map(normKey);
+    const column = (names) => findHeaderIndex(headers, names);
+    const hostColumn = column(["workflow host", "workflow host type"]);
+    const workflowColumn = column(["workflow name", "workflow"]);
+    const nodeColumn = column(["node name", "workflow node"]);
+    const modeColumn = column(["target mode"]);
+    const resourceColumn = column(["target resource"]);
+    const resourceTypeColumn = column(["target resource type"]);
+    const operationColumn = column(["operation"]);
+    const mappingsColumn = column(["mappings json"]);
+    const filtersColumn = column(["filters json"]);
+    const parentLoopColumn = column(["parent loop", "loop parent", "loop node"]);
+    if ([hostColumn, workflowColumn, nodeColumn, modeColumn, resourceColumn, resourceTypeColumn, operationColumn, mappingsColumn, filtersColumn].some((index) => index === -1)) continue;
+    for (const row of table.rows) {
+      const raw = row.__raw || [];
+      const get = (index) => cleanResourceName(row[table.headers[index]] || "");
+      const parse = (index) => parseJsonMaybe(cleanStructuredPlanCell(raw[index] || ""));
+      const record = {
+        host: get(hostColumn), workflowName: get(workflowColumn), nodeName: get(nodeColumn), targetMode: get(modeColumn), targetResource: get(resourceColumn), targetResourceType: get(resourceTypeColumn), operation: get(operationColumn), mappings: parse(mappingsColumn), filters: parse(filtersColumn),
+        batchSourceType: get(column(["batch source type"])),
+        batchSource: get(column(["batch source"])),
+        batchSourceFields: parse(column(["batch source fields json"])),
+        parentLoop: parentLoopColumn === -1 ? "" : get(parentLoopColumn),
+      };
+      if (record.host && record.workflowName && record.nodeName && !isNonResourceName(record.workflowName)) records.push(record);
+    }
+  }
+  return records;
+}
+
+function collectWorkflowLoopRecords(planText) {
+  const records = [];
+  for (const table of parseMarkdownTables(planText)) {
+    const headers = table.headers.map(normKey);
+    const column = (names) => findHeaderIndex(headers, names);
+    const workflowColumn = column(["workflow", "workflow name"]);
+    const hostColumn = column(["workflow host type", "workflow host"]);
+    const nodeColumn = column(["loop node name", "loop name"]);
+    const modeColumn = column(["loop mode"]);
+    const sourceParentColumn = column(["loop source parent"]);
+    const sourceColumn = column(["loop source"]);
+    const expressionColumn = column(["loop value expression json", "loop expression json"]);
+    if ([workflowColumn, nodeColumn, modeColumn].some((index) => index === -1)) continue;
+    for (const row of table.rows) {
+      const raw = row.__raw || [];
+      const get = (index) => index === -1 ? "" : cleanResourceName(row[table.headers[index]] || "");
+      const expression = expressionColumn === -1 ? null : parseJsonMaybe(cleanStructuredPlanCell(raw[expressionColumn] || ""));
+      const record = {
+        workflowName: get(workflowColumn),
+        host: get(hostColumn),
+        nodeName: get(nodeColumn),
+        mode: get(modeColumn).toLowerCase(),
+        sourceParent: get(sourceParentColumn),
+        source: get(sourceColumn),
+        expression,
+      };
+      if (record.workflowName && record.nodeName && !isNonResourceName(record.workflowName)) records.push(record);
+    }
+  }
+  return records;
+}
+
+function collectWorkflowHostRecords(planText) {
+  const records = [];
+  const collect = (marker, workflowType) => {
+    const section = extractNumberedSection(planText, marker);
+    for (const table of parseMarkdownTables(section)) {
+      const headers = table.headers.map(normKey);
+      // The detailed Set Data List action table is nested in the same section.
+      // It describes nodes, not workflow hosts.
+      if (headers.includes("workflow host")) continue;
+      const nameColumn = findHeaderIndex(headers, ["workflow name", "scheduled workflow name", "schedule workflow name", "data list workflow name"]);
+      const hostColumn = findHeaderIndex(headers, ["host list library", "host list", "host resource", "data list", "list library"]);
+      const triggerColumn = findHeaderIndex(headers, ["trigger condition", "trigger"]);
+      const settingsColumn = findHeaderIndex(headers, ["schedule settings json", "trigger settings json", "settings json", "schedule settings"]);
+      if (nameColumn === -1) continue;
+      for (const row of table.rows) {
+        const raw = row.__raw || [];
+        const name = cleanResourceName(row[table.headers[nameColumn]] || "");
+        if (!name || isNonResourceName(name)) continue;
+        records.push({ workflowType, name, hostResource: hostColumn === -1 ? "" : cleanResourceName(row[table.headers[hostColumn]] || ""), trigger: triggerColumn === -1 ? "" : cleanResourceName(row[table.headers[triggerColumn]] || ""), settings: settingsColumn === -1 ? null : parseJsonMaybe(cleanStructuredPlanCell(raw[settingsColumn] || "")) });
+      }
+    }
+  };
+  collect(/^##\s+7\.\s+(?:Schedule|Scheduled) Workflows Plan/im, 3);
+  collect(/^##\s+11\.\s+Data List Workflows Plan/im, 1);
+  return records;
+}
+
 function collectDashboardFilterRecords(planText) {
   const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
   const records = [];
@@ -2034,6 +2140,15 @@ function buildIdPaths(planDemand) {
     paths.push(`decoded.Forms[${index}].Key`);
     paths.push(`decoded.Forms[${index}].DefResourceID`);
   });
+  const workflowFormOffset = planDemand.resources.approvalForms.length;
+  const workflowHosts = plannedWorkflowHostRecords(planDemand);
+  workflowHosts.forEach((record, index) => {
+    paths.push(`decoded.Forms[${workflowFormOffset + index}].Key`);
+    paths.push(`decoded.Forms[${workflowFormOffset + index}].DefResourceID`);
+    if (record.workflowType !== 1) return;
+    const childIndex = childResources.findIndex((child) => normKey(child.name) === normKey(record.hostResource));
+    if (childIndex >= 0) paths.push(`decoded.Childs[${childIndex}].FlowMappings[${workflowFlowMappingIndex(planDemand, record)}].ID`);
+  });
   planDemand.resources.formReports.forEach((name, index) => {
     paths.push(`decoded.FormNewReports[${index}].ID`);
   });
@@ -2131,6 +2246,7 @@ function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = 
   const tableNames = [];
   for (const table of parseMarkdownTables(section)) {
     const normalizedHeaders = table.headers.map((header) => normKey(header));
+    if (["dataListWorkflows", "scheduleWorkflows"].includes(key) && normalizedHeaders.includes("workflow host")) continue;
     const nameColumn = findHeaderIndex(normalizedHeaders, tableHeaders);
     if (nameColumn === -1) continue;
     const nameHeader = table.headers[nameColumn];
@@ -4112,12 +4228,6 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
 }
 
 function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON, appPlanText = "", findings = [] }) {
-  if (planDemand.resources.scheduleWorkflows?.length) {
-    findings.push(error("FULL_APP_SCHEDULED_WORKFLOW_MATERIALIZER_NOT_IMPLEMENTED", "Scheduled Workflow resources are planned, but the shared full-app materializer does not yet emit the WorkflowType 3 resource envelope. Refusing to silently omit planned workflows.", { plannedWorkflows: planDemand.resources.scheduleWorkflows }));
-  }
-  if (planDemand.resources.dataListWorkflows?.length) {
-    findings.push(error("FULL_APP_DATA_LIST_WORKFLOW_MATERIALIZER_NOT_IMPLEMENTED", "Data List Workflow resources are planned, but the shared full-app materializer does not yet emit WorkflowType 1 Forms and host-list FlowMappings. Refusing to silently omit planned workflows.", { plannedWorkflows: planDemand.resources.dataListWorkflows }));
-  }
   const childResourceRecords = plannedChildResources(planDemand, planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`]);
   const dataListNames = childResourceRecords.map((record) => record.name);
   const dataListByName = new Map();
@@ -4258,7 +4368,18 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const key = stringId(ids[`decoded.Forms[${index}].Key`]);
     const defId = stringId(ids[`decoded.Forms[${index}].DefResourceID`]);
     const approvalFieldSpecs = approvalFieldSpecsForForm(planDemand, name);
-    const approvalWorkflowNodes = approvalWorkflowNodeSpecsForForm(planDemand, name);
+    const approvalWorkflowNodes = approvalWorkflowNodeSpecsForForm(planDemand, name).map((node) => {
+      if (node.nodeType !== "ContentList") return node;
+      const setDataListRecord = (planDemand.workflowSetDataListRecords || []).find((record) => (
+        normKey(record.host) === "approval form"
+        && normKey(record.workflowName) === normKey(name)
+        && normKey(record.nodeName) === normKey(node.nodeName)
+      ));
+      if (!setDataListRecord) {
+        findings.push(error("FULL_APP_APPROVAL_WORKFLOW_SET_DATALIST_CONFIG_REQUIRED", "Every Approval Form ContentList node must have one exact Workflow Set Data List Action Plan row; fallback mappings are not generation-ready.", { approvalForm: name, node: node.nodeName }));
+      }
+      return { ...node, setDataListRecord };
+    });
     const pageIds = approvalWorkflowIds(defId, key);
     return {
       Category: "",
@@ -4297,6 +4418,18 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       Perms: [],
     };
   });
+
+  const workflowForms = buildPlannedWorkflowHostForms({
+    planDemand,
+    rootListSetId: rootListId,
+    ids,
+    approvalFormCount: forms.length,
+    childResourceRecords,
+    listMetaByName,
+    childs,
+    findings,
+  });
+  forms.push(...workflowForms);
 
   const plannedFormReports = forms.length ? planDemand.resources.formReports.filter((name) => !isNonResourceName(name)) : [];
   const formNewReports = plannedFormReports.map((name, index) => ({
@@ -8206,6 +8339,324 @@ function workflowRejectedVertices(sourcePosition, rejectPosition) {
   ];
 }
 
+function plannedWorkflowHostRecords(planDemand) {
+  const parsed = Array.isArray(planDemand?.workflowHostRecords) ? planDemand.workflowHostRecords : [];
+  const expected = [
+    ...(planDemand?.resources?.dataListWorkflows || []).map((name) => ({ name, workflowType: 1 })),
+    ...(planDemand?.resources?.scheduleWorkflows || []).map((name) => ({ name, workflowType: 3 })),
+  ];
+  return expected.map((expectedRecord) => {
+    const found = parsed.find((record) => record.workflowType === expectedRecord.workflowType && normKey(record.name) === normKey(expectedRecord.name));
+    return found || { ...expectedRecord, hostResource: "", trigger: "", settings: null };
+  });
+}
+
+function workflowFlowMappingIndex(planDemand, host) {
+  return plannedWorkflowHostRecords(planDemand)
+    .filter((record) => record.workflowType === 1 && normKey(record.hostResource) === normKey(host.hostResource))
+    .findIndex((record) => normKey(record.name) === normKey(host.name));
+}
+
+function buildPlannedWorkflowHostForms({ planDemand, rootListSetId, ids, approvalFormCount, childResourceRecords, listMetaByName, childs, findings }) {
+  const hosts = plannedWorkflowHostRecords(planDemand);
+  const forms = [];
+  for (const [workflowIndex, host] of hosts.entries()) {
+    const actionRecords = (planDemand.workflowSetDataListRecords || []).filter((record) => (
+      normKey(record.workflowName) === normKey(host.name)
+      && ((host.workflowType === 1 && normKey(record.host) === "data list") || (host.workflowType === 3 && normKey(record.host) === "scheduled"))
+    ));
+    if (!actionRecords.length) {
+      findings.push(error("FULL_APP_WORKFLOW_SET_DATALIST_CONFIG_REQUIRED", "Every planned Data List or Scheduled Workflow must declare one or more exact Workflow Set Data List Action Plan rows before it can be materialized.", { workflow: host.name, workflowType: host.workflowType }));
+      continue;
+    }
+    let hostMeta = null;
+    let hostChildIndex = -1;
+    if (host.workflowType === 1) {
+      hostMeta = listMetaByName.get(normKey(host.hostResource)) || null;
+      hostChildIndex = childResourceRecords.findIndex((record) => normKey(record.name) === normKey(host.hostResource));
+      if (!hostMeta || hostChildIndex < 0) {
+        findings.push(error("FULL_APP_DATA_LIST_WORKFLOW_HOST_NOT_MATERIALIZED", "A Data List Workflow must declare a materialized host Data List or Document Library in the Data List Workflows Plan.", { workflow: host.name, hostResource: host.hostResource }));
+        continue;
+      }
+      if (!host.settings || typeof host.settings !== "object" || Array.isArray(host.settings)) {
+        findings.push(error("FULL_APP_DATA_LIST_WORKFLOW_TRIGGER_SETTINGS_REQUIRED", "Data List Workflow generation requires exact Trigger Settings JSON from the App Plan; do not infer lifecycle trigger payloads from prose.", { workflow: host.name, hostResource: host.hostResource }));
+        continue;
+      }
+    }
+    if (host.workflowType === 3 && (!host.settings || typeof host.settings !== "object" || Array.isArray(host.settings))) {
+      findings.push(error("FULL_APP_SCHEDULED_WORKFLOW_SETTINGS_REQUIRED", "Scheduled Workflow generation requires exact Schedule Settings JSON from the App Plan; do not invent schedules from prose.", { workflow: host.name }));
+      continue;
+    }
+    const formIndex = approvalFormCount + forms.length;
+    const key = stringId(ids[`decoded.Forms[${formIndex}].Key`]);
+    const defId = stringId(ids[`decoded.Forms[${formIndex}].DefResourceID`]);
+    if (!key || !defId) {
+      findings.push(error("FULL_APP_WORKFLOW_ID_ALLOCATION_MISSING", "Workflow Form IDs were not allocated before materialization.", { workflow: host.name, workflowType: host.workflowType }));
+      continue;
+    }
+    const def = buildWorkflowSetDataListDefResource({
+      name: host.name,
+      formKey: key,
+      defId,
+      workflowType: host.workflowType,
+      rootListSetId,
+      hostListId: hostMeta?.listId || "",
+      actionRecords,
+      loopRecords: (planDemand.workflowLoopRecords || []).filter((record) => normKey(record.workflowName) === normKey(host.name)),
+      listMetaByName,
+      findings,
+    });
+    if (!def) continue;
+    forms.push({
+      Category: "",
+      Name: host.name,
+      Key: key,
+      IsItemPerm: false,
+      AppID: 41,
+      ListID: hostMeta?.listId || 0,
+      ProcModelID: defId,
+      Description: "",
+      Ext: "",
+      DefResourceID: defId,
+      DefResource: exportResource(def),
+      Status: 1,
+      DeployedDefID: defId,
+      WorkflowType: host.workflowType,
+      Settings: host.workflowType === 3 ? JSON.stringify(host.settings) : "",
+      Deployed: true,
+      NoRule: { Prefix: "WF-{index}", StartIndex: 1, CustomLength: 4, AutoIncrement: 1 },
+      Perms: [],
+    });
+    if (host.workflowType === 1) {
+      const mappingIndex = workflowFlowMappingIndex(planDemand, host);
+      const mappingId = stringId(ids[`decoded.Childs[${hostChildIndex}].FlowMappings[${mappingIndex}].ID`]);
+      if (!mappingId) {
+        findings.push(error("FULL_APP_DATA_LIST_WORKFLOW_MAPPING_ID_MISSING", "A Data List Workflow FlowMappings ID was not allocated.", { workflow: host.name, hostResource: host.hostResource }));
+        continue;
+      }
+      childs[hostChildIndex].FlowMappings.push({
+        ID: mappingId,
+        ListID: stringId(hostMeta.listId),
+        Method: 0,
+        Setting: JSON.stringify(host.settings),
+        Title: host.name,
+        DefKey: key,
+        FieldName: cleanResourceName(host.trigger),
+        Ext1: "",
+        Ext2: "",
+        Ext3: "",
+      });
+    }
+  }
+  return forms;
+}
+
+function buildWorkflowSetDataListDefResource({ name, formKey, defId, workflowType, rootListSetId, hostListId = "", actionRecords, loopRecords = [], listMetaByName, findings }) {
+  const childshapes = buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSetId, hostListId, actionRecords, loopRecords, listMetaByName, findings });
+  if (!childshapes) return null;
+  return {
+    id: defId,
+    key: formKey,
+    defkey: formKey,
+    name,
+    title: name,
+    workflowType,
+    AppListSetID: stringId(rootListSetId),
+    ProcModelAppID: 41,
+    ProcModelListID: workflowType === 1 ? stringId(hostListId) : null,
+    ProcModelListSetID: workflowType === 1 ? stringId(rootListSetId) : null,
+    ext: {},
+    lineType: "rounded",
+    iconURL: "",
+    flowPage: [],
+    variables: { basic: [], listref: [], filter: [] },
+    graphposition: approvalWorkflowGraphPosition(childshapes),
+    graphzoom: 1,
+    graphver: 2,
+    pageurls: [],
+    childshapes: normalizeApprovalWorkflowGraphReferences(childshapes),
+  };
+}
+
+function buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSetId, hostListId, actionRecords, loopRecords = [], listMetaByName, findings }) {
+  const seed = `${defId}:${name}:set-data-list`;
+  const startId = deterministicUuid(`${seed}:start`);
+  const endId = deterministicUuid(`${seed}:end`);
+  const nodes = [];
+  for (const [index, record] of actionRecords.entries()) {
+    const target = record.targetMode === "current"
+      ? { listId: hostListId, listName: "Current list", resourceType: "data-list" }
+      : listMetaByName.get(normKey(record.targetResource));
+    if (!target?.listId) {
+      findings.push(error("FULL_APP_WORKFLOW_SET_DATALIST_TARGET_NOT_MATERIALIZED", "A Workflow Set Data List selected target must resolve to a generated Data List or Document Library.", { workflow: name, node: record.nodeName, targetResource: record.targetResource }));
+      return null;
+    }
+    nodes.push({
+      id: deterministicUuid(`${seed}:content-list:${index + 1}:${record.nodeName}`),
+      record,
+      target,
+      position: { x: 500 + index * 340, y: 200 },
+    });
+  }
+  const segments = [];
+  for (const node of nodes) {
+    const parentLoop = cleanResourceName(node.record.parentLoop);
+    if (!parentLoop) {
+      segments.push({ kind: "node", node });
+      continue;
+    }
+    let loop = segments.find((segment) => segment.kind === "loop" && normKey(segment.loop.nodeName) === normKey(parentLoop));
+    if (!loop) {
+      const loopRecord = loopRecords.find((record) => normKey(record.nodeName) === normKey(parentLoop));
+      if (!loopRecord) {
+        findings.push(error("FULL_APP_WORKFLOW_LOOP_CONFIG_REQUIRED", "A Set Data List node with Parent Loop requires an exact Workflow Loop Planning row so the LoopBody is not guessed.", { workflow: name, node: node.record.nodeName, parentLoop }));
+        return null;
+      }
+      loop = { kind: "loop", loop: loopRecord, nodes: [] };
+      segments.push(loop);
+    }
+    loop.nodes.push(node);
+  }
+  for (const segment of segments.filter((entry) => entry.kind === "loop")) {
+    const mode = segment.loop.mode;
+    if (!["list", "values", "number"].includes(mode)) {
+      findings.push(error("FULL_APP_WORKFLOW_LOOP_MODE_INVALID", "Workflow Loop Planning supports only list, values, or number modes.", { workflow: name, loop: segment.loop.nodeName, mode }));
+      return null;
+    }
+    if (mode === "list" && (!segment.loop.sourceParent || !segment.loop.source)) {
+      findings.push(error("FULL_APP_WORKFLOW_LOOP_SOURCE_REQUIRED", "A list Loop requires exact Loop Source Parent and Loop Source values.", { workflow: name, loop: segment.loop.nodeName }));
+      return null;
+    }
+    if ((mode === "values" || mode === "number") && !Array.isArray(segment.loop.expression)) {
+      findings.push(error("FULL_APP_WORKFLOW_LOOP_EXPRESSION_REQUIRED", "A values or number Loop requires exact Loop Value Expression JSON; do not derive it from prose.", { workflow: name, loop: segment.loop.nodeName, mode }));
+      return null;
+    }
+  }
+  const shapes = [];
+  const flow = (id, sourceId, targetId, label = "Next") => ({
+    id,
+    resourceid: id,
+    stencil: { id: "SequenceFlow" },
+    source: flowRef(sourceId),
+    target: flowRef(targetId),
+    properties: { name: label, linetype: "rounded", documentation: label, conditioninfo: [] },
+    dockers: [],
+  });
+  const flowIds = [];
+  const segmentId = (segment, index) => segment.kind === "node" ? segment.node.id : deterministicUuid(`${seed}:loop:${index + 1}:${segment.loop.nodeName}`);
+  const sourceIds = [startId, ...segments.map(segmentId)];
+  const targetIds = [...segments.map(segmentId), endId];
+  for (const [index, sourceId] of sourceIds.entries()) {
+    const id = deterministicUuid(`${seed}:flow:${index + 1}`);
+    flowIds.push(id);
+    shapes.push(flow(id, sourceId, targetIds[index], index === 0 ? "Started" : "Completed"));
+  }
+  shapes.push({
+    id: startId,
+    resourceid: startId,
+    stencil: { id: "StartNoneEvent" },
+    position: { x: 180, y: 200 },
+    incoming: [],
+    outgoing: [flowRef(flowIds[0])],
+    properties: { name: "Start", taskurl: "", isenabledemail: false, subject: "", to: "", html: "" },
+  });
+  for (const [index, segment] of segments.entries()) {
+    if (segment.kind === "loop") {
+      const loopId = segmentId(segment, index);
+      const bodyId = deterministicUuid(`${seed}:loop-body:${index + 1}:${segment.loop.nodeName}`);
+      const pureEdgeId = deterministicUuid(`${seed}:loop-body-edge:${index + 1}`);
+      const loopProperties = buildWorkflowLoopProperties({
+        name: segment.loop.nodeName,
+        loopType: segment.loop.mode,
+        sourceParent: segment.loop.sourceParent,
+        source: segment.loop.source,
+        expression: segment.loop.expression,
+      });
+      const internalFlowIds = segment.nodes.slice(0, -1).map((node, nodeIndex) => deterministicUuid(`${seed}:loop:${index + 1}:flow:${nodeIndex + 1}`));
+      const bodyChildren = [];
+      for (const [nodeIndex, node] of segment.nodes.entries()) {
+        bodyChildren.push({
+          id: node.id,
+          resourceid: node.id,
+          stencil: { id: "ContentList" },
+          position: { x: 80 + nodeIndex * 320, y: 70 },
+          incoming: nodeIndex === 0 ? [] : [flowRef(internalFlowIds[nodeIndex - 1])],
+          outgoing: nodeIndex === segment.nodes.length - 1 ? [] : [flowRef(internalFlowIds[nodeIndex])],
+          properties: buildWorkflowSetDataListProperties({ record: node.record, target: node.target, rootListSetId, hostListId, workflowType }),
+        });
+      }
+      for (const [nodeIndex, flowId] of internalFlowIds.entries()) bodyChildren.push(flow(flowId, segment.nodes[nodeIndex].id, segment.nodes[nodeIndex + 1].id, "Next"));
+      shapes.push({
+        id: pureEdgeId,
+        resourceid: pureEdgeId,
+        stencil: { id: "SequenceFlow" },
+        source: flowRef(loopId),
+        target: flowRef(bodyId),
+        properties: { name: "", linetype: "rounded", documentation: "", conditioninfo: [] },
+        dockers: [],
+        pureEdge: true,
+      });
+      shapes.push({
+        id: loopId,
+        resourceid: loopId,
+        stencil: { id: "Loop" },
+        bodyRef: bodyId,
+        position: { x: 500 + index * 340, y: 200 },
+        incoming: [flowRef(flowIds[index])],
+        outgoing: [flowRef(flowIds[index + 1]), flowRef(pureEdgeId)],
+        properties: loopProperties,
+      });
+      shapes.push({
+        id: bodyId,
+        resourceid: bodyId,
+        stencil: { id: "LoopBody" },
+        position: { x: 500 + index * 340, y: 340 },
+        incoming: [flowRef(pureEdgeId)],
+        outgoing: [],
+        properties: { name: "Loop body" },
+        children: bodyChildren,
+      });
+      continue;
+    }
+    const node = segment.node;
+    shapes.push({
+      id: node.id,
+      resourceid: node.id,
+      stencil: { id: "ContentList" },
+      position: node.position,
+      incoming: [flowRef(flowIds[index])],
+      outgoing: [flowRef(flowIds[index + 1])],
+      properties: buildWorkflowSetDataListProperties({ record: node.record, target: node.target, rootListSetId, hostListId, workflowType }),
+    });
+  }
+  shapes.push({
+    id: endId,
+    resourceid: endId,
+    stencil: { id: "EndNoneEvent" },
+    position: { x: 500 + segments.length * 340, y: 200 },
+    incoming: [flowRef(flowIds[flowIds.length - 1])],
+    outgoing: [],
+    properties: { name: "End", isenabledemail: false, subject: "", to: "", html: "" },
+  });
+  return shapes.map(withApprovalWorkflowDesignerBounds);
+}
+
+function buildWorkflowSetDataListProperties({ record, target, rootListSetId, hostListId, workflowType }) {
+  const selected = record.targetMode === "select";
+  const operation = cleanResourceName(record.operation).toLowerCase();
+  const properties = {
+    name: record.nodeName,
+    type: operation,
+    listtype: selected ? "select" : "current",
+    listid: stringId(selected ? target.listId : hostListId),
+    appid: selected ? 41 : "",
+    listdatas: operation === "remove" ? null : (record.mappings || []).map(({ TargetType, ...mapping }) => mapping),
+  };
+  if (selected) properties.listsetid = stringId(rootListSetId);
+  if (operation === "edit" || operation === "remove") properties.wheres = record.filters || [];
+  return properties;
+}
+
 function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [], formActionSetVariableRecords = [] }) {
   const {
     submissionPageId,
@@ -8568,6 +9019,21 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     return base;
   }
   if (stencil === "ContentList") {
+    if (step.setDataListRecord) {
+      const record = step.setDataListRecord;
+      const targetList = record.targetMode === "current"
+        ? null
+        : dataListMetas.find((meta) => normKey(meta?.listName) === normKey(record.targetResource));
+      if (!targetList?.listId) return base;
+      base.properties = {
+        ...base.properties,
+        ...buildWorkflowSetDataListProperties({ record, target: targetList, rootListSetId, hostListId: "", workflowType: 2 }),
+        plannedTargetListName: targetList.listName,
+        plannedBatchSourceType: record.batchSourceType || "",
+        plannedBatchSource: record.batchSource || "",
+      };
+      return base;
+    }
     const targetList = resolveContentListTargetList({ step, dataListMetas });
     const operation = workflowContentListOperation(step);
     base.properties = {

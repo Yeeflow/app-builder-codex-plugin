@@ -485,6 +485,8 @@ function validateWorkflowConnectorDescriptions(resource, flows, spacing, lineSty
   if (lineStyleRules.requireDocumentation === false) return;
   const maxChars = Number(spacing.workflowFlowDescriptionMaxChars || spacing.connectorLabelMaxChars || 42);
   for (const flow of flows) {
+    // Loop -> LoopBody is an internal Designer edge, not a business connector.
+    if (flow.shape?.pureEdge === true) continue;
     const flowPath = `$.childshapes[${flow.index}]`;
     const props = flow.shape.properties || {};
     if (!Object.prototype.hasOwnProperty.call(props, "documentation")) continue;

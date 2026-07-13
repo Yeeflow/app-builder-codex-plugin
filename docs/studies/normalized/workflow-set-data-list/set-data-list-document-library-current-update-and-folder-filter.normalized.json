@@ -1,0 +1,27 @@
+{
+  "currentDocumentUpdate": {
+    "stencil": "ContentList",
+    "workflowHost": "Document Library workflow",
+    "properties": {
+      "listtype": "current",
+      "type": "add",
+      "listdatas": [
+        { "Columns": "Text5", "Per": "0", "Data": [{ "type": "str", "value": "Active" }] },
+        { "Columns": "Datetime1", "Per": "0", "Data": ["<dateAdd(Created, year, 2) expression>"] },
+        { "Columns": "Decimal1", "Per": "1", "Data": [{ "type": "num", "value": "1" }] }
+      ]
+    }
+  },
+  "folderScopedMutation": {
+    "workflowHost": "Data List workflow",
+    "properties": {
+      "listtype": "select",
+      "type": "edit-or-remove",
+      "wheres": [
+        { "left": "<business or retention field>", "op": "<operator>", "right": "<value>" },
+        { "left": "_Path", "op": "0", "right": "<folder path expression>" }
+      ]
+    }
+  },
+  "proof": "export-proven-shape-runtime-proof-required"
+}

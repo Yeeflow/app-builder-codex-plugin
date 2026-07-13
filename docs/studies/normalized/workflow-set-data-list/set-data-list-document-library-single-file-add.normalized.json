@@ -1,0 +1,37 @@
+{
+  "stencil": "ContentList",
+  "proof": "export-proven-shape-runtime-proof-required",
+  "properties": {
+    "name": "Add travel document",
+    "listtype": "select",
+    "type": "add",
+    "appid": 41,
+    "listsetid": "<application-list-set-id>",
+    "listid": "<document-library-list-id>",
+    "listdatas": [
+      {
+        "Columns": "_Path",
+        "Per": "0",
+        "Data": [
+          { "exprType": "variable", "valueType": "text", "id": "<folder-variable-id>", "type": "expr", "name": "Workflow Variables:Folder" },
+          { "type": "op", "op": "&" },
+          { "type": "str", "value": "/travel documents" }
+        ]
+      },
+      {
+        "Columns": "Title",
+        "Per": "0",
+        "Data": [
+          { "exprType": "application", "valueType": "string", "id": "CurrentProcInstID", "type": "expr", "name": "Instance:Instance Id" }
+        ]
+      },
+      {
+        "Columns": "Text4",
+        "Per": "0",
+        "Data": [
+          { "exprType": "variable", "valueType": "file", "id": "<single-file-variable-id>", "type": "expr", "name": "Workflow Variables:Travel Document" }
+        ]
+      }
+    ]
+  }
+}

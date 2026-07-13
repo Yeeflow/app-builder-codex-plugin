@@ -1,0 +1,30 @@
+{
+  "stencil": "ContentList",
+  "proof": "export-proven-shape-runtime-proof-required",
+  "bulkSource": {
+    "host": "Data List Workflow",
+    "type": "Data List Sub List Field",
+    "id": "<host-sub-list-field-id>",
+    "childFields": ["<child-field-id>"]
+  },
+  "properties": {
+    "name": "Save sub list to data list",
+    "listtype": "select",
+    "type": "add",
+    "appid": 41,
+    "listsetid": "<application-list-set-id>",
+    "listid": "<target-data-list-id>",
+    "listdatas": [
+      {
+        "Columns": "<parent-association-target-field>",
+        "Per": "0",
+        "Data": [{ "exprType": "list_field", "valueType": "identity-picker", "id": "<host-parent-field-id>", "prop": "<host-parent-field-id>", "type": "expr" }]
+      },
+      {
+        "Columns": "<target-detail-field>",
+        "Per": "0",
+        "Data": [{ "exprType": "list_field", "valueType": "list", "id": "<host-sub-list-field-id>", "key": "_list.<child-field-id>", "type": "expr" }]
+      }
+    ]
+  }
+}

@@ -6,8 +6,11 @@ Proof boundary: this is export-proven, product-documented, config-reference-back
 
 | Source | Role | Proof label |
 |---|---|---|
-| `<downloads>/Workflow Actions Runtime Baseline (5)_Set data list.yap` | Export/schema source of truth | export-proven |
-| `<downloads>/node-configurations.json` | Node configuration path/control-type reference | config-reference-backed |
+| `/Users/Renger/Downloads/Workflow Actions Runtime Baseline (5)_Set data list.yap` | Export/schema source of truth | export-proven |
+| `/Users/rengerhu/Downloads/Leave Management-v1.1.yapk` | Approval, Data List, and Scheduled Workflow host coverage | export-proven |
+| `/Users/rengerhu/Downloads/Leave Management-v1.3.yapk` | Type 16 Document Library target, file mapping, folder paths, and Loop upload coverage | export-proven |
+| `/Users/rengerhu/Downloads/Leave Management-v1.4.yapk` | Direct bulk Sub list-to-record writes for Approval and Data List workflows | export-proven |
+| `/Users/Renger/Downloads/node-configurations.json` | Node configuration path/control-type reference | config-reference-backed |
 | Yeeflow Help Center: Set Data List Action, https://<yourdomain>.yeeflow.com/<redacted-path> | Product behavior and terminology | product-documented |
 | Yeeflow Help Center: Set data list step, https://<yourdomain>.yeeflow.com/<redacted-path> | Related form-action behavior for current list and selected data source | product-documented |
 | Yeeflow Help Center: Set Variable Action, https://<yourdomain>.yeeflow.com/<redacted-path> | Related workflow variable distinction | product-documented |
@@ -15,13 +18,13 @@ Proof boundary: this is export-proven, product-documented, config-reference-back
 
 ## Summary
 
-The export contains ten Set data list nodes. All Set data list nodes serialize as `ContentList`.
+The baseline and Leave Management v1.1 exports contain Set data list nodes. All Set data list nodes serialize as `ContentList`.
 
 | Workflow host | WorkflowType | `ContentList` count | Operations found | Target modes found | Notes |
 |---|---:|---:|---|---|---|
 | Approval form workflow | `2` | 6 | `add`, `edit`, `remove` | `select` | Targets included data lists. Proves selected-data-source add/update/delete, filters, numeric operation codes, and approval-form sub-list value mappings. |
 | Data-list workflow | `1` | 4 | `add`, `edit` | `current`, `select` | Proves current-list mode, selected-list mode, list-field expression values, and data-list sub-list value mappings. |
-| Scheduled workflow | `3` | 0 | none | none | This export does not prove Scheduled Workflow Set data list shape. |
+| Scheduled workflow | `3` | 4 | `add`, `edit`, `remove` | `select` | Leave Management v1.1 proves selected-target add/remove and Loop-body edit with Multiply/Divide mappings. |
 
 The studied app includes these relevant data sources:
 
@@ -47,8 +50,13 @@ All exported numeric IDs and private references are redacted in normalized refer
 | Data-list workflow | `ContentList` | Set Data List | `select` | `add` | Products | 3 | 0 | Adds to another data list using list-field and workflow-variable values. | export-proven |
 | Data-list workflow | `ContentList` | Set Data List | `select` | `edit` | Products | 1 | 1 | Updates selected Products row by Title filter. | export-proven |
 | Data-list workflow | `ContentList` | Set Data List | `select` | `add` | Save Sub Items | 6 | 0 | Products-list workflow maps data-list sub-list fields to multiple detail records. | export-proven |
+| Data-list workflow | `ContentList` | Update default usage | `select` | `remove` | Leave Usage Statistics | 0 | 1 | Deletes a selected target row with an exact filter. | export-proven (Leave Management v1.1) |
+| Scheduled workflow | `ContentList` | Update Information | `select` | `edit` | Employee Leave Balances | 1 | 1 | Loop-body numeric mappings prove Multiply (`Per=3`) and Divide (`Per=4`). | export-proven (Leave Management v1.1) |
+| Scheduled workflow | `ContentList` | Set Data List Sample | `select` | `add`, `remove` | Leave Usage Statistics / Employee Leave Balances | varies | varies | Scheduled selected-target maintenance shapes. | export-proven (Leave Management v1.1) |
 
-No `ContentList` node targets a document library in this export. Document-library targets are product-documented and config-plausible through selected data source behavior, but not export-proven by this sample.
+Leave Management v1.3 proves selected Type 16 Document Library targets for add/edit/remove, plus a Document Library host workflow using current-record update. File mutation behavior remains runtime-proof-required.
+
+Leave Management v1.4 proves direct bulk Sub list writes without a Loop wrapper. A selected-target `ContentList` `add` emits one target row for every source row when mapping tokens use `key: "_list.<child field>"`. Approval/Scheduled workflows use `exprType="variable"` with the Workflow List variable ID; Data List workflows use `exprType="list_field"` with the current host Sub list field ID. A parent-form/list mapping such as Applicant/Employee remains alongside the row mappings to retain source-row provenance.
 
 ## Data Source Target Selection
 
@@ -56,7 +64,7 @@ No `ContentList` node targets a document library in this export. Document-librar
 |---|---|---|---|---|
 | Selected data source | `properties.listtype="select"` plus `properties.appid`, `properties.listsetid`, `properties.listid` | approval and data-list workflows | Used for `Purchase Requests Runtime Test`, `Products`, and `Save Sub Items`. | export-proven |
 | Current list | `properties.listtype="current"` plus current host list `properties.listid` and no selected metadata | data-list workflow | Found on Purchase Requests Runtime Workflow. Product docs say current-list mode is list-form/list-context only. | export-proven + product-documented |
-| Document library target | not found | none | Product docs say selected data source can be data list or document library in related Set data list step behavior. | product-documented only |
+| Document library target | `listtype="select"` plus Type 16 target metadata and `_Path` / `Text4` mappings | Approval and Data List workflows | Leave Management v1.3 proves single-file add, Loop multi-file add, folder-scoped edit/remove, and native current-document update. | export-proven; runtime execution required |
 
 Generation rule: use `listtype="current"` only when a data-list/list-context host is present and the intent is to mutate the current item/list context. Use `listtype="select"` for other data lists or future document-library targets.
 
@@ -141,10 +149,10 @@ The product expectation is that sub-list rows can be saved to multiple target re
 | Current list mode | not found | found | export-proven |
 | Add operation | found | found | export-proven |
 | Edit operation | found | found | export-proven |
-| Remove operation | found | not found | export-proven absence in this export |
+| Remove operation | found | found | export-proven, including Leave Management v1.1 |
 | List-field values | not applicable except workflow variables/sub-list variable references | found as `exprType="list_field"` | export-proven |
 | Sub-list values | approval sub-list workflow variable references | data-list sub-list list-field references | export-proven |
-| Document library target | not found | not found | unproven in this export |
+| Document library target | selected Type 16 target found | selected Type 16 target found | export-proven shape; runtime mutation unproven |
 
 ## Set Data List vs Set Variable
 
