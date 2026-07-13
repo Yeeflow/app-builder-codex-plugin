@@ -20,6 +20,7 @@ try {
   expectPass("Submission form template resource passes", ["--resource", writeJson("submission-valid.json", submissionResource()), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"]);
   expectPass("Task form template resource passes", ["--resource", writeJson("task-valid.json", taskResource()), "--template", TASK_TEMPLATE_ID, "--page-role", "task"]);
   expectPass("generated package with submission and task templates passes", ["--package", writePackage("valid-approval-layout.yapk", decodedPackage())]);
+  expectPass("mixed Forms envelopes skip Data List and Scheduled workflow submission-page checks", ["--package", writePackage("mixed-workflow-types.yapk", decodedPackage({ mixedWorkflowTypes: true }))]);
   expectPass("generated package with data-list and schedule workflow task templates passes", ["--package", writePackage("valid-workflow-task-layouts.yapk", decodedPackage({ workflowTasks: true }))]);
   expectPass("App Plan approval layout selections pass", ["--plan", writeText("valid-app-plan.md", appPlan())]);
 
@@ -193,6 +194,22 @@ function decodedPackage(options = {}) {
     Navigation: [],
     IconUrl: "{\"b\":\"#0f766e\",\"i\":\"fa-solid fa-clipboard-check\",\"c\":\"#ffffff\"}",
   };
+  if (options.mixedWorkflowTypes) {
+    decoded.Forms.push(
+      {
+        Key: "DATA-LIST-WORKFLOW",
+        Name: "Data list workflow",
+        WorkflowType: 1,
+        DefResource: encodeDefResource({ key: "DATA-LIST-WORKFLOW", workflowType: 1, pageurls: [], childshapes: [] }),
+      },
+      {
+        Key: "SCHEDULED-WORKFLOW",
+        Name: "Scheduled workflow",
+        WorkflowType: 3,
+        DefResource: encodeDefResource({ key: "SCHEDULED-WORKFLOW", workflowType: 3, pageurls: [], childshapes: [] }),
+      },
+    );
+  }
   if (options.workflowTasks) {
     const workflowTask = options.workflowTaskResource || taskResource();
     decoded.DataListWorkflows = [
