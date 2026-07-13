@@ -93,6 +93,9 @@ yeeflow-data-list-generator/
 
 # Large or decoded generated artifacts that may contain customer data.
 *.json
+!docs/reference/form-action-open-item-form.template.json
+!docs/reference/form-action-open-approval-form.template.json
+!docs/reference/form-action-open-dashboard.template.json
 !fixtures/runtime-test-specs/dashboard-collection-first-generation-test-spec.json
 !it-hardware-capex-request-ui-generation-spec.json
 !it-hardware-capex-request-v3-ui-refresh-spec.json

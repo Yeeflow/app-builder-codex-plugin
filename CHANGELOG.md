@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add V1.7 export-backed Form Action Open Item Form, Open Approval Form, and Open Dashboard golden references across Approval Submission/Task, Data List/Document Library custom forms, and Dashboard.
+- Materialize `listitem`, `openform`, and `opendashboard` through one shared App Plan contract and builder, including current/selected item targeting, optional target-owned custom forms, defaults, query parameters, returned item IDs, and shared open-mode sizing.
+- Block Public Form usage, unresolved targets/layouts, missing selected Item/Form IDs, submitted-form input leakage, Dashboard non-temp expressions, and invalid Slide/Pop-up/Full page/New window sizing before signing readiness.
+- Harden Open Resource signing gates for selected custom-form operation purpose, parseable Item/Form ID expressions, unique named Query Parameters with valid values, and Approval Set Variables target/type compatibility.
+- Record safe render-only runtime proof for Add Item, New Approval Submission, and Dashboard targets while preserving no-write boundaries for selected Edit/View and Submitted Form variants that require disposable runtime IDs.
+
 ## 0.9.63
 
 - Add export-backed Form Action Set Data List golden references for Approval submission/task forms, Data List and Document Library custom forms, and Dashboard pages, covering conditional add/update/delete, current-record updates, execution results, and trigger bindings.

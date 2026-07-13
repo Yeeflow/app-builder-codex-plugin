@@ -19,7 +19,7 @@ Phase 1 covers:
 - `setvar` action steps
 - `confirm` action steps
 
-Phase 1 does not yet promote `listitem` action steps to general generation, although the export contains one example.
+The V1.7 Open Resource training supersedes the earlier `listitem` deferral: generated Approval, Data List/Document Library, and Dashboard Form Actions may use the shared `listitem`, `openform`, and `opendashboard` builder only when the matching planning and package hard gates pass.
 
 Phase 2 covers:
 
@@ -401,3 +401,15 @@ Use selected-resource `add`, `edit`, or `remove` for a Data List or Document Lib
 Form Action Set Data List writes one mutation per step. It must not expand a Sub List into multiple records; that capability belongs to Workflow Set Data List. Generated steps must have concise business names, explicit operation and target mode, complete field mappings for add/edit, optional execution conditions plus `continue` for mutually exclusive chains, and declared result targets when status/item/count outputs are consumed. Run `validate-form-action-set-data-list-plan.mjs` before generation and `validate-form-action-set-data-list.mjs --strict-generated` before signing.
 
 Approval Task Form Set Data List uses the same serialization as Submission Form. Data List and Document Library New/Edit/View forms share the custom-form contract. For selected Document Library Add, map `_Path` when a folder path is required and always map one single-file value to native Upload File `Text4`; Form Actions do not Loop or expand multi-file/array/List/Sub List sources. Print Page remains deferred to focused export training.
+
+# Form Action Open Resource
+
+Use `docs/standards/form-action-open-resource-golden-reference-standard.md` and `scripts/lib/form-action-open-resource-utils.cjs` for all generated Open Item Form, Open Approval Form, and Open Dashboard steps.
+
+- `listitem`: Add omits `op_type`; Edit/View emit it. Selected Edit/View requires `listdataid`. Current item is valid only on Data List/Document Library custom forms. Optional `layout` must belong to the selected target.
+- `openform`: New submission may carry `setVars` and `queryParams`; `setVars.defKey` equals the target `ProcKey`. Submitted form requires `formid` and carries neither input block.
+- `opendashboard`: target `PageID` resolves to Type 103 and may receive query parameters.
+- Open modes are `slide`, `modal`, `target`, and `new`. Slide/Pop-up sizes are `0`, `1`, `2`, `3`, and custom `9`; custom requires `cusize.w`.
+- Approval Submission/Task, Data List/Document Library custom forms, and Dashboard share the builder and trigger binder. Dashboard expressions are temp-only. Public Form is forbidden.
+
+Run `validate-form-action-open-resource-plan.mjs` before generation and `validate-form-action-open-resource.mjs --strict-generated` before signing. Export and validator proof do not by themselves claim live navigation or modal rendering.

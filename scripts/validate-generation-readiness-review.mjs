@@ -8,6 +8,7 @@ import { validateWorkflowLoopPlan } from "./validate-workflow-loop-plan.mjs";
 import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-list-plan.mjs";
 import { validateSetVariablePlan } from "./validate-set-variable-plan.mjs";
 import { validateFormActionSetDataListPlan } from "./validate-form-action-set-data-list-plan.mjs";
+import { validateFormActionOpenResourcePlan } from "./validate-form-action-open-resource-plan.mjs";
 
 const AREAS = [
   { key: "dataLists", title: "Data Lists and Document Libraries Plan", code: "GENERATION_READINESS_AREA_EMPTY", required: /data list|document library|not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required/i, extra: validateDataLists },
@@ -528,6 +529,24 @@ function validate(file) {
     ...finding,
   });
 
+  const formActionOpenResourcePlan = validateFormActionOpenResourcePlan(text);
+  const hasFormActionOpenResourceIntent = formActionOpenResourcePlan.openResourceRows > 0 || text.split(/\r?\n/).some((line) =>
+    /\b(Open item form|Open approval form|Open dashboard|listitem|openform|opendashboard)\b/i.test(line)
+    && /\b(Form Action|Submission form|Task form|Data List Form|Dashboard)\b/i.test(line)
+    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
+  );
+  if (hasFormActionOpenResourceIntent && formActionOpenResourcePlan.openResourceRows === 0) findings.push({
+    level: "error",
+    code: "GENERATION_READINESS_FORM_ACTION_OPEN_RESOURCE_PLAN_TABLE_MISSING",
+    area: "Form Action Open Resource Planning",
+    message: "Open Item Form, Open Approval Form, and Open Dashboard intent requires the standard Form Action Open Resource Planning table.",
+  });
+  for (const finding of formActionOpenResourcePlan.findings) findings.push({
+    level: finding.severity === "warning" ? "warning" : "error",
+    area: "Form Action Open Resource Planning",
+    ...finding,
+  });
+
   const workflowQueryDataPlan = validateWorkflowQueryDataPlan(text);
   const hasWorkflowQueryDataIntent = workflowQueryDataPlan.queryDataRows > 0 || text.split(/\r?\n/).some((line) =>
     /\bQuery\s*Data\b|\bQueryData\b/i.test(line)
@@ -626,6 +645,12 @@ function validate(file) {
       detectedIntent: hasWorkflowSetDataListIntent,
       setDataListRows: workflowSetDataListPlan.setDataListRows,
       status: workflowSetDataListPlan.status,
+    },
+    formActionOpenResourcePlan: {
+      validatorRan: true,
+      detectedIntent: hasFormActionOpenResourceIntent,
+      openResourceRows: formActionOpenResourcePlan.openResourceRows,
+      status: formActionOpenResourcePlan.status,
     },
     setVariablePlan: {
       validatorRan: true,
