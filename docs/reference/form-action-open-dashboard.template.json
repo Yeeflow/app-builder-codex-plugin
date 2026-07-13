@@ -1,0 +1,15 @@
+{
+  "templateId": "form_action_open_dashboard_v1_1",
+  "exactStepType": "opendashboard",
+  "example": {
+    "type": "opendashboard",
+    "name": "Open leave overview",
+    "attrs": {
+      "data": { "page": { "AppID": 41, "ListSetID": "${LIST_SET_ID}", "PageID": "${PAGE_ID}" } },
+      "queryParams": [{ "name": "employee", "value": { "variable": [{ "exprType": "variable", "valueType": "user", "id": "__temp_Employee", "type": "expr" }] } }],
+      "op": "modal",
+      "modalsize": 9,
+      "cusize": { "w": 420 }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "templateId": "form_action_open_approval_form_v1_1",
+  "exactStepType": "openform",
+  "newSubmissionExample": {
+    "type": "openform",
+    "name": "Create leave request",
+    "attrs": {
+      "data": { "form": { "AppID": 41, "ListSetID": "${LIST_SET_ID}", "ProcKey": "${PROC_KEY}" } },
+      "optype": "new",
+      "setVars": { "defKey": "${PROC_KEY}", "Rules": [{ "id": "Applicant", "idx": "Applicant", "name": "Applicant", "type": "user", "source": "Applicant", "rule": [{ "exprType": "variable", "valueType": "user", "id": "Requester", "type": "expr" }] }] },
+      "queryParams": [{ "name": "source", "value": { "value": "dashboard" } }],
+      "op": "target"
+    }
+  },
+  "submittedExample": {
+    "type": "openform",
+    "name": "View submitted request",
+    "attrs": {
+      "data": { "form": { "AppID": 41, "ListSetID": "${LIST_SET_ID}", "ProcKey": "${PROC_KEY}" } },
+      "optype": "submitted",
+      "formid": [{ "exprType": "variable", "valueType": "string", "id": "FormID", "type": "expr" }],
+      "op": "modal",
+      "modalsize": 3
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "templateId": "form_action_open_item_form_v1_1",
+  "exactStepType": "listitem",
+  "operations": ["add", "edit", "view"],
+  "targetModes": ["current", "select"],
+  "selectedExample": {
+    "type": "listitem",
+    "name": "View leave balance",
+    "attrs": {
+      "data": { "list": { "AppID": 41, "ListSetID": "${LIST_SET_ID}", "ListID": "${LIST_ID}" } },
+      "op_type": "view",
+      "listdataid": [{ "exprType": "variable", "valueType": "string", "id": "SelectedItemID", "type": "expr" }],
+      "layout": "${OPTIONAL_CUSTOM_FORM_LAYOUT_ID}",
+      "queryParams": [{ "name": "source", "value": { "value": "leave-request" } }],
+      "op": "modal",
+      "modalsize": 1
+    }
+  },
+  "currentItemExample": {
+    "type": "listitem",
+    "name": "Edit current balance",
+    "attrs": { "op_type": "edit", "op": "slide", "modalsize": 2 }
+  }
+}

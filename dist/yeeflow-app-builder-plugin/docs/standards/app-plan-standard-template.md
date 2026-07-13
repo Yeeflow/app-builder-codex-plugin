@@ -268,7 +268,26 @@ Rules:
 - Data List Workflow `SetVariableTask` cannot update the current record. Use a `ContentList` / Set Data List node with `listtype = "current"` for current-item field writes.
 - A bulk Sub list write is an export-proven `ContentList` `add` action, not a Loop substitute: use `key: "_list.<childField>"` in each row-derived mapping. Approval Form and Scheduled workflows use `exprType: "variable"` from a declared Workflow List variable; Data List workflows use `exprType: "list_field"` from a current-record Sub list field. Declare the corresponding Batch Source columns above, use an explicit selected target, and include a parent-form/list association mapping such as Applicant, Employee, or instance ID whenever the target rows need to remain traceable to their source.
 
-Query Data planning rules:
+
+##### Form Action Open Resource Planning
+
+Required whenever a Form Action opens an Item Form, Approval Form, or Dashboard. One row represents one step; use exact step types `listitem`, `openform`, and `opendashboard`.
+
+| Host Resource | Host Form / Page | Host Type | Action Name | Step Order | Step Name | Trigger | Bound Control | Exact Step Type | Operation Type | Target Mode | Target Resource Type | Target Resource | Item / Form ID Expression Tokens | Selected Custom Form | Default / Set Variables JSON | Query Parameters JSON | Open Mode | Modal Size | Custom Width | Return Item ID Temp Variable | Execution Condition Tokens | Continue When Not Met | Business Rationale | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Resource> | <Submission form / Task form / Custom form / Dashboard> | Approval Submission / Approval Task / Data List New/Edit/View / Document Library New/Edit/View / Dashboard | <Business action> | 1 | <Business step> | Button Click / Container Click / Field Change / Page Load | <Exact control identity> | listitem / openform / opendashboard | add / edit / view / new / submitted / open | current / select / N/A | Data List / Document Library / Approval Form / Dashboard | <Exact target> | <JSON token array or None> | <Target custom form or None> | <JSON array or None> | <JSON array or None> | slide / modal / target / new | 0 / 1 / 2 / 3 / 9 / None | <positive width for size 9 or None> | <temp variable or None> | <JSON token array or None> | Yes / No | <Reason> | export-proven / runtime-proof-required |
+
+Rules:
+
+- Follow `docs/standards/form-action-open-resource-golden-reference-standard.md`; do not substitute direct control action settings for Form Action steps.
+- Selected Item Edit/View requires exact Item ID expression tokens. Current item mode is available only on Data List or Document Library custom forms.
+- `openform/new` may use target Approval variable defaults and query parameters. `openform/submitted` requires Form ID tokens and forbids both.
+- Optional custom item forms must belong to the selected target Data List or Document Library and match the requested operation.
+- Dashboard-host expressions may reference only declared temp variables.
+- Slide/Pop-up use modal sizes 0/1/2/3/9. Size 9 requires Custom Width. Full page/New window carry no modal size.
+- Public Forms cannot plan or materialize these steps.
+
+##### Form Action Query Data Planning Rules
 
 - One table row represents one Form Action step. Repeat `Action Name` for multi-step actions and preserve row order.
 - Data List Form rows must identify both `Host Resource` and `Host Form`; these values are part of Plan-vs-Actual validation.
