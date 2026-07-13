@@ -150,6 +150,7 @@ function validatePackage(packagePath, context) {
     return;
   }
   for (const [formIndex, form] of asArray(decoded?.Forms || decoded?.Data?.Forms).entries()) {
+    if (isNonApprovalWorkflowEnvelope(form)) continue;
     const def = decodeDefResource(form?.DefResource);
     if (!def) {
       context.findings.push(error("APPROVAL_FORM_LAYOUT_DEFRESOURCE_DECODE_FAILED", "Approval form DefResource must decode before Approval Form Layouts v1.1 validation.", { formIndex, formName: form?.Name || form?.Title || "" }));
@@ -197,6 +198,11 @@ function validatePackage(packagePath, context) {
       validateTaskReadonlyGuidance(page.formdef, context.findings, `${workflow.source}.${pageIndex}`);
     }
   }
+}
+
+function isNonApprovalWorkflowEnvelope(form) {
+  const workflowType = Number(form?.WorkflowType ?? form?.workflowType);
+  return workflowType === 1 || workflowType === 3;
 }
 
 function validateAppPlan(planPath, findings) {

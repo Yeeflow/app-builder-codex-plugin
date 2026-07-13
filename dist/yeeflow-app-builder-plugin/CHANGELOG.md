@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.62
+
+- Scope Approval Form layout-template validation to Approval workflow envelopes (`WorkflowType = 2`) while skipping Data List and Scheduled workflow envelopes serialized in the shared `Forms[]` collection.
+- Preserve strict submission-page validation for Approval forms and legacy type-missing Approval exports.
+- Add mixed-envelope regression coverage proving one Approval form can coexist with Data List and Scheduled workflows without false `APPROVAL_FORM_LAYOUT_SUBMISSION_PAGE_COUNT_INVALID` signing blockers.
+
 ## 0.9.61
 
 - Add export-backed Workflow Set Data List golden references for Approval, Data List, and Scheduled workflows, covering current-record updates plus add, update, and delete operations against Data Lists and Document Libraries.
