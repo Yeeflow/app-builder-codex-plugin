@@ -171,6 +171,21 @@ When an Assignment Task uses a direct Job Position assignee, add or include Job 
 
 When `Node Type = SetVariableTask`, add a `Set Variable Assignments` column using `VariableId :: variableType :: Business Name :: JSON expression token array`, separated by `;;` for multiple assignments. Exact assignments are mandatory; never use an empty/default placeholder.
 
+#### Workflow Set Data List Action Plan
+
+| Workflow Host | Workflow Name | Node Name | Target Mode | Target Resource | Target Resource Type | Operation | Mappings JSON | Filters JSON | Batch Source Type | Batch Source | Batch Source Fields JSON | Parent Loop | Proof Boundary | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Approval Form / Data List / Scheduled | <Workflow> | <ContentList node> | current/select | <Host or selected resource> | Data List / Document Library | add/edit/remove | <JSON array of Columns, Per, Data> | <JSON array of where conditions> | Workflow List Variable / Data List Sub List Field / blank | <List variable id or Sub list field id> | <JSON array of child field IDs> | <Loop name or blank> | export-proven/runtime-proof-required/export-learning-required | <Business intent> |
+
+Rules:
+
+- Approval Form and Scheduled workflows must use `Target Mode = select`.
+- Data List workflows may use `current`; preserve the export-proven `current + add` shape for current-record mutation.
+- `add` and `edit` require a non-empty `Mappings JSON` array. `edit` and `remove` require non-empty, field-specific `Filters JSON`.
+- Numeric operation codes are `0` Value, `1` Increase, `2` Decrease, `3` Multiply, and `4` Divide. Codes `1` through `4` require a numeric target field.
+- Document Library targets are export-proven for Type 16 node shape. Add operations must map `Title`, `Text4` (Upload file), and `_Path`; mark actual file mutation execution `runtime-proof-required` until disposable-library runtime proof exists.
+- When `Parent Loop` is nonblank, the node is materialized inside the named `LoopBody`; the plan must also contain an exact Workflow Loop Planning row. It must never be flattened into a host graph or recreated as repeated static nodes.
+
 Workflow rules:
 
 - Node types must come from the active plugin workflow-node knowledge base.
@@ -251,6 +266,7 @@ Rules:
 - `Start Another Action Target` must resolve to another action on the same page. Use it to chain derived-value actions such as Requester -> Department/Department name.
 - Approval field rows that consume Set Variable output must set `Read Only = Yes` for derived display values. When generated Dynamic Display behavior is required, the field row's `Dynamic Display` cell must contain an exact JSON rule array; generation rewrites every rule `controlId` to the containing control ID and rejects undeclared variable references.
 - Data List Workflow `SetVariableTask` cannot update the current record. Use a `ContentList` / Set Data List node with `listtype = "current"` for current-item field writes.
+- A bulk Sub list write is an export-proven `ContentList` `add` action, not a Loop substitute: use `key: "_list.<childField>"` in each row-derived mapping. Approval Form and Scheduled workflows use `exprType: "variable"` from a declared Workflow List variable; Data List workflows use `exprType: "list_field"` from a current-record Sub list field. Declare the corresponding Batch Source columns above, use an explicit selected target, and include a parent-form/list association mapping such as Applicant, Employee, or instance ID whenever the target rows need to remain traceable to their source.
 
 Query Data planning rules:
 
@@ -309,9 +325,9 @@ Workflow Query Data planning rules:
 
 Required for every Workflow `Loop` node.
 
-| Workflow | Workflow Host Type | Loop Node Name | Loop Mode | Loop Source Parent | Loop Source | LoopBody Actions | Current Iteration / Current Item Use | Delay or Repeated Side Effects | Proof Boundary | Business Rationale |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Workflow> | Approval / Data List / Scheduled Workflow | <Business action name> | list / values / number | __variables_ / __list_ / expression | <List variable, Sub List field, multi-value expression, or count expression> | <Ordered actions inside LoopBody> | <LoopIndex / LoopItem fields / None> | <Email, mutation, Delay, or None> | export-proven / runtime-proof-required | <Why iteration is required> |
+| Workflow | Workflow Host Type | Loop Node Name | Loop Mode | Loop Source Parent | Loop Source | Loop Value Expression JSON | LoopBody Actions | Current Iteration / Current Item Use | Delay or Repeated Side Effects | Proof Boundary | Business Rationale |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Workflow> | Approval / Data List / Scheduled Workflow | <Business action name> | list / values / number | __variables_ / __list_ / blank for expression | <List variable or Sub List field> | <required for values/number; expression token array> | <Ordered actions inside LoopBody> | <LoopIndex / LoopItem fields / None> | <Email, mutation, Delay, or None> | export-proven / runtime-proof-required | <Why iteration is required> |
 
 Workflow Loop planning rules:
 
@@ -319,6 +335,7 @@ Workflow Loop planning rules:
 - `list + __list_` is Data List Workflow-only and requires a real Sub List field on the host list.
 - `values` requires a non-empty expression-token array that returns multiple values; V1.7 proves a multiple User field.
 - `number` requires an expression-token array that resolves to a positive loop count; a fixed number uses a numeric token.
+- For `values` and `number`, `Loop Value Expression JSON` is required and is copied exactly into `Loop.properties.loopValue.value`; do not serialize a business label or derive an expression from prose.
 - Every mode requires a resolving `bodyRef` and explicit ordered `LoopBody Actions`.
 - List current iteration is `LoopIndex`; current row fields use `LoopItem.<field>`. Do not invent field IDs.
 - Repeated email, mutation, external calls, and Delay execution are runtime-sensitive even when their serialization is export-proven.
@@ -538,6 +555,7 @@ Required when a Data list workflow includes a generated task form page.
 Rules:
 
 - Node types must come from active plugin workflow-node documentation or export-proven references.
+- Every Data List workflow `ContentList` node must also appear in the Workflow Set Data List Action Plan with explicit target, mapping, and filter JSON.
 - Runtime execution proof is separate from package validation.
 - If a Data list workflow includes a task form, it must select `approval_form_layout_task_v1_1`. The generated task form must follow the same Approval Form Layouts v1.1 task template contract as Approval form task pages, including readonly-by-default fields unless assignee input is required.
 

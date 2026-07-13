@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.60`
+- Version: `0.9.61`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.60` hardens schema-authoritative Approval controls and Dashboard Collection schema/dependency closure, including namespaced operation variables and unplanned Workbench template-residue cleanup.
+Current release `0.9.61` adds export-backed Workflow Set Data List generation for Data Lists and Document Libraries, including direct List/Sub List bulk writes, numeric operations, folder-aware document writes, and signing-readiness validation.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.60
+Version: 0.9.61
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.60
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.61
 ```
 
 ## What Is Included

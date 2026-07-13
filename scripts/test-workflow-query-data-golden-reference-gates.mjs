@@ -269,12 +269,11 @@ try {
   const materializerReport = materializeFullAppGeneratedFinal({ cwd: materializerTemp, functionalSpec: specPath, appPlan: planPath, outDir: path.join(materializerTemp, "dist"), allowFixtureApiIdsForTests: true });
   assert.equal(materializerReport.status, "fail");
   const materializerCodes = new Set(materializerReport.findings.map((finding) => finding.code));
-  assert.ok(materializerCodes.has("FULL_APP_SCHEDULED_WORKFLOW_MATERIALIZER_NOT_IMPLEMENTED"));
-  assert.ok(materializerCodes.has("FULL_APP_DATA_LIST_WORKFLOW_MATERIALIZER_NOT_IMPLEMENTED"));
+  assert.ok(materializerCodes.has("FULL_APP_WORKFLOW_SET_DATALIST_CONFIG_REQUIRED"));
 } finally {
   fs.rmSync(materializerTemp, { recursive: true, force: true });
 }
-cases.push({ case: "full-app materializer cannot silently omit WorkflowType 1/3 plans", status: "pass" });
+cases.push({ case: "full-app materializer requires explicit Workflow Set Data List configuration for WorkflowType 1/3 plans", status: "pass" });
 
 console.log(JSON.stringify({ status: "pass", test: path.basename(fileURLToPath(import.meta.url)), cases }, null, 2));
 

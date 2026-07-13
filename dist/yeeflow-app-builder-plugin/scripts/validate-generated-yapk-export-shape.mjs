@@ -62,6 +62,9 @@ function readPackageOrDecodedJson(file) {
 function validateApprovalForms(decoded, findings) {
   for (const [formIndex, form] of asArray(decoded?.Forms).entries()) {
     const formPath = `$.Forms[${formIndex}]`;
+    // Data List (1) and Scheduled (3) workflows use the same Forms[] envelope,
+    // but do not own Approval submission/task pages or reviewer paths.
+    if ([1, 3].includes(Number(form?.WorkflowType))) continue;
     const defResult = decodeApprovalDefResource(form?.DefResource, `${formPath}.DefResource`);
     findings.push(...defResult.findings);
     if (!defResult.def) continue;

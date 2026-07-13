@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.9.60",
-  "description": "v0.9.60 hardens schema-authoritative controls and Collection dependency closure.",
+  "version": "0.9.61",
+  "description": "v0.9.61 adds export-backed Workflow Set Data List generation and signing-readiness hardening.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [

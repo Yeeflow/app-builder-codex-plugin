@@ -1,0 +1,27 @@
+{
+  "loop": {
+    "stencil": "Loop",
+    "properties": {
+      "loopType": "values",
+      "loopValue": {
+        "type": 2,
+        "value": [
+          { "exprType": "variable", "valueType": "file", "id": "<multi-file-variable-id>", "type": "expr", "name": "Workflow Variables:Additional Documents" }
+        ]
+      }
+    }
+  },
+  "loopBodyContentList": {
+    "stencil": "ContentList",
+    "proof": "export-proven-shape-runtime-proof-required",
+    "properties": {
+      "listtype": "select",
+      "type": "add",
+      "listdatas": [
+        { "Columns": "_Path", "Per": "0", "Data": ["<folder expression>", { "type": "str", "value": "/additional documents" }] },
+        { "Columns": "Title", "Per": "0", "Data": ["<dynamic request identity>", { "exprType": "loop_ctx", "key": "LoopIndex", "type": "expr", "name": "Current Loop:Current iteration" }] },
+        { "Columns": "Text4", "Per": "0", "Data": [{ "exprType": "loop_ctx", "key": "LoopItem", "type": "expr", "name": "Current Loop:Current object" }] }
+      ]
+    }
+  }
+}

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.61
+
+- Add export-backed Workflow Set Data List golden references for Approval, Data List, and Scheduled workflows, covering current-record updates plus add, update, and delete operations against Data Lists and Document Libraries.
+- Enforce numeric-field Value, Increase, Decrease, Multiply, and Divide semantics; Document Library Upload File, unique Name, and folder Path contracts; and loop-backed multi-file writes before signing readiness.
+- Support direct bulk writes from Approval/Scheduled List variables and Data List Sub List fields through canonical `_list.<field>` mappings, preserving a parent-record association mapping and blocking source-kind, child-field, or operation mismatches.
+
 ## 0.9.60
 
 - Make Approval Form control materialization schema-authoritative so Text variables whose names contain `Status`, `Category`, `Type`, or `Priority` cannot silently become Radio/Select controls.

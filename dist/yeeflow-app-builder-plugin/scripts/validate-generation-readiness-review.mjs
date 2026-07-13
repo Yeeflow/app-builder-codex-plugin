@@ -5,6 +5,7 @@ import path from "node:path";
 import { validateFormActionQueryDataPlan } from "./validate-form-action-query-data-plan.mjs";
 import { validateWorkflowQueryDataPlan } from "./validate-workflow-query-data-plan.mjs";
 import { validateWorkflowLoopPlan } from "./validate-workflow-loop-plan.mjs";
+import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-list-plan.mjs";
 import { validateSetVariablePlan } from "./validate-set-variable-plan.mjs";
 
 const AREAS = [
@@ -550,6 +551,28 @@ function validate(file) {
     });
   }
 
+  const workflowSetDataListPlan = validateWorkflowSetDataListPlan(text);
+  const hasWorkflowSetDataListIntent = workflowSetDataListPlan.setDataListRows > 0 || text.split(/\r?\n/).some((line) =>
+    /\bSet\s*Data\s*List\b/i.test(line)
+    && /\b(Approval|Data List|Scheduled)\s+Workflow\b|\bworkflow\s+node\b/i.test(line)
+    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
+  );
+  if (hasWorkflowSetDataListIntent && workflowSetDataListPlan.setDataListRows === 0) {
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_WORKFLOW_SET_DATALIST_PLAN_TABLE_MISSING",
+      area: "Workflow Set Data List Planning",
+      message: "Workflow Set Data List intent requires the standard Workflow Set Data List Action Plan table before generation readiness can pass.",
+    });
+  }
+  for (const finding of workflowSetDataListPlan.findings) {
+    findings.push({
+      level: finding.severity === "warning" ? "warning" : "error",
+      area: "Workflow Set Data List Planning",
+      ...finding,
+    });
+  }
+
   const errors = findings.filter((finding) => finding.level !== "warning").length;
   const warnings = findings.filter((finding) => finding.level === "warning").length;
   return {
@@ -576,6 +599,12 @@ function validate(file) {
       detectedIntent: hasWorkflowLoopIntent,
       loopRows: workflowLoopPlan.loopRows,
       status: workflowLoopPlan.status,
+    },
+    workflowSetDataListPlan: {
+      validatorRan: true,
+      detectedIntent: hasWorkflowSetDataListIntent,
+      setDataListRows: workflowSetDataListPlan.setDataListRows,
+      status: workflowSetDataListPlan.status,
     },
     setVariablePlan: {
       validatorRan: true,
