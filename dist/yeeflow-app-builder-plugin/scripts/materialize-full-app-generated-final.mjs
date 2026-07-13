@@ -27,6 +27,7 @@ import {
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
 import workflowGraphReferenceUtils from "./lib/approval-workflow-graph-reference-utils.cjs";
 import setVariableContractUtils from "./lib/set-variable-contract-utils.cjs";
+import formActionSetDataListUtils from "./lib/form-action-set-data-list-utils.cjs";
 import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-list-plan.mjs";
 
 const {
@@ -39,6 +40,7 @@ const {
   normalizeApprovalWorkflowGraphReferences,
 } = workflowGraphReferenceUtils;
 const { buildWorkflowVariableSetting, normalizeSetVariableHostType } = setVariableContractUtils;
+const { buildFormActionSetDataListStep } = formActionSetDataListUtils;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
@@ -788,6 +790,7 @@ function analyzeAppPlanResourceDemand(planText) {
   const dashboardPageLayoutTemplateRecords = collectDashboardPageLayoutTemplateRecords(planText);
   const reverseRelatedRecords = collectReverseRelatedPlanRows(planText);
   const formActionSetVariableRecords = collectFormActionSetVariableRecords(planText);
+  const formActionSetDataListRecords = collectFormActionSetDataListRecords(planText);
   const workflowSetDataListRecords = collectWorkflowSetDataListRecords(planText);
   const workflowLoopRecords = collectWorkflowLoopRecords(planText);
   const workflowHostRecords = collectWorkflowHostRecords(planText);
@@ -834,6 +837,7 @@ function analyzeAppPlanResourceDemand(planText) {
     workflowLoopRecords,
     workflowHostRecords,
     formActionSetVariableRecords,
+    formActionSetDataListRecords,
     dashboardPageLayoutTemplateRecords,
     dashboardFilterRecords,
     dashboardSummaryMetricRecords,
@@ -902,6 +906,75 @@ function collectFormActionSetVariableRecords(planText) {
   return records;
 }
 
+function collectFormActionSetDataListRecords(planText) {
+  const records = [];
+  for (const table of parseMarkdownTables(planText)) {
+    const headers = table.headers.map((header) => normKey(header));
+    const column = (names) => findHeaderIndex(headers, names);
+    const stepTypeColumn = column(["exact step type", "step type"]);
+    if (stepTypeColumn === -1) continue;
+    const hostResourceColumn = column(["host resource"]);
+    const hostPageColumn = column(["host form page", "host form", "host page"]);
+    const hostTypeColumn = column(["host type", "host surface page"]);
+    const actionColumn = column(["action name"]);
+    const stepOrderColumn = column(["step order"]);
+    const stepNameColumn = column(["step name"]);
+    const operationColumn = column(["operation"]);
+    const targetModeColumn = column(["target mode"]);
+    if ([hostResourceColumn, hostPageColumn, hostTypeColumn, actionColumn, stepOrderColumn, stepNameColumn, operationColumn, targetModeColumn].some((index) => index === -1)) continue;
+    const triggerColumn = column(["trigger"]);
+    const boundControlColumn = column(["bound control", "bound control field"]);
+    const targetTypeColumn = column(["target resource type"]);
+    const targetResourceColumn = column(["target resource"]);
+    const mappingsColumn = column(["field mapping json", "field mapping"]);
+    const filtersColumn = column(["filter json", "filters"]);
+    const conditionColumn = column(["execution condition tokens", "condition tokens", "condition"]);
+    const continueColumn = column(["continue when not met", "continue"]);
+    const statusKindColumn = column(["status target kind"]);
+    const statusIdColumn = column(["status target id"]);
+    const itemKindColumn = column(["item result target kind", "item id count target kind"]);
+    const itemIdColumn = column(["item result target id", "item id count target id"]);
+    const itemAttrColumn = column(["item result attribute"]);
+    const rationaleColumn = column(["business rationale", "notes"]);
+    const cell = (row, index) => index === -1 ? "" : row[table.headers[index]];
+    const structuredCell = (row, index) => index === -1 ? "" : row.__raw?.[index] ?? cell(row, index);
+    for (const row of table.rows) {
+      if (!/set\s*data\s*list|setdatalist/i.test(cleanResourceName(cell(row, stepTypeColumn)))) continue;
+      const hostResource = cleanResourceName(cell(row, hostResourceColumn));
+      const hostPage = cleanResourceName(cell(row, hostPageColumn));
+      const hostType = cleanResourceName(cell(row, hostTypeColumn));
+      const actionName = cleanResourceName(cell(row, actionColumn));
+      const stepName = cleanResourceName(cell(row, stepNameColumn));
+      if ([hostResource, hostPage, actionName, stepName].some((value) => !value || isPlanningPlaceholder(value))) continue;
+      records.push({
+        hostResource,
+        hostPage,
+        hostType,
+        actionName,
+        stepOrder: Number(cleanResourceName(cell(row, stepOrderColumn))) || 1,
+        stepName,
+        trigger: cleanResourceName(cell(row, triggerColumn)) || "None",
+        boundControl: cleanResourceName(cell(row, boundControlColumn)),
+        operation: cleanResourceName(cell(row, operationColumn)).toLowerCase(),
+        targetMode: cleanResourceName(cell(row, targetModeColumn)).toLowerCase(),
+        targetResourceType: cleanResourceName(cell(row, targetTypeColumn)),
+        targetResource: cleanResourceName(cell(row, targetResourceColumn)),
+        mappingsJson: cleanStructuredPlanCell(structuredCell(row, mappingsColumn)),
+        filtersJson: cleanStructuredPlanCell(structuredCell(row, filtersColumn)),
+        conditionJson: cleanStructuredPlanCell(structuredCell(row, conditionColumn)),
+        continueNext: /^(true|yes)$/i.test(cleanResourceName(cell(row, continueColumn))),
+        statusTargetKind: cleanResourceName(cell(row, statusKindColumn)),
+        statusTargetId: cleanResourceName(cell(row, statusIdColumn)),
+        itemTargetKind: cleanResourceName(cell(row, itemKindColumn)),
+        itemTargetId: cleanResourceName(cell(row, itemIdColumn)),
+        itemResultAttribute: cleanResourceName(cell(row, itemAttrColumn)).toLowerCase(),
+        rationale: cleanResourceName(cell(row, rationaleColumn)),
+      });
+    }
+  }
+  return records;
+}
+
 export function materializePlannedFormActionSetVariables(resource, { records = [], hostResource = "", hostPage = "", hostType = "" } = {}) {
   if (!resource || typeof resource !== "object") return resource;
   const requestedHostType = normalizeSetVariableHostType(hostType);
@@ -959,6 +1032,100 @@ export function materializePlannedFormActionSetVariables(resource, { records = [
     bindPlannedFormActionTrigger(resource, action, actionRecords[0]);
   }
   return resource;
+}
+
+export function materializePlannedFormActionSetDataLists(resource, {
+  records = [], hostResource = "", hostPage = "", hostSurface = "", listMetaByName = new Map(), rootListSetId = "",
+} = {}) {
+  if (!resource || typeof resource !== "object") return resource;
+  const selected = records.filter((record) => normKey(record.hostResource) === normKey(hostResource)
+    && normKey(record.hostPage) === normKey(hostPage)
+    && (!record.hostType || formActionSetDataListHostMatches(record.hostType, hostSurface)));
+  if (!selected.length) return resource;
+  resource.actions = Array.isArray(resource.actions) ? resource.actions : [];
+  resource.formAction = resource.formAction && typeof resource.formAction === "object" && !Array.isArray(resource.formAction) ? resource.formAction : {};
+  resource.tempVars = Array.isArray(resource.tempVars) ? resource.tempVars : [];
+  for (const record of [...selected].sort((left, right) => left.stepOrder - right.stepOrder)) {
+    let action = resource.actions.find((item) => normKey(item?.name) === normKey(record.actionName));
+    if (!action) {
+      action = { id: deterministicUuid(`${hostResource}:${hostPage}:form-action:${record.actionName}`), name: record.actionName, steps: [] };
+      resource.actions.push(action);
+    }
+    action.steps = Array.isArray(action.steps) ? action.steps : [];
+    const targetMeta = record.targetMode === "select" ? listMetaByName.get(normKey(record.targetResource)) : null;
+    if (record.targetMode === "select" && !targetMeta) throw new Error(`FORM_ACTION_SET_DATA_LIST_TARGET_UNRESOLVED: ${hostResource} / ${hostPage} / ${record.targetResource}`);
+    const statusTarget = formActionResultTarget(record.statusTargetKind, record.statusTargetId);
+    const itemTarget = formActionResultTarget(record.itemTargetKind, record.itemTargetId);
+    if (statusTarget?.parent === "__temp_") ensureFormActionResultTempVariable(resource, statusTarget.id, "number");
+    if (itemTarget?.parent === "__temp_") ensureFormActionResultTempVariable(resource, itemTarget.id, "text");
+    const step = buildFormActionSetDataListStep({
+      hostSurface,
+      name: record.stepName,
+      operation: record.operation,
+      targetMode: record.targetMode,
+      target: targetMeta ? { AppID: 41, ListSetID: rootListSetId, ListID: targetMeta.listId, ListType: targetMeta.resourceType === "document-library" ? 16 : 1 } : undefined,
+      mappings: parseRequiredPlanJsonArray(record.mappingsJson, record.operation === "remove" ? [] : null, `FORM_ACTION_SET_DATA_LIST_MAPPING_INVALID: ${hostResource} / ${hostPage} / ${record.stepName}`),
+      filters: parseRequiredPlanJsonArray(record.filtersJson, [], `FORM_ACTION_SET_DATA_LIST_FILTER_INVALID: ${hostResource} / ${hostPage} / ${record.stepName}`),
+      condition: parseRequiredPlanJsonArray(record.conditionJson, [], `FORM_ACTION_SET_DATA_LIST_CONDITION_INVALID: ${hostResource} / ${hostPage} / ${record.stepName}`),
+      continueNext: record.continueNext,
+      statusTarget,
+      itemTarget,
+      itemResultAttribute: formActionItemResultAttribute(record.itemResultAttribute),
+    });
+    const existingIndex = action.steps.findIndex((item) => item?.type === "setdatalist" && normKey(item?.name) === normKey(record.stepName));
+    if (existingIndex >= 0) action.steps.splice(existingIndex, 1);
+    const insertionIndex = Math.max(0, Math.min(action.steps.length, record.stepOrder - 1));
+    action.steps.splice(insertionIndex, 0, step);
+    bindPlannedFormActionTrigger(resource, action, record);
+  }
+  return resource;
+}
+
+function formActionSetDataListHostMatches(planned, actual) {
+  const normalized = normKey(planned);
+  if (actual === "dashboard") return /dashboard/.test(normalized);
+  if (/^approval_/.test(actual)) {
+    if (!/approval/.test(normalized)) return false;
+    if (/submission/.test(normalized)) return actual === "approval_submission";
+    if (/task/.test(normalized)) return actual === "approval_task";
+    if (/print/.test(normalized)) return false;
+    return true;
+  }
+  if (/^data_list_/.test(actual)) return /data list/.test(normalized);
+  if (/^document_library_/.test(actual)) return /document library/.test(normalized);
+  return false;
+}
+
+function formActionResultTarget(kind, id) {
+  if (!id || isPlanningPlaceholder(id) || /^none|n a|not applicable$/i.test(normKey(id))) return null;
+  const key = normKey(kind);
+  const parent = /temp/.test(key) ? "__temp_" : /current.*field|list field/.test(key) ? "__list_" : "__variables_";
+  return { id: cleanResourceName(id).replace(/^__temp_/, ""), parent };
+}
+
+function formActionItemResultAttribute(value) {
+  const normalized = cleanResourceName(value).toLowerCase();
+  return !normalized || /^(none|n a|not applicable)$/.test(normKey(normalized)) ? undefined : normalized;
+}
+
+function ensureFormActionResultTempVariable(resource, id, type) {
+  const cleanId = cleanResourceName(id).replace(/^__temp_/, "");
+  if (resource.tempVars.some((variable) => [variable.id, variable.name].some((value) => normKey(value) === normKey(cleanId)))) return;
+  resource.tempVars.push({ idx: deterministicUuid(`${resource.id || resource.title}:temp:${cleanId}`), id: cleanId, name: cleanId, type });
+}
+
+function parseRequiredPlanJsonArray(value, fallback, errorMessage) {
+  if (!value || isPlanningPlaceholder(value) || /^(none|n\/a|not applicable)$/i.test(value)) {
+    if (fallback !== null) return fallback;
+    throw new Error(errorMessage);
+  }
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) throw new Error("not array");
+    return parsed;
+  } catch {
+    throw new Error(errorMessage);
+  }
 }
 
 function buildPlannedFormActionAssignment(record) {
@@ -3158,6 +3325,14 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     hostPage: formName,
     hostType: "Data List Form",
   });
+  materializePlannedFormActionSetDataLists(resource, {
+    records: planDemand.formActionSetDataListRecords,
+    hostResource: listName,
+    hostPage: formName,
+    hostSurface: `${String(planDemand.childResourceRecords?.find((record) => normKey(record.name) === normKey(listName))?.resourceType || "data-list").replace("-", "_")}_${templateKind === "newEdit" ? (/\bedit\b/i.test(formName) ? "edit" : "new") : "view"}`,
+    listMetaByName,
+    rootListSetId,
+  });
   reconcilePageTempVariableReferences(resource);
   return resource;
 }
@@ -4401,6 +4576,8 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         approvalWorkflowNodes,
         dataListMetas: Array.from(listMetaByName.values()),
         formActionSetVariableRecords: planDemand.formActionSetVariableRecords,
+        formActionSetDataListRecords: planDemand.formActionSetDataListRecords,
+        listMetaByName,
       })),
       Status: 1,
       DeployedDefID: defId,
@@ -4477,6 +4654,14 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       hostResource: name,
       hostPage: name,
       hostType: "Dashboard",
+    });
+    materializePlannedFormActionSetDataLists(dashboardResource, {
+      records: planDemand.formActionSetDataListRecords,
+      hostResource: name,
+      hostPage: name,
+      hostSurface: "dashboard",
+      listMetaByName,
+      rootListSetId: rootListId,
     });
     const dashboardResourceJson = JSON.stringify(dashboardResource);
     return {
@@ -8657,7 +8842,7 @@ function buildWorkflowSetDataListProperties({ record, target, rootListSetId, hos
   return properties;
 }
 
-function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [], formActionSetVariableRecords = [] }) {
+function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [], formActionSetVariableRecords = [], formActionSetDataListRecords = [], listMetaByName = new Map() }) {
   const {
     submissionPageId,
     taskPageId,
@@ -8702,6 +8887,23 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     hostPage: "Task form",
     hostType: "Approval",
   });
+  materializePlannedFormActionSetDataLists(submissionFormDef, {
+    records: formActionSetDataListRecords,
+    hostResource: name,
+    hostPage: "Submission form",
+    hostSurface: "approval_submission",
+    listMetaByName,
+    rootListSetId,
+  });
+  materializePlannedFormActionSetDataLists(taskFormDef, {
+    records: formActionSetDataListRecords,
+    hostResource: name,
+    hostPage: "Task form",
+    hostSurface: "approval_task",
+    listMetaByName,
+    rootListSetId,
+  });
+  variables.tempVars = mergeApprovalPageTempVars(variables.tempVars, submissionFormDef.tempVars, taskFormDef.tempVars);
   return {
     id: defId,
     key: formKey,
@@ -8751,6 +8953,18 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     ],
     childshapes,
   };
+}
+
+function mergeApprovalPageTempVars(...groups) {
+  const merged = [];
+  const seen = new Set();
+  for (const group of groups) for (const variable of group || []) {
+    const id = cleanResourceName(variable?.id || variable?.name);
+    if (!id || seen.has(normKey(id))) continue;
+    seen.add(normKey(id));
+    merged.push({ idx: variable.idx || deterministicUuid(`approval-temp:${id}`), id, ...(variable.type ? { type: variable.type } : {}) });
+  }
+  return merged;
 }
 
 function approvalWorkflowExecutionSteps(nodes) {

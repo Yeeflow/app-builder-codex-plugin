@@ -1,0 +1,37 @@
+{
+  "templateId": "form_action_set_data_list_document_library_add_v1",
+  "hostSurface": "data_list_view",
+  "step": {
+    "type": "setdatalist",
+    "name": "Add travel document",
+    "attrs": {
+      "listtype": "select",
+      "type": "add",
+      "listdatas": [
+        {
+          "Per": "0",
+          "Columns": "_Path",
+          "Data": [
+            { "exprType": "list_field", "valueType": "radio", "id": "LeaveType", "type": "expr" },
+            { "type": "op", "op": "&" },
+            { "type": "str", "value": "/travel documents" }
+          ]
+        },
+        {
+          "Per": "0",
+          "Columns": "Text4",
+          "Data": [
+            { "exprType": "list_field", "valueType": "file-upload", "id": "TravelDocument", "type": "expr" }
+          ]
+        }
+      ]
+    }
+  },
+  "rules": {
+    "targetResourceType": "Document Library",
+    "uploadField": "Text4",
+    "pathField": "_Path",
+    "singleFileOnly": true,
+    "multiFileRequiresWorkflow": true
+  }
+}

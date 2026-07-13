@@ -1,0 +1,11 @@
+{
+  "templateId": "form_action_set_data_list_dashboard_crud_v1",
+  "hostSurface": "dashboard",
+  "rules": {
+    "targetMode": "select",
+    "targetResourceTypes": ["Data List", "Document Library"],
+    "resultParent": "__temp_",
+    "updateDeleteRequireFilters": true
+  },
+  "operations": ["add", "edit", "remove"]
+}

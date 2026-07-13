@@ -1,0 +1,15 @@
+{
+  "templateId": "form_action_set_data_list_data_list_view_current_edit_v1",
+  "hostSurface": "data_list_view",
+  "step": {
+    "type": "setdatalist",
+    "name": "Update current item",
+    "attrs": {
+      "listtype": "current",
+      "type": "edit",
+      "listdatas": [
+        { "Per": "0", "Columns": "Text1", "Data": [{ "type": "str", "value": "Active" }] }
+      ]
+    }
+  }
+}
