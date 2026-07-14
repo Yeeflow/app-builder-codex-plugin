@@ -7,6 +7,7 @@
 - Add Public Form Form Action golden references, planning, materialization, and package validation for the eight product-supported step types while keeping unproven serialization fail-closed.
 - Restrict anonymous Set variables and Redirect expressions to current-list fields, same-form temp variables, and fixed values; reject Query Data, Set Data List, Open Resource, Invoke Service, and other application-resource steps.
 - Ignore App Plan template placeholder rows and instructional scaffolding during action intent extraction while retaining missing-table hard gates for real business requirements.
+- Make the plugin metadata inspector cache-root aware so isolated installed-cache smoke does not require source-checkout marketplace files.
 
 ## 0.9.66
 

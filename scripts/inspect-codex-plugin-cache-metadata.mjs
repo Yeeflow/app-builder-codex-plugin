@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { pluginRootMode } from "./lib/plugin-root-layout.mjs";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -18,34 +19,39 @@ const expectedMarketplaceId = argValue("--expect-marketplace-id", "yeeflow");
 const expectedMarketplaceLabel = argValue("--expect-marketplace-label", "Yeeflow");
 const expectedPluginId = argValue("--expect-plugin-id", "yeeflow-app-builder");
 const expectedPluginName = argValue("--expect-plugin-name", "Yeeflow App Builder");
+const rootMode = pluginRootMode(root);
+const installedCacheRoot = rootMode === "installed-cache-root";
 
 const marketplacePath = path.join(root, ".agents/plugins/marketplace.json");
-const pluginPath = path.join(root, "dist/yeeflow-app-builder-plugin/.codex-plugin/plugin.json");
+const pluginPath = installedCacheRoot
+  ? path.join(root, ".codex-plugin/plugin.json")
+  : path.join(root, "dist/yeeflow-app-builder-plugin/.codex-plugin/plugin.json");
 
-const marketplace = readJson(marketplacePath);
+const marketplace = installedCacheRoot ? null : readJson(marketplacePath);
 const plugin = readJson(pluginPath);
 
 const summary = {
-  sparsePaths: [
+  rootMode,
+  sparsePaths: installedCacheRoot ? [] : [
     ".agents/plugins/marketplace.json",
     "dist/yeeflow-app-builder-plugin",
   ],
-  marketplaceId: marketplace.name,
-  marketplaceLabel: marketplace.interface?.displayName ?? null,
-  pluginEntryId: marketplace.plugins?.[0]?.name ?? null,
+  marketplaceId: marketplace?.name ?? null,
+  marketplaceLabel: marketplace?.interface?.displayName ?? null,
+  pluginEntryId: marketplace?.plugins?.[0]?.name ?? null,
   pluginId: plugin.name,
   pluginDisplayName: plugin.interface?.displayName ?? null,
   pluginVersion: plugin.version,
 };
 
 const failures = [];
-if (summary.marketplaceId !== expectedMarketplaceId) {
+if (!installedCacheRoot && summary.marketplaceId !== expectedMarketplaceId) {
   failures.push(`marketplace id expected ${expectedMarketplaceId}, got ${summary.marketplaceId}`);
 }
-if (summary.marketplaceLabel !== expectedMarketplaceLabel) {
+if (!installedCacheRoot && summary.marketplaceLabel !== expectedMarketplaceLabel) {
   failures.push(`marketplace label expected ${expectedMarketplaceLabel}, got ${summary.marketplaceLabel}`);
 }
-if (summary.pluginEntryId !== expectedPluginId) {
+if (!installedCacheRoot && summary.pluginEntryId !== expectedPluginId) {
   failures.push(`marketplace plugin id expected ${expectedPluginId}, got ${summary.pluginEntryId}`);
 }
 if (summary.pluginId !== expectedPluginId) {
