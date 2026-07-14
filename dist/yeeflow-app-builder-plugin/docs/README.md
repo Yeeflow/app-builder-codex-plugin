@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.9.64`
+- Version: `0.9.65`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.64` adds export-backed Form Action Open Item Form, Open Approval Form, and Open Dashboard generation with shared planning, materialization, strict target/form/ID/query/default validation, and safe render-only runtime proof boundaries.
+Current release `0.9.65` hardens Data List and Approval Form choice option materialization so every planned business value becomes one runtime option, planning annotations are removed, long enums are preserved, and `choices` / `color_choices` drift is blocked before signing.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 

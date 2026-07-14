@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.65
+
+- Normalize Data List and Approval Form choice enums through one shared parser, including ASCII and Chinese delimiters, line breaks, JSON arrays, and structured arrays.
+- Remove planning annotations such as `Planning Default` / `规划默认` from runtime option labels and preserve every explicit business option without silent 8/12-option truncation.
+- Keep `Rules.choices[]` and `Rules.color_choices[]` synchronized and block merged values, planning annotations, duplicate values, missing color choices, and value/order drift before signing readiness.
+
 ## 0.9.64
 
 - Add V1.7 export-backed Form Action Open Item Form, Open Approval Form, and Open Dashboard golden references across Approval Submission/Task, Data List/Document Library custom forms, and Dashboard.

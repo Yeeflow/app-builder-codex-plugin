@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.9.35`
+`0.9.65`
+
+Version `0.9.65` releases shared choice-field option materialization hardening. Data List and Approval Form generation now split ASCII and Chinese enum delimiters into one runtime option per business value, remove planning annotations from labels, preserve explicit enums without silent truncation, synchronize `choices` and `color_choices`, and reject merged, annotated, duplicate, missing-color, or value/order-drifting option arrays before signing readiness.
 
 Version `0.9.35` releases Data List Workbench empty-right-column hardening. Generated Data List Workbench View Item forms now remove empty `right_side_panel` content and normalize `main_work_queue_wrapper` to a single `1fr` Grid column across desktop/laptop, tablet, and mobile when no right-side business content is present. Data List form layout validation blocks Workbench forms that retain a blank second `main_work_queue_wrapper` column before signing readiness.
 
