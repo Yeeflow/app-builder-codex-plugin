@@ -51,7 +51,11 @@ function validatePrintTarget(step, sourceEntry, pageById, strictGenerated, findi
   if (!tables.length) findings.push({ severity: "error", code: "PRINT_DASHBOARD_TABLE_LAYOUT_MISSING", message: "Print Dashboard requires Table controls for print-safe layout.", page: target.page.Title });
   if (!tables.some((control) => Object.keys(control.attrs?.["table-merges"] || {}).length)) findings.push({ severity: "error", code: "PRINT_DASHBOARD_TABLE_MERGE_REFERENCE_MISSING", message: "The golden print template requires a merged-row/column Table example.", page: target.page.Title });
   if (!qr || qr.attrs?.["qr-code-link"]?.type !== "2") findings.push({ severity: "error", code: "PRINT_DASHBOARD_COLLECTION_ITEM_QR_INVALID", message: "Collection item QR must target the current Collection item (qr-code-link.type=2).", page: target.page.Title });
-  if (strictGenerated && target.resource?.templateMarker !== "dashboard-print-multi-record-table-v1") findings.push({ severity: "error", code: "PRINT_DASHBOARD_GOLDEN_TEMPLATE_MARKER_MISSING", message: "Generated print Dashboard must materialize dashboard-print-multi-record-table-v1.", page: target.page.Title });
+  const printTemplateId = target.resource?.printDashboardTemplateId
+    || target.resource?.attrs?.printDashboardTemplateId
+    || target.resource?.generatedFinalDashboardMaterialization?.printDashboardTemplateId;
+  if (strictGenerated && printTemplateId !== "dashboard-print-multi-record-table-v1") findings.push({ severity: "error", code: "PRINT_DASHBOARD_GOLDEN_TEMPLATE_MARKER_MISSING", message: "Generated print Dashboard must materialize dashboard-print-multi-record-table-v1 inside the canonical Dashboard page shell.", page: target.page.Title });
+  if (strictGenerated && target.resource?.templateMarker !== "dashboard-page-layouts-v1.1") findings.push({ severity: "error", code: "PRINT_DASHBOARD_CANONICAL_PAGE_SHELL_MISSING", message: "Generated print Dashboard must retain the dashboard-page-layouts-v1.1 canonical page shell.", page: target.page.Title });
 }
 
 function validateBarcodeConsumer(resource, step, entry, findings) {

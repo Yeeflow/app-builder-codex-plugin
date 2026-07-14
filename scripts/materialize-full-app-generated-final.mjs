@@ -1335,6 +1335,65 @@ export function materializePlannedFormActionPrintBarcode(resource, {
   return resource;
 }
 
+export function ensurePlannedFormActionPrintBarcodeTriggers(resource, {
+  records = [], hostResource = "", hostPage = "", hostSurface = "",
+} = {}) {
+  if (!resource || typeof resource !== "object") return resource;
+  const selected = records.filter((record) => normKey(record.hostResource) === normKey(hostResource)
+    && normKey(record.hostPage) === normKey(hostPage)
+    && (!record.hostType || formActionSetDataListHostMatches(record.hostType, hostSurface))
+    && record.boundControl
+    && !isPlanningPlaceholder(record.boundControl)
+    && !/page load/.test(normKey(record.trigger)));
+  const missing = unique(selected.map((record) => cleanResourceName(record.boundControl)))
+    .filter((identity) => identity && !findPlannedActionControl(resource, identity));
+  if (!missing.length) return resource;
+  const slot = findBusinessSectionContentArea(resource);
+  if (!slot) throw new Error(`FORM_ACTION_PRINT_BARCODE_APPROVED_TRIGGER_SLOT_MISSING: ${hostResource} / ${hostPage}`);
+  slot.children = Array.isArray(slot.children) ? slot.children : [];
+  let toolbar = slot.children.find((child) => hasIdentity(child, "print_barcode_action_toolbar"));
+  if (!toolbar) {
+    toolbar = {
+      type: "container",
+      id: deterministicUuid(`${hostResource}:${hostPage}:print-barcode-action-toolbar`),
+      name: "Print and scan actions",
+      title: "Print and scan actions",
+      label: "Print and scan actions",
+      nv_label: "print_barcode_action_toolbar",
+      nav_label: "print_barcode_action_toolbar",
+      attrs: {
+        style: {
+          widthtype: [null, "1"],
+          direction: [null, "row"],
+          gap: [null, "--sp--s150"],
+          align_items: [null, "center"],
+          justify_content: [null, "flex-start"],
+        },
+      },
+      children: [],
+    };
+    slot.children.unshift(toolbar);
+  }
+  for (const identity of missing) {
+    const record = selected.find((item) => cleanResourceName(item.boundControl) === identity);
+    const label = cleanResourceName(record?.stepName || record?.actionName || identity) || identity;
+    toolbar.children.push({
+      type: "action_button",
+      id: deterministicUuid(`${hostResource}:${hostPage}:print-barcode-trigger:${identity}`),
+      name: label,
+      title: label,
+      label,
+      nv_label: identity,
+      nav_label: identity,
+      attrs: {
+        common: { positioning: { widthtype: [null, "2"] } },
+        button: { normal: { border: { type: "0" }, c: "var(--c--background)", bg: "var(--c--primary)" } },
+      },
+    });
+  }
+  return resource;
+}
+
 function materializeBarcodeCollectionFilter(resource, record) {
   if (!record.barcodeFilterField || isPlanningPlaceholder(record.barcodeFilterField)) {
     throw new Error(`FORM_ACTION_BARCODE_FILTER_FIELD_MISSING: ${record.hostResource} / ${record.hostPage} / ${record.stepName}`);
@@ -2917,6 +2976,7 @@ function fieldSpecsForList(planDemand, listName) {
           existingTitle.fieldType = "Text";
           existingTitle.controlType = cleanResourceName(field.controlType) || "input";
           existingTitle.choiceValues = cleanResourceName(field.choiceValues);
+          existingTitle.allowScan = field.allowScan === true;
         }
         seen.add(displayKey);
         return;
@@ -2937,6 +2997,7 @@ function fieldSpecsForList(planDemand, listName) {
       lookupTarget: cleanResourceName(field.lookupTarget),
       listFields: Array.isArray(field.listFields) ? field.listFields : [],
       listSummaries: Array.isArray(field.listSummaries) ? field.listSummaries : [],
+      allowScan: field.allowScan === true,
     });
   };
   add({ displayName: "Title", fieldName: "Title", fieldType: "Text", controlType: "input" });
@@ -4642,7 +4703,7 @@ function buildFieldRules({ field, type, lookupTargetListId = "" }) {
     return listVariables.length ? JSON.stringify({ "list-variables": listVariables }) : "";
   }
   if (field?.allowScan === true) {
-    if (type !== "input" || !/^text$/i.test(String(field?.fieldType || ""))) {
+    if (type !== "input" || normalizeFieldType(field?.fieldType) !== "Text") {
       throw new Error(`DATA_LIST_BARCODE_SCAN_FIELD_TYPE_INVALID: ${field?.displayName || field?.fieldName || "field"}`);
     }
     return JSON.stringify({ allowScan: true });
@@ -5111,6 +5172,12 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       dashboardMetaByName,
       rootListSetId: rootListId,
     });
+    ensurePlannedFormActionPrintBarcodeTriggers(dashboardResource, {
+      records: planDemand.formActionPrintBarcodeRecords,
+      hostResource: name,
+      hostPage: name,
+      hostSurface: "dashboard",
+    });
     materializePlannedFormActionPrintBarcode(dashboardResource, {
       records: planDemand.formActionPrintBarcodeRecords,
       hostResource: name,
@@ -5119,6 +5186,8 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       dashboardMetaByName,
       rootListSetId: rootListId,
     });
+    ensureDashboardContentCardRequiredSlots(dashboardResource);
+    removeEmptySectionTitleAreas(dashboardResource);
     const dashboardResourceJson = JSON.stringify(dashboardResource);
     return {
       ListID: rootListId,
@@ -5188,7 +5257,8 @@ function validatePlannedLookupTargetsMaterialized({ planDemand, dataListNames, d
 
 function selectDashboardPageLayoutTemplateForPage({ planDemand, pageName }) {
   const records = planDemand.dashboardPageLayoutTemplateRecords || [];
-  const match = records.find((record) => dashboardNameMatches(pageName, record.dashboardPage));
+  const exact = records.find((record) => normKey(pageName) === normKey(record.dashboardPage));
+  const match = exact || records.find((record) => dashboardNameMatches(pageName, record.dashboardPage));
   return match?.selectedTemplateId || PAGE_LAYOUT_TEMPLATE_ID;
 }
 
@@ -5241,12 +5311,50 @@ export function buildPrintDashboardResource({ name, layoutId, rootListSetId, lis
   const fields = fieldsForDynamicControls(listMeta).slice(0, 6);
   if (!fields.length) throw new Error(`PRINT_DASHBOARD_SOURCE_FIELDS_MISSING: ${name}`);
   const id = (suffix) => deterministicUuid(`${name}:${layoutId}:print:${suffix}`);
+  const canonicalHeading = ({ suffix, text, variable, typography = "body-medium", row, col }) => ({
+    type: "heading",
+    id: id(suffix),
+    name: text,
+    title: text,
+    label: "Text",
+    nv_label: slugifyNavigatorLabel(suffix),
+    nav_label: slugifyNavigatorLabel(suffix),
+    attrs: {
+      ...(Number.isInteger(row) ? { "table-row-index": row } : {}),
+      ...(Number.isInteger(col) ? { "table-col-index": col } : {}),
+      common: { positioning: { widthtype: [null, "2"] } },
+      headc: { title: variable ? { variable } : { value: text } },
+      heads: { ty: [null, typography], color: "#263241" },
+    },
+  });
   const cell = ({ row, col, title, field, children = [] }) => ({
-    type: "container", id: id(`cell:${row}:${col}:${title}`), label: title,
-    attrs: { "table-row-index": row, "table-col-index": col, common: { padding: [null, { top: 8, right: 8, bottom: 8, left: 8 }] } },
+    type: "container", id: id(`cell:${row}:${col}:${title}`), name: title, title, label: title,
+    nv_label: `print_cell_${row}_${col}`,
+    nav_label: `print_cell_${row}_${col}`,
+    attrs: {
+      "table-row-index": row,
+      "table-col-index": col,
+      common: { padding: [null, { top: 8, right: 8, bottom: 8, left: 8 }] },
+      style: { widthtype: [null, "1"], direction: [null, "column"], gap: [null, "--sp--s50"], align_items: [null, "stretch"], justify_content: [null, "flex-start"] },
+    },
     children: children.length ? children : [
-      { type: "heading", id: id(`label:${row}:${col}`), label: title, attrs: { headc: { title: { value: title } } } },
-      { type: "dynamic-field", id: id(`value:${row}:${col}`), label: `${title} Value`, attrs: { source: "3", "obj-f": field?.fieldName || "Title" } },
+      canonicalHeading({ suffix: `label_${row}_${col}`, text: title }),
+      {
+        type: "dynamic-field",
+        id: id(`value:${row}:${col}`),
+        name: `${title} Value`,
+        title: `${title} Value`,
+        label: "Dynamic field",
+        nv_label: `print_value_${row}_${col}`,
+        nav_label: `print_value_${row}_${col}`,
+        field: field?.fieldName || "Title",
+        attrs: {
+          source: "3",
+          "obj-f": field?.fieldName || "Title",
+          field: field?.fieldName || "Title",
+          data: { field: field?.fieldName || "Title" },
+        },
+      },
     ],
   });
   const itemTable = {
@@ -5274,33 +5382,61 @@ export function buildPrintDashboardResource({ name, layoutId, rootListSetId, lis
     ],
   };
   const collection = {
-    type: "collection", id: collectionId || id("collection"), label: "Printable records", nv_label: "print_records_collection",
+    type: "collection", id: collectionId || id("collection"), name: "Printable records", title: "Printable records", label: "Printable records", nv_label: "print_records_collection", nav_label: "print_records_collection",
+    datasetPresentationTemplateId: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
+    derivedFromDatasetPresentationTemplate: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
     attrs: {
-      data: { list: { AppID: 41, ListID: stringId(listMeta.listId), Type: listMeta.resourceType === "document-library" ? 16 : 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) }, sort: [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }] },
+      datasetPresentationTemplateId: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
+      derivedFromDatasetPresentationTemplate: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
+      data: {
+        list: { AppID: 41, ListID: stringId(listMeta.listId), Type: listMeta.resourceType === "document-library" ? 16 : 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) },
+        sort: [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }],
+        detailOpenBehavior: "no-open",
+        disableOpen: true,
+      },
       layout: { col: [null, 1], rg: [null, 16] },
     },
     children: [itemTable],
   };
-  return {
-    type: "container", id: `${slugify(name)}_print_root`, name, title: name, ver: "1.0.0",
-    templateMarker: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
-    derivedFromDashboardPageLayoutTemplate: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
-    attrs: { container: { cw: "2", padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] }, dashboardPageLayoutTemplateId: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID },
-    children: [{
-      type: "container", id: id("content"), label: "Print content", nv_label: "print_content_area", attrs: { common: { positioning: { widthtype: [null, "1"] } } },
-      children: [{
-        type: "table-v2", id: id("header-table"), label: "Print header", nv_label: "print_header_table",
-        attrs: { columns: { "1": { list: [{ value: 70, unit: "%" }, { value: 30, unit: "%" }] } }, rows: { "1": { list: [{ value: 64, unit: "px" }] } }, style: { border: "0" } },
-        children: [
-          { type: "heading", id: id("title"), label: name, attrs: { "table-row-index": 0, "table-col-index": 0, headc: { title: { value: name } } } },
-          { type: "heading", id: id("date"), label: "Printed on", attrs: { "table-row-index": 0, "table-col-index": 1, headc: { title: { variable: [{ type: "func", func: "dateFormat", params: [[{ type: "func", func: "now", params: [] }], [{ type: "str", value: "DD/MM/YYYY" }]] }] } } } },
-        ],
-      }, collection],
-    }],
-    filterVars: [], tempVars: [], actions: [], formAction: {}, exts: [], ReportIds: [], LayoutID: layoutId,
-    plannedControls: { printTable: true, collection: true, qrCode: true },
-    generatedFinalDashboardMaterialization: { shellTemplate: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID, dashboardPageLayoutTemplateId: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID },
+  const resource = buildDashboardPageLayoutShell({ name, templateId: PAGE_LAYOUT_TEMPLATE_ID });
+  const slot = findBusinessSectionContentArea(resource);
+  if (!slot) throw new Error(`PRINT_DASHBOARD_APPROVED_CONTENT_SLOT_MISSING: ${name}`);
+  slot.children = [{
+    type: "table-v2", id: id("header-table"), name: "Print header", title: "Print header", label: "Print header", nv_label: "print_header_table", nav_label: "print_header_table",
+    attrs: { columns: { "1": { list: [{ value: 70, unit: "%" }, { value: 30, unit: "%" }] } }, rows: { "1": { list: [{ value: 64, unit: "px" }] } }, style: { border: "0" } },
+    children: [
+      canonicalHeading({ suffix: "print_title", text: name, typography: "h5-medium", row: 0, col: 0 }),
+      canonicalHeading({
+        suffix: "print_date",
+        text: "Printed on",
+        row: 0,
+        col: 1,
+        variable: [{ type: "func", func: "dateFormat", params: [[{ type: "func", func: "now", params: [] }], [{ type: "str", value: "DD/MM/YYYY" }]] }],
+      }),
+    ],
+  }, collection];
+  resource.printDashboardTemplateId = DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID;
+  resource.attrs = { ...(resource.attrs || {}), printDashboardTemplateId: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID };
+  resource.LayoutID = layoutId;
+  resource.plannedControls = { printTable: true, collection: true, qrCode: true };
+  resource.generatedFinalDashboardMaterialization = {
+    shellTemplate: PAGE_LAYOUT_TEMPLATE_ID,
+    dashboardPageLayoutTemplateId: PAGE_LAYOUT_TEMPLATE_ID,
+    printDashboardTemplateId: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
+    sourceResource: listMeta.listName,
   };
+  normalizeGeneratedDashboardControls(resource, name);
+  scrubDashboardSourceTemplateResidue(resource, { listName: listMeta.listName, scrubMetadata: false });
+  removeResidualTemplateSectionHeaders(resource);
+  removeEmptyDashboardBusinessSections(resource);
+  ensureDashboardContentCardRequiredSlots(resource);
+  removeEmptySectionTitleAreas(resource);
+  applyDashboardTextMapping(resource, { name, datasetRegion: "Printable records", listName: listMeta.listName, kpiContracts: [] });
+  removeOperationsWithoutActions(resource);
+  instantiateDashboardControlUuids(resource, slugify(name));
+  normalizeAndPruneDashboardTempVars(resource);
+  reconcilePageTempVariableReferences(resource);
+  return resource;
 }
 
 function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId = PAGE_LAYOUT_TEMPLATE_ID, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecords = [], dashboardFilters, dashboardAnalytics, dashboardDataTables = [], dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
@@ -8002,7 +8138,40 @@ function ensureSectionTitleHeader(titleArea, seed, headerPrototype = null) {
     const header = clone(headerPrototype);
     header.id = deterministicUuid(`${seed}:section-title-header`);
     titleArea.children.unshift(header);
+    return;
   }
+  titleArea.children.unshift({
+    id: deterministicUuid(`${seed}:section-title-header`),
+    type: "container",
+    label: "Section title header",
+    name: "Section title header",
+    nv_label: "section_title_header",
+    nav_label: "section_title_header",
+    attrs: {
+      style: {
+        widthtype: [null, "2", null, "1"],
+        direction: [null, "column"],
+        gap: [null, 0],
+        align_items: [null, "stretch"],
+        justify_content: [null, "flex-start"],
+      },
+    },
+    children: [{
+      id: deterministicUuid(`${seed}:section-title-text`),
+      type: "heading",
+      label: "Text",
+      name: "Section title",
+      title: "Section title",
+      nv_label: "section_title_text",
+      nav_label: "section_title_text",
+      width: "inline",
+      attrs: {
+        common: { positioning: { widthtype: [null, "2"] } },
+        heads: { ty: [null, "h6-medium"], color: "#111827" },
+        headc: { title: { value: "Section" } },
+      },
+    }],
+  });
 }
 
 function removeUnresolvedPageActionControls(root) {

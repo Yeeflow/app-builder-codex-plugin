@@ -20,6 +20,8 @@ const DASHBOARD_DATASET_TEMPLATE_ROOT_IDS = new Set([
   "card_with_multiselect_toolbar_wrapper",
   "collection_control_responsive_card_wrapper",
   "Event Pipeline Grid-Table",
+  "print_records_collection",
+  "print_record_table",
 ]);
 const APPROVED_DATA_TABLE_TEMPLATE_IDS = new Set([
   "data_table_control_standard_scroll",
