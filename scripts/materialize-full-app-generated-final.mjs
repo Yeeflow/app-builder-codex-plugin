@@ -29,6 +29,7 @@ import workflowGraphReferenceUtils from "./lib/approval-workflow-graph-reference
 import setVariableContractUtils from "./lib/set-variable-contract-utils.cjs";
 import formActionSetDataListUtils from "./lib/form-action-set-data-list-utils.cjs";
 import formActionOpenResourceUtils from "./lib/form-action-open-resource-utils.cjs";
+import choiceFieldOptionUtils from "./lib/choice-field-option-utils.cjs";
 import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-list-plan.mjs";
 
 const {
@@ -43,6 +44,7 @@ const {
 const { buildWorkflowVariableSetting, normalizeSetVariableHostType } = setVariableContractUtils;
 const { buildFormActionSetDataListStep } = formActionSetDataListUtils;
 const { buildFormActionOpenResourceStep } = formActionOpenResourceUtils;
+const { parseChoiceOptionValues } = choiceFieldOptionUtils;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
@@ -4384,11 +4386,8 @@ function buildFieldRules({ field, type, lookupTargetListId = "" }) {
   }
   const choiceTypes = new Set(["select", "radio", "checkbox", "tag"]);
   if (!choiceTypes.has(type)) return "";
-  const values = (String(field.choiceValues || "")
-    .split(/[,;]+/)
-    .map((value) => value.trim())
-    .filter(Boolean)).concat(inferChoiceValues(field));
-  const uniqueValues = unique(values).slice(0, 8);
+  const values = parseChoiceOptionValues(field.choiceValues).concat(inferChoiceValues(field));
+  const uniqueValues = unique(values);
   if (!uniqueValues.length) return "";
   const colors = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"];
   const choices = uniqueValues.map((value, index) => ({
@@ -4405,7 +4404,7 @@ function buildFieldRules({ field, type, lookupTargetListId = "" }) {
 }
 
 function inferChoiceValues(field) {
-  if (String(field?.choiceValues || "").trim()) return [];
+  if (String(field?.choiceValues || "").trim()) return parseChoiceOptionValues(field.choiceValues);
   const raw = normKey(`${field?.displayName || ""} ${field?.fieldName || ""} ${field?.fieldType || ""} ${field?.controlType || ""}`);
   if (/priority|urgency|severity|critical/.test(raw)) return ["Low", "Medium", "High", "Critical"];
   if (/condition|inspection|quality/.test(raw)) return ["Good", "Fair", "Damaged", "Lost"];
@@ -10188,12 +10187,12 @@ function fieldsForDynamicControls(listMeta) {
 function choiceValuesForField(field) {
   const parsed = parseJsonMaybe(field?.Rules) || {};
   const fromRules = Array.isArray(parsed.choices)
-    ? parsed.choices.map((choice) => String(choice?.value || choice?.label || choice || "").trim()).filter(Boolean)
+    ? parseChoiceOptionValues(parsed.choices)
     : [];
-  const fromPlan = String(field?.choiceValues || "").split(/[,;]+/).map((value) => value.trim()).filter(Boolean);
+  const fromPlan = parseChoiceOptionValues(field?.choiceValues);
   const explicitValues = unique(fromRules.concat(fromPlan));
-  if (explicitValues.length) return explicitValues.slice(0, 12);
-  return unique(inferChoiceValues(field)).slice(0, 12);
+  if (explicitValues.length) return explicitValues;
+  return unique(inferChoiceValues(field));
 }
 
 function primaryFieldName(listMeta) {

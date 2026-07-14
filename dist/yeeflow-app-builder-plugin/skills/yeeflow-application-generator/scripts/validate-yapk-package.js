@@ -8,6 +8,13 @@ const { validatePackageWrapperIcon } = require(resolveLocalModule([
   path.join(__dirname, "scripts/lib/application-icon-validation.cjs"),
   path.join(__dirname, "lib/application-icon-validation.cjs"),
 ]));
+const {
+  containsMergedChoiceValues,
+  containsPlanningAnnotation,
+} = require(resolveLocalModule([
+  path.join(__dirname, "scripts/lib/choice-field-option-utils.cjs"),
+  path.join(__dirname, "lib/choice-field-option-utils.cjs"),
+]));
 
 const WRAPPER_REQUIRED = [
   "PackageId",
@@ -298,6 +305,7 @@ function validateField(field, path, errors, warnings, context = {}) {
   if (field.Type !== undefined && !FIELD_CONTROL_TYPES.has(field.Type)) add(warnings, "YAPK_FIELD_CONTROL_TYPE_UNKNOWN", "Field Type is not in product schema known control-type list.", { path: `${path}.Type` });
   if (CHOICE_FIELD_TYPES.has(field.Type)) {
     const choices = collectChoiceValues(field);
+    const rules = parseMaybeJson(field.Rules, {});
     if (!choices.runtimePath) {
       add(errors, "CHOICE_OPTION_RUNTIME_SHAPE_MISSING", "Choice fields must use export-proven Rules.choices; legacy paths such as Rules.Options are ignored by runtime dropdowns.", {
         path,
@@ -312,6 +320,22 @@ function validateField(field, path, errors, warnings, context = {}) {
     }
     if (choices.all.some((value) => !String(value).trim())) add(errors, "CHOICE_OPTION_BLANK", "Choice fields must not include blank option rows.", { path, field: fieldName || field.DisplayName || null });
     if (choices.values.some((value) => GENERIC_CHOICE_RE.test(String(value).trim()))) add(errors, "CHOICE_OPTION_GENERIC", "Choice fields must use business option values, not generic placeholders.", { path, field: fieldName || field.DisplayName || null });
+    if (choices.values.some(containsMergedChoiceValues)) {
+      add(errors, "CHOICE_OPTION_CONTAINS_MULTIPLE_VALUES", "Each Rules.choices entry must represent exactly one option. Split comma, semicolon, Chinese comma, or ideographic-comma lists into separate choices entries.", { path, field: fieldName || field.DisplayName || null });
+    }
+    if (choices.values.some(containsPlanningAnnotation)) {
+      add(errors, "CHOICE_OPTION_PLANNING_ANNOTATION_PRESENT", "Planning annotations such as Planning Default are plan metadata and must not appear in runtime option text.", { path, field: fieldName || field.DisplayName || null });
+    }
+    const normalizedChoiceValues = choices.values.map((value) => String(value).trim().toLocaleLowerCase());
+    if (new Set(normalizedChoiceValues).size !== normalizedChoiceValues.length) {
+      add(errors, "CHOICE_OPTION_DUPLICATE", "Choice option values must be unique after case-insensitive normalization.", { path, field: fieldName || field.DisplayName || null });
+    }
+    const colorChoices = Array.isArray(rules?.color_choices) ? rules.color_choices.map(choiceValue).map((value) => String(value).trim()) : [];
+    if (!Array.isArray(rules?.color_choices)) {
+      add(errors, "CHOICE_COLOR_OPTIONS_MISSING", "Generated choice fields must include color_choices synchronized with Rules.choices, even when show_color is false.", { path, field: fieldName || field.DisplayName || null });
+    } else if (JSON.stringify(colorChoices) !== JSON.stringify(choices.values.map((value) => String(value).trim()))) {
+      add(errors, "CHOICE_COLOR_OPTIONS_MISMATCH", "Rules.color_choices must contain the same option values in the same order as Rules.choices.", { path, field: fieldName || field.DisplayName || null });
+    }
   }
 }
 
