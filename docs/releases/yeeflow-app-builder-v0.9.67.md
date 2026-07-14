@@ -6,6 +6,7 @@
 - Exact allowlist recognition for Set variables, Execute custom code, Show confirm dialog, Redirect page to, Submit form, Start another action, Barcode scan, and NFC reader.
 - Anonymous-context safety gates that limit values to fixed data, current-list fields, and same-form temp variables and reject application-resource actions.
 - App Plan placeholder-safe row extraction and intent detection.
+- Installed-cache-aware metadata inspection for isolated RC smoke tests.
 
 ## Validation
 
