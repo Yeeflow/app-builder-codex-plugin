@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.9.66`
+- Version: `0.9.67`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.66` adds OAuth-backed workspace application discovery with redacted output and a guarded application deletion path that requires workspace-scoped readback, exact ID/title matching, and strong confirmation.
+Current release `0.9.67` adds export-backed Public Form Form Actions, anonymous-context target and expression restrictions, and placeholder-safe App Plan readiness parsing.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
