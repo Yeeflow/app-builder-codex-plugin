@@ -36,6 +36,10 @@ export function extractFormActionSetDataListPlanRows(markdown) {
     let cursor = index + 2;
     while (cursor < lines.length && isTableLine(lines[cursor])) {
       const cells = splitRow(lines[cursor]);
+      if (hasPlaceholderCell(cells)) {
+        cursor += 1;
+        continue;
+      }
       const row = Object.fromEntries(headers.map((header, cellIndex) => [header, cells[cellIndex] || ""]));
       if (/set\s*data\s*list|setdatalist/i.test(value(row, "Exact Step Type", "Step Type"))) rows.push(row);
       cursor += 1;
@@ -43,6 +47,10 @@ export function extractFormActionSetDataListPlanRows(markdown) {
     index = cursor - 1;
   }
   return rows;
+}
+
+function hasPlaceholderCell(cells) {
+  return cells.some((cell) => /<[^>]+>/.test(String(cell || "")));
 }
 
 function validateRow(row, index, findings) {

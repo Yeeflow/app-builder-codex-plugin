@@ -1,0 +1,24 @@
+{
+  "proof": "export-proven from Customer Satisfaction (2).ydl",
+  "action": {
+    "id": "{{ActionID}}",
+    "name": "Redirect to",
+    "steps": [
+      {
+        "type": "redirect",
+        "name": "Redirect page to",
+        "attrs": {
+          "link": {
+            "opentype": false,
+            "url": null,
+            "variable": [
+              { "type": "str", "value": "https://example.com?title=" },
+              { "type": "op", "op": "&" },
+              { "exprType": "list_field", "valueType": "input", "id": "Title", "prop": "Title", "type": "expr", "name": "List Fields:Title" }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

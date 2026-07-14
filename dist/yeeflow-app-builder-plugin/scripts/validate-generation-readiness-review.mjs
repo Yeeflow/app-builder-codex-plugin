@@ -70,6 +70,14 @@ function isNegativeGuardrailLine(line) {
   return /\b(do not|don't|must not|never|forbid|forbidden|reject|rejected|fail|fails|block|blocks|blocked|blocking|blocker|blockers|not generation-ready|must be marked|marked as|unless marked|without runtime proof|proof-required|deferred)\b/i.test(line);
 }
 
+function isActionablePlanningIntentLine(line) {
+  const value = String(line || "").trim();
+  if (!value || /^#{1,6}\s/.test(value) || /^\|.*\|$/.test(value) || /<[^>]+>/.test(value)) return false;
+  if (/^Required\s+(?:whenever|for\s+every)\b/i.test(value)) return false;
+  if (/^[-*+]\s+/.test(value) && /\b(?:automatically|cannot|export-proven|focused|must|pagination|planning|requires?|rules?|should|supports?|writes?)\b/i.test(value)) return false;
+  return !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(value);
+}
+
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
@@ -489,9 +497,9 @@ function validate(file) {
 
   const queryDataPlan = validateFormActionQueryDataPlan(text);
   const hasFormActionQueryDataIntent = queryDataPlan.queryDataRows > 0 || text.split(/\r?\n/).some((line) =>
-    /\bQuery\s*Data\b/i.test(line)
+    isActionablePlanningIntentLine(line)
+    && /\bQuery\s*Data\b/i.test(line)
     && /\b(Form Action|Form Actions and Temp Variables|Dashboard|Custom Data List Form|Approval Submission|Approval Task)\b/i.test(line)
-    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
   );
   if (hasFormActionQueryDataIntent && queryDataPlan.queryDataRows === 0) {
     findings.push({
@@ -511,9 +519,9 @@ function validate(file) {
 
   const formActionSetDataListPlan = validateFormActionSetDataListPlan(text);
   const hasFormActionSetDataListIntent = formActionSetDataListPlan.setDataListRows > 0 || text.split(/\r?\n/).some((line) =>
-    /\bSet\s*Data\s*List\b|\bsetdatalist\b/i.test(line)
+    isActionablePlanningIntentLine(line)
+    && /\bSet\s*Data\s*List\b|\bsetdatalist\b/i.test(line)
     && /\b(Form Action|Submission form|Task form|Data List Form|Dashboard)\b/i.test(line)
-    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
   );
   if (hasFormActionSetDataListIntent && formActionSetDataListPlan.setDataListRows === 0) {
     findings.push({
@@ -531,9 +539,9 @@ function validate(file) {
 
   const formActionOpenResourcePlan = validateFormActionOpenResourcePlan(text);
   const hasFormActionOpenResourceIntent = formActionOpenResourcePlan.openResourceRows > 0 || text.split(/\r?\n/).some((line) =>
-    /\b(Open item form|Open approval form|Open dashboard|listitem|openform|opendashboard)\b/i.test(line)
+    isActionablePlanningIntentLine(line)
+    && /\b(Open item form|Open approval form|Open dashboard|listitem|openform|opendashboard)\b/i.test(line)
     && /\b(Form Action|Submission form|Task form|Data List Form|Dashboard)\b/i.test(line)
-    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
   );
   if (hasFormActionOpenResourceIntent && formActionOpenResourcePlan.openResourceRows === 0) findings.push({
     level: "error",
@@ -549,9 +557,9 @@ function validate(file) {
 
   const workflowQueryDataPlan = validateWorkflowQueryDataPlan(text);
   const hasWorkflowQueryDataIntent = workflowQueryDataPlan.queryDataRows > 0 || text.split(/\r?\n/).some((line) =>
-    /\bQuery\s*Data\b|\bQueryData\b/i.test(line)
+    isActionablePlanningIntentLine(line)
+    && /\bQuery\s*Data\b|\bQueryData\b/i.test(line)
     && /\b(Approval|Data List|Scheduled)\s+Workflow\b|\bworkflow\s+node\b/i.test(line)
-    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
   );
   if (hasWorkflowQueryDataIntent && workflowQueryDataPlan.queryDataRows === 0) {
     findings.push({
@@ -571,9 +579,9 @@ function validate(file) {
 
   const workflowLoopPlan = validateWorkflowLoopPlan(text);
   const hasWorkflowLoopIntent = workflowLoopPlan.loopRows > 0 || text.split(/\r?\n/).some((line) =>
-    /\bLoop\b|Loop through list items|Loop through multiple values|Loop for fixed times/i.test(line)
+    isActionablePlanningIntentLine(line)
+    && /\bLoop\b|Loop through list items|Loop through multiple values|Loop for fixed times/i.test(line)
     && /\b(Approval|Data List|Scheduled)\s+Workflow\b|\bworkflow\s+node\b|\bLoopBody\b/i.test(line)
-    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
   );
   if (hasWorkflowLoopIntent && workflowLoopPlan.loopRows === 0) {
     findings.push({
@@ -593,9 +601,9 @@ function validate(file) {
 
   const workflowSetDataListPlan = validateWorkflowSetDataListPlan(text);
   const hasWorkflowSetDataListIntent = workflowSetDataListPlan.setDataListRows > 0 || text.split(/\r?\n/).some((line) =>
-    /\bSet\s*Data\s*List\b/i.test(line)
+    isActionablePlanningIntentLine(line)
+    && /\bSet\s*Data\s*List\b/i.test(line)
     && /\b(Approval|Data List|Scheduled)\s+Workflow\b|\bworkflow\s+node\b/i.test(line)
-    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
   );
   if (hasWorkflowSetDataListIntent && workflowSetDataListPlan.setDataListRows === 0) {
     findings.push({

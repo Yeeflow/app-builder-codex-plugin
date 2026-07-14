@@ -353,3 +353,6 @@ Redacted refs are stored in:
 `docs/studies/normalized/data-list-public-forms/`
 
 They are synthetic or redacted shape references only. They do not contain raw public form resources, real share URLs, tenant IDs, user IDs, or private payloads.
+# Public Form Form Actions
+
+Public Form actions are intentionally narrower than Custom Data List Form actions. Use `docs/standards/public-form-form-action-golden-reference-standard.md` and the normalized Set variables/Redirect templates. Anonymous actions may use only current-list Public Form-compatible fields, same-form temp variables, and fixed values. They must not query, open, or mutate other application resources.

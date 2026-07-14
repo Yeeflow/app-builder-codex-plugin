@@ -196,6 +196,10 @@ function queryDataRows(markdown) {
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitRow(lines[rowIndex]);
+      if (hasPlaceholderCell(cells)) {
+        rowIndex += 1;
+        continue;
+      }
       const row = Object.fromEntries(headers.map((header, cellIndex) => [header, cells[cellIndex] || ""]));
       const stepType = value(row, "Exact Step Type", "Steps");
       if (/query\s*data|querydata/i.test(stepType)) rows.push(row);
@@ -204,6 +208,10 @@ function queryDataRows(markdown) {
     index = rowIndex - 1;
   }
   return rows;
+}
+
+function hasPlaceholderCell(cells) {
+  return cells.some((cell) => /<[^>]+>/.test(String(cell || "")));
 }
 
 function value(row, ...names) {

@@ -32,12 +32,16 @@ export function extractWorkflowLoopPlanRows(markdown) {
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitRow(lines[rowIndex]);
-      rows.push(Object.fromEntries(headers.map((header, cellIndex) => [header, cells[cellIndex] || ""])));
+      if (!hasPlaceholderCell(cells)) rows.push(Object.fromEntries(headers.map((header, cellIndex) => [header, cells[cellIndex] || ""])));
       rowIndex += 1;
     }
     index = rowIndex - 1;
   }
   return rows;
+}
+
+function hasPlaceholderCell(cells) {
+  return cells.some((cell) => /<[^>]+>/.test(String(cell || "")));
 }
 
 function validateRow(row, index, findings) {

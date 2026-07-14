@@ -834,6 +834,7 @@ function analyzeAppPlanResourceDemand(planText) {
     dataListViewRecords: collectDataListViewRecords(planText),
     customFormRecords: collectCustomFormRecords(planText),
     publicFormRecords: collectPublicFormRecords(planText),
+    publicFormActionRecords: collectPublicFormActionRecords(planText),
     reverseRelatedRecords,
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
@@ -853,6 +854,44 @@ function analyzeAppPlanResourceDemand(planText) {
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
   };
+}
+
+function collectPublicFormActionRecords(planText) {
+  const records = [];
+  for (const table of parseMarkdownTables(planText)) {
+    const headers = table.headers.map((header) => normKey(header));
+    const column = (names) => findHeaderIndex(headers, names);
+    const hostListColumn = column(["host data list", "data list"]);
+    const publicFormColumn = column(["public form", "public form name"]);
+    const actionColumn = column(["action name"]);
+    const stepOrderColumn = column(["step order"]);
+    const stepTypeColumn = column(["exact step type", "step type"]);
+    const configColumn = column(["step configuration json", "step config json"]);
+    if ([hostListColumn, publicFormColumn, actionColumn, stepOrderColumn, stepTypeColumn, configColumn].some((index) => index === -1)) continue;
+    const stepNameColumn = column(["step name"]);
+    const triggerColumn = column(["trigger"]);
+    const boundControlColumn = column(["bound control"]);
+    const cell = (row, index) => index === -1 ? "" : row[table.headers[index]];
+    const structured = (row, index) => index === -1 ? "" : row.__raw?.[index] ?? cell(row, index);
+    for (const row of table.rows) {
+      const hostList = cleanResourceName(cell(row, hostListColumn));
+      const publicForm = cleanResourceName(cell(row, publicFormColumn));
+      const actionName = cleanResourceName(cell(row, actionColumn));
+      if (!hostList || !publicForm || !actionName || [hostList, publicForm, actionName].some(isPlanningPlaceholder)) continue;
+      records.push({
+        hostList,
+        publicForm,
+        actionName,
+        stepOrder: Number(cleanResourceName(cell(row, stepOrderColumn))) || 1,
+        stepType: cleanResourceName(cell(row, stepTypeColumn)),
+        stepName: cleanResourceName(cell(row, stepNameColumn)),
+        trigger: cleanResourceName(cell(row, triggerColumn)),
+        boundControl: cleanResourceName(cell(row, boundControlColumn)),
+        configJson: cleanStructuredPlanCell(structured(row, configColumn)),
+      });
+    }
+  }
+  return records;
 }
 
 function collectFormActionSetVariableRecords(planText) {
@@ -3500,7 +3539,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   return resource;
 }
 
-function buildPublicFormEntry({ record, publicFormId, listId, listName, fields, findings }) {
+function buildPublicFormEntry({ record, publicFormId, listId, listName, fields, findings, planDemand }) {
   const selectedFields = resolvePublicFormFields(record, fields);
   for (const field of selectedFields) {
     const controlType = publicFormControlType(field);
@@ -3512,7 +3551,7 @@ function buildPublicFormEntry({ record, publicFormId, listId, listName, fields, 
       ));
     }
   }
-  const resource = materializePublicFormResource({ record, listName, fields: selectedFields.filter((field) => PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES.has(publicFormControlType(field))) });
+  const resource = materializePublicFormResource({ record, listName, fields: selectedFields.filter((field) => PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES.has(publicFormControlType(field))), planDemand });
   return {
     ListID: listId,
     ID: publicFormId,
@@ -3546,7 +3585,7 @@ function publicFormControlType(field) {
   return type;
 }
 
-function materializePublicFormResource({ record, listName, fields }) {
+function materializePublicFormResource({ record, listName, fields, planDemand }) {
   const pageTemplate = JSON.parse(fs.readFileSync(PUBLIC_FORM_PAGE_TEMPLATE_PATH, "utf8"));
   const resource = clone(pageTemplate.resource);
   resource.publicFormPageLayoutTemplateId = PUBLIC_FORM_PAGE_TEMPLATE_ID;
@@ -3564,7 +3603,88 @@ function materializePublicFormResource({ record, listName, fields }) {
   removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
   reinstantiateTemplateUuidValues(resource);
+  materializePlannedFormActionSetVariables(resource, {
+    records: planDemand?.formActionSetVariableRecords || [],
+    hostResource: listName,
+    hostPage: record.formName,
+    hostType: "Public Form",
+  });
+  materializePlannedPublicFormActions(resource, {
+    records: planDemand?.publicFormActionRecords || [],
+    hostList: listName,
+    publicForm: record.formName,
+  });
   return resource;
+}
+
+function materializePlannedPublicFormActions(resource, { records = [], hostList = "", publicForm = "" } = {}) {
+  const selected = records.filter((record) => normKey(record.hostList) === normKey(hostList) && normKey(record.publicForm) === normKey(publicForm));
+  if (!selected.length) return resource;
+  resource.actions = Array.isArray(resource.actions) ? resource.actions : [];
+  resource.formAction = resource.formAction && typeof resource.formAction === "object" && !Array.isArray(resource.formAction) ? resource.formAction : {};
+  resource.tempVars = Array.isArray(resource.tempVars) ? resource.tempVars : [];
+  const actionNames = unique(selected.map((record) => record.actionName));
+  const actionIdByName = new Map(actionNames.map((name) => [normKey(name), deterministicUuid(`${hostList}:${publicForm}:public-form-action:${name}`)]));
+  for (const actionName of actionNames) {
+    let action = resource.actions.find((item) => normKey(item?.name) === normKey(actionName));
+    if (!action) {
+      action = { id: actionIdByName.get(normKey(actionName)), name: actionName, steps: [] };
+      resource.actions.push(action);
+    }
+    for (const record of selected.filter((item) => normKey(item.actionName) === normKey(actionName)).sort((left, right) => left.stepOrder - right.stepOrder)) {
+      const type = normalizePublicFormPlannedStepType(record.stepType);
+      if (type === "setvar") throw new Error(`PUBLIC_FORM_ACTION_SETVAR_USE_SHARED_TABLE: ${hostList} / ${publicForm} / ${actionName}`);
+      if (["customcode", "barcode", "nfc"].includes(type)) throw new Error(`PUBLIC_FORM_ACTION_STEP_SERIALIZATION_UNPROVEN: ${hostList} / ${publicForm} / ${record.stepType}`);
+      const config = parsePublicFormActionConfig(record.configJson, hostList, publicForm, record.stepName || record.stepType);
+      let step;
+      if (type === "redirect") {
+        const variable = Array.isArray(config.expressionTokens) ? config.expressionTokens : [];
+        step = { type: "redirect", name: record.stepName || "Redirect page to", attrs: { link: { opentype: config.openType === true, url: config.fixedUrl || null, variable } } };
+      } else if (type === "submit") {
+        step = { type: "submit", ...(record.stepName ? { name: record.stepName } : {}) };
+      } else if (type === "confirm") {
+        const resultId = config.resultTempVariable ? plannedTempVariableId(config.resultTempVariable) : "";
+        if (resultId) ensureFormActionResultTempVariable(resource, resultId, "string");
+        step = { type: "confirm", name: record.stepName || "Show confirm dialog", attrs: { confirm_qs: Array.isArray(config.messageTokens) ? config.messageTokens : [] } };
+        if (resultId) step.attrs.confirm_rs = { exprType: "variable", valueType: "string", id: resultId, type: "expr", name: resultId.replace(/^__temp_/, "") };
+      } else if (type === "otheraction") {
+        const targetId = actionIdByName.get(normKey(config.targetActionName));
+        if (!targetId) throw new Error(`PUBLIC_FORM_ACTION_CHAIN_TARGET_UNRESOLVED: ${hostList} / ${publicForm} / ${config.targetActionName || "missing"}`);
+        step = { type: "otheraction", name: record.stepName || "Start another action", attrs: { control_action: targetId } };
+      } else {
+        throw new Error(`PUBLIC_FORM_ACTION_STEP_TYPE_NOT_ALLOWED: ${hostList} / ${publicForm} / ${record.stepType}`);
+      }
+      action.steps.splice(Math.max(0, Math.min(action.steps.length, record.stepOrder - 1)), 0, step);
+      bindPlannedFormActionTrigger(resource, action, { ...record, hostResource: hostList, hostPage: publicForm });
+    }
+  }
+  return resource;
+}
+
+function normalizePublicFormPlannedStepType(value) {
+  const normalized = normKey(value);
+  const aliases = new Map([
+    ["set variables", "setvar"], ["set variable", "setvar"], ["setvar", "setvar"],
+    ["execute custom code", "customcode"], ["custom code", "customcode"], ["customcode", "customcode"],
+    ["show confirm dialog", "confirm"], ["confirm", "confirm"],
+    ["redirect page to", "redirect"], ["redirect", "redirect"],
+    ["submit form", "submit"], ["submit", "submit"],
+    ["start another action", "otheraction"], ["otheraction", "otheraction"],
+    ["barcode scan", "barcode"], ["barcode", "barcode"],
+    ["nfc reader", "nfc"], ["nfc", "nfc"],
+  ]);
+  return aliases.get(normalized) || normalized;
+}
+
+function parsePublicFormActionConfig(value, hostList, publicForm, stepName) {
+  if (!value || isPlanningPlaceholder(value) || /^(none|n\/a|not applicable)$/i.test(value)) return {};
+  try {
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("not object");
+    return parsed;
+  } catch {
+    throw new Error(`PUBLIC_FORM_ACTION_CONFIG_INVALID: ${hostList} / ${publicForm} / ${stepName}`);
+  }
 }
 
 function buildPublicFormFieldsGrid({ fields, listName, formName }) {
@@ -4698,6 +4818,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       listName: name,
       fields,
       findings,
+      planDemand,
     })) : [];
     return {
       List: list,
