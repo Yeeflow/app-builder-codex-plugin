@@ -98,9 +98,9 @@ Repeat this subsection for each Data list or Document library.
 
 #### Fields
 
-| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Contract title | Title | Title | Title | input control | plugin-known field/control type | validator-backed | N/A | Yes | No | | <Placeholder text> | | | | | | Native title field |
+| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Allow Barcode / QR Scan | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Contract title | Title | Title | Title | input control | plugin-known field/control type | validator-backed | N/A | Yes | No | | <Placeholder text> | | | | | | No | Native title field |
 
 Field rules:
 
@@ -116,6 +116,7 @@ Field rules:
 - Currency/number fields must use supported numeric field types.
 - Multiline notes, descriptions, and justifications must use supported multiline text fields.
 - Barcode, serial number, asset tag, and external code values should use text unless a supported barcode-specific field is required.
+- Set `Allow Barcode / QR Scan = Yes` only for Text fields rendered with the input control. Generated fields then serialize `Rules = {"allowScan":true}`; never infer scanning from a field name alone.
 - Placeholder text must be defined for user-entered fields when the exact selected field/control type supports placeholders. If placeholder support is unknown, mark the row `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof/generation impact.
 
 #### List Relationships
@@ -268,6 +269,29 @@ Rules:
 - Data List Workflow `SetVariableTask` cannot update the current record. Use a `ContentList` / Set Data List node with `listtype = "current"` for current-item field writes.
 - A bulk Sub list write is an export-proven `ContentList` `add` action, not a Loop substitute: use `key: "_list.<childField>"` in each row-derived mapping. Approval Form and Scheduled workflows use `exprType: "variable"` from a declared Workflow List variable; Data List workflows use `exprType: "list_field"` from a current-record Sub list field. Declare the corresponding Batch Source columns above, use an explicit selected target, and include a parent-form/list association mapping such as Applicant, Employee, or instance ID whenever the target rows need to remain traceable to their source.
 
+##### Form Action Set Data List Planning
+
+Required whenever an Approval Submission/Task form, Data List or Document Library custom form, or Dashboard Form Action contains `Set Data List`. One row represents one step and `Step Order` is the order inside the named action. Approval Print Page Set Data List remains `focused-export-proof-required`.
+
+| Host Resource | Host Form / Page | Host Type | Action Name | Step Order | Step Name | Trigger | Bound Control | Exact Step Type | Operation | Target Mode | Target Resource Type | Target Resource | Field Mapping JSON | Filter JSON | Execution Condition Tokens | Continue When Not Met | Status Target Kind | Status Target ID | Item Result Target Kind | Item Result Target ID | Item Result Attribute | Proof Boundary | Business Rationale |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Resource> | <Submission form / Task form / New/Edit/View form / Dashboard> | Approval Submission / Approval Task / Data List New / Data List Edit / Data List View / Document Library New / Document Library Edit / Document Library View / Dashboard | <Business action> | 1 | <Business step> | Page Load / Field Change / Button Click / Container Click | <Control identity or None> | Set Data List | add / edit / remove | current / select | Data List / Document Library / None | <Exact resource or None> | <JSON listdatas array or None for remove> | <JSON wheres array or None for add/current> | <JSON expression token array or None> | true / false | Temp variable / Workflow variable / None | <Exact ID or None> | Temp variable / Workflow variable / None | <Exact ID or None> | itemid / totalcount / None | export-proven / validator-backed / runtime-proof-required | <Persistence intent and risk rationale> |
+
+Rules:
+
+- `current` is valid only on Data List/Document Library custom forms and means an immediate update of the current record. It does not require a selected target resource or filters.
+- On New/Edit forms, prefer `Set Variable` plus `Submit Form` for ordinary field changes. A direct current-record Set Data List write is allowed only with an explicit immediate-side-effect rationale.
+- View Item forms cannot persist through Submit Form; use `current + edit` when a business command must update the viewed record.
+- `select + add` requires field mappings. `select + edit/remove` requires explicit non-empty filters so the mutation scope is bounded.
+- Target resources are Data Lists or Document Libraries. Form Report/Data Report are not Set Data List mutation targets.
+- `Per` in `Field Mapping JSON` is `0` Value, `1` Increase, `2` Decrease, `3` Multiply, or `4` Divide. Arithmetic modes are valid only for compatible numeric target fields.
+- `Status Target` and `Item Result Target` are optional. When configured, they must resolve to declared variables. Dashboard result targets must be page temp variables.
+- Mutually exclusive conditional Add/Update steps normally set `Continue When Not Met = true`, allowing the next branch step to be evaluated.
+- Form Action Set Data List cannot expand Sub List rows into multiple target records. Use Workflow Set Data List for bulk Sub List-to-Data List/Document Library writes.
+- Document Library Add must map one single-file value to native Upload File `Text4`. `_Path` is the export-proven folder pseudo-field. Multi-file, array, List, and Sub List upload sources require Workflow Set Data List.
+- Public Forms cannot contain Set Data List Form Action steps.
+- Use `docs/standards/form-action-set-data-list-golden-reference-standard.md`, run `validate-form-action-set-data-list-plan.mjs` before materialization, and run `validate-form-action-set-data-list.mjs --strict-generated` before signing.
+
 
 ##### Form Action Open Resource Planning
 
@@ -286,6 +310,24 @@ Rules:
 - Dashboard-host expressions may reference only declared temp variables.
 - Slide/Pop-up use modal sizes 0/1/2/3/9. Size 9 requires Custom Width. Full page/New window carry no modal size.
 - Public Forms cannot plan or materialize these steps.
+
+##### Form Action Print Page and Barcode Scan Planning
+
+Required whenever an Approval Submission/Task form, custom Data List/Document Library form, or Dashboard uses Print page or Barcode scan. One row represents one step. This focused baseline proves Dashboard print targets and Dashboard barcode scanning.
+
+| Host Resource | Host Form / Page | Host Type | Action Name | Step Order | Step Name | Trigger | Bound Control | Exact Step Type | Target Page Type | Target Page | Print Title Expression Tokens | Paper Size | Print Layout | Scale Percent | Margins | Scanning Mode | Barcode Type | Result Temp Variable | Error Temp Variable | On Read Error | Barcode Filter Field | Business Rationale | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Inventory | Inventory | Dashboard | Print inventory | 1 | Print inventory records | Button Click | btn_print_inventory | print | Dashboard | Print inventory | `[{"type":"str","value":"Inventory List_"},{"type":"op","op":"&"},{"type":"func","func":"dateFormat","params":[[{"type":"func","func":"now","params":[]}],[{"type":"str","value":"DDMMYY"}]]}]` | A4 | landscape | 80 | Minimum | N/A | N/A | N/A | N/A | N/A | N/A | Print all inventory records | export-proven |
+| Barcode Scan | Barcode Scan | Dashboard | Scan items | 1 | Scan inventory barcodes | Container Click | scan_trigger | barcode | N/A | N/A | N/A | N/A | N/A | N/A | N/A | multiple | auto | var_SelectedItems | var_ScanErrorMsg | Stop | Text10 | Filter Inventory Collection to scanned serial numbers | export-proven |
+
+Rules:
+
+- `print` currently supports an export-proven Dashboard target only. The target Dashboard must use `dashboard-print-multi-record-table-v1`, with a Collection, `table-v2` layout, at least one row/column merge example, and current-Collection-item QR binding.
+- A4 serializes as `settings.Size = "6"`; Scale Percent serializes as a decimal (`80` -> `"0.8"`); Minimum margins serialize as `settings.Margins = "3"`.
+- `barcode` modes are `multiple`, `select`, and `auto`. Export-proven barcode types in this round are Auto (omitted `attrs.type`) and `ean-13`.
+- Result and error targets must be declared page temp variables. The result variable must be consumed by a Collection filter using operator `9` (contains/in scanned values); orphan scan output is a generated-final failure.
+- This export proves Stop action on read error. Continue-to-next-step remains focused-export-proof-required.
+- Public Form Barcode scan remains governed separately by the Public Form action allowlist and remains serialization-unproven until a Public Form export proves its exact shape.
 
 ##### Form Action Query Data Planning Rules
 
@@ -659,13 +701,14 @@ Required for every generated Dashboard page.
 
 | Dashboard Page | Selected Dashboard Page Layout Template | Business Layout Need | Primary Regions Needed | Right Side Panel Needed | Chart Cards Section Needed | Selection Reason | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Dashboard> | dashboard-page-layouts-v1.1 / dashboard-page-layouts-workbench / dashboard-page-layouts-two-panel-workspace / dashboard-page-layouts-three-panel-workspace | General overview / operational workbench / master-detail workspace | <Sections/regions> | Yes/No | Yes/No | <Reason using template guidance> | Generated-final validation |
+| <Dashboard> | dashboard-page-layouts-v1.1 / dashboard-page-layouts-workbench / dashboard-page-layouts-two-panel-workspace / dashboard-page-layouts-three-panel-workspace / dashboard-print-multi-record-table-v1 | General overview / operational workbench / master-detail workspace / multi-record print page | <Sections/regions> | Yes/No | Yes/No | <Reason using template guidance> | Generated-final validation |
 
 Rules:
 
 - Select exactly one Dashboard page layout template per Dashboard page from `docs/reference/dashboard-page-layout-templates.json`.
 - Use `dashboard-page-layouts-v1.1` for general overview dashboards, report-style dashboards, and section-first pages.
 - Use `dashboard-page-layouts-workbench` for operational workbench pages that need a primary working area, optional right-side panel, top filters, KPI cards, grouped analytics, and queue/list regions.
+- Use `dashboard-print-multi-record-table-v1` only for a Dashboard selected as a Print page target. It provides one-record-per-Collection-item Table layout, merged row/column support, and a current-Collection-item QR region.
 - Use `dashboard-page-layouts-two-panel-workspace` when a Dashboard must manage one source dataset with a left record list and a right selected-record detail panel.
 - Use `dashboard-page-layouts-three-panel-workspace` when the selected-record detail needs a main detail panel plus an additional right-side information/action panel.
 - If `dashboard-page-layouts-workbench` is selected, state whether `right_side_panel` and `chart_cards_section` are needed. Empty Workbench right-side panels and empty chart sections must be removed during generation.

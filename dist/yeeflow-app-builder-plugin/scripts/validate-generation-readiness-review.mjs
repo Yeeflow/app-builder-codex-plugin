@@ -9,6 +9,7 @@ import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-li
 import { validateSetVariablePlan } from "./validate-set-variable-plan.mjs";
 import { validateFormActionSetDataListPlan } from "./validate-form-action-set-data-list-plan.mjs";
 import { validateFormActionOpenResourcePlan } from "./validate-form-action-open-resource-plan.mjs";
+import { validateFormActionPrintBarcodePlan } from "./validate-form-action-print-barcode-plan.mjs";
 
 const AREAS = [
   { key: "dataLists", title: "Data Lists and Document Libraries Plan", code: "GENERATION_READINESS_AREA_EMPTY", required: /data list|document library|not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required/i, extra: validateDataLists },
@@ -555,6 +556,24 @@ function validate(file) {
     ...finding,
   });
 
+  const formActionPrintBarcodePlan = validateFormActionPrintBarcodePlan(text);
+  const hasFormActionPrintBarcodeIntent = formActionPrintBarcodePlan.rows > 0 || text.split(/\r?\n/).some((line) =>
+    isActionablePlanningIntentLine(line)
+    && /\b(Print page|Barcode scan|Exact Step Type\s*[:=]?\s*(?:print|barcode))\b/i.test(line)
+    && /\b(Form Action|Submission form|Task form|Data List Form|Dashboard)\b/i.test(line)
+  );
+  if (hasFormActionPrintBarcodeIntent && formActionPrintBarcodePlan.rows === 0) findings.push({
+    level: "error",
+    code: "GENERATION_READINESS_FORM_ACTION_PRINT_BARCODE_PLAN_TABLE_MISSING",
+    area: "Form Action Print Page and Barcode Scan Planning",
+    message: "Print page or Barcode scan intent requires the standard Form Action Print Page and Barcode Scan Planning table.",
+  });
+  for (const finding of formActionPrintBarcodePlan.findings) findings.push({
+    level: finding.severity === "warning" ? "warning" : "error",
+    area: "Form Action Print Page and Barcode Scan Planning",
+    ...finding,
+  });
+
   const workflowQueryDataPlan = validateWorkflowQueryDataPlan(text);
   const hasWorkflowQueryDataIntent = workflowQueryDataPlan.queryDataRows > 0 || text.split(/\r?\n/).some((line) =>
     isActionablePlanningIntentLine(line)
@@ -659,6 +678,12 @@ function validate(file) {
       detectedIntent: hasFormActionOpenResourceIntent,
       openResourceRows: formActionOpenResourcePlan.openResourceRows,
       status: formActionOpenResourcePlan.status,
+    },
+    formActionPrintBarcodePlan: {
+      validatorRan: true,
+      detectedIntent: hasFormActionPrintBarcodeIntent,
+      rows: formActionPrintBarcodePlan.rows,
+      status: formActionPrintBarcodePlan.status,
     },
     setVariablePlan: {
       validatorRan: true,

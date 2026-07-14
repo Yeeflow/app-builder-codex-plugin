@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.68
+
+- Add export-backed Form Action Print Page and Barcode Scan planning, shared materialization, package validation, and signing-readiness gates across supported page hosts.
+- Add the `dashboard-print-multi-record-table-v1` golden layout for multi-record Dashboard printing with Collection-backed Table composition, merged cells, dynamic controls, and current-item QR codes.
+- Support Text field barcode/QR scanning through canonical `Rules.allowScan`, plus Auto and EAN-13 scan modes, multiple/select/automatic scanning, result/error variables, and scan-result Collection filters.
+- Keep unlearned Data List item, Document Library item, Approval Submission, and Approval Print Page print targets fail-closed until exact export-backed contracts are available.
+
 ## 0.9.67
 
 - Add Public Form Form Action golden references, planning, materialization, and package validation for the eight product-supported step types while keeping unproven serialization fail-closed.
