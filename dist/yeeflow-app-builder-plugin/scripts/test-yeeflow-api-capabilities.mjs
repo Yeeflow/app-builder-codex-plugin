@@ -26,6 +26,7 @@ testPathsAndRawCapabilityPolicy();
 testLocationsList();
 testPositionCapabilities();
 testWorkspaceCapabilities();
+testApplicationManagementCapabilities();
 testListCommand();
 testCallHelperBlocksWrites();
 testCallHelperAcceptsWorkspaceReads();
@@ -149,6 +150,31 @@ function testWorkspaceCapabilities() {
   }
 }
 
+function testApplicationManagementCapabilities() {
+  const list = getCapability("workspaces.applications.list");
+  assert.ok(list);
+  assert.equal(list.method, "GET");
+  assert.equal(list.path, "/workspaces/{category}/{id}/applications");
+  assert.equal(list.readOnly, true);
+  assert.equal(list.auth, "oauth");
+  assert.deepEqual(list.requiredParams, ["path:category", "path:id"]);
+  assert.deepEqual(list.optionalParams, ["query:appID"]);
+  assert.match(list.notes, /30 or 41/);
+  assert.match(list.notes, /redacted application ID previews/);
+
+  const remove = getCapability("applications.delete");
+  assert.ok(remove);
+  assert.equal(remove.method, "DELETE");
+  assert.equal(remove.path, "/applications/{id}");
+  assert.equal(remove.readOnly, false);
+  assert.equal(remove.requiresConfirmation, true);
+  assert.equal(remove.confirmationLevel, "strong");
+  assert.deepEqual(remove.requiredParams, ["path:id"]);
+  assert.deepEqual(remove.optionalParams, ["query:appID"]);
+  assert.match(remove.notes, /workspace-scoped application readback/);
+  assert.match(remove.notes, /exact application ID and title/);
+}
+
 function testListCommand() {
   const all = run(["scripts/yeeflow-api-list-capabilities.mjs"]);
   assert.equal(all.status, 0, all.stderr);
@@ -178,6 +204,10 @@ function testCallHelperBlocksWrites() {
   const workspaceWrite = run(["scripts/yeeflow-api-call-capability.mjs", "--name", "workspaces.add"]);
   assert.notEqual(workspaceWrite.status, 0);
   assert.match(workspaceWrite.stderr, /does not execute write capabilities/);
+
+  const applicationDelete = run(["scripts/yeeflow-api-call-capability.mjs", "--name", "applications.delete"]);
+  assert.notEqual(applicationDelete.status, 0);
+  assert.match(applicationDelete.stderr, /does not execute write capabilities/);
 }
 
 function testCallHelperAcceptsWorkspaceReads() {

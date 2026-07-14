@@ -2,6 +2,7 @@
 
 import { getCapability, pathParamsFor, summarizeCapability } from "./lib/yeeflow-api-capabilities.mjs";
 import { buildLoginRequiredResult, mergeAuthHeaders, resolveYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
+import { normalizeApplicationAppId, summarizeApplicationList } from "./lib/yeeflow-application-management.mjs";
 import { summarizeWorkspaceList, summarizeWorkspaceRecord } from "./lib/yeeflow-workspace-selection.mjs";
 
 const args = parseArgs(process.argv.slice(2));
@@ -21,6 +22,9 @@ try {
   }
 
   const params = parseParams(args.params);
+  if (capability.name === "workspaces.applications.list") {
+    params.appID = String(normalizeApplicationAppId(params.appID));
+  }
   const urlPath = buildPath(capability, params);
   const query = buildQuery(capability, params);
   const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local" });
@@ -61,6 +65,8 @@ try {
     output.workspaceSummary = data && typeof data === "object" && !Array.isArray(data)
       ? { workspaceCount: 1, workspaces: [summarizeWorkspaceRecord(data, 1)] }
       : { workspaceCount: 0, workspaces: [] };
+  } else if (capability.name === "workspaces.applications.list") {
+    output.applicationSummary = summarizeApplicationList(parsed);
   }
 
   console.log(JSON.stringify(output, null, 2));
@@ -144,6 +150,7 @@ function printUsage() {
   console.log(`Usage:
   node scripts/yeeflow-api-call-capability.mjs --name locations.list
   node scripts/yeeflow-api-call-capability.mjs --name locations.get --param id=<location-id>
+  node scripts/yeeflow-api-call-capability.mjs --name workspaces.applications.list --param category=flowcraft --param id=<workspace-id> --param appID=41
 
 Executes only mapped read-only GET capabilities through the OAuth/API auth wrapper. It does not support arbitrary raw paths and does not save raw responses. If OAuth is missing, normal user-facing flows should use the Yeeflow plugin login action; local OAuth CLI scripts are developer diagnostics only.`);
 }

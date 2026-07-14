@@ -1,6 +1,6 @@
 ---
 name: yeeflow-api-operator
-description: Safely use Yeeflow REST APIs from Codex when local credentials are available. Use for read-only Yeeflow organization and reference-data lookups, API connectivity checks, directory/master-data discovery, users, departments, locations, positions, groups, assignment-routing API coverage, or when app planning/runtime tests need authorized org data without exposing secrets.
+description: Safely use Yeeflow REST APIs from Codex when local credentials are available. Use for read-only Yeeflow organization and reference-data lookups, workspace application discovery, guarded application deletion, API connectivity checks, directory/master-data discovery, users, departments, locations, positions, groups, assignment-routing API coverage, or when app planning/runtime tests need authorized data without exposing secrets.
 ---
 
 # Yeeflow API Operator
@@ -118,6 +118,7 @@ Initial supported endpoints:
 - `GET /groups/{id}/users`
 - `GET /workspaces/settings` and `GET /workspaces/flowcraft` through `node scripts/yeeflow-workspace-list.mjs --all` or `--category flowcraft`
 - `GET /workspaces/{category}/{id}` when a narrow read-only lookup is explicitly needed
+- `GET /workspaces/{category}/{id}/applications?appID=41` through `node scripts/yeeflow-workspace-applications.mjs --workspace-id <workspace-id>` to list applications in one selected workspace
 
 Report only:
 
@@ -139,6 +140,55 @@ Job-position lookup for workflow assignment routing:
 - No standalone `GET /positions/{id}` endpoint and no current-user/system-admin permission-check endpoint are mapped in this repository today.
 - `POST /positions`, `PUT /positions/{id}`, `POST /positions/{id}/users`, and `POST /positions/{id}/users/remove` are admin-confirmation-gated writes. They must never run automatically during generation.
 - If a required job position is missing and system-admin status cannot be proven, stop and ask the user to have a system admin create/update it or provide an existing job position/fallback.
+
+## Application Management Operations
+
+The documented application-management capabilities are:
+
+- `GET /workspaces/{category}/{id}/applications?appID={30|41}` to list applications in one workspace.
+- `DELETE /applications/{id}?appID={30|41}` to delete one application by ID.
+
+`appID` supports only `30` or `41` and defaults to `41`. Do not invent other values.
+
+List applications with the dedicated read-only helper:
+
+```bash
+node scripts/yeeflow-workspace-applications.mjs \
+  --category flowcraft \
+  --workspace-id <workspace-id> \
+  --app-id 41
+```
+
+The helper requires OAuth, automatically uses the shared expired-token refresh path, and prints only application count, title, safe type/status values, and redacted application ID previews. It must not print raw responses, full workspace IDs, full application IDs, tenant identifiers, or private URLs.
+
+Application deletion is destructive and must never run through `yeeflow-api-call-capability.mjs`. Use only the dedicated guarded helper. It is dry-run by default:
+
+```bash
+node scripts/yeeflow-application-delete.mjs \
+  --expected-title "Exact Application Title"
+```
+
+A live deletion requires all of the following in the same invocation:
+
+1. Explicit user authorization to delete that exact application.
+2. The selected workspace ID and application ID.
+3. The exact expected application title.
+4. A workspace-scoped application-list preflight that finds exactly one matching ID and the exact title.
+5. The exact strong-confirmation phrase `DELETE APPLICATION: <Exact Application Title>`.
+6. `--execute`.
+
+```bash
+node scripts/yeeflow-application-delete.mjs \
+  --category flowcraft \
+  --workspace-id <workspace-id> \
+  --application-id <application-id> \
+  --expected-title "Exact Application Title" \
+  --confirm-delete "DELETE APPLICATION: Exact Application Title" \
+  --app-id 41 \
+  --execute
+```
+
+Do not infer deletion approval from a request to add, document, inspect, validate, or test the API. A successful DELETE response is API acceptance only. Re-run the read-only workspace application query and confirm absence before claiming final deletion. Never perform application deletion against an unconfirmed production workspace or as part of a generic smoke test.
 
 ## Package Automation Operations
 

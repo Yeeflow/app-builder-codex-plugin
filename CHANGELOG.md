@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.66
+
+- Add `GET /workspaces/{category}/{id}/applications` to the capability map and provide an OAuth-backed helper that returns application counts, titles, safe metadata, and redacted application ID previews only.
+- Add a dedicated dry-run-first `DELETE /applications/{id}` helper with workspace-scoped readback, exact application ID/title matching, `appID` 30/41 validation, and exact strong confirmation before execution.
+- Add source/dist contract, redaction, input-gate, write-blocking, OAuth live-smoke, and application identity regression coverage without executing a destructive delete during release validation.
+
 ## 0.9.65
 
 - Normalize Data List and Approval Form choice enums through one shared parser, including ASCII and Chinese delimiters, line breaks, JSON arrays, and structured arrays.
