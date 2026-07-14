@@ -19,6 +19,7 @@ const APPROVED_IDS = new Set([
   "collection_control_grid_table_with_multiselect",
   "Event Pipeline Grid-Table",
 ]);
+const PRINT_TEMPLATE_ID = "dashboard-print-multi-record-table-v1";
 
 const INTERNAL_TEMPLATE_STRUCTURE_IDS = new Set([
   "collection_control_responsive_card_wrapper",
@@ -821,12 +822,16 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
     findings.push(error("DASH_DATASET_COLLECTION_TEMPLATE_PROVENANCE_MISSING", "Every generated Dashboard Collection must carry or inherit approved dataset presentation template provenance.", { page: page.title, path: entry.pointer, approvedTemplateIds: [...approvedIds] }));
     return;
   }
-  if (!approvedIds.has(provenance.templateId)) {
+  if (!approvedIds.has(provenance.templateId) && provenance.templateId !== PRINT_TEMPLATE_ID) {
     findings.push(error("DASH_DATASET_COLLECTION_TEMPLATE_UNKNOWN", "Generated Dashboard Collection uses an unknown dataset presentation template.", { page: page.title, path: entry.pointer, templateId: provenance.templateId, approvedTemplateIds: [...approvedIds] }));
     return;
   }
 
   validateCollectionRuntimeBindings(entry, page, findings, context);
+  if (provenance.templateId === PRINT_TEMPLATE_ID) {
+    validatePrintCollection(entry, page, findings);
+    return;
+  }
   validateCollectionStyleContracts(entry, page, findings, { templateId: provenance.templateId });
   if (GRID_TABLE_IDS.has(provenance.templateId)) validateGridTable(entry, page, provenance.templateId, findings);
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
@@ -835,6 +840,21 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
   if (provenance.templateId === "collection_control_grid_table_with_multiselect") validateGridMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
+}
+
+function validatePrintCollection(entry, page, findings) {
+  const table = findDescendants(entry.control, (node) => String(node?.type || "") === "table-v2")[0];
+  if (!table) {
+    findings.push(error("DASH_DATASET_PRINT_TABLE_MISSING", "Printable Dashboard Collection must materialize a table-v2 item layout.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+  if (!isObject(table?.attrs?.["table-merges"]) || !Object.keys(table.attrs["table-merges"]).length) {
+    findings.push(error("DASH_DATASET_PRINT_TABLE_MERGES_MISSING", "Printable table-v2 item layout must preserve merged-cell metadata.", { page: page.title, path: `${entry.pointer}.children` }));
+  }
+  const qr = findDescendants(table, (node) => String(node?.type || "") === "list-qrcode")[0];
+  if (!qr || String(qr?.attrs?.["qr-code-link"]?.type || "") !== "2") {
+    findings.push(error("DASH_DATASET_PRINT_CURRENT_ITEM_QR_MISSING", "Printable Dashboard Collection must include a QR code linked to the current Collection item.", { page: page.title, path: `${entry.pointer}.children` }));
+  }
 }
 
 function isMasterDetailWorkspaceInternalCollection(entry, page) {
@@ -1274,6 +1294,7 @@ function resolveExplicitCollectionTemplateId(entry, approvedIds) {
   ].map((item) => String(item || "").trim()).filter(Boolean);
   for (const candidate of candidates) {
     if (/^event pipeline grid-table$/i.test(candidate)) return "Event Pipeline Grid-Table";
+    if (candidate === PRINT_TEMPLATE_ID) return PRINT_TEMPLATE_ID;
     if (approvedIds.has(candidate)) return candidate;
   }
   return "";

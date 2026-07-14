@@ -16,6 +16,8 @@ const CARD_TEMPLATE_IDS = new Set([
   "collection_control_card_with_multiselect_toolbar",
 ]);
 
+const PRINT_TEMPLATE_ID = "dashboard-print-multi-record-table-v1";
+
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.package) {
@@ -116,12 +118,40 @@ function validateDashboardPage(page, context) {
 
 function validateDashboardCollection(entry, page, context) {
   const templateId = effectiveTemplateId(entry);
+  if (templateId === PRINT_TEMPLATE_ID) {
+    validatePrintCollection(entry, page, context);
+    return;
+  }
   if (CARD_TEMPLATE_IDS.has(templateId)) {
     validateCardCollection(entry, page, context, templateId);
     return;
   }
   if (templateId && !GRID_TABLE_TEMPLATE_IDS.has(templateId)) return;
   validateGridTableCollection(entry, page, context, templateId || "implicit-grid-table");
+}
+
+function validatePrintCollection(entry, page, context) {
+  const { findings } = context;
+  const { control, pointer } = entry;
+  const table = firstDescendant(control, (node) => node.type === "table-v2");
+  if (!table) {
+    findings.push(error("DASHBOARD_PRINT_COLLECTION_TABLE_MISSING", "Printable Dashboard Collection must contain one table-v2 item layout.", { page: page.title, path: pointer }));
+    return;
+  }
+  if (!table?.attrs?.["table-merges"] || !Object.keys(table.attrs["table-merges"]).length) {
+    findings.push(error("DASHBOARD_PRINT_COLLECTION_TABLE_MERGES_MISSING", "Printable table-v2 item layout must preserve explicit merged-cell metadata.", { page: page.title, path: `${pointer}.children` }));
+  }
+  if (!firstDescendant(table, (node) => node.type === "dynamic-field" || node.type === "dynamic-user" || node.type === "dynamic-image" || node.type === "dynamic-file")) {
+    findings.push(error("DASHBOARD_PRINT_COLLECTION_DYNAMIC_VALUE_MISSING", "Printable table-v2 item layout must bind at least one dynamic record value.", { page: page.title, path: `${pointer}.children` }));
+  }
+  const qr = firstDescendant(table, (node) => node.type === "list-qrcode");
+  if (!qr || String(qr?.attrs?.["qr-code-link"]?.type || "") !== "2") {
+    findings.push(error("DASHBOARD_PRINT_COLLECTION_CURRENT_ITEM_QR_MISSING", "Printable Collection must include a list-qrcode linked to the current Collection item.", { page: page.title, path: `${pointer}.children` }));
+  }
+  const data = control?.attrs?.data || {};
+  if (!data?.list?.ListID || !Array.isArray(data.sort) || !data.sort.length) {
+    findings.push(error("DASHBOARD_PRINT_COLLECTION_DATASET_INVALID", "Printable Collection must bind a concrete source list and primary sort.", { page: page.title, path: `${pointer}.attrs.data` }));
+  }
 }
 
 function validateCardCollection(entry, page, context, templateId) {
@@ -208,7 +238,7 @@ function firstTemplateId(nodes) {
       node?.derivedFromCollectionTemplate,
       node?.derivedFromGoldenReference,
     ].filter(Boolean).map(String);
-    const found = candidates.find((candidate) => GRID_TABLE_TEMPLATE_IDS.has(candidate) || CARD_TEMPLATE_IDS.has(candidate));
+    const found = candidates.find((candidate) => GRID_TABLE_TEMPLATE_IDS.has(candidate) || CARD_TEMPLATE_IDS.has(candidate) || candidate === PRINT_TEMPLATE_ID);
     if (found) return found;
   }
   return "";
