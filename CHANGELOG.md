@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.67
+
+- Add Public Form Form Action golden references, planning, materialization, and package validation for the eight product-supported step types while keeping unproven serialization fail-closed.
+- Restrict anonymous Set variables and Redirect expressions to current-list fields, same-form temp variables, and fixed values; reject Query Data, Set Data List, Open Resource, Invoke Service, and other application-resource steps.
+- Ignore App Plan template placeholder rows and instructional scaffolding during action intent extraction while retaining missing-table hard gates for real business requirements.
+
 ## 0.9.66
 
 - Add `GET /workspaces/{category}/{id}/applications` to the capability map and provide an OAuth-backed helper that returns application counts, titles, safe metadata, and redacted application ID previews only.
