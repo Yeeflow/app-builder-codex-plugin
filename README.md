@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.67`
+- Version: `0.9.68`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.67` adds export-backed Public Form Form Actions, anonymous-context target and expression restrictions, and placeholder-safe App Plan readiness parsing.
+Current release `0.9.68` adds export-backed Dashboard Print Page and Barcode Scan planning, generation, validation, and golden-reference layout contracts.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.67
+Version: 0.9.68
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.67
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.68
 ```
 
 ## What Is Included

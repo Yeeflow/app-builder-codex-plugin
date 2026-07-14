@@ -1,0 +1,97 @@
+{
+  "referenceId": "online-library-v3-1-print-barcode",
+  "proof": "export-proven",
+  "source": "Online Library-v3.1.yapk",
+  "templates": {
+    "dashboardPrintPageStep": {
+      "type": "print",
+      "attrs": {
+        "printtype": "select",
+        "data": {
+          "AppID": 41,
+          "ListSetID": "{{LIST_SET_ID}}",
+          "Type": "page",
+          "SourceID": "{{DASHBOARD_PAGE_ID}}"
+        },
+        "ptit": "{{EXPRESSION_TOKENS}}",
+        "settings": {
+          "Size": "6",
+          "Layout": "landscape",
+          "Scale": "0.8",
+          "Margins": "3"
+        }
+      }
+    },
+    "barcodeScanMultipleAuto": {
+      "type": "barcode",
+      "attrs": {
+        "mode": "multiple",
+        "response": { "prefix": "__temp_", "value": "{{RESULT_TEMP_VARIABLE}}" },
+        "message": { "prefix": "__temp_", "value": "{{ERROR_TEMP_VARIABLE}}" }
+      }
+    },
+    "barcodeScanMultipleEan13": {
+      "type": "barcode",
+      "attrs": {
+        "mode": "multiple",
+        "response": { "prefix": "__temp_", "value": "{{RESULT_TEMP_VARIABLE}}" },
+        "message": { "prefix": "__temp_", "value": "{{ERROR_TEMP_VARIABLE}}" },
+        "type": "ean-13"
+      }
+    },
+    "barcodeScanSelectEan13": {
+      "type": "barcode",
+      "attrs": {
+        "mode": "select",
+        "response": { "prefix": "__temp_", "value": "{{RESULT_TEMP_VARIABLE}}" },
+        "message": { "prefix": "__temp_", "value": "{{ERROR_TEMP_VARIABLE}}" },
+        "type": "ean-13"
+      }
+    },
+    "barcodeScanAutomaticEan13": {
+      "type": "barcode",
+      "attrs": {
+        "mode": "auto",
+        "response": { "prefix": "__temp_", "value": "{{RESULT_TEMP_VARIABLE}}" },
+        "message": { "prefix": "__temp_", "value": "{{ERROR_TEMP_VARIABLE}}" },
+        "type": "ean-13"
+      }
+    },
+    "barcodeEnabledTextFieldRules": {
+      "FieldType": "Text",
+      "Type": "input",
+      "Rules": "{\"allowScan\":true}"
+    },
+    "collectionScanFilter": {
+      "pre": "and",
+      "left": "{{BARCODE_FIELD_NAME}}",
+      "op": "9",
+      "right": [
+        {
+          "exprType": "variable",
+          "valueType": "string",
+          "id": "__temp_{{RESULT_TEMP_VARIABLE}}",
+          "type": "expr",
+          "name": "{{RESULT_TEMP_VARIABLE}}"
+        }
+      ],
+      "showCus": false
+    },
+    "collectionItemQr": {
+      "type": "list-qrcode",
+      "attrs": {
+        "qr-code-size": [null, 96],
+        "qr-code-link": { "type": "2", "value": "" }
+      }
+    },
+    "tableMergeShape": {
+      "type": "table-v2",
+      "attrs": {
+        "table-merges": {
+          "0,1": [[0, 1], [1, 1]],
+          "3,0": [[3, 0], [3, 1]]
+        }
+      }
+    }
+  }
+}

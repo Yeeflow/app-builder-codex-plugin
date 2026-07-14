@@ -146,6 +146,12 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     "--strict-generated",
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("form-action-print-barcode", [
+    "scripts/validate-form-action-print-barcode.mjs",
+    "--package",
+    resolvedPackage,
+    "--strict-generated",
+  ]));
   gates.push(runGate("approval-form-layouts-v1.1", [
     "scripts/validate-approval-form-layout-template.mjs",
     "--package",

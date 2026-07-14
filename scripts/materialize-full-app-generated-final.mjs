@@ -29,6 +29,7 @@ import workflowGraphReferenceUtils from "./lib/approval-workflow-graph-reference
 import setVariableContractUtils from "./lib/set-variable-contract-utils.cjs";
 import formActionSetDataListUtils from "./lib/form-action-set-data-list-utils.cjs";
 import formActionOpenResourceUtils from "./lib/form-action-open-resource-utils.cjs";
+import formActionPrintBarcodeUtils from "./lib/form-action-print-barcode-utils.cjs";
 import choiceFieldOptionUtils from "./lib/choice-field-option-utils.cjs";
 import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-list-plan.mjs";
 
@@ -44,6 +45,7 @@ const {
 const { buildWorkflowVariableSetting, normalizeSetVariableHostType } = setVariableContractUtils;
 const { buildFormActionSetDataListStep } = formActionSetDataListUtils;
 const { buildFormActionOpenResourceStep } = formActionOpenResourceUtils;
+const { buildDashboardPrintStep, buildBarcodeScanStep } = formActionPrintBarcodeUtils;
 const { parseChoiceOptionValues } = choiceFieldOptionUtils;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -70,6 +72,7 @@ const PUBLIC_FORM_PAGE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/public-fo
 const PUBLIC_FORM_FIELDS_1COL_TEMPLATE_PATH = path.join(ROOT, "docs/reference/public-form-fields-1col.template.json");
 const PUBLIC_FORM_PAGE_TEMPLATE_ID = "public-form-page-layout-standard";
 const PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID = "public_form_fields_1col_v1_1";
+const DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID = "dashboard-print-multi-record-table-v1";
 const PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES = new Set([
   "input",
   "textarea",
@@ -137,6 +140,7 @@ const SOURCE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = {
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = Object.freeze([
   PAGE_LAYOUT_TEMPLATE_ID,
+  DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
   "dashboard-page-layouts-workbench",
   "dashboard-page-layouts-two-panel-workspace",
   "dashboard-page-layouts-three-panel-workspace",
@@ -796,6 +800,7 @@ function analyzeAppPlanResourceDemand(planText) {
   const formActionSetVariableRecords = collectFormActionSetVariableRecords(planText);
   const formActionSetDataListRecords = collectFormActionSetDataListRecords(planText);
   const formActionOpenResourceRecords = collectFormActionOpenResourceRecords(planText);
+  const formActionPrintBarcodeRecords = collectFormActionPrintBarcodeRecords(planText);
   const workflowSetDataListRecords = collectWorkflowSetDataListRecords(planText);
   const workflowLoopRecords = collectWorkflowLoopRecords(planText);
   const workflowHostRecords = collectWorkflowHostRecords(planText);
@@ -845,6 +850,7 @@ function analyzeAppPlanResourceDemand(planText) {
     formActionSetVariableRecords,
     formActionSetDataListRecords,
     formActionOpenResourceRecords,
+    formActionPrintBarcodeRecords,
     dashboardPageLayoutTemplateRecords,
     dashboardFilterRecords,
     dashboardSummaryMetricRecords,
@@ -1059,6 +1065,53 @@ export function collectFormActionOpenResourceRecords(planText) {
   return records;
 }
 
+export function collectFormActionPrintBarcodeRecords(planText) {
+  const records = [];
+  for (const table of parseMarkdownTables(planText)) {
+    const headers = table.headers.map((header) => normKey(header));
+    const column = (names) => findHeaderIndex(headers, names);
+    const typeColumn = column(["exact step type", "step type"]);
+    const required = {
+      hostResource: column(["host resource"]), hostPage: column(["host form page", "host form", "host page"]), hostType: column(["host type"]),
+      actionName: column(["action name"]), stepOrder: column(["step order"]), stepName: column(["step name"]), trigger: column(["trigger"]), boundControl: column(["bound control"]),
+    };
+    if (typeColumn === -1 || Object.values(required).some((index) => index === -1)) continue;
+    const optional = {
+      targetType: column(["target page type"]), targetPage: column(["target page"]), titleTokens: column(["print title expression tokens"]),
+      paperSize: column(["paper size"]), printLayout: column(["print layout"]), scale: column(["scale percent"]), margins: column(["margins"]),
+      scanningMode: column(["scanning mode"]), barcodeType: column(["barcode type"]), resultVariable: column(["result temp variable"]), errorVariable: column(["error temp variable"]), onReadError: column(["on read error"]),
+      barcodeFilterField: column(["barcode filter field", "scan filter field"]),
+    };
+    const cell = (row, index) => index === -1 ? "" : row[table.headers[index]];
+    const structured = (row, index) => index === -1 ? "" : row.__raw?.[index] ?? cell(row, index);
+    for (const row of table.rows) {
+      const stepType = cleanResourceName(cell(row, typeColumn)).toLowerCase();
+      if (!new Set(["print", "barcode"]).has(stepType)) continue;
+      const record = Object.fromEntries(Object.entries(required).map(([key, index]) => [key, cleanResourceName(cell(row, index))]));
+      if ([record.hostResource, record.hostPage, record.actionName, record.stepName].some((value) => !value || isPlanningPlaceholder(value))) continue;
+      records.push({
+        ...record,
+        stepType,
+        stepOrder: Number(record.stepOrder) || 1,
+        targetType: cleanResourceName(cell(row, optional.targetType)),
+        targetPage: cleanResourceName(cell(row, optional.targetPage)),
+        titleTokensJson: cleanStructuredPlanCell(structured(row, optional.titleTokens)),
+        paperSize: cleanResourceName(cell(row, optional.paperSize)),
+        printLayout: cleanResourceName(cell(row, optional.printLayout)),
+        scalePercent: cleanResourceName(cell(row, optional.scale)),
+        margins: cleanResourceName(cell(row, optional.margins)),
+        scanningMode: cleanResourceName(cell(row, optional.scanningMode)),
+        barcodeType: cleanResourceName(cell(row, optional.barcodeType)),
+        resultVariable: cleanResourceName(cell(row, optional.resultVariable)),
+        errorVariable: cleanResourceName(cell(row, optional.errorVariable)),
+        onReadError: cleanResourceName(cell(row, optional.onReadError)),
+        barcodeFilterField: cleanResourceName(cell(row, optional.barcodeFilterField)),
+      });
+    }
+  }
+  return records;
+}
+
 export function materializePlannedFormActionSetVariables(resource, { records = [], hostResource = "", hostPage = "", hostType = "" } = {}) {
   if (!resource || typeof resource !== "object") return resource;
   const requestedHostType = normalizeSetVariableHostType(hostType);
@@ -1227,6 +1280,80 @@ export function materializePlannedFormActionOpenResources(resource, {
     bindPlannedFormActionTrigger(resource, action, record);
   }
   return resource;
+}
+
+export function materializePlannedFormActionPrintBarcode(resource, {
+  records = [], hostResource = "", hostPage = "", hostSurface = "", dashboardMetaByName = new Map(), rootListSetId = "",
+} = {}) {
+  if (!resource || typeof resource !== "object") return resource;
+  const selected = records.filter((record) => normKey(record.hostResource) === normKey(hostResource)
+    && normKey(record.hostPage) === normKey(hostPage)
+    && (!record.hostType || formActionSetDataListHostMatches(record.hostType, hostSurface)));
+  if (!selected.length) return resource;
+  resource.actions = Array.isArray(resource.actions) ? resource.actions : [];
+  resource.formAction = resource.formAction && typeof resource.formAction === "object" && !Array.isArray(resource.formAction) ? resource.formAction : {};
+  resource.tempVars = Array.isArray(resource.tempVars) ? resource.tempVars : [];
+  for (const record of [...selected].sort((left, right) => left.stepOrder - right.stepOrder)) {
+    let action = resource.actions.find((item) => normKey(item?.name) === normKey(record.actionName));
+    if (!action) {
+      action = { id: deterministicUuid(`${hostResource}:${hostPage}:form-action:${record.actionName}`), name: record.actionName, steps: [] };
+      resource.actions.push(action);
+    }
+    action.steps = Array.isArray(action.steps) ? action.steps : [];
+    let step;
+    if (record.stepType === "print") {
+      if (!/^dashboard$/i.test(record.targetType)) throw new Error(`FORM_ACTION_PRINT_TARGET_TYPE_UNPROVEN: ${record.targetType}`);
+      const target = dashboardMetaByName.get(normKey(record.targetPage));
+      if (!target) throw new Error(`FORM_ACTION_PRINT_DASHBOARD_TARGET_UNRESOLVED: ${record.targetPage}`);
+      step = buildDashboardPrintStep({
+        name: record.stepName,
+        target: { AppID: 41, ListSetID: rootListSetId, SourceID: target.pageId },
+        titleTokens: parseRequiredPlanJsonArray(record.titleTokensJson, null, `FORM_ACTION_PRINT_TITLE_EXPRESSION_INVALID: ${record.stepName}`),
+        paperSize: record.paperSize,
+        layout: record.printLayout,
+        scalePercent: record.scalePercent,
+        margins: record.margins,
+      });
+    } else {
+      ensureFormActionResultTempVariable(resource, record.resultVariable, record.scanningMode === "multiple" ? "array" : "text");
+      ensureFormActionResultTempVariable(resource, record.errorVariable, "text");
+      step = buildBarcodeScanStep({
+        name: record.stepName,
+        mode: record.scanningMode,
+        barcodeType: record.barcodeType,
+        resultVariable: record.resultVariable,
+        errorVariable: record.errorVariable,
+        onReadError: record.onReadError,
+      });
+      materializeBarcodeCollectionFilter(resource, record);
+    }
+    const existingIndex = action.steps.findIndex((item) => item?.type === record.stepType && normKey(item?.name) === normKey(record.stepName));
+    if (existingIndex >= 0) action.steps.splice(existingIndex, 1);
+    action.steps.splice(Math.max(0, Math.min(action.steps.length, record.stepOrder - 1)), 0, step);
+    bindPlannedFormActionTrigger(resource, action, record);
+  }
+  return resource;
+}
+
+function materializeBarcodeCollectionFilter(resource, record) {
+  if (!record.barcodeFilterField || isPlanningPlaceholder(record.barcodeFilterField)) {
+    throw new Error(`FORM_ACTION_BARCODE_FILTER_FIELD_MISSING: ${record.hostResource} / ${record.hostPage} / ${record.stepName}`);
+  }
+  const collection = findDescendants(resource, (node) => node?.type === "collection")[0];
+  if (!collection) throw new Error(`FORM_ACTION_BARCODE_COLLECTION_CONSUMER_MISSING: ${record.hostResource} / ${record.hostPage}`);
+  collection.attrs = collection.attrs || {};
+  collection.attrs.data = collection.attrs.data || {};
+  collection.attrs.data.filter = Array.isArray(collection.attrs.data.filter) ? collection.attrs.data.filter : [];
+  const condition = {
+    key: deterministicUuid(`${record.hostResource}:${record.hostPage}:${record.actionName}:${record.barcodeFilterField}:scan-filter`),
+    pre: "and",
+    left: record.barcodeFilterField,
+    op: "9",
+    right: [{ exprType: "variable", valueType: "string", id: `__temp_${record.resultVariable.replace(/^__temp_/, "")}`, type: "expr", name: record.resultVariable.replace(/^__temp_/, "") }],
+    showCus: false,
+  };
+  collection.attrs.data.filter = collection.attrs.data.filter.filter((item) => !(item?.left === condition.left && JSON.stringify(item?.right || []).includes(condition.right[0].id)));
+  collection.attrs.data.filter.push(condition);
 }
 
 function validatePlannedOpenApprovalVariables(rules, targetMeta, record) {
@@ -1681,6 +1808,7 @@ function collectDataListFieldSpecs(planText) {
     const lookupTargetColumn = findHeaderIndex(normalizedHeaders, ["lookup target", "target list", "lookup data list", "lookup list", "related list"]);
     const subListFieldsColumn = findHeaderIndex(normalizedHeaders, ["sub list row fields", "sublist row fields", "sub list columns", "sublist columns", "row fields"]);
     const subListSummariesColumn = findHeaderIndex(normalizedHeaders, ["sub list summaries", "sublist summaries", "sub list summary", "sublist summary", "summary fields"]);
+    const allowScanColumn = findHeaderIndex(normalizedHeaders, ["allow barcode qr scan", "allow barcode scan", "allow scan", "barcode qr scan"]);
     const purposeColumn = findHeaderIndex(normalizedHeaders, ["purpose", "business purpose", "description", "notes"]);
     if (displayColumn === -1 || (fieldTypeColumn === -1 && controlTypeColumn === -1)) continue;
     let rowIndex = index + 2;
@@ -1715,6 +1843,7 @@ function collectDataListFieldSpecs(planText) {
         lookupTarget: lookupTargetColumn === -1 ? lookupTargetFromPurpose(purpose) : cleanResourceName(cells[lookupTargetColumn]) || lookupTargetFromPurpose(purpose),
         listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn]),
         listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cells[subListSummariesColumn]),
+        allowScan: allowScanColumn !== -1 && /^(?:yes|true|on|enabled)$/i.test(cleanResourceName(cells[allowScanColumn])),
       });
       rowIndex += 1;
     }
@@ -3535,6 +3664,14 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     hostSurface: `${String(planDemand.childResourceRecords?.find((record) => normKey(record.name) === normKey(listName))?.resourceType || "data-list").replace("-", "_")}_${templateKind === "newEdit" ? (/\bedit\b/i.test(formName) ? "edit" : "new") : "view"}`,
     listMetaByName, approvalMetaByName, dashboardMetaByName, rootListSetId,
   });
+  materializePlannedFormActionPrintBarcode(resource, {
+    records: planDemand.formActionPrintBarcodeRecords,
+    hostResource: listName,
+    hostPage: formName,
+    hostSurface: `${String(planDemand.childResourceRecords?.find((record) => normKey(record.name) === normKey(listName))?.resourceType || "data-list").replace("-", "_")}_${templateKind === "newEdit" ? (/\bedit\b/i.test(formName) ? "edit" : "new") : "view"}`,
+    dashboardMetaByName,
+    rootListSetId,
+  });
   reconcilePageTempVariableReferences(resource);
   return resource;
 }
@@ -4504,6 +4641,12 @@ function buildFieldRules({ field, type, lookupTargetListId = "" }) {
       .map(({ idx, id, name, type: rowType, editable }) => ({ idx, id, name, type: rowType, editable }));
     return listVariables.length ? JSON.stringify({ "list-variables": listVariables }) : "";
   }
+  if (field?.allowScan === true) {
+    if (type !== "input" || !/^text$/i.test(String(field?.fieldType || ""))) {
+      throw new Error(`DATA_LIST_BARCODE_SCAN_FIELD_TYPE_INVALID: ${field?.displayName || field?.fieldName || "field"}`);
+    }
+    return JSON.stringify({ allowScan: true });
+  }
   const choiceTypes = new Set(["select", "radio", "checkbox", "tag"]);
   if (!choiceTypes.has(type)) return "";
   const values = parseChoiceOptionValues(field.choiceValues).concat(inferChoiceValues(field));
@@ -4869,6 +5012,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         formActionSetVariableRecords: planDemand.formActionSetVariableRecords,
         formActionSetDataListRecords: planDemand.formActionSetDataListRecords,
         formActionOpenResourceRecords: planDemand.formActionOpenResourceRecords,
+        formActionPrintBarcodeRecords: planDemand.formActionPrintBarcodeRecords,
         listMetaByName,
         approvalMetaByName,
         dashboardMetaByName,
@@ -4964,6 +5108,14 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       hostSurface: "dashboard",
       listMetaByName,
       approvalMetaByName,
+      dashboardMetaByName,
+      rootListSetId: rootListId,
+    });
+    materializePlannedFormActionPrintBarcode(dashboardResource, {
+      records: planDemand.formActionPrintBarcodeRecords,
+      hostResource: name,
+      hostPage: name,
+      hostSurface: "dashboard",
       dashboardMetaByName,
       rootListSetId: rootListId,
     });
@@ -5084,7 +5236,79 @@ function selectDashboardSummaryMetricsForPage({ planDemand, pageName, pageIndex 
   return records.filter((record) => !record.dashboardPage).slice(0, 4);
 }
 
+export function buildPrintDashboardResource({ name, layoutId, rootListSetId, listMeta, collectionId }) {
+  if (!listMeta?.listId) throw new Error(`PRINT_DASHBOARD_SOURCE_LIST_UNRESOLVED: ${name}`);
+  const fields = fieldsForDynamicControls(listMeta).slice(0, 6);
+  if (!fields.length) throw new Error(`PRINT_DASHBOARD_SOURCE_FIELDS_MISSING: ${name}`);
+  const id = (suffix) => deterministicUuid(`${name}:${layoutId}:print:${suffix}`);
+  const cell = ({ row, col, title, field, children = [] }) => ({
+    type: "container", id: id(`cell:${row}:${col}:${title}`), label: title,
+    attrs: { "table-row-index": row, "table-col-index": col, common: { padding: [null, { top: 8, right: 8, bottom: 8, left: 8 }] } },
+    children: children.length ? children : [
+      { type: "heading", id: id(`label:${row}:${col}`), label: title, attrs: { headc: { title: { value: title } } } },
+      { type: "dynamic-field", id: id(`value:${row}:${col}`), label: `${title} Value`, attrs: { source: "3", "obj-f": field?.fieldName || "Title" } },
+    ],
+  });
+  const itemTable = {
+    type: "table-v2", id: id("item-table"), label: "Printable record table", nv_label: "print_record_table",
+    attrs: {
+      columns: { "1": { list: [{ value: 34, unit: "%" }, { value: 33, unit: "%" }, { value: 33, unit: "%" }] } },
+      rows: { "1": { list: [{ value: 54, unit: "px" }, { value: 54, unit: "px" }, { value: 96, unit: "px" }] } },
+      style: { "border-width": [null, { top: 1, right: 1, bottom: 1, left: 1 }], "border-color": "var(--cus-c--tableBorder)", "align-i": [null, "2"] },
+      "table-merges": {
+        "0,0": [[0, 0], [0, 1]],
+        "2,0": [[2, 0], [2, 1]],
+      },
+    },
+    children: [
+      cell({ row: 0, col: 0, title: fields[0]?.displayName || "Name", field: fields[0] }),
+      cell({ row: 0, col: 2, title: fields[1]?.displayName || "Reference", field: fields[1] || fields[0] }),
+      cell({ row: 1, col: 0, title: fields[2]?.displayName || "Status", field: fields[2] || fields[0] }),
+      cell({ row: 1, col: 1, title: fields[3]?.displayName || "Category", field: fields[3] || fields[0] }),
+      cell({ row: 1, col: 2, title: fields[4]?.displayName || "Location", field: fields[4] || fields[0] }),
+      cell({ row: 2, col: 0, title: fields[5]?.displayName || "Details", field: fields[5] || fields[0] }),
+      cell({ row: 2, col: 2, title: "Record QR Code", children: [{
+        type: "list-qrcode", id: id("item-qr"), label: "QR Code", nv_label: "print_record_qr",
+        attrs: { "qr-code-size": [null, 96], "qr-code-link": { type: "2", value: "" }, common: { positioning: { widthtype: [null, "2"] } } },
+      }] }),
+    ],
+  };
+  const collection = {
+    type: "collection", id: collectionId || id("collection"), label: "Printable records", nv_label: "print_records_collection",
+    attrs: {
+      data: { list: { AppID: 41, ListID: stringId(listMeta.listId), Type: listMeta.resourceType === "document-library" ? 16 : 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) }, sort: [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }] },
+      layout: { col: [null, 1], rg: [null, 16] },
+    },
+    children: [itemTable],
+  };
+  return {
+    type: "container", id: `${slugify(name)}_print_root`, name, title: name, ver: "1.0.0",
+    templateMarker: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
+    derivedFromDashboardPageLayoutTemplate: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
+    attrs: { container: { cw: "2", padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] }, dashboardPageLayoutTemplateId: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID },
+    children: [{
+      type: "container", id: id("content"), label: "Print content", nv_label: "print_content_area", attrs: { common: { positioning: { widthtype: [null, "1"] } } },
+      children: [{
+        type: "table-v2", id: id("header-table"), label: "Print header", nv_label: "print_header_table",
+        attrs: { columns: { "1": { list: [{ value: 70, unit: "%" }, { value: 30, unit: "%" }] } }, rows: { "1": { list: [{ value: 64, unit: "px" }] } }, style: { border: "0" } },
+        children: [
+          { type: "heading", id: id("title"), label: name, attrs: { "table-row-index": 0, "table-col-index": 0, headc: { title: { value: name } } } },
+          { type: "heading", id: id("date"), label: "Printed on", attrs: { "table-row-index": 0, "table-col-index": 1, headc: { title: { variable: [{ type: "func", func: "dateFormat", params: [[{ type: "func", func: "now", params: [] }], [{ type: "str", value: "DD/MM/YYYY" }]] }] } } } },
+        ],
+      }, collection],
+    }],
+    filterVars: [], tempVars: [], actions: [], formAction: {}, exts: [], ReportIds: [], LayoutID: layoutId,
+    plannedControls: { printTable: true, collection: true, qrCode: true },
+    generatedFinalDashboardMaterialization: { shellTemplate: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID, dashboardPageLayoutTemplateId: DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID },
+  };
+}
+
 function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId = PAGE_LAYOUT_TEMPLATE_ID, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecords = [], dashboardFilters, dashboardAnalytics, dashboardDataTables = [], dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
+  if (pageLayoutTemplateId === DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID) {
+    const record = (datasetRecords || [])[0] || {};
+    const sourceMeta = listMetaByName?.get(normKey(record.sourceResource)) || listMeta;
+    return buildPrintDashboardResource({ name, layoutId, rootListSetId, listMeta: sourceMeta, collectionId });
+  }
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar, plannedMetrics: dashboardSummaryMetrics });
   const resource = buildDashboardPageLayoutShell({ name, layoutId, templateId: pageLayoutTemplateId });
@@ -9146,7 +9370,7 @@ function buildWorkflowSetDataListProperties({ record, target, rootListSetId, hos
   return properties;
 }
 
-function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [], formActionSetVariableRecords = [], formActionSetDataListRecords = [], formActionOpenResourceRecords = [], listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map() }) {
+function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [], formActionSetVariableRecords = [], formActionSetDataListRecords = [], formActionOpenResourceRecords = [], formActionPrintBarcodeRecords = [], listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map() }) {
   const {
     submissionPageId,
     taskPageId,
@@ -9220,6 +9444,22 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     hostPage: "Task form",
     hostSurface: "approval_task",
     listMetaByName, approvalMetaByName, dashboardMetaByName, rootListSetId,
+  });
+  materializePlannedFormActionPrintBarcode(submissionFormDef, {
+    records: formActionPrintBarcodeRecords,
+    hostResource: name,
+    hostPage: "Submission form",
+    hostSurface: "approval_submission",
+    dashboardMetaByName,
+    rootListSetId,
+  });
+  materializePlannedFormActionPrintBarcode(taskFormDef, {
+    records: formActionPrintBarcodeRecords,
+    hostResource: name,
+    hostPage: "Task form",
+    hostSurface: "approval_task",
+    dashboardMetaByName,
+    rootListSetId,
   });
   variables.tempVars = mergeApprovalPageTempVars(variables.tempVars, submissionFormDef.tempVars, taskFormDef.tempVars);
   return {

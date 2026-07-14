@@ -413,3 +413,9 @@ Use `docs/standards/form-action-open-resource-golden-reference-standard.md` and 
 - Approval Submission/Task, Data List/Document Library custom forms, and Dashboard share the builder and trigger binder. Dashboard expressions are temp-only. Public Form is forbidden.
 
 Run `validate-form-action-open-resource-plan.mjs` before generation and `validate-form-action-open-resource.mjs --strict-generated` before signing. Export and validator proof do not by themselves claim live navigation or modal rendering.
+
+# Form Action Print Page and Barcode Scan
+
+Generated Print Page and Barcode Scan steps use `scripts/lib/form-action-print-barcode-utils.cjs` and the standard App Plan table. The export-proven Print Page target in this training is a Dashboard only. Preserve `type=print`, selected page metadata, expression-token title, A4 size code `6`, portrait/landscape, decimal scale, and Minimum margins code `3`. A multi-record print page selects `dashboard-print-multi-record-table-v1`, repeats records with a Collection, lays out each record with `table-v2`, preserves merge metadata, and may link QR to the current Collection item with `qr-code-link.type=2`.
+
+Barcode Scan uses `type=barcode`; proven modes are `multiple`, `select`, and `auto`; proven types are Auto (omitted `attrs.type`) and `ean-13`. Declare result/error variables before binding the action and make the result observable in form logic or a Collection filter. A Data List scan-enabled identifier remains a Text/input field whose stringified `Rules` contains `allowScan:true`. Run both print/barcode planning and generated-package validators. Camera, browser print preview, physical scan, and printed output remain runtime proof boundaries.
