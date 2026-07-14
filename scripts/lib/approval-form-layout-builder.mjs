@@ -3,6 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { cleanPlanningLabel, isPlanningPlaceholder } from "./planning-placeholder-utils.mjs";
 import { resolveSchemaAuthoritativeFormControlType } from "./form-control-type-authority.mjs";
+import choiceFieldOptionUtils from "./choice-field-option-utils.cjs";
+
+const { parseChoiceOptionValues } = choiceFieldOptionUtils;
 
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -365,7 +368,7 @@ function firstNonEmpty(...values) {
 
 function inferChoiceValues(field) {
   if (String(field?.choiceValues || "").trim()) {
-    return String(field.choiceValues).split(/[,;]+/).map((value) => value.trim()).filter(Boolean);
+    return parseChoiceOptionValues(field.choiceValues);
   }
   const raw = normKey(`${field?.displayName || ""} ${field?.fieldName || ""} ${field?.fieldType || ""} ${field?.controlType || ""}`);
   if (/priority|urgency|severity|critical/.test(raw)) return ["Low", "Medium", "High", "Critical"];
