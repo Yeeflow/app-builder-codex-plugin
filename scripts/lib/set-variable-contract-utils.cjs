@@ -18,6 +18,8 @@ const SET_VARIABLE_HOST_TYPE_ALIASES = new Map([
   ["data list form", "data-list-form"],
   ["custom data list form", "data-list-form"],
   ["document library form", "data-list-form"],
+  ["public form", "public-form"],
+  ["data list public form", "public-form"],
   ["dashboard", "dashboard"],
   ["dashboard page", "dashboard"],
 ]);
@@ -66,7 +68,7 @@ function validateFormActionSetVariableStep(step, options = {}) {
       if (host === "dashboard" || host === "approval") {
         findings.push(finding("FORM_ACTION_SETVAR_LIST_FIELD_TARGET_UNSUPPORTED_HOST", "Dashboard and Approval Form page Set variable steps cannot target current Data List fields.", { path, host }));
       } else if (!declaredListFields.has(text(target.id)) && !declaredListFields.has(text(target.prop))) {
-        findings.push(finding("FORM_ACTION_SETVAR_LIST_FIELD_TARGET_UNRESOLVED", "Data List Form Set variable target must resolve to a current-list field.", { path, target: text(target.id || target.prop) }));
+        findings.push(finding("FORM_ACTION_SETVAR_LIST_FIELD_TARGET_UNRESOLVED", "Data List Form or Public Form Set variable target must resolve to a current-list field.", { path, target: text(target.id || target.prop) }));
       }
     } else {
       findings.push(finding("FORM_ACTION_SETVAR_TARGET_TYPE_UNSUPPORTED", "Set variable target must be a temp variable or, on a Data List Form, a current list field.", { path, exprType: text(target.exprType) }));

@@ -1,0 +1,38 @@
+{
+  "proof": "export-proven from Customer Satisfaction (2).ydl",
+  "action": {
+    "id": "{{ActionID}}",
+    "name": "Public form set variables",
+    "steps": [
+      {
+        "type": "setvar",
+        "name": "Set field with field value",
+        "attrs": {
+          "setvar_var": { "exprType": "list_field", "valueType": "input", "id": "{{TargetFieldName}}", "prop": "{{TargetFieldName}}", "type": "expr" },
+          "setvar_val": [
+            { "exprType": "list_field", "valueType": "input", "id": "{{SourceFieldName}}", "prop": "{{SourceFieldName}}", "type": "expr" },
+            { "type": "op", "op": "&" },
+            { "type": "str", "value": " ABC" }
+          ]
+        }
+      },
+      {
+        "type": "setvar",
+        "name": "Set multiple variables",
+        "attrs": {
+          "setvar_multi": true,
+          "setvar_array": [
+            {
+              "var": { "exprType": "list_field", "valueType": "input", "id": "{{TargetFieldName}}", "prop": "{{TargetFieldName}}", "type": "expr" },
+              "value": [{ "exprType": "variable", "valueType": "string", "id": "__temp_var_Value1", "type": "expr", "name": "var_Value1" }]
+            },
+            {
+              "var": { "exprType": "variable", "valueType": "string", "id": "__temp_var_Value1", "type": "expr", "name": "var_Value1" },
+              "value": [{ "type": "str", "value": "ABC" }]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

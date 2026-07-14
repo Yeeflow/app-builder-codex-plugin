@@ -476,6 +476,24 @@ Optional and additive. Add rows only for Data Lists that require anonymous submi
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Data List> | <Public Form> | <Visible title> | <Anonymous submission purpose> | <Field labels or field names> | public-form-page-layout-standard | public_form_fields_1col_v1_1 | 1 column survey fields | None | Business-mapped title; no Operations | Generated-final validation; anonymous runtime submit proof separate |
 
+##### Public Form Form Action Planning
+
+Required whenever a Data List Public Form contains a Form Action. Public Forms use an anonymous, current-list-only action surface and must not reuse the broader Custom Data List Form capability set.
+
+| Host Data List | Public Form | Action Name | Step Order | Step Name | Trigger | Bound Control | Exact Step Type | Step Configuration JSON | Business Rationale | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Data List> | <Public Form> | <Action> | 1 | <Step> | Page Load / Button Click / Field Change / None | <Control or None> | Redirect page to / Show confirm dialog / Submit form / Start another action | <Exact JSON object> | <Reason> | export-proven / runtime-proof-required |
+
+Rules:
+
+- Follow `docs/standards/public-form-form-action-golden-reference-standard.md`.
+- Public Form Set variables must use the shared Form Action Set Variable Planning table with `Host Type = Public Form`.
+- Only Set variables, Execute custom code, Show confirm dialog, Redirect page to, Submit form, Start another action, Barcode scan, and NFC reader are product-supported.
+- Query data, Set data list, Open item form, Open approval form, Open dashboard, Invoke custom service, and all other application-resource steps are forbidden.
+- Execute custom code, Barcode scan, and NFC reader remain generated-final blockers until exact decoded Public Form step exports are available.
+- Redirect configuration uses `{ "fixedUrl": "https://...", "openType": false }` or `{ "expressionTokens": [...] }`. Tokens may reference only fixed values, current-list fields, or same-form temp variables.
+- Confirm configuration uses `{ "messageTokens": [...], "resultTempVariable": "var_Result" }`; Start another action uses `{ "targetActionName": "Other action" }`; Submit uses `{}`.
+
 Rules:
 
 - Public Forms are stored under the host Type `1` Data List `PublicForms[]`; they are not custom Data List forms and must not replace `List.LayoutView.add/edit/view`.

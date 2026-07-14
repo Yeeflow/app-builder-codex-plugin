@@ -15,6 +15,14 @@ const {
   path.join(__dirname, "scripts/lib/choice-field-option-utils.cjs"),
   path.join(__dirname, "lib/choice-field-option-utils.cjs"),
 ]));
+const { validatePublicFormActions } = require(resolveLocalModule([
+  path.join(__dirname, "scripts/lib/public-form-action-utils.cjs"),
+  path.join(__dirname, "lib/public-form-action-utils.cjs"),
+]));
+const { PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES } = require(resolveLocalModule([
+  path.join(__dirname, "scripts/lib/public-form-template-utils.cjs"),
+  path.join(__dirname, "lib/public-form-template-utils.cjs"),
+]));
 
 const WRAPPER_REQUIRED = [
   "PackageId",
@@ -367,6 +375,15 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
   validateNativeTitle(pkg.Fields, path, errors);
   validateDefaultViews(pkg, path, errors);
   validateChoiceSampleRows(pkg, path, errors);
+  for (const [publicFormIndex, publicForm] of asArray(pkg.PublicForms).entries()) {
+    const resource = parseResourceLike(publicForm?.Resource || publicForm?.DefResource || "");
+    if (!resource) continue;
+    for (const finding of validatePublicFormActions(resource, {
+      pathPrefix: `${path}.PublicForms[${publicFormIndex}].Resource`,
+      declaredListFields: asArray(pkg.Fields).filter((field) => PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES.has(String(field?.ControlType || field?.Type || ""))),
+      generatedOutput: true,
+    })) add(errors, finding.code, finding.message, finding);
+  }
   if ("Defs" in pkg) add(errors, "YAPK_CHILDS_USES_DEFS", "YAPK Childs items must use Fields, not YAP Defs.", { path: `${path}.Defs` });
 }
 

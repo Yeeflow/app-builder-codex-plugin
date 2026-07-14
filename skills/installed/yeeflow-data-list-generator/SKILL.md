@@ -5,6 +5,14 @@ description: generate, inspect, validate, package, debug, and improve yeeflow da
 
 # Yeeflow Data List Generator
 
+## Public Form Form Actions
+
+Route Form Action generation by host surface. Anonymous Public Forms do not inherit the Custom Data List Form action catalog. They allow only Set variables, Execute custom code, Show confirm dialog, Redirect page to, Submit form, Start another action, Barcode scan, and NFC reader, subject to `docs/standards/public-form-form-action-golden-reference-standard.md`.
+
+Public Form Set variables may target only Public Form-compatible fields on the current host Data List and temp variables declared on the same form. Their values, and Redirect page expressions, may use only fixed tokens, current-list fields, and same-form temp variables. Never generate Query data, Set data list, Open item form, Open approval form, Open dashboard, Invoke custom service, or any cross-resource action on a Public Form.
+
+Use the shared Form Action Set Variable planning table with `Host Type = Public Form`. Use the Public Form Form Action Planning table for Redirect, Confirm, Submit, and Start another action. Set variables and Redirect are export-proven from `Customer Satisfaction (2).ydl`. Execute custom code, Barcode scan, and NFC reader are UI-backed but their Public Form step serialization is not export-proven; block generated-final materialization rather than guessing their JSON.
+
 ## Data List Form Set Variable
 
 Use `docs/standards/set-variable-golden-reference-standard.md`. A custom Data List Form `setvar` step may target a declared page temp variable or a real current-list field. Preserve expression-array conditions and boolean `continue` semantics for ordered alternative steps. When a temp variable controls Dynamic Display or read-only state, declaration, producer target, and consumer expression must resolve to the same ID.

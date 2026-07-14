@@ -21,6 +21,7 @@ const {
   validateWorkflowAssigneeExpression,
 } = require("./scripts/lib/workflow-assignee-expression-utils.cjs");
 const { validateDataViewFixedFilters } = require("./scripts/lib/data-list-view-filter-utils.cjs");
+const { validatePublicFormActions } = require("./scripts/lib/public-form-action-utils.cjs");
 const { validateFormActionSetVariableStep, variableAliases } = require("./scripts/lib/set-variable-contract-utils.cjs");
 const {
   PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES,
@@ -3710,6 +3711,13 @@ function validatePublicForms(item, fieldsByName, pathPrefix, report) {
         }
       }
     }));
+    for (const actionIssue of validatePublicFormActions(resource, {
+      pathPrefix: `${context.path}.Resource`,
+      declaredListFields: [...fieldsByName.values()].filter((field) => PUBLIC_FORM_ALLOWED_FIELD_TYPES.has(safeString(field && field.Type)) && !PUBLIC_FORM_DISALLOWED_SYSTEM_FIELDS.has(safeString(field && field.FieldName))),
+      generatedOutput: report.mode === "generator",
+    })) {
+      issue(report, generatorFinalSeverity(report), actionIssue.code, actionIssue.message, { ...context, ...actionIssue });
+    }
     if (!submitControls) issue(report, "warning", "PUBLIC_FORM_SUBMIT_CONTROL_MISSING", "Public forms intended for anonymous collection should include an export-proven submit control.", context);
   });
 }

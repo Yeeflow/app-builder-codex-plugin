@@ -61,6 +61,16 @@ try {
     "| Host Data List | Public Form Name | Form Title | Description / Purpose | Included Fields | Public Form Page Layout Template | Public Form Fields Layout Template | Proof Boundary |",
     "| --- | --- | --- | --- | --- | --- | --- | --- |",
     "| Survey Responses | Customer Feedback Public Form | Customer Feedback Survey | Tell us about your experience. | Customer Name, Email, Overall Satisfaction, Improvement Feedback | public-form-page-layout-standard | public_form_fields_1col_v1_1 | Generated-final validation |",
+    "",
+    "##### Form Action Set Variable Planning",
+    "| Host Resource | Host Form / Page | Host Type | Action Name | Step Order | Step Name | Trigger | Bound Control / Field | Target Kind | Target ID | Target Value Type | RHS Expression Tokens | Condition Tokens | Continue | Start Another Action Target | Result Consumer / Use | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Survey Responses | Customer Feedback Public Form | Public Form | Prepare redirect | 1 | Set redirect value | None | None | Temp variable | var_Value1 | string | [{\"type\":\"str\",\"value\":\"https://example.com?title=\"},{\"type\":\"op\",\"op\":\"&\"},{\"exprType\":\"list_field\",\"valueType\":\"input\",\"id\":\"Title\",\"prop\":\"Title\",\"type\":\"expr\",\"name\":\"List Fields:Title\"}] | None | false | None | Redirect URL | export-proven |",
+    "",
+    "##### Public Form Form Action Planning",
+    "| Host Data List | Public Form | Action Name | Step Order | Step Name | Trigger | Bound Control | Exact Step Type | Step Configuration JSON | Business Rationale | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Survey Responses | Customer Feedback Public Form | Redirect to | 1 | Redirect page to | None | None | Redirect page to | {\"expressionTokens\":[{\"exprType\":\"variable\",\"valueType\":\"string\",\"id\":\"__temp_var_Value1\",\"type\":\"expr\",\"name\":\"var_Value1\"}],\"openType\":false} | Redirect after submission flow | export-proven |",
   ].join("\n");
   fs.writeFileSync(planPath, planText);
 
@@ -90,6 +100,9 @@ try {
   assert.deepEqual(actualPublicFieldNames, expectedPublicFieldNames, "planned Public Form fields must materialize inside the golden-reference field grid");
   assert.deepEqual(validatePublicFormPageLayout(publicResource, { pathPrefix: "Survey Responses.PublicForms[0].Resource", severity: "error", generatedOutput: true }), []);
   assertGeneratedPublicFormOptionalRegionsPruned(publicResource);
+  assert.equal(publicResource.actions.some((action) => action.name === "Prepare redirect" && action.steps.some((step) => step.type === "setvar")), true, "shared Set variable builder must materialize Public Form actions");
+  assert.equal(publicResource.actions.some((action) => action.name === "Redirect to" && action.steps.some((step) => step.type === "redirect")), true, "Public Form Redirect builder must materialize export-proven redirect steps");
+  assert.equal(publicResource.tempVars.some((variable) => variable.id === "__temp_var_Value1"), true, "Public Form planned temp variable must be declared on the same form");
   cases.push("full-app materializer keeps Public Form additive to standard New/Edit/View custom forms");
 
   const noPublicPlanPath = path.join(tempDir, "yeeflow-app-plan-no-public-form.md");
@@ -120,6 +133,21 @@ try {
   const formGate = run(FORM_LAYOUT_VALIDATOR, ["--package", report.outputs.package, "--plan", planPath]);
   assert.equal(formGate.status, 0, formGate.stderr || formGate.stdout);
   cases.push("generated package passes Data List Form Layouts v1.1 with PublicForms[] present");
+
+  const unsupportedActionDecoded = structuredClone(decoded);
+  const unsupportedActionForm = JSON.parse(unsupportedActionDecoded.Childs.find((item) => item.List?.Title === "Survey Responses").PublicForms[0].Resource);
+  unsupportedActionForm.actions.push({ id: "bad-query-action", name: "Query another resource", steps: [{ type: "querydata", attrs: {} }] });
+  unsupportedActionDecoded.Childs.find((item) => item.List?.Title === "Survey Responses").PublicForms[0].Resource = JSON.stringify(unsupportedActionForm);
+  const unsupportedActionPath = writeMutatedPackage(report.outputs.package, unsupportedActionDecoded, "public-form-querydata-invalid.yapk");
+  expectFailureCode(PACKAGE_VALIDATOR, [unsupportedActionPath], "PUBLIC_FORM_ACTION_STEP_TYPE_NOT_ALLOWED");
+
+  const externalExpressionDecoded = structuredClone(decoded);
+  const externalExpressionForm = JSON.parse(externalExpressionDecoded.Childs.find((item) => item.List?.Title === "Survey Responses").PublicForms[0].Resource);
+  externalExpressionForm.actions.find((action) => action.name === "Prepare redirect").steps[0].attrs.setvar_val = [{ exprType: "application", prop: "ApplicantUserID", type: "expr" }];
+  externalExpressionDecoded.Childs.find((item) => item.List?.Title === "Survey Responses").PublicForms[0].Resource = JSON.stringify(externalExpressionForm);
+  const externalExpressionPath = writeMutatedPackage(report.outputs.package, externalExpressionDecoded, "public-form-external-expression-invalid.yapk");
+  expectFailureCode(PACKAGE_VALIDATOR, [externalExpressionPath], "PUBLIC_FORM_ACTION_EXPRESSION_SCOPE_INVALID");
+  cases.push("generated-final YAPK validator rejects unsupported Public Form steps and external expression scopes");
 
   expectPreflightDataListFormGatesPass(report.outputs.package);
   expectPreflightDataListFormGatesPass(noPublicReport.outputs.package);
@@ -152,6 +180,14 @@ function expectFailureCode(script, args, code) {
   const output = `${result.stdout}\n${result.stderr}`;
   assert.notEqual(result.status, 0, `${path.basename(script)} should reject the Public Form-only Data List`);
   assert.match(output, new RegExp(code), `${path.basename(script)} should include ${code}\n${output}`);
+}
+
+function writeMutatedPackage(sourcePackage, decodedResource, fileName) {
+  const wrapper = JSON.parse(fs.readFileSync(sourcePackage, "utf8"));
+  wrapper.Resource = encodeYapkResourceOfficial(decodedResource);
+  const output = path.join(tempDir, fileName);
+  fs.writeFileSync(output, `${JSON.stringify(wrapper, null, 2)}\n`);
+  return output;
 }
 
 function expectPreflightDataListFormGatesPass(packagePath) {
