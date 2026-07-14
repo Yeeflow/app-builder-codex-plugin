@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.69
+
+- Integrate canonical Dashboard Print Page and Barcode Scan materialization into the shared generated-final path instead of relying on test-only or hand-authored artifacts.
+- Preserve exact print layout, approved trigger slots, scan-enabled Text field contracts, scan result/error variables, and scan-result Collection filtering through package preflight.
+- Add hard gates and source/dist regression coverage for stale template columns, invalid print Collection residue, missing trigger bindings, unsupported scan contracts, and canonical preflight drift.
+- Record safe installed-app runtime proof while leaving physical camera scanning, native print dialogs, printer output, Designer saves, and publishing outside the claimed boundary.
+
 ## 0.9.68
 
 - Add export-backed Form Action Print Page and Barcode Scan planning, shared materialization, package validation, and signing-readiness gates across supported page hosts.

@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.9.68",
-  "description": "v0.9.68 adds export-backed Dashboard Print Page and Barcode Scan generation and validation.",
+  "version": "0.9.69",
+  "description": "v0.9.69 closes canonical generated-final and preflight integration for Dashboard Print Page and Barcode Scan artifacts.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
@@ -213,7 +213,9 @@
     "planning-annotation-cleanup",
     "workspace-applications",
     "application-management-api",
-    "guarded-application-delete"
+    "guarded-application-delete",
+    "canonical-print-preflight",
+    "barcode-generated-final-integration"
   ],
   "skills": "./skills/",
   "interface": {
