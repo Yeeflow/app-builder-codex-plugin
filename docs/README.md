@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.9.65`
+- Version: `0.9.66`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.65` hardens Data List and Approval Form choice option materialization so every planned business value becomes one runtime option, planning annotations are removed, long enums are preserved, and `choices` / `color_choices` drift is blocked before signing.
+Current release `0.9.66` adds OAuth-backed workspace application discovery with redacted output and a guarded application deletion path that requires workspace-scoped readback, exact ID/title matching, and strong confirmation.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
