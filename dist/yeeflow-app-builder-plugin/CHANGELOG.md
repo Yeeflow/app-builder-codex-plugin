@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.71
+
+- Route Generation Readiness and its child planning validators through one shared Markdown table parser that preserves escaped pipes and pipes inside inline code while ignoring fenced examples.
+- Project Workflow Set Data List variable declarations into generated workflow `variables.basic` and `variables.listref`, including typed `_list.<child>` fields for Approval and Scheduled workflow List variables.
+- Preserve canonical List child expression tokens through decoded `ContentList`, reuse existing Query Data ListRefs instead of creating duplicate Complex Types, and add source/dist end-to-end regression proof.
+
 ## 0.9.70
 
 - Parse App Plan and Functional Specification Markdown by semantic table headers and structured disposition fields instead of scanning unrelated prose cells for page roles, fake IDs, clarification status, or deferred intent.
