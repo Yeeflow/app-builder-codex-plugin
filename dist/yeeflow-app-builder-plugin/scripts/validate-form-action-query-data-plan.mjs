@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
 
 const MODES = new Set([
   "single_to_variables",
@@ -161,9 +162,9 @@ function hasRelatedDatasetControlConsumer(markdown, row) {
     .map(meaningfulTokens)
     .filter((tokens) => tokens.length >= 2);
   if (!candidates.length) return false;
-  for (const line of String(markdown || "").split(/\r?\n/)) {
+  for (const line of stripMarkdownFencedBlocks(markdown).split(/\r?\n/)) {
     if (!/^\s*\|.*\|\s*$/.test(line)) continue;
-    const cells = line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+    const cells = splitMarkdownTableRow(line);
     if (!cells.some((cell) => /^(Collection|Data Table)$/i.test(cell))) continue;
     const lineTokens = new Set(meaningfulTokens(line));
     if (candidates.some((tokens) => tokens.filter((token) => lineTokens.has(token)).length >= 2)) return true;
@@ -188,7 +189,7 @@ function requireTarget(type, target, mapping, expectedType, findings, path) {
 
 function queryDataRows(markdown) {
   const rows = [];
-  const lines = String(markdown || "").split(/\r?\n/);
+  const lines = stripMarkdownFencedBlocks(markdown).split(/\r?\n/);
   for (let index = 0; index < lines.length - 1; index += 1) {
     if (!isTableLine(lines[index]) || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitRow(lines[index]);
@@ -239,7 +240,7 @@ function isTableLine(line) {
 }
 
 function splitRow(line) {
-  return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+  return splitMarkdownTableRow(line);
 }
 
 function add(findings, severity, code, message, path, detail = {}) {

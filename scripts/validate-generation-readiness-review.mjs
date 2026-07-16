@@ -14,6 +14,8 @@ import {
   findMarkdownTable,
   markdownRowValue,
   positivePlanningText,
+  splitMarkdownTableRow,
+  stripMarkdownFencedBlocks,
 } from "./lib/markdown-planning-utils.mjs";
 
 const AREAS = [
@@ -141,7 +143,7 @@ function meaningfulBody(body) {
 }
 
 function splitTableRow(line) {
-  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+  return splitMarkdownTableRow(line);
 }
 
 function isSeparatorRow(cells) {
@@ -448,7 +450,7 @@ function validateControlActionPropertyGates(text, sections) {
 }
 
 function validate(file) {
-  const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
+  const text = stripMarkdownFencedBlocks(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
   const sections = extractSections(text);
   const findings = [];
   const areaStatus = {};

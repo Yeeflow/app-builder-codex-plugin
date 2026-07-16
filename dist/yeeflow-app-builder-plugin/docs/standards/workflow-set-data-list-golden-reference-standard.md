@@ -74,6 +74,20 @@ Every planned workflow Set Data List node must appear in the `Workflow Set Data 
 - The token must match the declaration exactly by `id`, optional `key`, case-normalized `valueType`, and `name == expressionName`. Multiple child declarations sharing one variable `id` must preserve one variable `type` and business `name`.
 - `buildWorkflowSetDataListProperties` intentionally preserves canonical mapping and filter JSON. The validator must reject invalid tokens; the materializer must not guess, rename, or silently repair them.
 
+### Shared projection contract for List-variable children
+
+Validation support is not sufficient by itself. The approved Markdown row's `Workflow Variable Declarations JSON` must survive the shared generation path:
+
+1. Markdown table parsing preserves each declaration and its optional `_list.<child>` key.
+2. The shared projection groups declarations by workflow variable `id`.
+3. A List parent is emitted in `variables.basic` with `type: "list"` and a stable ListRef value.
+4. Each `_list.<child>` declaration is emitted as one typed field in the matching `variables.listref` definition.
+5. The generated `ContentList.properties.listdatas[].Data[]` token preserves the exact parent `id`, child `key`, `valueType`, and canonical expression `name`.
+
+If Query Data or an Approval field already declared the same List parent and ListRef, Set Data List projection must merge into that existing ListRef. It must not create a second Complex Type under a differently-cased or derived ID.
+
+A validator-only implementation that accepts child expressions while the projection or materializer drops their declarations is a generation defect. Missing parent variables, missing ListRef child fields, or changed decoded `ContentList` tokens are generated-final blockers.
+
 ## Bulk Sub List Writes
 
 `Leave Management-v1.4.yapk` proves that one `ContentList` add node can write one target record for each Sub list row without an enclosing Loop. The node remains a standard selected-target `add` with `listdatas`; its row-derived mappings carry `key: "_list.<child field>"`.
@@ -92,3 +106,5 @@ When `Parent Loop` is present, generated-final materializes the node as `Loop ->
 `scripts/test-workflow-set-data-list-golden-reference-gates.mjs` covers Approval increase/decrease, Data List current add and selected remove, Scheduled multiply/divide, Document Library single/multi-file patterns, and rejection of unsafe host mode, missing filters/mappings, unknown target fields, invalid file values, static document names, and numeric operations on non-number fields.
 
 `scripts/test-workflow-set-data-list-plan-gates.mjs` additionally covers Approval, Scheduled, and Data List workflow source-token semantics. It requires hard failures for illegal token kinds, missing declarations, and mismatched `id`, `key`, `valueType`, or expression names.
+
+`scripts/test-workflow-set-data-list-materialization-gates.mjs` proves the complete Markdown-to-package path for Scheduled List-variable children: Markdown declaration, shared projection, `variables.basic`, `variables.listref`, generated ResourceGraph, and decoded `ContentList` token parity.

@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
 
 const OPERATIONS = new Set(["add", "edit", "remove"]);
 const TARGET_MODES = new Set(["current", "select"]);
@@ -28,7 +29,7 @@ export function validateFormActionSetDataListPlan(markdown) {
 
 export function extractFormActionSetDataListPlanRows(markdown) {
   const rows = [];
-  const lines = String(markdown || "").split(/\r?\n/);
+  const lines = stripMarkdownFencedBlocks(markdown).split(/\r?\n/);
   for (let index = 0; index < lines.length - 1; index += 1) {
     if (!isTableLine(lines[index]) || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitRow(lines[index]);
@@ -133,7 +134,7 @@ function value(row, ...names) {
 function normalize(valueText) { return String(valueText || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 function isNone(valueText) { return !String(valueText || "").trim() || /^(none|n\/a|not applicable|无|不适用)$/i.test(String(valueText).trim()) || /^<.*>$/.test(String(valueText).trim()); }
 function isTableLine(line) { return /^\s*\|.*\|\s*$/.test(line || ""); }
-function splitRow(line) { return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim()); }
+function splitRow(line) { return splitMarkdownTableRow(line); }
 function add(findings, severity, code, message, path, detail = {}) { findings.push({ severity, code, message, path, ...detail }); }
 function parseArgs(argv) { const out = {}; for (let index = 0; index < argv.length; index += 1) { if (argv[index] === "--plan") out.plan = argv[++index]; else if (argv[index] === "--help" || argv[index] === "-h") usage(0); else usage(1); } return out; }
 function usage(exitCode) { console.error("Usage: node scripts/validate-form-action-set-data-list-plan.mjs --plan <app-plan.md>"); process.exit(exitCode); }

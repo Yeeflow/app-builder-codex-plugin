@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import setVariableContractUtils from "./lib/set-variable-contract-utils.cjs";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
 
 const { normalizeSetVariableHostType } = setVariableContractUtils;
 
@@ -11,7 +12,7 @@ export function validateSetVariablePlan(text) {
   const findings = [];
   let formActionRows = 0;
   let workflowRows = 0;
-  const lines = String(text || "").split(/\r?\n/);
+  const lines = stripMarkdownFencedBlocks(text).split(/\r?\n/);
   for (let index = 0; index < lines.length - 1; index += 1) {
     if (!isTableLine(lines[index]) || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1] || "")) continue;
     const headers = cells(lines[index]).map(norm);
@@ -70,7 +71,7 @@ export function validateSetVariablePlan(text) {
   return { status: findings.length ? "fail" : "pass", formActionRows, workflowRows, findings };
 }
 
-function cells(line) { const s=String(line||"").trim().replace(/^\|/,'').replace(/\|$/,''); return s.split('|').map((v)=>v.trim()); }
+function cells(line) { return splitMarkdownTableRow(line); }
 function isTableLine(line) { return /^\s*\|.*\|\s*$/.test(String(line || "")); }
 function norm(value) { return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 function column(headers, names) { return headers.findIndex((header) => names.includes(header)); }

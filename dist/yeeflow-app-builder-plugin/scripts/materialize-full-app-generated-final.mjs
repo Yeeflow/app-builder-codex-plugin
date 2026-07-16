@@ -32,6 +32,12 @@ import formActionOpenResourceUtils from "./lib/form-action-open-resource-utils.c
 import formActionPrintBarcodeUtils from "./lib/form-action-print-barcode-utils.cjs";
 import choiceFieldOptionUtils from "./lib/choice-field-option-utils.cjs";
 import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-list-plan.mjs";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
+import {
+  buildWorkflowVariablesFromSetDataListRecords,
+  mergeWorkflowVariableProjection,
+  workflowSetDataListProjectionRecord,
+} from "./lib/workflow-set-data-list-projection-utils.mjs";
 
 const {
   buildWorkflowExpressionButton,
@@ -2317,19 +2323,21 @@ function collectWorkflowSetDataListRecords(planText) {
     const operationColumn = column(["operation"]);
     const mappingsColumn = column(["mappings json"]);
     const filtersColumn = column(["filters json"]);
+    const declarationsColumn = column(["workflow variable declarations json"]);
     const parentLoopColumn = column(["parent loop", "loop parent", "loop node"]);
     if ([hostColumn, workflowColumn, nodeColumn, modeColumn, resourceColumn, resourceTypeColumn, operationColumn, mappingsColumn, filtersColumn].some((index) => index === -1)) continue;
     for (const row of table.rows) {
       const raw = row.__raw || [];
       const get = (index) => cleanResourceName(row[table.headers[index]] || "");
       const parse = (index) => parseJsonMaybe(cleanStructuredPlanCell(raw[index] || ""));
-      const record = {
+      const record = workflowSetDataListProjectionRecord({
         host: get(hostColumn), workflowName: get(workflowColumn), nodeName: get(nodeColumn), targetMode: get(modeColumn), targetResource: get(resourceColumn), targetResourceType: get(resourceTypeColumn), operation: get(operationColumn), mappings: parse(mappingsColumn), filters: parse(filtersColumn),
+        workflowVariableDeclarations: declarationsColumn === -1 ? [] : parse(declarationsColumn),
         batchSourceType: get(column(["batch source type"])),
         batchSource: get(column(["batch source"])),
         batchSourceFields: parse(column(["batch source fields json"])),
         parentLoop: parentLoopColumn === -1 ? "" : get(parentLoopColumn),
-      };
+      });
       if (record.host && record.workflowName && record.nodeName && !isNonResourceName(record.workflowName)) records.push(record);
     }
   }
@@ -4755,7 +4763,7 @@ function dashboardNameMatches(pageName, plannedPageName) {
 }
 
 function parseMarkdownTables(section) {
-  const lines = section.split(/\r?\n/);
+  const lines = stripMarkdownFencedBlocks(section).split(/\r?\n/);
   const tables = [];
   for (let index = 0; index < lines.length; index += 1) {
     if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
@@ -4778,7 +4786,7 @@ function parseMarkdownTables(section) {
 }
 
 function splitRawTableLine(line) {
-  return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+  return splitMarkdownTableRow(line);
 }
 
 function isTableLine(line) {
@@ -4786,7 +4794,7 @@ function isTableLine(line) {
 }
 
 function splitTableLine(line) {
-  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cleanResourceName(cell));
+  return splitMarkdownTableRow(line).map((cell) => cleanResourceName(cell));
 }
 
 function unique(values) {
@@ -9351,7 +9359,7 @@ function buildWorkflowSetDataListDefResource({ name, formKey, defId, workflowTyp
     lineType: "rounded",
     iconURL: "",
     flowPage: [],
-    variables: { basic: [], listref: [], filter: [] },
+    variables: buildWorkflowVariablesFromSetDataListRecords(actionRecords),
     graphposition: approvalWorkflowGraphPosition(childshapes),
     graphzoom: 1,
     graphver: 2,
@@ -9570,6 +9578,10 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
   }));
   const variables = buildApprovalVariables(approvalFieldSpecs);
   addApprovalWorkflowActionVariables(variables, childshapes);
+  mergeWorkflowVariableProjection(
+    variables,
+    buildWorkflowVariablesFromSetDataListRecords(approvalWorkflowNodes.map((node) => node.setDataListRecord).filter(Boolean)),
+  );
   const submissionFormDef = approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || []);
   const taskFormDef = approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs));
   materializePlannedFormActionSetVariables(submissionFormDef, {
