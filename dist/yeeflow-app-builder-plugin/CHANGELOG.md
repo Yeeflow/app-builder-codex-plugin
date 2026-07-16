@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.70
+
+- Parse App Plan and Functional Specification Markdown by semantic table headers and structured disposition fields instead of scanning unrelated prose cells for page roles, fake IDs, clarification status, or deferred intent.
+- Require item-level requirement markers for traceability when requirement IDs are present, and require explicit reason, impact, fallback, and proof/follow-up evidence for structured deferred dispositions.
+- Add host-specific Workflow Set Data List source-token hard gates, reject invalid `workflow-field` expressions, and require exact workflow-variable declaration matches for mapping/filter `id`, child `key`, `valueType`, and canonical expression name.
+- Add source/dist regressions, standards, skill guidance, training reports, and cache-artifact checks covering Approval Form, Scheduled, and Data List workflow surfaces.
+
 ## 0.9.69
 
 - Integrate canonical Dashboard Print Page and Barcode Scan materialization into the shared generated-final path instead of relying on test-only or hand-authored artifacts.

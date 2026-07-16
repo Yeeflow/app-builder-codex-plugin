@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.9.69`
+- Version: `0.9.70`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.69` closes canonical generated-final and preflight integration for Dashboard Print Page and Barcode Scan artifacts.
+Current release `0.9.70` hardens structured App Plan parsing and Workflow Set Data List source-token validation.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 

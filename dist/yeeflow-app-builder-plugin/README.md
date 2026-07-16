@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.69`
+- Version: `0.9.70`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.69` closes canonical generated-final and preflight integration for Dashboard Print Page and Barcode Scan artifacts.
+Current release `0.9.70` hardens structured App Plan parsing and Workflow Set Data List source-token validation.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.69
+Version: 0.9.70
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.69
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.70
 ```
 
 ## What Is Included
