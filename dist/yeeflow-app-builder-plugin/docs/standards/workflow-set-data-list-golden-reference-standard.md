@@ -63,7 +63,16 @@ For a selected Document Library `add` operation:
 
 ## Required Planning Record
 
-Every planned workflow Set Data List node must appear in the `Workflow Set Data List Action Plan` table with the host, node name, target mode/resource/type, operation, JSON mappings, JSON filters, `Parent Loop`, and proof boundary. Missing or ambiguous records block generated-final materialization.
+Every planned workflow Set Data List node must appear in the `Workflow Set Data List Action Plan` table with the host, node name, target mode/resource/type, operation, JSON mappings, JSON filters, workflow-variable declarations, `Parent Loop`, and proof boundary. Missing or ambiguous records block generated-final materialization.
+
+### Workflow source token contract
+
+- Approval Form and Scheduled workflows allow `variable`, `application`, and `loop_ctx` expression sources.
+- Data List workflows additionally allow current-record `list_field` expression sources.
+- `workflow-field` is not a valid source token on any workflow host and must fail before materialization.
+- Every `exprType: "variable"` source in `listdatas` or `wheres` planning JSON requires a `Workflow Variable Declarations JSON` entry with `id`, workflow-variable `type`, token `valueType`, business `name`, canonical `expressionName`, and optional Sub list child `key`.
+- The token must match the declaration exactly by `id`, optional `key`, case-normalized `valueType`, and `name == expressionName`. Multiple child declarations sharing one variable `id` must preserve one variable `type` and business `name`.
+- `buildWorkflowSetDataListProperties` intentionally preserves canonical mapping and filter JSON. The validator must reject invalid tokens; the materializer must not guess, rename, or silently repair them.
 
 ## Bulk Sub List Writes
 
@@ -81,3 +90,5 @@ When `Parent Loop` is present, generated-final materializes the node as `Loop ->
 ## Regression Coverage
 
 `scripts/test-workflow-set-data-list-golden-reference-gates.mjs` covers Approval increase/decrease, Data List current add and selected remove, Scheduled multiply/divide, Document Library single/multi-file patterns, and rejection of unsafe host mode, missing filters/mappings, unknown target fields, invalid file values, static document names, and numeric operations on non-number fields.
+
+`scripts/test-workflow-set-data-list-plan-gates.mjs` additionally covers Approval, Scheduled, and Data List workflow source-token semantics. It requires hard failures for illegal token kinds, missing declarations, and mismatched `id`, `key`, `valueType`, or expression names.

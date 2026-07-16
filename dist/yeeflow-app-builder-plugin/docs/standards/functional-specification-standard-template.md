@@ -1,5 +1,7 @@
 # <Application Name> - Functional Specification
 
+Assign each core business requirement a stable marker using the `REQ-<AREA>-NN` or `FS-<AREA>-NN` pattern. Preserve each concrete marker in the App Plan so traceability is checked requirement by requirement instead of inferred from generic section keywords.
+
 Use this template as Stage 1 / Step 1 for every Yeeflow application build. The purpose of this document is to convert the user's request, documents, screenshots, examples, and clarifications into a complete business requirement specification before creating the Yeeflow App Plan.
 
 This document focuses on business requirements and expected application behavior. It should read like a business-analysis document that explains the process, rules, data lifecycle, user roles, decision points, exception cases, dashboard information needs, and operational reporting needs before the Yeeflow App Plan exists. It should not be a package-generation blueprint. Yeeflow resource selection, generation order, field internal names, control implementation shapes, package validation, signing, and runtime proof belong in the App Plan and later steps.

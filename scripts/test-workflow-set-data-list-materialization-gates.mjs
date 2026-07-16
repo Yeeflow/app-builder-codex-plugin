@@ -93,6 +93,11 @@ function plan() {
     { Columns: "Text3", TargetType: "text", Per: "0", Data: [{ exprType: "variable", valueType: "string", id: "LeaveRequestDetails", key: "_list.LeaveType", type: "expr", name: "Workflow Variables:Leave request details:Leave Type" }] },
     { Columns: "Decimal5", TargetType: "number", Per: "0", Data: [{ exprType: "variable", valueType: "number", id: "LeaveRequestDetails", key: "_list.Hours", type: "expr", name: "Workflow Variables:Leave request details:Hours" }] },
   ]);
+  const batchDeclarations = JSON.stringify([
+    { id: "Applicant", type: "user", valueType: "user", name: "Applicant", expressionName: "Workflow Variables:Applicant" },
+    { id: "LeaveRequestDetails", type: "list", valueType: "string", name: "Leave request details", expressionName: "Workflow Variables:Leave request details:Leave Type", key: "_list.LeaveType" },
+    { id: "LeaveRequestDetails", type: "list", valueType: "number", name: "Leave request details", expressionName: "Workflow Variables:Leave request details:Hours", key: "_list.Hours" },
+  ]);
   const documentMapping = JSON.stringify([
     { Columns: "Title", TargetType: "text", Per: "0", Data: [{ type: "str", value: "Additional document-" }, { exprType: "loop_ctx", key: "LoopIndex", type: "expr", name: "Current Loop:Current iteration" }] },
     { Columns: "Text4", TargetType: "file-upload", Per: "0", Data: [{ exprType: "loop_ctx", key: "LoopItem", type: "expr", name: "Current Loop:Current object" }] },
@@ -131,11 +136,11 @@ function plan() {
     "",
     "#### Workflow Set Data List Action Plan",
     "",
-    "| Workflow Host | Workflow Name | Node Name | Target Mode | Target Resource | Target Resource Type | Operation | Mappings JSON | Filters JSON | Batch Source Type | Batch Source | Batch Source Fields JSON | Parent Loop | Proof Boundary | Notes |",
-    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
-    `| Data List | Update usage | Update current usage | current | Host list | Data List | add | \`${mapping}\` | \`[]\` |  |  | \`[]\` |  | export-proven | Update current item. |`,
-    `| Scheduled | Daily usage update | Save leave detail list | select | Leave Usage Statistics | Data List | add | \`${batchMapping}\` | \`[]\` | Workflow List Variable | LeaveRequestDetails | \`[\"LeaveType\",\"Hours\"]\` |  | export-proven | Add one usage item for every leave detail. |`,
-    `| Scheduled | Store additional documents | Add additional document | select | Travel request documents | Document Library | add | \`${documentMapping}\` | \`[]\` |  |  | \`[]\` | Loop additional documents | export-proven | Add each uploaded document. |`,
+    "| Workflow Host | Workflow Name | Node Name | Target Mode | Target Resource | Target Resource Type | Operation | Mappings JSON | Filters JSON | Workflow Variable Declarations JSON | Batch Source Type | Batch Source | Batch Source Fields JSON | Parent Loop | Proof Boundary | Notes |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    `| Data List | Update usage | Update current usage | current | Host list | Data List | add | \`${mapping}\` | \`[]\` | \`[]\` |  |  | \`[]\` |  | export-proven | Update current item. |`,
+    `| Scheduled | Daily usage update | Save leave detail list | select | Leave Usage Statistics | Data List | add | \`${batchMapping}\` | \`[]\` | \`${batchDeclarations}\` | Workflow List Variable | LeaveRequestDetails | \`[\"LeaveType\",\"Hours\"]\` |  | export-proven | Add one usage item for every leave detail. |`,
+    `| Scheduled | Store additional documents | Add additional document | select | Travel request documents | Document Library | add | \`${documentMapping}\` | \`[]\` | \`[]\` |  |  | \`[]\` | Loop additional documents | export-proven | Add each uploaded document. |`,
     "",
     "#### Workflow Loop Planning",
     "",

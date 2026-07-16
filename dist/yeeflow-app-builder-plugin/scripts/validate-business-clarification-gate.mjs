@@ -209,7 +209,7 @@ function analyzeFile(file, kind, mode) {
         if (row.every((cell) => !cell || /^<.*>$/.test(cell))) continue;
         const statusCell = statusIndex === -1 ? "" : row[statusIndex] ?? "";
         const answerCell = answerIndex === -1 ? "" : row[answerIndex] ?? "";
-        const statusText = [statusCell, answerCell].join(" ").trim();
+        const statusText = statusCell.trim();
         const gateKey = rowValue(table.header, row, ["Key", "Gate", "ID"]);
         const question = rowValue(table.header, row, ["Question", "Decision", "Gate Question"]);
         if (!statusCell.trim() || /^<.*>$/.test(statusCell.trim()) || !answerCell.trim() || /^<.*>$/.test(answerCell.trim())) {
@@ -223,7 +223,7 @@ function analyzeFile(file, kind, mode) {
             statusText,
             message: "Business decision gate row is missing status, answer, or default approval information.",
           });
-        } else if (FAIL_STATUS.test(statusText)) {
+        } else if (FAIL_STATUS.test(statusCell)) {
           findings.push({
             level: "error",
             code: "BUSINESS_CLARIFICATION_UNANSWERED_GATE",
@@ -234,7 +234,7 @@ function analyzeFile(file, kind, mode) {
             statusText,
             message: "Business decision gate is still unanswered or pending.",
           });
-        } else if (DEFERRED_STATUS.test(statusText) && !rowHasDeferredReason(table.header, row)) {
+        } else if (DEFERRED_STATUS.test(statusCell) && !rowHasDeferredReason(table.header, row)) {
           findings.push({
             level: "error",
             code: "BUSINESS_CLARIFICATION_STATUS_MISSING",
@@ -245,7 +245,7 @@ function analyzeFile(file, kind, mode) {
             statusText,
             message: "Deferred business decision gates must include reason, fallback, proof impact, or follow-up evidence.",
           });
-        } else if (PLANNING_DEFAULT_STATUS.test(statusText)) {
+        } else if (PLANNING_DEFAULT_STATUS.test(statusCell)) {
           if (mode === "generation") {
             findings.push({
               level: "error",
@@ -269,9 +269,9 @@ function analyzeFile(file, kind, mode) {
               message: "Default is applied for planning only; generation remains blocked until the user answers or approves defaults for generation.",
             });
           }
-        } else if (GENERATION_DEFAULT_STATUS.test(statusText)) {
+        } else if (GENERATION_DEFAULT_STATUS.test(statusCell)) {
           // Explicit user generation approval is accepted in both modes.
-        } else if (AMBIGUOUS_DEFAULT_STATUS.test(statusText)) {
+        } else if (AMBIGUOUS_DEFAULT_STATUS.test(statusCell)) {
           findings.push({
             level: "error",
             code: "BUSINESS_CLARIFICATION_AMBIGUOUS_DEFAULT_APPROVAL",
@@ -282,7 +282,7 @@ function analyzeFile(file, kind, mode) {
             statusText,
             message: "Ambiguous default-approved wording must be replaced with default-applied-for-planning or user-default-approved-for-generation.",
           });
-        } else if (!PASS_STATUS.test(statusText)) {
+        } else if (!PASS_STATUS.test(statusCell) && !DEFERRED_STATUS.test(statusCell)) {
           warnings.push({
             level: "warning",
             code: "BUSINESS_CLARIFICATION_STATUS_UNRECOGNIZED",
@@ -299,7 +299,8 @@ function analyzeFile(file, kind, mode) {
 
     for (const line of section.body.split(/\r?\n/)) {
       if (!/^\s*[-*]\s+/.test(line)) continue;
-      if (FAIL_STATUS.test(line)) {
+      const explicitStatus = line.match(/^\s*[-*]\s+(?:status\s*:\s*)?([^:|]+?)(?:\s*[:|]|$)/i)?.[1]?.trim() || "";
+      if (FAIL_STATUS.test(explicitStatus) && /^(?:unanswered|pending|TBD|to be confirmed|requires clarification|not answered|open)$/i.test(explicitStatus)) {
         findings.push({
           level: "error",
           code: "BUSINESS_CLARIFICATION_UNANSWERED_GATE",

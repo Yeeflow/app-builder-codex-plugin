@@ -4,6 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
+import {
+  extractMarkdownSubsection,
+  findMarkdownTable,
+  markdownRowValue,
+} from "./lib/markdown-planning-utils.mjs";
 import { asArray, isObject, parseJsonMaybe, quoteLargeJsonIntegers, readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -222,21 +227,23 @@ function validateAppPlan(planPath, findings) {
     return;
   }
   const selectionBlock = subsectionAfterHeading(section, /####\s+Approval Form Layout Template Selection/i);
-  const rows = tableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row.raw));
+  const table = findMarkdownTable(selectionBlock, ["Page Role", "Selected Approval Form Layout Template"]);
+  const rows = table?.rows || [];
   const selectedIds = [];
   for (const row of rows) {
-    const ids = [...row.raw.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    const pageRole = markdownRowValue(table, row, "Page Role");
+    const selectedTemplate = markdownRowValue(table, row, "Selected Approval Form Layout Template");
+    const ids = [...selectedTemplate.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
     selectedIds.push(...ids);
     for (const id of ids) {
       if (!TEMPLATE_IDS.has(id)) {
         findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_TEMPLATE_UNKNOWN", "Approval Form Layout Template Selection must use an approved Approval Form Layouts v1.1 template ID.", { templateId: id, row: row.raw }));
       }
     }
-    const lower = row.raw.toLowerCase();
-    if (/\bsubmission\b/.test(lower) && !row.raw.includes(SUBMISSION_TEMPLATE_ID)) {
+    if (/^submission$/i.test(pageRole) && !selectedTemplate.includes(SUBMISSION_TEMPLATE_ID)) {
       findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_SUBMISSION_TEMPLATE_MISMATCH", "Submission forms must select approval_form_layout_submission_v1_1.", { row: row.raw }));
     }
-    if (/\btask\b/.test(lower) && !row.raw.includes(TASK_TEMPLATE_ID)) {
+    if (/^task$/i.test(pageRole) && !selectedTemplate.includes(TASK_TEMPLATE_ID)) {
       findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_TASK_TEMPLATE_MISMATCH", "Task forms must select approval_form_layout_task_v1_1.", { row: row.raw }));
     }
   }
@@ -262,24 +269,31 @@ function validateWorkflowTaskAppPlanSelection(text, findings, sectionName, expec
     findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_SELECTION_TABLE_MISSING", `${sectionName} must include a Workflow Task Form Layout Template Selection table when workflow task forms are planned.`, { section: sectionName }));
     return;
   }
-  const selectionBlock = section.split(/#### Workflow Task Form Layout Template Selection/i)[1]?.split(/####|##\s+\d+\./i)[0] || "";
-  const rows = tableRows(selectionBlock).filter((row) => row.cells[0]?.toLowerCase() !== "workflow");
-  const selectedRows = rows.filter((row) => row.raw.includes(TASK_TEMPLATE_ID) || /\btask\b/i.test(row.raw));
+  const selectionBlock = extractMarkdownSubsection(section, /####\s+Workflow Task Form Layout Template Selection/i);
+  const table = findMarkdownTable(selectionBlock, ["Workflow Surface", "Selected Workflow Task Form Layout Template"]);
+  const rows = table?.rows || [];
+  const selectedRows = rows.filter((row) => {
+    const surface = markdownRowValue(table, row, "Workflow Surface");
+    const selectedTemplate = markdownRowValue(table, row, "Selected Workflow Task Form Layout Template");
+    return /\btask\b/i.test(surface) || selectedTemplate.includes(TASK_TEMPLATE_ID);
+  });
   if (!selectedRows.length) {
     findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_TEMPLATE_SELECTION_REQUIRED", `${sectionName} must select approval_form_layout_task_v1_1 for each generated workflow task form.`, { section: sectionName }));
     return;
   }
   for (const row of selectedRows) {
-    const ids = [...row.raw.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    const surface = markdownRowValue(table, row, "Workflow Surface");
+    const selectedTemplate = markdownRowValue(table, row, "Selected Workflow Task Form Layout Template");
+    const ids = [...selectedTemplate.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
     for (const id of ids) {
       if (id !== TASK_TEMPLATE_ID) {
         findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_TEMPLATE_UNKNOWN", "Workflow task forms may only use approval_form_layout_task_v1_1.", { section: sectionName, templateId: id, row: row.raw }));
       }
     }
-    if (!row.raw.includes(TASK_TEMPLATE_ID)) {
+    if (!selectedTemplate.includes(TASK_TEMPLATE_ID)) {
       findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_TEMPLATE_MISMATCH", "Workflow task forms must select approval_form_layout_task_v1_1.", { section: sectionName, row: row.raw }));
     }
-    if (expectedSurface && !new RegExp(expectedSurface.replace(/\s+/g, "\\s+"), "i").test(row.raw)) {
+    if (expectedSurface && !new RegExp(`^${expectedSurface.replace(/\s+/g, "\\s+")}$`, "i").test(surface)) {
       findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_SURFACE_MISSING", "Workflow task template selection row must identify the workflow task surface.", { section: sectionName, expectedSurface, row: row.raw }));
     }
   }

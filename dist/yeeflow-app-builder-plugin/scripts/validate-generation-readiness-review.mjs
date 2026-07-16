@@ -10,6 +10,11 @@ import { validateSetVariablePlan } from "./validate-set-variable-plan.mjs";
 import { validateFormActionSetDataListPlan } from "./validate-form-action-set-data-list-plan.mjs";
 import { validateFormActionOpenResourcePlan } from "./validate-form-action-open-resource-plan.mjs";
 import { validateFormActionPrintBarcodePlan } from "./validate-form-action-print-barcode-plan.mjs";
+import {
+  findMarkdownTable,
+  markdownRowValue,
+  positivePlanningText,
+} from "./lib/markdown-planning-utils.mjs";
 
 const AREAS = [
   { key: "dataLists", title: "Data Lists and Document Libraries Plan", code: "GENERATION_READINESS_AREA_EMPTY", required: /data list|document library|not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required/i, extra: validateDataLists },
@@ -305,18 +310,20 @@ function selectedControlsFromRecordDisplay(body) {
   const controls = [];
   const tableMatch = body.match(/Record Display Control Selection([\s\S]*?)(?:\n####|\n##|$)/i);
   const source = tableMatch?.[1] ?? "";
-  for (const line of source.split(/\r?\n/)) {
-    if (!line.includes("|")) continue;
+  const table = findMarkdownTable(source, ["Selection Reason"]);
+  for (const row of table?.rows || []) {
+    const selected = markdownRowValue(table, row, ["Selected Record Display Control", "Selected Control"]);
     for (const control of RECORD_DISPLAY_CONTROLS) {
-      if (new RegExp(`\\b${control.replace(/\s+/g, "\\s+")}\\b`, "i").test(line)) controls.push(control);
+      if (new RegExp(`^${control.replace(/\s+/g, "\\s+")}$`, "i").test(selected)) controls.push(control);
     }
   }
   return [...new Set(controls)];
 }
 
 function hasDataListRecordDisplayNeed(body) {
-  return /\b(Data List records|data-list records|record display|Data Source|Source List|list records|records displayed)\b/i.test(body)
-    || /\b(Data table|Collection|Kanban|Vertical timeline|Horizontal timeline|Vertical Timeline|Horizontal Timeline)\b/i.test(body);
+  const positiveText = positivePlanningText(body);
+  return /\b(Data List records|data-list records|record display|Data Source|Source List|list records|records displayed)\b/i.test(positiveText)
+    || /\b(Data table|Collection|Kanban|Vertical timeline|Horizontal timeline|Vertical Timeline|Horizontal Timeline)\b/i.test(positiveText);
 }
 
 function validateControlActionPropertyGates(text, sections) {
@@ -346,7 +353,8 @@ function validateControlActionPropertyGates(text, sections) {
     }
   }
 
-  if (dashboard && /\b(Collection|Kanban|Vertical Timeline|Horizontal Timeline|Vertical timeline|Horizontal timeline)\b/i.test(dashboard.body) && !/Item Template Dynamic Controls/i.test(dashboard.body)) {
+  const positiveDashboardText = positivePlanningText(dashboard?.body || "");
+  if (dashboard && /\b(Collection|Kanban|Vertical Timeline|Horizontal Timeline|Vertical timeline|Horizontal timeline)\b/i.test(positiveDashboardText) && !/Item Template Dynamic Controls/i.test(dashboard.body)) {
     findings.push({
       level: "error",
       code: "GENERATION_READINESS_ITEM_TEMPLATE_DYNAMIC_CONTROLS_MISSING",
@@ -364,10 +372,11 @@ function validateControlActionPropertyGates(text, sections) {
       message: "Unsupported Dynamic control types must be marked export-learning-required, runtime-proof-required, or deferred.",
     });
   }
-  for (const line of dynamicSection.split(/\r?\n/)) {
-    if (!/dynamic-user/i.test(line)) continue;
-    const cells = line.split("|").map((cell) => cell.trim()).filter(Boolean);
-    const boundField = cells[4] ?? line;
+  const dynamicTable = findMarkdownTable(dynamicSection, ["Display Purpose"]);
+  for (const row of dynamicTable?.rows || []) {
+    const control = markdownRowValue(dynamicTable, row, ["Expected Dynamic Display Control Category", "Dynamic Control Type"]);
+    if (!/^dynamic-user$/i.test(control)) continue;
+    const boundField = markdownRowValue(dynamicTable, row, ["Source Field", "Bound Field"]);
     if (/\b(Status|Priority|Amount|Total|Title|Date)\b/i.test(boundField) && !/\b(User|Owner|Requester|Approver|Assignee|Person|Member)\b/i.test(boundField)) {
       findings.push({
         level: "error",
@@ -378,7 +387,7 @@ function validateControlActionPropertyGates(text, sections) {
     }
   }
 
-  if (dashboard && /\b(Collection|Kanban)\b/i.test(dashboard.body) && !/(Collection (and|\/) Kanban Item Actions|No Collection\/Kanban item actions required)/i.test(dashboard.body)) {
+  if (dashboard && /\b(Collection|Kanban)\b/i.test(positiveDashboardText) && !/(Collection (and|\/) Kanban Item Actions|No Collection\/Kanban item actions required)/i.test(dashboard.body)) {
     findings.push({
       level: "error",
       code: "GENERATION_READINESS_COLLECTION_KANBAN_ACTION_DECISION_MISSING",
@@ -399,7 +408,7 @@ function validateControlActionPropertyGates(text, sections) {
   }
 
   const subListText = [approvalForms?.body ?? "", customForms?.body ?? ""].join("\n");
-  if (/\bSub List\b/i.test(subListText) && !/(Sub List List Actions|No custom Sub List actions required)/i.test(subListText)) {
+  if (/\bSub List\b/i.test(positivePlanningText(subListText)) && !/(Sub List List Actions|No custom Sub List actions required)/i.test(subListText)) {
     findings.push({
       level: "error",
       code: "GENERATION_READINESS_SUB_LIST_ACTION_DECISION_MISSING",
