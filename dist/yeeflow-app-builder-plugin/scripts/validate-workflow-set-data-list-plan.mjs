@@ -61,6 +61,7 @@ function validateRow(row, index, findings) {
   const operation = value(row, "Operation").toLowerCase();
   const mappings = parseJson(value(row, "Mappings JSON"), "Mappings JSON", path, findings);
   const filters = parseJson(value(row, "Filters JSON"), "Filters JSON", path, findings);
+  const workflowVariableDeclarations = parseJson(value(row, "Workflow Variable Declarations JSON"), "Workflow Variable Declarations JSON", path, findings);
   const batchSourceType = value(row, "Batch Source Type").toLowerCase();
   const batchSource = value(row, "Batch Source");
   const batchSourceFields = parseJson(value(row, "Batch Source Fields JSON"), "Batch Source Fields JSON", path, findings);
@@ -87,7 +88,71 @@ function validateRow(row, index, findings) {
       if (mapping && NUMERIC_MUTATIONS.has(String(mapping.Per)) && !NUMERIC_TYPES.has(String(mapping.TargetType || "").toLowerCase())) add(findings, "error", "WORKFLOW_SET_DATALIST_PLAN_NUMERIC_TARGET_INVALID", "Increase/decrease/multiply/divide mappings must declare a numeric TargetType.", mappingPath, { targetType: mapping.TargetType, Per: mapping.Per });
     });
   }
+  validateWorkflowSourceTokens({ host, mappings, filters, workflowVariableDeclarations, findings, path });
   if (documentLibraryTarget && operation === "add" && Array.isArray(mappings)) validateDocumentLibraryAddMappings(mappings, findings, path);
+}
+
+function validateWorkflowSourceTokens({ host, mappings, filters, workflowVariableDeclarations, findings, path }) {
+  const tokens = expressionTokens([mappings, filters]);
+  const declarations = Array.isArray(workflowVariableDeclarations) ? workflowVariableDeclarations : [];
+  const variableTokens = tokens.filter((token) => String(token?.exprType || "").toLowerCase() === "variable");
+  const allowedKinds = host === "data list"
+    ? new Set(["variable", "list_field", "application", "loop_ctx"])
+    : new Set(["variable", "application", "loop_ctx"]);
+
+  for (const token of tokens) {
+    const kind = String(token?.exprType || "").toLowerCase();
+    if (!allowedKinds.has(kind)) {
+      add(findings, "error", "WORKFLOW_SET_DATALIST_PLAN_WORKFLOW_SOURCE_TOKEN_KIND_INVALID", "Workflow Set Data List contains an expression source token kind that is invalid for this workflow host.", path, { host, exprType: token?.exprType, token });
+    }
+  }
+
+  if (!variableTokens.length) return;
+  if (!Array.isArray(workflowVariableDeclarations)) {
+    add(findings, "error", "WORKFLOW_SET_DATALIST_PLAN_WORKFLOW_VARIABLE_DECLARATION_MISMATCH", "Mappings or filters that reference workflow variables require Workflow Variable Declarations JSON.", path);
+    return;
+  }
+  const malformed = declarations.filter((declaration) => !declaration || !String(declaration.id || "").trim() || !String(declaration.type || "").trim() || !String(declaration.valueType || "").trim() || !String(declaration.name || "").trim() || !String(declaration.expressionName || "").trim());
+  if (malformed.length) {
+    add(findings, "error", "WORKFLOW_SET_DATALIST_PLAN_WORKFLOW_VARIABLE_DECLARATION_MISMATCH", "Each workflow variable declaration requires id, type, valueType, name, and expressionName.", path, { declarations: malformed });
+  }
+  const identityContracts = new Map();
+  for (const declaration of declarations) {
+    if (!declaration?.id) continue;
+    const identity = String(declaration.id).toLowerCase();
+    const previous = identityContracts.get(identity);
+    const contract = `${String(declaration.type || "").toLowerCase()}::${String(declaration.name || "")}`;
+    if (previous && previous !== contract) {
+      add(findings, "error", "WORKFLOW_SET_DATALIST_PLAN_WORKFLOW_VARIABLE_DECLARATION_MISMATCH", "Declarations for the same workflow variable identity must preserve one variable type and business name.", path, { id: declaration.id, key: declaration.key || "" });
+    }
+    identityContracts.set(identity, contract);
+  }
+  for (const token of variableTokens) {
+    const declaration = declarations.find((candidate) => (
+      String(candidate?.id || "") === String(token.id || "")
+      && String(candidate?.key || "") === String(token.key || "")
+      && String(candidate?.valueType || "").toLowerCase() === String(token.valueType || "").toLowerCase()
+      && String(candidate?.expressionName || "") === String(token.name || "")
+    ));
+    if (!declaration) {
+      add(findings, "error", "WORKFLOW_SET_DATALIST_PLAN_WORKFLOW_VARIABLE_DECLARATION_MISMATCH", "A workflow variable expression token does not exactly match a declared id, key, valueType, and expressionName contract.", path, { token });
+    }
+  }
+}
+
+function expressionTokens(value) {
+  const tokens = [];
+  const visit = (current) => {
+    if (Array.isArray(current)) {
+      current.forEach(visit);
+      return;
+    }
+    if (!current || typeof current !== "object") return;
+    if (current.exprType) tokens.push(current);
+    Object.values(current).forEach(visit);
+  };
+  visit(value);
+  return tokens;
 }
 
 function validateBatchSource({ host, operation, targetMode, batchSourceType, batchSource, batchSourceFields, mappings, findings, path }) {

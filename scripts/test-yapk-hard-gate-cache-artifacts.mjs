@@ -11,6 +11,7 @@ const ROOT_MODE = pluginRootMode(ROOT);
 const hardGateScripts = [
   "scripts/lib/plugin-root-layout.mjs",
   "scripts/lib/form-control-type-authority.mjs",
+  "scripts/lib/markdown-planning-utils.mjs",
   "scripts/validate-yapk-id-provenance.mjs",
   "scripts/validate-yapk-navigation-runtime-metadata.mjs",
   "scripts/validate-yapk-live-install-readiness.mjs",
@@ -90,6 +91,11 @@ const hardGateScripts = [
   "scripts/validate-functional-specification.mjs",
   "scripts/validate-app-plan-resource-order.mjs",
   "scripts/test-functional-specification-and-app-plan-gates.mjs",
+  "scripts/test-validator-parsing-hardening-gates.mjs",
+  "scripts/validate-workflow-set-data-list-plan.mjs",
+  "scripts/test-workflow-set-data-list-plan-gates.mjs",
+  "docs/standards/workflow-set-data-list-golden-reference-standard.md",
+  "docs/training/workflow-set-data-list-token-semantics-focused-training-report.md",
   "scripts/validate-business-clarification-gate.mjs",
   "scripts/validate-generation-readiness-review.mjs",
   "scripts/validate-functional-spec-to-app-plan-traceability.mjs",
@@ -160,6 +166,7 @@ const hardGateScripts = [
   "scripts/test-custom-code-surface-contract-gates.mjs",
   "scripts/test-custom-service-contract-gates.mjs",
   "scripts/test-repo-root-hygiene.mjs",
+  "docs/training/validator-parsing-hardening-training-report.md",
 ];
 
 for (const sourcePath of hardGateScripts) {

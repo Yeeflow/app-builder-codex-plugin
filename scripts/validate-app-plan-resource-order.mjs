@@ -3,6 +3,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  extractMarkdownSubsection,
+  findMarkdownTable,
+  hasTechnicalPlaceholderIdContext,
+  markdownRowValue,
+  parseMarkdownTables,
+  positivePlanningText,
+} from "./lib/markdown-planning-utils.mjs";
 
 const PLUGIN_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -178,7 +186,6 @@ const DASHBOARD_FORBIDDEN_IMPLEMENTATION_PATTERNS = [
   ["APP_PLAN_DASHBOARD_LOW_LEVEL_ID_LEAK", /\b(?:ListID|PageID|FormID|LayoutID|ProcKey)\s*[:=]\s*[A-Za-z0-9_-]+|\b(?:ListID|PageID|FormID|LayoutID|ProcKey)\b(?!\/)/i],
   ["APP_PLAN_DASHBOARD_ACTIONTYPECODE_LEAK", /\bactionTypeCode\s*[:=]\s*["']?\d+["']?/i],
   ["APP_PLAN_DASHBOARD_JSON_PROPERTY_PATH_LEAK", /\b(?:attrs|Resource|Pages|Data|Childs|LayoutInResources|Ext2)\.[A-Za-z0-9_.[\]]+/i],
-  ["APP_PLAN_DASHBOARD_FAKE_PLACEHOLDER_ID_LEAK", /\b(?:LIST|PAGE|FORM|LAYOUT|PROC)-[A-Za-z0-9_-]+\b/i],
   ["APP_PLAN_DASHBOARD_EXACT_RESOURCE_ID_LEAK", /\b\d{16,}\b/],
   ["APP_PLAN_DASHBOARD_LAYOUT_JSON_LEAK", /"type"\s*:\s*"?(?:container|collection|summary|data-table|kanban|text|heading)"?|^\s*[{[]\s*$/im],
 ];
@@ -365,7 +372,8 @@ function validateResourceOrder(text, findings) {
 }
 
 function validateControlActionPlanning(text, findings) {
-  if (/\b(Collection|Kanban|Vertical Timeline|Horizontal Timeline|Vertical timeline|Horizontal timeline)\b/i.test(text) && !/Item Template Dynamic Controls/i.test(text)) {
+  const positiveText = positivePlanningText(text);
+  if (/\b(Collection|Kanban|Vertical Timeline|Horizontal Timeline|Vertical timeline|Horizontal timeline)\b/i.test(positiveText) && !/Item Template Dynamic Controls/i.test(text)) {
     findings.push({
       level: "error",
       code: "APP_PLAN_ITEM_TEMPLATE_DYNAMIC_CONTROLS_MISSING",
@@ -373,7 +381,7 @@ function validateControlActionPlanning(text, findings) {
     });
   }
 
-  if (/\b(Collection|Kanban)\b/i.test(text) && !/(Collection (and|\/) Kanban Item Actions|No Collection\/Kanban item actions required)/i.test(text)) {
+  if (/\b(Collection|Kanban)\b/i.test(positiveText) && !/(Collection (and|\/) Kanban Item Actions|No Collection\/Kanban item actions required)/i.test(text)) {
     findings.push({
       level: "error",
       code: "APP_PLAN_COLLECTION_KANBAN_ACTION_DECISION_MISSING",
@@ -381,7 +389,7 @@ function validateControlActionPlanning(text, findings) {
     });
   }
 
-  if (/\bSub List\b/i.test(text) && !/(Sub List List Actions|No custom Sub List actions required|No Sub List actions are needed|Sub List actions are not required)/i.test(text)) {
+  if (/\bSub List\b/i.test(positiveText) && !/(Sub List List Actions|No custom Sub List actions required|No Sub List actions are needed|Sub List actions are not required)/i.test(text)) {
     findings.push({
       level: "error",
       code: "APP_PLAN_SUB_LIST_ACTION_DECISION_MISSING",
@@ -493,6 +501,13 @@ function validateDashboardPagesPlan(text, findings) {
       });
     }
   }
+  if (hasTechnicalPlaceholderIdContext(implementationPolicyText)) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_DASHBOARD_FAKE_PLACEHOLDER_ID_LEAK",
+      message: "Dashboard Pages Plan contains a fake placeholder ID in a technical ID field or property context.",
+    });
+  }
 }
 
 function isTemplatePlaceholderOrInstructionLine(line) {
@@ -512,8 +527,12 @@ function maskApprovedDashboardTemplateIds(text) {
 }
 
 function validateDashboardDataAnalyticsTemplateSelection(dashboard, findings) {
-  const dashboardSectionsBlock = dashboard.split(/#### Dashboard Filters/i)[0].split(/#### Dashboard Sections/i)[1] || "";
-  const analyticsPlanned = splitTableRows(dashboardSectionsBlock).some((row) => /\b(Chart|Data analytics|Pie chart|Column chart|Bar chart|Line chart|Area chart|Pivot table)\b/i.test(row));
+  const dashboardSectionsBlock = extractMarkdownSubsection(dashboard, /####\s+Dashboard Sections/i);
+  const sectionsTable = findMarkdownTable(dashboardSectionsBlock, ["Selected Yeeflow Control Type Category"]);
+  const analyticsPlanned = Boolean(sectionsTable?.rows.some((row) => {
+    const selectedControl = markdownRowValue(sectionsTable, row, "Selected Yeeflow Control Type Category");
+    return /\b(Chart|Data analytics|Pie chart|Column chart|Bar chart|Line chart|Area chart|Pivot table)\b/i.test(selectedControl);
+  }));
   const selectionBlock = dashboard.split(/#### Dashboard Actions/i)[0].split(/#### Data Analytics Template Selection/i)[1] || "";
   const rows = splitTableRows(selectionBlock);
   const selectedIds = [];
@@ -545,13 +564,14 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
   const customForms = sectionBody(sections, "Custom Data List Forms Plan");
   if (!customForms.trim()) return;
   const hasConcreteCustomFormRows = splitTableRows(customForms).some((row) => /\|\s*(New|Edit|View|New\/Edit|Detail|Custom|Print)\s*\|/i.test(row));
-  const selectionBlock = customForms.split(/#### Form Fields/i)[0].split(/#### Data List Form Layout Template Selection/i)[1] || "";
-  const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*Workflow\s*\|/i.test(row));
+  const selectionBlock = extractMarkdownSubsection(customForms, /####\s+Data List Form Layout Template Selection/i);
+  const table = findMarkdownTable(selectionBlock, ["Form Usage", "Selected Data List Form Layout Template"]);
+  const rows = table?.rows || [];
   const selectedIds = [];
   for (const row of rows) {
-    const cells = row.split("|").slice(1, -1).map((cell) => cell.trim());
-    const formUsage = cells[2] || row;
-    const ids = [...row.matchAll(/\bdata_list_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    const formUsage = markdownRowValue(table, row, "Form Usage");
+    const selectedTemplate = markdownRowValue(table, row, "Selected Data List Form Layout Template");
+    const ids = [...selectedTemplate.matchAll(/\bdata_list_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
     for (const id of ids) {
       selectedIds.push(id);
       if (!APPROVED_DATA_LIST_FORM_LAYOUT_TEMPLATE_IDS.has(id)) {
@@ -568,7 +588,7 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
         level: "error",
         code: "APP_PLAN_DATA_LIST_FORM_LAYOUT_NEW_EDIT_TEMPLATE_MISMATCH",
         message: "New/Edit custom Data List forms must select an approved Data List Form Layout template that supports New/Edit usage.",
-        row,
+        row: row.raw,
       });
     }
     if (/\bview\b/i.test(formUsage) && !ids.some((id) => dataListFormLayoutTemplateSupports(id, "view"))) {
@@ -576,7 +596,7 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
         level: "error",
         code: "APP_PLAN_DATA_LIST_FORM_LAYOUT_VIEW_TEMPLATE_MISMATCH",
         message: "View Item custom Data List forms must select an approved Data List Form Layout template that supports View usage.",
-        row,
+        row: row.raw,
       });
     }
   }
@@ -600,26 +620,27 @@ function validateApplicationLayoutTemplateSelection(text, findings) {
       message: "Application Navigation Plan must declare the default application layout template: application-layout-sidebar-workspace-1.",
     });
   }
-  for (const row of splitTableRows(navigation)) {
-    if (!/\|\s*yes\s*\|/i.test(row)) continue;
-    const cells = row.split("|").slice(1, -1).map((cell) => cell.trim());
-    if (cells.length < 7) continue;
-    const icon = cells[6] || "";
-    if (!icon || /^<.*>$/.test(icon)) {
-      findings.push({
-        level: "error",
-        code: "APP_PLAN_APPLICATION_NAV_VISIBLE_ICON_MISSING",
-        message: "Every visible Application Navigation Plan menu group/item row must select a suitable FontAwesome icon.",
-        row,
-      });
-    } else if (!/^fa-(solid|regular|light|duotone|brands)\s+fa-[a-z0-9-]+$/i.test(icon)) {
-      findings.push({
-        level: "error",
-        code: "APP_PLAN_APPLICATION_NAV_VISIBLE_ICON_NOT_FONTAWESOME",
-        message: "Application Navigation Plan visible icons must use FontAwesome class names.",
-        icon,
-        row,
-      });
+  for (const table of parseMarkdownTables(navigation)) {
+    for (const row of table.rows) {
+      const visible = markdownRowValue(table, row, ["Visible in Navigation", "Visible", "Navigation Visible"]);
+      if (!/^yes$/i.test(visible)) continue;
+      const icon = markdownRowValue(table, row, ["FontAwesome Icon", "Icon", "Navigation Icon"]);
+      if (!icon || /^<.*>$/.test(icon)) {
+        findings.push({
+          level: "error",
+          code: "APP_PLAN_APPLICATION_NAV_VISIBLE_ICON_MISSING",
+          message: "Every visible Application Navigation Plan menu group/item row must select a suitable FontAwesome icon.",
+          row: row.raw,
+        });
+      } else if (!/^fa-(solid|regular|light|duotone|brands)\s+fa-[a-z0-9-]+$/i.test(icon)) {
+        findings.push({
+          level: "error",
+          code: "APP_PLAN_APPLICATION_NAV_VISIBLE_ICON_NOT_FONTAWESOME",
+          message: "Application Navigation Plan visible icons must use FontAwesome class names.",
+          icon,
+          row: row.raw,
+        });
+      }
     }
   }
 }
@@ -735,10 +756,13 @@ function validateApprovalFormLayoutTemplateSelection(text, findings) {
   const hasApprovalRows = dataRows.some((row) => /\b(Submission|Task|Workflow|Review|Approve|Reject|approval_form_layout_)\b/i.test(row));
   if (!hasApprovalRows) return;
   const selectionBlock = subsectionAfterHeading(approvalForms, /####\s+Approval Form Layout Template Selection/i);
-  const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row));
+  const table = findMarkdownTable(selectionBlock, ["Page Role", "Selected Approval Form Layout Template"]);
+  const rows = table?.rows || [];
   const selectedIds = [];
   for (const row of rows) {
-    const ids = [...row.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    const pageRole = markdownRowValue(table, row, "Page Role");
+    const selectedTemplate = markdownRowValue(table, row, "Selected Approval Form Layout Template");
+    const ids = [...selectedTemplate.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
     for (const id of ids) {
       selectedIds.push(id);
       if (!APPROVED_APPROVAL_FORM_LAYOUT_TEMPLATE_IDS.has(id)) {
@@ -750,20 +774,20 @@ function validateApprovalFormLayoutTemplateSelection(text, findings) {
         });
       }
     }
-    if (/\bsubmission\b/i.test(row) && !row.includes("approval_form_layout_submission_v1_1")) {
+    if (/^submission$/i.test(pageRole) && !selectedTemplate.includes("approval_form_layout_submission_v1_1")) {
       findings.push({
         level: "error",
         code: "APP_PLAN_APPROVAL_FORM_LAYOUT_SUBMISSION_TEMPLATE_MISMATCH",
         message: "Submission form pages must select approval_form_layout_submission_v1_1.",
-        row,
+        row: row.raw,
       });
     }
-    if (/\btask\b/i.test(row) && !row.includes("approval_form_layout_task_v1_1")) {
+    if (/^task$/i.test(pageRole) && !selectedTemplate.includes("approval_form_layout_task_v1_1")) {
       findings.push({
         level: "error",
         code: "APP_PLAN_APPROVAL_FORM_LAYOUT_TASK_TEMPLATE_MISMATCH",
         message: "Task form pages must select approval_form_layout_task_v1_1.",
-        row,
+        row: row.raw,
       });
     }
   }
@@ -799,9 +823,14 @@ function validateWorkflowTaskLayoutTemplateSelection(text, findings, sectionName
     });
     return;
   }
-  const selectionBlock = section.split(/#### Workflow Task Form Layout Template Selection/i)[1]?.split(/####|##\s+\d+\./i)[0] || "";
-  const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*(Workflow|---)\s*\|/i.test(row));
-  const selectedRows = rows.filter((row) => /\btask\b/i.test(row) || row.includes(APPROVAL_TASK_LAYOUT_TEMPLATE_ID));
+  const selectionBlock = extractMarkdownSubsection(section, /####\s+Workflow Task Form Layout Template Selection/i);
+  const table = findMarkdownTable(selectionBlock, ["Workflow Surface", "Selected Workflow Task Form Layout Template"]);
+  const rows = table?.rows || [];
+  const selectedRows = rows.filter((row) => {
+    const surface = markdownRowValue(table, row, "Workflow Surface");
+    const template = markdownRowValue(table, row, "Selected Workflow Task Form Layout Template");
+    return /\btask\b/i.test(surface) || template.includes(APPROVAL_TASK_LAYOUT_TEMPLATE_ID);
+  });
   if (!selectedRows.length) {
     findings.push({
       level: "error",
@@ -812,7 +841,9 @@ function validateWorkflowTaskLayoutTemplateSelection(text, findings, sectionName
     return;
   }
   for (const row of selectedRows) {
-    const ids = [...row.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    const surface = markdownRowValue(table, row, "Workflow Surface");
+    const selectedTemplate = markdownRowValue(table, row, "Selected Workflow Task Form Layout Template");
+    const ids = [...selectedTemplate.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
     for (const id of ids) {
       if (id !== APPROVAL_TASK_LAYOUT_TEMPLATE_ID) {
         findings.push({
@@ -821,27 +852,27 @@ function validateWorkflowTaskLayoutTemplateSelection(text, findings, sectionName
           message: "Workflow task forms may only use approval_form_layout_task_v1_1.",
           section: sectionName,
           templateId: id,
-          row,
+          row: row.raw,
         });
       }
     }
-    if (!row.includes(APPROVAL_TASK_LAYOUT_TEMPLATE_ID)) {
+    if (!selectedTemplate.includes(APPROVAL_TASK_LAYOUT_TEMPLATE_ID)) {
       findings.push({
         level: "error",
         code: "APP_PLAN_WORKFLOW_TASK_FORM_LAYOUT_TEMPLATE_MISMATCH",
         message: "Workflow task forms must select approval_form_layout_task_v1_1.",
         section: sectionName,
-        row,
+        row: row.raw,
       });
     }
-    if (!new RegExp(expectedSurface.replace(/\s+/g, "\\s+"), "i").test(row)) {
+    if (!new RegExp(`^${expectedSurface.replace(/\s+/g, "\\s+")}$`, "i").test(surface)) {
       findings.push({
         level: "error",
         code: "APP_PLAN_WORKFLOW_TASK_FORM_LAYOUT_SURFACE_MISSING",
         message: "Workflow task form layout selection must identify whether this is a Data list workflow task or Schedule workflow task.",
         section: sectionName,
         expectedSurface,
-        row,
+        row: row.raw,
       });
     }
   }

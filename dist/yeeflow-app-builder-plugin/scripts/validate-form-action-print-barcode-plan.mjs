@@ -2,10 +2,11 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { parseMarkdownTables } from "./lib/markdown-planning-utils.mjs";
 
 export function extractPrintBarcodePlanRows(text) {
   const rows = [];
-  for (const table of markdownTables(text)) {
+  for (const table of parseMarkdownTables(text)) {
     const headers = table.headers.map(norm);
     const typeIndex = find(headers, ["exact step type", "step type"]);
     const hostIndex = find(headers, ["host resource"]);
@@ -13,7 +14,8 @@ export function extractPrintBarcodePlanRows(text) {
     const actionIndex = find(headers, ["action name"]);
     const stepIndex = find(headers, ["step name"]);
     if ([typeIndex, hostIndex, pageIndex, actionIndex, stepIndex].some((value) => value < 0)) continue;
-    for (const cells of table.rows) {
+    for (const row of table.rows) {
+      const cells = row.cells;
       const type = clean(cells[typeIndex]).toLowerCase();
       if (!new Set(["print", "barcode"]).has(type)) continue;
       rows.push(Object.fromEntries(table.headers.map((header, index) => [header, clean(cells[index])])));
@@ -58,21 +60,13 @@ export function validateFormActionPrintBarcodePlan(text) {
   return { status: findings.length ? "fail" : "pass", rows: rows.length, findings };
 }
 
-function markdownTables(text) {
-  const lines = String(text || "").split(/\r?\n/), out = [];
-  for (let i = 0; i < lines.length - 1; i += 1) {
-    if (!/^\s*\|/.test(lines[i]) || !/^\s*\|?\s*:?-{3,}/.test(lines[i + 1])) continue;
-    const headers = split(lines[i]), rows = [];
-    for (i += 2; i < lines.length && /^\s*\|/.test(lines[i]); i += 1) rows.push(split(lines[i]));
-    out.push({ headers, rows }); i -= 1;
-  }
-  return out;
-}
-function split(line) { return String(line).trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((value) => value.trim()); }
 function find(headers, names) { return headers.findIndex((header) => names.some((name) => header === norm(name))); }
 function norm(value) { return clean(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 function clean(value) { return String(value || "").replace(/<br\s*\/?>/gi, " ").trim(); }
-function tokens(value) { try { const parsed = JSON.parse(value); return Array.isArray(parsed) && parsed.length > 0; } catch { return false; } }
+function tokens(value) {
+  const source = String(value || "").trim().replace(/^`([\s\S]*)`$/, "$1");
+  try { const parsed = JSON.parse(source); return Array.isArray(parsed) && parsed.length > 0; } catch { return false; }
+}
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const index = process.argv.indexOf("--plan");

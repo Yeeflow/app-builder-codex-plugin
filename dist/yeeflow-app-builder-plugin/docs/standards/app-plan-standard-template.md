@@ -26,19 +26,20 @@ Primary artifact rule: generate this plan as the primary human-readable Markdown
 
 Map each major requirement from the Functional Specification to Yeeflow resources.
 
-| Requirement Area | Business Requirement | Yeeflow Resource Type | Planned Resource Name | Required | Notes |
-| --- | --- | --- | --- | --- | --- |
-| Data management | <Requirement> | Data list or Document library | <Name> | Yes/No | Select one exact Yeeflow resource type |
-| Approval/review | <Requirement> | Approval form | <Name> | Yes/No | <Notes> |
-| Approval output | <Requirement> | Form report | <Name> | Yes/No | Must be based on a specific Approval form |
-| List browsing | <Requirement> | Data List view | <Name> | Yes/No | Must belong to a specific Data list or Document library |
-| Dashboard/workbench | <Requirement> | Dashboard page | <Name> | Yes/No | Page-level UI resource, not a Form report |
-| Automation | <Requirement> | Data-list workflow / Schedule workflow / Form action | <Name> | Yes/No | <Notes> |
-| AI | <Requirement> | AI Agent / Copilot / AI Assistant node | <Name> | Yes/No | <Notes> |
+| Requirement ID | Requirement Area | Business Requirement | Yeeflow Resource Type | Planned Resource Name | Required | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| REQ-DATA-01 | Data management | <Requirement> | Data list or Document library | <Name> | Yes/No | Select one exact Yeeflow resource type |
+| REQ-APPROVAL-01 | Approval/review | <Requirement> | Approval form | <Name> | Yes/No | <Notes> |
+| REQ-REPORT-01 | Approval output | <Requirement> | Form report | <Name> | Yes/No | Must be based on a specific Approval form |
+| REQ-VIEW-01 | List browsing | <Requirement> | Data List view | <Name> | Yes/No | Must belong to a specific Data list or Document library |
+| REQ-UI-01 | Dashboard/workbench | <Requirement> | Dashboard page | <Name> | Yes/No | Page-level UI resource, not a Form report |
+| REQ-WORKFLOW-01 | Automation | <Requirement> | Data-list workflow / Schedule workflow / Form action | <Name> | Yes/No | <Notes> |
+| REQ-AI-01 | AI | <Requirement> | AI Agent / Copilot / AI Assistant node | <Name> | Yes/No | <Notes> |
 
 Rules:
 
 - Every core business requirement must map to a Yeeflow resource, a supported configuration, or an explicitly deferred item.
+- Give every core Functional Specification requirement a stable `REQ-<AREA>-NN` or `FS-<AREA>-NN` marker and repeat that exact marker in this mapping table and any detailed App Plan row that implements it. Generic words such as `field`, `page`, `workflow`, or `dashboard` are not substitutes for item-level traceability.
 - App Plan dashboard planning must trace back to the Functional Specification's business-level dashboard questions, source business objects/data lists, summary metrics, source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts.
 - Functional Specification to App Plan traceability is executable with `scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>`.
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
@@ -174,15 +175,17 @@ When `Node Type = SetVariableTask`, add a `Set Variable Assignments` column usin
 
 #### Workflow Set Data List Action Plan
 
-| Workflow Host | Workflow Name | Node Name | Target Mode | Target Resource | Target Resource Type | Operation | Mappings JSON | Filters JSON | Batch Source Type | Batch Source | Batch Source Fields JSON | Parent Loop | Proof Boundary | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Approval Form / Data List / Scheduled | <Workflow> | <ContentList node> | current/select | <Host or selected resource> | Data List / Document Library | add/edit/remove | <JSON array of Columns, Per, Data> | <JSON array of where conditions> | Workflow List Variable / Data List Sub List Field / blank | <List variable id or Sub list field id> | <JSON array of child field IDs> | <Loop name or blank> | export-proven/runtime-proof-required/export-learning-required | <Business intent> |
+| Workflow Host | Workflow Name | Node Name | Target Mode | Target Resource | Target Resource Type | Operation | Mappings JSON | Filters JSON | Workflow Variable Declarations JSON | Batch Source Type | Batch Source | Batch Source Fields JSON | Parent Loop | Proof Boundary | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Approval Form / Data List / Scheduled | <Workflow> | <ContentList node> | current/select | <Host or selected resource> | Data List / Document Library | add/edit/remove | <JSON array of Columns, Per, Data> | <JSON array of where conditions> | <JSON array of id, type, valueType, name, expressionName, and optional key; [] when unused> | Workflow List Variable / Data List Sub List Field / blank | <List variable id or Sub list field id> | <JSON array of child field IDs> | <Loop name or blank> | export-proven/runtime-proof-required/export-learning-required | <Business intent> |
 
 Rules:
 
 - Approval Form and Scheduled workflows must use `Target Mode = select`.
 - Data List workflows may use `current`; preserve the export-proven `current + add` shape for current-record mutation.
 - `add` and `edit` require a non-empty `Mappings JSON` array. `edit` and `remove` require non-empty, field-specific `Filters JSON`.
+- Approval Form and Scheduled workflow source expressions may use declared `variable`, `application`, or `loop_ctx` tokens. Data List workflows may additionally use current-record `list_field` tokens. `workflow-field` is not a valid workflow source token.
+- Every `exprType: "variable"` token in mappings or filters must exactly match one entry in `Workflow Variable Declarations JSON` by `id`, optional child-field `key`, case-normalized `valueType`, and canonical `expressionName`. Each declaration must also include the workflow variable's actual `type` and business `name`.
 - Numeric operation codes are `0` Value, `1` Increase, `2` Decrease, `3` Multiply, and `4` Divide. Codes `1` through `4` require a numeric target field.
 - Document Library targets are export-proven for Type 16 node shape. Add operations must map `Title`, `Text4` (Upload file), and `_Path`; mark actual file mutation execution `runtime-proof-required` until disposable-library runtime proof exists.
 - When `Parent Loop` is nonblank, the node is materialized inside the named `LoopBody`; the plan must also contain an exact Workflow Loop Planning row. It must never be flattened into a host graph or recreated as repeated static nodes.

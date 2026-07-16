@@ -2,6 +2,12 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import {
+  findMarkdownTable,
+  isNegativeRequirementStatement,
+  markdownRowValue,
+  positivePlanningText,
+} from "./lib/markdown-planning-utils.mjs";
 
 const CATEGORIES = [
   { key: "businessObjects", spec: "Business Objects and Data Requirements", plan: ["Requirement-to-Yeeflow Resource Mapping Summary", "Data Lists and Document Libraries Plan", "Deferred or Runtime-Proof Items"], code: "TRACEABILITY_BUSINESS_OBJECT_UNMAPPED", coverage: /data list|document library|master|transaction|reference|deferred|not applicable|N\/A/i },
@@ -74,15 +80,41 @@ function meaningful(sectionText) {
   return /[A-Za-z0-9]{3,}/.test(stripped);
 }
 
-function deferredWithoutReason(planText) {
+function deferredWithoutReason(planSections) {
   const findings = [];
-  for (const line of planText.split(/\r?\n/)) {
-    if (!/\bdeferred\b|runtime-proof-required|export-learning-required/i.test(line)) continue;
-    if (!/\breason\b|\bfallback\b|\bimpact\b|\bproof\b|\bfollow-up\b|because|until|post-import/i.test(line)) {
-      findings.push(line.trim());
+  const section = sectionBody(planSections, "Deferred or Runtime-Proof Items");
+  if (!section.trim()) return findings;
+  const table = findMarkdownTable(section, ["Item", "Category", "Reason", "Fallback"]);
+  if (table) {
+    for (const row of table.rows) {
+      const disposition = markdownRowValue(table, row, ["Category", "Disposition", "Status"]);
+      if (!/\b(deferred|runtime-proof-required|export-learning-required|post-import-config)\b/i.test(disposition)) continue;
+      const reason = markdownRowValue(table, row, ["Reason", "Why"]);
+      const fallback = markdownRowValue(table, row, ["Fallback", "Alternative"]);
+      const impact = markdownRowValue(table, row, ["User Impact", "Impact", "Generation Impact"]);
+      const proof = markdownRowValue(table, row, ["Required Proof or Follow-up", "Proof", "Follow-up", "Required Proof"]);
+      const missing = [
+        ["reason", reason],
+        ["fallback", fallback],
+        ["impact", impact],
+        ["proof/follow-up", proof],
+      ].filter(([, value]) => !value || /^(?:none|n\/a|not provided|tbd)$/i.test(value)).map(([name]) => name);
+      if (missing.length) findings.push({ line: row.raw, missing });
     }
+    return findings;
+  }
+  for (const line of section.split(/\r?\n/)) {
+    if (isNegativeRequirementStatement(line)) continue;
+    if (!/^\s*[-*]\s+/.test(line) || !/\b(deferred|runtime-proof-required|export-learning-required)\b/i.test(line)) continue;
+    const missing = ["reason", "fallback", "impact", "proof|follow-up"].filter((marker) => !new RegExp(`\\b(?:${marker})\\b\\s*:`, "i").test(line));
+    if (missing.length) findings.push({ line: line.trim(), missing });
   }
   return findings;
+}
+
+function requirementIds(text) {
+  const withoutTemplatePlaceholders = String(text || "").replace(/<[^>]+>/g, " ");
+  return [...new Set(withoutTemplatePlaceholders.match(/\b(?:REQ|FS)-[A-Z0-9][A-Z0-9_-]*\b/gi) || [])].map((id) => id.toUpperCase());
 }
 
 function hasRelevantDeferredCoverage(planText, topicPattern) {
@@ -90,6 +122,8 @@ function hasRelevantDeferredCoverage(planText, topicPattern) {
 }
 
 function addSpecializedTraceabilityFindings(specText, planText, findings, unmappedRequirementCategories, coverage) {
+  specText = positivePlanningText(specText);
+  planText = positivePlanningText(planText);
   const recordDisplayNeed = /\b(card list|cards|board|status board|work board|timeline|history|audit|activity feed|event feed|list view|record display|record list|queue)\b/i;
   const recordDisplayCovered = /\b(Data table|Collection|Kanban|Vertical Timeline|Horizontal Timeline|Vertical timeline|Horizontal timeline)\b/i;
   if (recordDisplayNeed.test(specText) && !recordDisplayCovered.test(planText) && !hasRelevantDeferredCoverage(planText, /\b(record display|card|cards|board|timeline|history|audit|activity|queue|dashboard)\b/i)) {
@@ -166,13 +200,28 @@ function validate(specFile, planFile) {
     }
   }
 
-  for (const line of deferredWithoutReason(planText)) {
+  for (const item of deferredWithoutReason(planSections)) {
     findings.push({
       level: "error",
       code: "TRACEABILITY_DEFERRED_WITHOUT_REASON",
       category: "deferred",
-      message: "Deferred App Plan item lacks nearby reason, fallback, proof impact, or follow-up.",
-      line,
+      message: `Deferred App Plan disposition is missing required contract fields: ${item.missing.join(", ")}.`,
+      line: item.line,
+      missing: item.missing,
+    });
+  }
+
+  const specRequirementIds = requirementIds(specText);
+  const planRequirementIds = new Set(requirementIds(planText));
+  for (const requirementId of specRequirementIds) {
+    if (planRequirementIds.has(requirementId)) continue;
+    unmappedRequirementCategories.push(`requirement:${requirementId}`);
+    findings.push({
+      level: "error",
+      code: "TRACEABILITY_REQUIREMENT_ID_UNMAPPED",
+      category: "requirementId",
+      requirementId,
+      message: `Functional Specification requirement ${requirementId} is not mapped by ID in the App Plan.`,
     });
   }
 

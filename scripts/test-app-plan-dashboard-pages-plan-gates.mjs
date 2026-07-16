@@ -151,9 +151,11 @@ Active Requests view with Title, Status, Priority, Due Date display fields.
 ${dashboardPlan}
 
 ## 15. Application Navigation Plan
+Application layout template: \`application-layout-sidebar-workspace-1\`
+
 | Navigation Order | Group | Item | Yeeflow Resource Type | Target Resource | Visible | Icon | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Operations | Facility Operations Dashboard | Dashboard | Facility Operations Dashboard | Yes | dashboard | Main dashboard |
+| 1 | Operations | Facility Operations Dashboard | Dashboard | Facility Operations Dashboard | Yes | fa-solid fa-chart-line | Main dashboard |
 
 ## 16. Target Users, Roles, Groups, and Permissions
 | Role | Resource/Page/Form | View | Create | Edit | Approve |
