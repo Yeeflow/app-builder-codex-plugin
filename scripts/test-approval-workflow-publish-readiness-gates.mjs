@@ -65,12 +65,21 @@ try {
   assert.equal(variableIds.has("queriedTitle"), true, "single QueryData target variable is declared");
   assert.equal(variableIds.has("travelRows"), true, "List QueryData result variable is declared");
   assert.equal(materializedDef.variables.listref.some((listref) => listref.id === "TravelRows" && listref.fields.some((field) => field.id === "rowTitle")), true, "List QueryData creates the planned Complex Type/ListRef fields");
+  assert.equal(materializedDef.variables.listref.some((listref) => listref.id === "travelRowsListRef"), false, "Set Data List projection must reuse the Query Data ListRef instead of creating a duplicate");
   assert.equal(String(contentListNode.properties.listid), travelRecordsListId, "ContentList target listid resolves to the planned child data list");
   assert.notEqual(String(contentListNode.properties.listid), rootListSetId, "ContentList target listid must not use the root application ListSet");
   assert.equal(contentListNode.properties.listtype, "select", "ContentList uses select application mode instead of current/Uncategorized");
   assert.equal(String(contentListNode.properties.listsetid), rootListSetId, "ContentList listsetid resolves to the current application ListSet");
   assert.equal(contentListNode.properties.appid, 41, "ContentList appid resolves to the current Yeeflow application context");
   assert.equal(contentListNode.properties.listdatas[0].Data[0].key, "_list.rowTitle", "Approval workflow bulk mapping preserves the List-variable child field key");
+  assert.deepEqual(contentListNode.properties.listdatas[0].Data[0], {
+    exprType: "variable",
+    valueType: "text",
+    id: "travelRows",
+    key: "_list.rowTitle",
+    type: "expr",
+    name: "Workflow Variables:Travel rows:Title",
+  }, "Approval workflow decoded ContentList preserves the canonical List child expression");
   cases.push({ case: "pass: App Plan workflow nodes and ContentList target selection materialize into DefResource graph", status: "pass" });
 
   expectCode("planned workflow node parity fails when a planned task is missing", mutateResource(materializedDef, (def) => {

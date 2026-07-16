@@ -43,7 +43,34 @@ try {
   assert.equal(selectedMutation.properties.listtype, "select");
   assert.equal(selectedMutation.properties.appid, 41);
   assert.equal(selectedMutation.properties.listsetid, decoded.ListSet.ListID);
-  assert.equal(selectedMutation.properties.listdatas.find((entry) => entry.Columns === "Text3").Data[0].key, "_list.LeaveType");
+  const leaveTypeSource = selectedMutation.properties.listdatas.find((entry) => entry.Columns === "Text3").Data[0];
+  const hoursSource = selectedMutation.properties.listdatas.find((entry) => entry.Columns === "Decimal5").Data[0];
+  assert.deepEqual(leaveTypeSource, {
+    exprType: "variable",
+    valueType: "string",
+    id: "LeaveRequestDetails",
+    key: "_list.LeaveType",
+    type: "expr",
+    name: "Workflow Variables:Leave request details:Leave Type",
+  });
+  assert.deepEqual(hoursSource, {
+    exprType: "variable",
+    valueType: "number",
+    id: "LeaveRequestDetails",
+    key: "_list.Hours",
+    type: "expr",
+    name: "Workflow Variables:Leave request details:Hours",
+  });
+  const applicantVariable = scheduledDef.variables.basic.find((variable) => variable.id === "Applicant");
+  const leaveDetailsVariable = scheduledDef.variables.basic.find((variable) => variable.id === "LeaveRequestDetails");
+  const leaveDetailsListRef = scheduledDef.variables.listref.find((variable) => variable.id === "LeaveRequestDetailsListRef");
+  assert.equal(applicantVariable.type, "user");
+  assert.equal(leaveDetailsVariable.type, "list");
+  assert.equal(leaveDetailsVariable.value, "LeaveRequestDetailsListRef");
+  assert.deepEqual(leaveDetailsListRef.fields, [
+    { id: "LeaveType", idx: "LeaveType", name: "Leave Type", type: "text", editable: true },
+    { id: "Hours", idx: "Hours", name: "Hours", type: "number", editable: true },
+  ]);
   const loop = documentLoopDef.childshapes.find((shape) => shape?.stencil?.id === "Loop");
   const loopBody = documentLoopDef.childshapes.find((shape) => shape?.stencil?.id === "LoopBody");
   assert.ok(loop);
@@ -72,7 +99,7 @@ try {
   const preflightReport = JSON.parse(preflight.stdout);
   assert.equal(preflightReport.gates.find((gate) => gate.gate === "generated-yapk-export-shape-materialization")?.ok, true);
   assert.equal(preflightReport.gates.find((gate) => gate.gate === "approval-workflow-publish-readiness")?.ok, true);
-  console.log("workflow Set Data List materialization gates: pass (Type 1 + Type 3 + FlowMappings + LoopBody)");
+  console.log("workflow Set Data List materialization gates: pass (Markdown projection + Type 1/3 + list variable child expressions + decoded ContentList)");
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

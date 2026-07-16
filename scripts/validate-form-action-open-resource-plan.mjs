@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
 
 if (isMainModule()) {
   const file = process.argv[process.argv.indexOf("--plan") + 1];
@@ -20,7 +21,7 @@ export function validateFormActionOpenResourcePlan(text) {
 
 export function extractFormActionOpenResourcePlanRows(text) {
   const rows = [];
-  const lines = String(text || "").split(/\r?\n/);
+  const lines = stripMarkdownFencedBlocks(text).split(/\r?\n/);
   for (let i = 0; i < lines.length - 2; i += 1) {
     if (!isTable(lines[i]) || !isTable(lines[i + 1]) || !/^\s*\|?\s*:?-+/.test(lines[i + 1])) continue;
     const headers = split(lines[i]);
@@ -85,7 +86,7 @@ function value(row, name) { const key = Object.keys(row).find((item) => norm(ite
 function norm(valueText) { return String(valueText || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 function none(valueText) { return !String(valueText || "").trim() || /^(none|n\/a|not applicable)$/i.test(String(valueText).trim()) || /^<.*>$/.test(String(valueText).trim()); }
 function isTable(line) { return /^\s*\|.*\|\s*$/.test(line || ""); }
-function split(line) { return String(line).trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim()); }
+function split(line) { return splitMarkdownTableRow(line); }
 function add(findings, severity, code, message, path) { findings.push({ severity, code, message, path }); }
 function usage() { console.error("Usage: node scripts/validate-form-action-open-resource-plan.mjs --plan <app-plan.md>"); process.exit(1); }
 function isMainModule() { return import.meta.url === pathToFileURL(process.argv[1]).href; }

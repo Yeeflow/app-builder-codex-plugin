@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
 
 if (isMainModule()) {
   const plan = argument("--plan") || process.argv.slice(2).find((item) => item !== "--json");
@@ -24,7 +25,7 @@ export function validateWorkflowLoopPlan(markdown) {
 
 export function extractWorkflowLoopPlanRows(markdown) {
   const rows = [];
-  const lines = String(markdown || "").split(/\r?\n/);
+  const lines = stripMarkdownFencedBlocks(markdown).split(/\r?\n/);
   for (let index = 0; index < lines.length - 1; index += 1) {
     if (!isTableLine(lines[index]) || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitRow(lines[index]);
@@ -101,7 +102,7 @@ function isTableLine(line) {
 }
 
 function splitRow(line) {
-  return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+  return splitMarkdownTableRow(line);
 }
 
 function argument(name) {

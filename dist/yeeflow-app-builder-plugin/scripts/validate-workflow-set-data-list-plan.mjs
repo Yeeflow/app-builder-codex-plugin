@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
 
 const HOSTS = new Set(["approval form", "data list", "scheduled"]);
 const OPERATIONS = new Set(["add", "edit", "remove"]);
@@ -30,7 +31,7 @@ export function validateWorkflowSetDataListPlan(markdown) {
 
 export function extractWorkflowSetDataListPlanRows(markdown) {
   const rows = [];
-  const lines = String(markdown || "").split(/\r?\n/);
+  const lines = stripMarkdownFencedBlocks(markdown).split(/\r?\n/);
   for (let index = 0; index < lines.length - 1; index += 1) {
     if (!isTableLine(lines[index]) || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitRow(lines[index]);
@@ -213,7 +214,7 @@ function value(row, name) { const key = Object.keys(row).find((candidate) => nor
 function normalize(value) { return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 function isNone(value) { return !String(value || "").trim() || /^(none|n\/a|not applicable|无|不适用)$/i.test(String(value).trim()); }
 function isTableLine(line) { return /^\s*\|.*\|\s*$/.test(String(line || "")); }
-function splitRow(line) { return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim()); }
+function splitRow(line) { return splitMarkdownTableRow(line); }
 function argument(name) { const index = process.argv.indexOf(name); return index === -1 ? "" : process.argv[index + 1] || ""; }
 function usage(exitCode) { console.error("Usage: node scripts/validate-workflow-set-data-list-plan.mjs --plan <yeeflow-app-plan.md>"); process.exit(exitCode); }
 function isMainModule() { return import.meta.url === pathToFileURL(process.argv[1]).href; }
