@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const json = (path) => JSON.parse(readFileSync(resolve(root, path), "utf8"));
+const state = json("docs/architecture/yeeflow-app-builder-core-migration-state.json");
+const coreReadiness = json("compatibility/capability-manifests/data-list-sublist-embedded-schema-core-public-api-readiness.v0.1.0.json");
+const integrationReadiness = json("compatibility/capability-manifests/data-list-sublist-frozen-descriptor-production-integration-readiness.v0.1.0.json");
+const acceptedPhases = [coreReadiness.phase, "phase-9n-selective-data-list-embedded-sublist-frozen-descriptor-production-host-context-routing-proof", "phase-9o-export-proven-data-list-embedded-sublist-descriptor-family-closure-audit", "phase-8f-data-list-sublist-family-reconciliation-and-closure-audit", "phase-10a-data-list-sublist-summary-temporary-variable-contract-audit", "phase-10b-data-list-sublist-scalar-summary-intent-internal-shadow", "phase-10c-data-list-sublist-scalar-summary-intent-dual-public-distribution-readiness-audit", "phase-10d-data-list-sublist-scalar-summary-intent-dual-public-distribution-promotion", "phase-10e-data-list-sublist-scalar-summary-intent-selective-routing-proof", "phase-10f-data-list-sublist-summary-family-closure-audit", "phase-11a-data-list-sublist-summary-runtime-temporary-variable-lifecycle-and-scope-contract-audit", "phase-11b-sublist-summary-runtime-temporary-variable-scope-evidence-audit", "phase-11c-sublist-summary-scoped-dynamic-intent-internal-shadow", "phase-11d-sublist-summary-dynamic-intent-dual-public-distribution-readiness", "phase-11e-sublist-summary-dynamic-intent-dual-public-distribution-promotion"];
+const phase11bBlocked = state.migration?.currentPhase === "phase-11b-sublist-summary-runtime-temporary-variable-scope-evidence-audit" && state.migration?.currentPhaseStatus === "blocked" && state.migration?.overallStatus === "blocked" && state.migration?.nextPhase === "" && state.proofStatus?.dataListSublistSummaryTempVariableScopeEvidence === "blocked_missing_external_product_runtime_scope_evidence";
+const phase11bExportAccepted = state.migration?.currentPhase === "phase-11b-sublist-summary-runtime-temporary-variable-scope-evidence-audit" && state.migration?.currentPhaseStatus === "complete" && state.migration?.overallStatus === "in_progress" && state.migration?.nextPhase === "phase-11c-sublist-summary-scoped-dynamic-intent-internal-shadow" && state.proofStatus?.dataListSublistSummaryTempVariableScopeEvidence === "accepted_export_proven_nonserialized_host_context";
+if (coreReadiness.prospectiveApi?.name !== "projectDataListEmbeddedSublistDescriptor" || coreReadiness.publicExportAdded || coreReadiness.artifactChanged || coreReadiness.distributionChanged || !coreReadiness.excludes.includes("WeakMap") || !coreReadiness.excludes.includes("id/idx as identity") || integrationReadiness.publicDistribution !== "Phase 9M only after separate authorization" || integrationReadiness.productionRouting !== "Phase 9N only after 9M proof and separate authorization" || integrationReadiness.childIdentityPrerequisite !== "superseded" || !(acceptedPhases.includes(state.migration?.currentPhase) || phase11bBlocked || phase11bExportAccepted)) throw new Error("SUBLIST_EMBEDDED_SCHEMA_PUBLIC_CONTRACT_INVALID");
+console.log("SUBLIST_EMBEDDED_SCHEMA_CORE_PUBLIC_API_READINESS_ACCEPTED");
+console.log("SUBLIST_FROZEN_DESCRIPTOR_PRODUCTION_INTEGRATION_READINESS_ACCEPTED");
+console.log("SUBLIST_EMBEDDED_SCHEMA_PUBLIC_CONTRACT_AND_ROUTING_READINESS_VALID");

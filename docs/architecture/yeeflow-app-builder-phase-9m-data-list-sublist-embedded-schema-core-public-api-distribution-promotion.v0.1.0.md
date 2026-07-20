@@ -1,0 +1,1 @@
+"# Phase 9M Embedded Sublist Descriptor Core Public API Distribution Promotion\n\nThe only added Materializer Core export is `projectDataListEmbeddedSublistDescriptor`. It returns frozen JSON-safe descriptor data and never exposes Plugin-local host context. No adapter or production route changed.\n"

@@ -9,7 +9,7 @@ Current install identity:
 - Version: `0.9.71`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.71` hardens shared Markdown planning parsing and completes Workflow List-variable child projection into generated ContentList workflows.
+Current release `1.0.0` delivers Core v1 and the OAuth browser-login repair.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 

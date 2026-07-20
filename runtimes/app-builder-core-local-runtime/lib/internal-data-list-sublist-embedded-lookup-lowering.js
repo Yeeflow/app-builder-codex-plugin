@@ -1,0 +1,6 @@
+export function lowerDataListSublistEmbeddedLookupIntentAtHost(intent, binding) { if (!intent || !Object.isFrozen(intent) || !embeddedLookupHostText(binding?.controlId) || !embeddedLookupHostText(binding?.parentBinding) || !embeddedLookupHostText(binding?.parentControlId))
+    throw Error("SUBLIST_EMBEDDED_LOOKUP_HOST_BINDING_INVALID"); const c = intent.column, t = intent.target; if (!embeddedLookupHostText(c?.id) || !embeddedLookupHostText(c.idx) || !embeddedLookupHostText(c.name) || c.type !== "lookup" || !embeddedLookupHostId(t?.listId) || !embeddedLookupHostId(t?.listSetId) || t.valueField !== c.id)
+    throw Error("SUBLIST_EMBEDDED_LOOKUP_LOWERING_INVALID"); return Object.freeze({ idx: c.idx, id: c.id, name: c.name, type: "lookup", editable: c.editable, control: Object.freeze({ id: binding.controlId, label: c.name, binding: t.valueField, displayLabel: [null, true], type: "lookup", attrs: Object.freeze({ list_field: true, list_field_binding: binding.parentBinding, list_control_id: binding.parentControlId, listid: t.listId, appid: 41, listsetid: t.listSetId, listfield: t.displayField }) }) }); }
+const embeddedLookupHostId = (v) => typeof v === "string" && /^\d{19}$/.test(v);
+const embeddedLookupHostText = (v) => typeof v === "string" && v.length > 0;
+//# sourceMappingURL=internal-data-list-sublist-embedded-lookup-lowering.js.map

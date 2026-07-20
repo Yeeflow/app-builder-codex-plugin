@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import setVariableUtils from "./lib/set-variable-contract-utils.cjs";
 import workflowValidator from "../workflow-action-config-validator.js";
 import { buildPlannedWorkflowSetVariableAssignments, materializePlannedFormActionSetVariables } from "./materialize-full-app-generated-final.mjs";
@@ -154,7 +155,7 @@ try {
 | Travel Allowance Policies | Travel Allowance Policies New/Edit Form | Data List Form | Set meal allowance | 1 | Set domestic allowance | Field Change | Text1 | Current list field | Decimal1 | number | [{"type":"num","value":"1200"}] | [{"exprType":"list_field","id":"Text1","type":"expr"}] | true | None | Persisted allowance field | validator-backed |
 `);
   const outputDir = path.join(integrationDir, "out");
-  const run = spawnSync(process.execPath, [new URL("./materialize-full-app-generated-final.mjs", import.meta.url).pathname, "--functional-spec", specPath, "--app-plan", planPath, "--out-dir", outputDir, "--allow-fixture-api-ids-for-tests", "--json"], { encoding: "utf8" });
+  const run = spawnSync(process.execPath, [fileURLToPath(new URL("./materialize-full-app-generated-final.mjs", import.meta.url)), "--functional-spec", specPath, "--app-plan", planPath, "--out-dir", outputDir, "--allow-fixture-api-ids-for-tests", "--json"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr || run.stdout);
   const report = JSON.parse(run.stdout);
   const decoded = JSON.parse(fs.readFileSync(report.outputs.decodedResource, "utf8"));

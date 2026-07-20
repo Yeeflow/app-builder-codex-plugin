@@ -16,7 +16,7 @@ Do not commit `.env.local`. Do not paste Yeeflow passwords, OAuth tokens, auth c
 
 ## Normal Plugin Login Flow
 
-For normal user-facing API requests, do not tell users to run local Node OAuth scripts. If OAuth is missing or expired, say: `Please sign in to Yeeflow using the plugin login flow so I can continue this operation.` Preserve the original operation. If the current runtime cannot start the plugin login action, say: `I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`
+For normal user-facing API requests, do not tell users to run local Node OAuth scripts. This Plugin has no registered user-facing browser-login action yet. If OAuth is missing or expired, preserve the original operation and say: `I need Yeeflow login before I can continue, but a supported plugin login action is not available in this runtime.`
 
 Preserve the original requested API action, such as `positions.list`, so the user can retry after login completes.
 
@@ -56,14 +56,14 @@ https://127.0.0.1:53724/callback
 
 The login helper picks the first available port. It does not fall back to HTTP.
 
-By default it expects local development certificate files at:
+By default the plugin creates a short-lived local development certificate and private key at:
 
 ```text
-.yeeflow-oauth/localhost-cert.pem
-.yeeflow-oauth/localhost-key.pem
+~/.yeeflow/oauth-callback/localhost-cert.pem
+~/.yeeflow/oauth-callback/localhost-key.pem
 ```
 
-These paths are ignored by Git. You may instead set `YEEFLOW_OAUTH_CALLBACK_CERT_FILE` and `YEEFLOW_OAUTH_CALLBACK_KEY_FILE` to certificate and key files outside the repository. Do not commit certificate private keys.
+These user-local files are outside the Plugin archive and Git worktree. The private key is owner-readable only where supported. You may instead set `YEEFLOW_OAUTH_CALLBACK_CERT_FILE` and `YEEFLOW_OAUTH_CALLBACK_KEY_FILE` to another user-local pair. Do not commit certificate private keys.
 
 ## Token Storage
 

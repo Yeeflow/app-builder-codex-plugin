@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-core-adapter.mjs";
 
 if (isMainModule()) {
   const file = process.argv[process.argv.indexOf("--plan") + 1];

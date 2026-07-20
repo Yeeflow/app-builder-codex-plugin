@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-core-adapter.mjs";
 
 const MODES = new Set([
   "single_to_variables",
@@ -87,9 +87,9 @@ function validateRow(row, index, findings, markdown) {
   } else if (mode === "multiple_to_list_sublist") {
     requireDataListHost(host, findings, path, mode);
     requireTarget(resultType, result, mapping, /current.*sub\s*list|record.*sub\s*list|data\s*list.*sub\s*list/i, findings, path);
-    if (/read[ -]?only|display only|view only|仅展示|只读/i.test(notes)) {
+    if (/read[ -]?only|display only|view only|\u4ec5\u5c55\u793a|\u53ea\u8bfb/i.test(notes)) {
       add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_READONLY_SUBLIST_MISUSE", "Read-only reverse-related display should use Collection or Data Table instead of Query Data into Sub list", path);
-    } else if (!/edit|update|working copy|line item|quotation|quote|quantity|description|编辑|更新|报价|明细/i.test(notes)) {
+    } else if (!/edit|update|working copy|line item|quotation|quote|quantity|description|\u7f16\u8f91|\u66f4\u65b0|\u62a5\u4ef7|\u660e\u7ec6/i.test(notes)) {
       add(findings, "warning", "FORM_ACTION_QUERYDATA_PLAN_SUBLIST_WORKING_COPY_RATIONALE_REQUIRED", "Explain why queried rows must become an editable Sub list working copy instead of a Collection/Data Table", path);
     }
   } else if (mode === "multiple_to_temp_collection") {
@@ -228,7 +228,7 @@ function normalize(value) {
 }
 
 function isNone(value) {
-  return !String(value || "").trim() || /^(none|n\/a|not applicable|无|不适用)$/i.test(String(value).trim());
+  return !String(value || "").trim() || /^(none|n\/a|not applicable|\u65e0|\u4e0d\u9002\u7528)$/i.test(String(value).trim());
 }
 
 function isEmpty(value) {

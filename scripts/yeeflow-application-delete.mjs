@@ -56,7 +56,7 @@ try {
   if (!args.expectedTitle) throw new Error("--expected-title is required with --execute.");
   assertApplicationDeleteConfirmation({ expectedTitle: args.expectedTitle, confirmation: args.confirmDelete });
 
-  const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local" });
+  const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local", onDemandLogin: true, oauthOnly: true });
   if (auth.mode !== "oauth") {
     console.log(JSON.stringify(buildLoginRequiredResult({
       auth,

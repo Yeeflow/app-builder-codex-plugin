@@ -7,7 +7,7 @@ const execute = args.has("--execute");
 const endpoint = valueAfter("--endpoint", "/locations");
 
 try {
-  const auth = await resolveYeeflowApiAuth({ dotenv: valueAfter("--dotenv", ".env.local") });
+  const auth = await resolveYeeflowApiAuth({ dotenv: valueAfter("--dotenv", ".env.local"), onDemandLogin: true, oauthOnly: true });
   if (auth.mode !== "oauth") {
     console.log(JSON.stringify(buildLoginRequiredResult({
       auth,

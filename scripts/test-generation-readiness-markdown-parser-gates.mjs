@@ -27,7 +27,7 @@ try {
     const source = fs.readFileSync(path.join(root, "scripts", script), "utf8");
     assert.equal(source.includes('split("|")'), false, `${script} must not use raw split(\"|\")`);
     assert.equal(source.includes("split('|')"), false, `${script} must not use raw split('|')`);
-    assert.match(source, /markdown-planning-utils\.mjs/, `${script} must use the shared Markdown planning parser`);
+    assert.match(source, /markdown-planning-(?:utils|core-adapter)\.mjs/, `${script} must use the shared Markdown planning parser`);
   }
 
   assert.deepEqual(

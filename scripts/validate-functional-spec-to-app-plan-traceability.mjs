@@ -7,7 +7,7 @@ import {
   isNegativeRequirementStatement,
   markdownRowValue,
   positivePlanningText,
-} from "./lib/markdown-planning-utils.mjs";
+} from "./lib/markdown-planning-core-adapter.mjs";
 
 const CATEGORIES = [
   { key: "businessObjects", spec: "Business Objects and Data Requirements", plan: ["Requirement-to-Yeeflow Resource Mapping Summary", "Data Lists and Document Libraries Plan", "Deferred or Runtime-Proof Items"], code: "TRACEABILITY_BUSINESS_OBJECT_UNMAPPED", coverage: /data list|document library|master|transaction|reference|deferred|not applicable|N\/A/i },

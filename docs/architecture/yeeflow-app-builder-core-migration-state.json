@@ -1,0 +1,1753 @@
+{
+  "schemaVersion": "1.0.0",
+  "architectureName": "Yeeflow App Builder Core",
+  "lastUpdated": "2026-07-20",
+  "authority": {
+    "handoffDocument": "docs/architecture/yeeflow-app-builder-core-handoff.md",
+    "referenceConversation": "https://chatgpt.com/share/6a5a1125-f6c4-83ec-8fba-4caeb6c2290b",
+    "ignoreExternalIncubationSource": "/Users/rengerhu/Documents/Yeeflow AI App Builder"
+  },
+  "repository": {
+    "root": "/Users/rengerhu/Documents/App Builder Codex Plugin 2",
+    "remote": "https://github.com/Yeeflow/app-builder-codex-plugin.git",
+    "baselineCommit": "fcc8b8e16b784f1032759ee1b6b588a144497feb",
+    "baselineTag": "yeeflow-app-builder-plugin-v0.9.71",
+    "baselinePluginVersion": "0.9.71",
+    "installedPluginVersionObserved": "0.9.71",
+    "baselineVerifiedAt": "2026-07-17"
+  },
+  "migration": {
+    "currentPhase": "core-v1-release-candidate-integration-and-application-e2e-readiness",
+    "overallStatus": "core_v1_rc_readiness_accepted",
+    "currentPhaseStatus": "complete",
+    "nextPhase": "core-v1-rc-candidate-build-and-isolated-e2e-validation",
+    "selectedFirstVerticalSlice": {
+      "sourcePath": "scripts/lib/markdown-planning-utils.mjs",
+      "targetPackage": "@yeeflow/app-builder-core-planning",
+      "status": "shadow_implementation_and_parity_passed",
+      "rationale": "Deterministic Markdown planning parsing has stable exported functions, existing fixtures and consumers, no host side effects, a clear Legacy entry point, and no materializer dependency."
+    },
+    "implementationStarted": true,
+    "localRuntimeOnlyUntilParityClosure": true,
+    "independentRepositoryDeferred": true,
+    "serviceRuntimeDeferred": true
+  },
+  "languagePolicy": {
+    "conversationLanguages": [
+      "Chinese",
+      "English"
+    ],
+    "repositoryContentLanguage": "English",
+    "generatedArtifactLanguage": "English",
+    "appliesTo": [
+      "file and directory names",
+      "source code and comments",
+      "documentation",
+      "configuration and metadata",
+      "skills and agent instructions",
+      "tests, fixtures, snapshots, and reports",
+      "CLI output, logs, findings, and error messages",
+      "Golden Reference templates and normalized assets",
+      "generated Yeeflow resources and package metadata",
+      "commit, pull-request, and release content"
+    ],
+    "changedFileGateRequired": true,
+    "broadAllowlistProhibited": true,
+    "status": "implemented_and_verified"
+  },
+  "completed": [
+    {
+      "id": "architecture-handoff",
+      "status": "complete",
+      "evidence": "docs/architecture/yeeflow-app-builder-core-handoff.md"
+    },
+    {
+      "id": "source-baseline-identification",
+      "status": "complete",
+      "evidence": "Git HEAD fcc8b8e16b784f1032759ee1b6b588a144497feb and tag yeeflow-app-builder-plugin-v0.9.71"
+    },
+    {
+      "id": "reconfirm-runtime-baseline",
+      "status": "complete",
+      "evidence": "2026-07-17: HEAD fcc8b8e16b784f1032759ee1b6b588a144497feb, tag yeeflow-app-builder-plugin-v0.9.71, README and CHANGELOG source release 0.9.71, dist metadata 0.9.71, and enabled installed yeeflow-app-builder@yeeflow 0.9.71. The dist and installed plugin metadata SHA-256 values match."
+    },
+    {
+      "id": "capture-worktree-protection-baseline",
+      "status": "complete",
+      "evidence": "2026-07-17: preserved pre-existing .gitignore modification, docs/architecture untracked directory, and dist/yeeflow-app-builder-plugin/docs/studies/normalized/workflow-expressions/scheduled-workflow-expression-context.normalized 2.json. No protected duplicate was deleted, staged, renamed, or classified."
+    },
+    {
+      "id": "create-capability-classification-manifest",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/yeeflow-app-builder-capability-classification.v0.9.71.json contains 3669 records; scripts/validate-capability-classification-manifest.mjs passed with CAPABILITY_MANIFEST_VALID."
+    },
+    {
+      "id": "add-english-only-gate",
+      "status": "complete",
+      "evidence": "scripts/validate-english-only-content.mjs verifies migration-owned changed files by default and supports explicit paths, Git changed files, generated artifact directories, and narrow reviewed allowlists. scripts/test-english-only-content-gate.mjs passed the required positive and negative regressions."
+    },
+    {
+      "id": "create-source-dist-topology-contract",
+      "status": "complete",
+      "evidence": "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json records every source and dist script relationship with SHA-256 behavior, rationale, owner, and verification status. scripts/validate-source-dist-topology.mjs passed with zero unknown relationships."
+    },
+    {
+      "id": "harden-capability-manifest-validator",
+      "status": "complete",
+      "evidence": "Capability manifest validation now rejects Core host side effects, generated-distribution paths outside dist, compatibility shims without adapter ownership, mixed records without side effects and a Core split target, and targets outside the approved package registry."
+    },
+    {
+      "id": "phase-0-closure",
+      "status": "complete",
+      "evidence": "Phase 0 closure verified on 2026-07-17: English-only gate, capability classification, source/dist topology, semantic classification, and protected duplicate exclusions all passed with no unknown findings."
+    },
+    {
+      "id": "create-workspace-skeleton",
+      "status": "complete",
+      "evidence": "2026-07-17: pnpm 11.9.0 was verified and pinned. pnpm install completed with TypeScript 5.7.3. The private workspace contains 10 Core packages, one Local Runtime package, and one Codex Plugin Adapter package. pnpm run typecheck, pnpm run test, and pnpm run validate:package-boundaries all passed."
+    },
+    {
+      "id": "add-dependency-boundary-gates",
+      "status": "complete",
+      "evidence": "scripts/validate-dependency-boundaries.mjs uses the TypeScript compiler API to inspect static imports, export-from declarations, dynamic imports, require calls, type-only imports, relative imports, workspace imports, external imports, and Node.js built-ins across all workspace source files. pnpm run validate:dependency-boundaries and pnpm run test:dependency-boundaries passed."
+    },
+    {
+      "id": "phase-1-closure",
+      "status": "complete",
+      "evidence": "Phase 1 closure verified on 2026-07-17: private pnpm workspace, TypeScript project references, version and capability metadata skeletons, allowed package dependency graph, workspace structural checks, and dependency-boundary hard gate passed without changing Legacy Plugin behavior or dist."
+    },
+    {
+      "id": "phase-2-mixed-file-decomposition-audit",
+      "status": "complete",
+      "evidence": "Phase 2 closure verified on 2026-07-17: compatibility/capability-manifests/yeeflow-app-builder-mixed-file-decomposition.v0.9.71.json audited 437 classified source records using TypeScript AST structure and local importer tracing. The ledger validator and 12 positive and negative regression cases passed. No Legacy implementation or dist file was migrated or changed."
+    },
+    {
+      "id": "phase-3a-markdown-planning-core-shadow",
+      "status": "complete",
+      "evidence": "2026-07-17: packages/app-builder-core-planning/src/markdown-planning-utils.ts implements the complete Legacy public API without host dependencies. compatibility/differential-fixtures/markdown-planning-utils.v0.9.71.json exercised 8 versioned fixtures and 36 calls against both implementations with exact normalized parity. Legacy callers and dist remained unchanged."
+    },
+    {
+      "id": "phase-3a5-architecture-convergence",
+      "status": "complete",
+      "evidence": "2026-07-17: the v0.1.0 architecture convergence contract accepted a 17-package graph, added schemas, identity, builder, runtime-verification, and test-fixtures skeletons, and passed architecture convergence validation without copying Shared Core implementation or changing Legacy behavior."
+    },
+    {
+      "id": "phase-3b1-core-distribution-resolution-proof",
+      "status": "complete",
+      "evidence": "CORE_DISTRIBUTION_VALID, gate regressions, deterministic dual-build, source/archive/installed all-export verification with 11 exports each, temporary official-layout ZIP extraction, and hidden-core Legacy rollback passed. Historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-3b2-approved-initial-caller-wave",
+      "status": "complete",
+      "evidence": "2026-07-17: scripts/lib/markdown-planning-core-adapter.mjs resolved only the distributed Core planning artifact and provided all 11 parity-proven Markdown planning exports. The seven approved non-materializer validators switched without Legacy fallback. CORE_COMPAT_ADAPTER_PARITY_PASSED covered 8 fixtures and 36 calls; source, temporary official ZIP, and simulated installed Plugin resolution passed; explicit missing-artifact, missing-export, and forbidden-resolution gates passed; selected caller gates passed. Historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-3b2-print-barcode-plan-validator-wave",
+      "status": "complete",
+      "evidence": "2026-07-18: scripts/validate-form-action-print-barcode-plan.mjs switched only its parity-proven parseMarkdownTables dependency to scripts/lib/markdown-planning-core-adapter.mjs. The versioned valid and invalid Print Page and Barcode Scan corpus ran 2 fixtures and 6 Legacy/Core/adapter CLI calls with identical exit statuses, validation codes, normalized output, and stderr behavior. The existing 16-case validator regression and source, temporary official ZIP, and simulated installed Plugin proofs passed. Historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-3b2-approval-layout-template-validator-wave",
+      "status": "complete",
+      "evidence": "2026-07-18: scripts/validate-approval-form-layout-template.mjs switched only its parity-proven extractMarkdownSubsection, findMarkdownTable, and markdownRowValue dependencies to scripts/lib/markdown-planning-core-adapter.mjs. The versioned Approval Form Layout Template corpus ran 6 fixtures and 18 Legacy/Core/adapter CLI calls with identical exit statuses, validation codes, normalized output, and stderr behavior. It covers Submission descriptions containing later task processing, escaped pipes, fenced table-like text, missing template selection, role/template mismatches, and malformed tables. Existing layout-template and parsing-hardening regressions plus source, temporary official ZIP, and simulated installed Plugin proofs passed. Historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-3b2-functional-spec-traceability-validator-wave",
+      "status": "complete",
+      "evidence": "2026-07-18: scripts/validate-functional-spec-to-app-plan-traceability.mjs switched only its parity-proven findMarkdownTable, isNegativeRequirementStatement, markdownRowValue, and positivePlanningText dependencies to scripts/lib/markdown-planning-core-adapter.mjs. The versioned Traceability corpus ran 5 fixtures and 15 Legacy/Core/adapter CLI calls with identical exit statuses, validation codes, normalized output, and stderr behavior. It covers exact requirement-ID mapping, generic wording without an ID, complete and incomplete structured deferred dispositions, ordinary deferred prose, escaped pipes, fenced table-like content, and positive and negative requirement statements. Existing traceability, control-action, and parsing-hardening regressions plus source, temporary official ZIP, and simulated installed Plugin proofs passed. Historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-3b2-resource-order-validator-wave",
+      "status": "complete",
+      "evidence": "2026-07-18: scripts/validate-app-plan-resource-order.mjs switched only its parity-proven extractMarkdownSubsection, findMarkdownTable, hasTechnicalPlaceholderIdContext, markdownRowValue, parseMarkdownTables, and positivePlanningText dependencies to scripts/lib/markdown-planning-core-adapter.mjs. The versioned Resource Order corpus ran 7 fixtures and 21 Legacy/Core/adapter CLI calls with identical exit statuses, validation codes, normalized output, and stderr behavior. It covers resource ordering, required dashboard table shapes and planning subsections, application layout-template selection, ordinary Page-level/Form-level prose, escaped pipes, fenced table-like content, not-applicable planning text, and synthetic technical placeholder IDs. Existing Resource Order and parsing-hardening regressions plus source, temporary official ZIP, and simulated installed Plugin proofs passed. Historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-3b2-generation-readiness-review-validator-wave",
+      "status": "complete",
+      "evidence": "2026-07-18: scripts/validate-generation-readiness-review.mjs switched only its parity-proven findMarkdownTable, markdownRowValue, positivePlanningText, splitMarkdownTableRow, and stripMarkdownFencedBlocks dependencies to scripts/lib/markdown-planning-core-adapter.mjs. The versioned Generation Readiness corpus ran 7 fixtures and 21 Legacy/Core/adapter CLI calls with identical exit statuses, validation codes, normalized output, and stderr behavior. It covers valid readiness, missing planning areas, complete and incomplete runtime-proof rows, ordinary deferred prose, escaped pipes, fenced table-like content, and positive and not-applicable planning statements. Existing Generation Readiness and parsing-hardening regressions plus source, temporary official ZIP, and simulated installed Plugin proofs passed. Historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-3b2-selective-core-compatibility-cutover",
+      "status": "complete",
+      "evidence": "2026-07-18: all approved production non-materializer Markdown planning consumers now resolve through scripts/lib/markdown-planning-core-adapter.mjs with focused Legacy/Core/adapter parity and source/archive/installed distribution proof. The only remaining production Legacy parser caller is scripts/materialize-full-app-generated-final.mjs. Generated-final target and projection completeness validation remains intentionally owned by generated-final/package validation and was not moved or changed in this caller migration phase."
+    },
+    {
+      "id": "phase-4b-materializer-core-distribution-proof",
+      "status": "complete",
+      "evidence": "2026-07-18: @yeeflow/app-builder-core-materializer v0.1.0 public API contract passed with runtime exports capabilityMetadata and normalizeHexColor only. The official Core distribution contract now validates Planning and Materializer self-contained ESM artifacts. The Materializer artifact passed the 13-case normalizeHexColor corpus in repository dist, temporary official-layout ZIP extraction, and simulated complete installed Plugin layouts. Generic multi-artifact negative regressions, deterministic dual-build proof, Planning source/archive/installed all-export proof, Legacy hidden-Core rollback proof, and historical ZIP checksum protection all passed. No Legacy materializer production caller switched."
+    },
+    {
+      "id": "phase-4c-normalize-hex-color-production-routing",
+      "status": "complete",
+      "evidence": "2026-07-18: only the four existing scripts/materialize-full-app-generated-final.mjs normalizeHexColor call expressions now use scripts/lib/materializer-core-adapter.mjs. The adapter resolves only the proven distributed Materializer artifact and its four explicit failure codes passed isolated negative gates. A fixture-mode actual materialization produced equal planned color values, normalized decoded output, and output-file shape for the Legacy baseline, routed source, temporary official ZIP, and simulated installed Plugin. Two routed source runs were deterministically equal after normalizing only the materializer's pre-existing control-style UUID. A temporary rollback copy removed the adapter import, restored the four call expressions to the unchanged Legacy helper, removed the Materializer Core artifact, and matched the baseline. No other materializer behavior was routed."
+    },
+    {
+      "id": "phase-4d-default-value-for-field-type-vertical-slice",
+      "status": "complete",
+      "evidence": "2026-07-18: TypeScript AST re-audit confirmed defaultValueForFieldType at lines 3650-3652 has one buildFieldRecord call site, no direct or transitive helper dependencies, no mutable module state, no host side effects, no random, time, or live-ID behavior, JSON-serializable input and output, and a bounded no-throw contract. The Core public API, self-contained Materializer artifact, adapter, 15-case differential corpus, source/archive/installed actual-materializer integration, deterministic double run, and temporary retained-Legacy rollback all passed. Only the one default-value call expression was routed; the Legacy helper remains intact."
+    },
+    {
+      "id": "phase-4e-escape-regexp-vertical-slice",
+      "status": "complete",
+      "evidence": "2026-07-18: TypeScript AST re-audit confirmed escapeRegExp at lines 748-750 has one production extractNamedSection call site at line 603, no direct or transitive helper dependencies, no mutable module state, no host side effects, no random, time, or live-ID behavior, JSON-serializable input and output, and a bounded no-throw contract. The Core public API, self-contained Materializer artifact, adapter, 13-case differential corpus, source/archive/installed actual-materializer integration, deterministic double run, and temporary retained-Legacy rollback all passed. Only the one escape-regexp call expression was routed; the Legacy helper remains intact."
+    },
+    {
+      "id": "phase-4f-materializer-core-candidate-selection-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: audit-only TypeScript AST selection assessed all 327 remaining deterministic helpers after excluding normalizeHexColor, defaultValueForFieldType, and escapeRegExp. Four independent single-slice candidates were ranked; 323 records were deferred for prohibited capability area, caller fan-out, coupled semantics, or wider public API boundary. normalizeForLooseFormMatch is the sole recommendation. No Core API, adapter, routing, distribution, or materializer behavior changed."
+    },
+    {
+      "id": "phase-4g-normalize-loose-form-match-vertical-slice",
+      "status": "complete",
+      "evidence": "2026-07-18: TypeScript AST re-audit confirmed normalizeForLooseFormMatch at lines 3993-3995 has exactly three reverseRelatedRecordMatchesForm call expressions, no direct or transitive helper dependencies, no mutable module state, no host effects, no random, time, or live-ID behavior, JSON-serializable input and output, and a bounded no-throw contract. The Core public API, self-contained Materializer artifact, adapter, 15-case differential corpus, source/archive/installed actual-materializer integration, deterministic double run, and temporary retained-Legacy rollback all passed. Only the three approved loose-form-match call expressions were routed; the Legacy helper remains intact."
+    },
+    {
+      "id": "phase-4h-strip-planning-document-suffix-vertical-slice",
+      "status": "complete",
+      "evidence": "2026-07-18: TypeScript AST re-audit confirmed stripPlanningDocumentSuffix at lines 10588-10593 has exactly three extractTitle and extractApplicationName call expressions at lines 10572, 10582, and 10584, no direct or transitive helper dependencies, no mutable module state, no host effects, no random, time, or live-ID behavior, JSON-serializable input and output, and a bounded no-throw contract. The Core public API, self-contained Materializer artifact, adapter, 19-case differential corpus, source/archive/installed actual-materializer integration across heading, bullet, and table title paths, deterministic double run, and temporary retained-Legacy rollback all passed. Only the three approved planning-document-suffix call expressions were routed; the Legacy helper remains intact."
+    },
+    {
+      "id": "phase-4i-dependency-name-vertical-slice",
+      "status": "complete",
+      "evidence": "2026-07-18: TypeScript AST re-audit confirmed dependencyName is the exact two-line strict truthy property-precedence helper and has exactly four buildTemplateDependencyNameMaps call expressions. It has no direct or transitive helper dependencies, mutable module state, host effects, random, time, live-ID behavior, external mutation, or JSON-serializable error path. The Core public API, self-contained Materializer artifact, adapter, 18-case differential corpus, source/archive/installed actual-materializer integration, deterministic double run, and temporary retained-Legacy rollback all passed. Only the four approved dependencyName call expressions were routed; the Legacy helper remains intact."
+    },
+    {
+      "id": "phase-4j-safe-dependency-identifier-vertical-slice",
+      "status": "complete",
+      "evidence": "2026-07-18: TypeScript AST re-audit confirmed safeDependencyIdentifier has exactly three scopedDependencyName call expressions, no local or transitive dependencies, mutable state, host effects, nondeterminism, or external mutation. Its bounded null-options TypeError contract was preserved. The Core API, distributed artifact, adapter, 23-case corpus, source/archive/installed materializer integration, deterministic double run, and temporary Legacy rollback all passed. Only the three approved call expressions were routed; the Legacy helper remains intact."
+    },
+    {
+      "id": "phase-4-materializer-core-closure",
+      "status": "complete",
+      "evidence": "2026-07-18: regenerated TypeScript AST seam ledger contains zero eligible-single-slice and zero eligible-batch-candidate records after excluding all seven independently proven routes. The residual inventory has 318 defer-high-risk candidates, organized into contract-first Phase 5 capability families. All seven differential, source, archive, installed, determinism, and temporary Legacy rollback proofs plus governance gates passed; the historical ZIP checksum remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-5a-field-control-projection-boundary-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: the versioned audit and capability matrix selected exactly one Data List-only scalar field projection boundary before buildFieldRecord ID assembly. No Legacy route, adapter, or distribution artifact changed."
+    },
+    {
+      "id": "phase-5b-data-list-scalar-field-projection-core-shadow",
+      "status": "complete",
+      "evidence": "2026-07-18: @yeeflow/app-builder-core-materializer added an immutable pre-ID Data List scalar projection contract. The 20-case versioned matrix ran 14 projected Text, Datetime, Decimal, and Bit cases, one preserved barcode-scan error case, and five explicit deferred-boundary cases against exact AST-extracted Legacy buildFieldRecord behavior. Input immutability passed. No production route, adapter, distribution artifact, or Legacy materializer source changed."
+    },
+    {
+      "id": "phase-5c-data-list-scalar-field-projection-public-api-and-distribution-readiness",
+      "status": "complete",
+      "evidence": "2026-07-18: projectDataListScalarField and only its immutable DTO contract became an approved Materializer Core public API. The complete 20-case corpus passed compiled source, official Plugin dist, temporary official ZIP, and simulated installed Plugin surfaces with exact runtime-export, JSON-serialization, and runtime-freezing checks. Negative gates passed for a missing projection export, unexpected runtime export, public-contract mismatch, checksum mismatch, workspace and node_modules leakage, source-map leakage, and mismatched surface output. Routing readiness was accepted without changing the Legacy materializer, adapter, or production callers."
+    },
+    {
+      "id": "phase-5d-data-list-scalar-field-projection-selective-routing",
+      "status": "complete",
+      "evidence": "2026-07-18: only one marked scalar-only pre-ID branch inside buildFieldRecord now calls projectDataListScalarField through scripts/lib/materializer-core-adapter.mjs. The single production caller remains fieldSpecsForList(...).map(... buildFieldRecord(...)). A temporary Legacy baseline, Core-routed source, temporary official ZIP, and simulated installed Plugin produced identical normalized decoded resources, errors, and output-file shapes. The scope gate proved lookup, sublist, identity, file, and image controls cannot invoke Core. The historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-5e-remaining-field-control-projection-family-selection-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: TypeScript AST audit classified all eight remaining field/control projection capabilities. Zero candidates meet the one-surface immutable vertical requirements. Lookup, sublist, identity, binary, and Document Library fields require a resource-definition contract; Approval variables and controls require a workflow or form contract; Dashboard filters are host orchestration only. NO_SAFE_REMAINING_FIELD_CONTROL_PROJECTION_VERTICAL was recorded without changing Core APIs, adapters, distribution, or materializer behavior."
+    },
+    {
+      "id": "phase-5f-resource-definition-construction-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: TypeScript AST audit classified twelve resource-definition construction entries. The original Data List default-view layout proposal required a fixed-filter key and findings host contract; after Phase 5H/5I established and shadow-proved that boundary, Phase 5J reclassified this one Data List-only boundary as eligible-after-fixed-filter-host-contract for a future immutable Core shadow. All remaining entries require identity allocation, template graphs, workflow/form contracts, or host orchestration. No Core API, adapter, distribution artifact, or materializer behavior changed in the audit."
+    },
+    {
+      "id": "phase-5h-fixed-filter-key-and-findings-lowering-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: the TypeScript AST contract audit established deterministic request ordinals, host-supplied opaque filter keys, allocation error semantics, immutable Core findings, and host-only findings-array lowering. FIXED_FILTER_KEY_FINDINGS_HOST_CONTRACT_VALID passed with a ten-case fixture matrix and six negative contract regressions. No Core parser, host lowering, adapter, route, distribution artifact, or Legacy materializer behavior changed."
+    },
+    {
+      "id": "phase-5i-fixed-filter-parser-and-host-lowering-shadow",
+      "status": "complete",
+      "evidence": "2026-07-18: @yeeflow/app-builder-core-materializer added a non-routed immutable fixed-filter intent parser and Local Runtime added non-routed explicit key and findings lowering. The eleven-case corpus used a controlled Legacy crypto.randomUUID VM sequence and passed exact filter and findings parity for seven normal cases, deterministic request identity, Core immutability, and missing/invalid/collision allocation gates. No Legacy materializer, adapter, distribution artifact, or production route changed."
+    },
+    {
+      "id": "phase-5j-data-list-default-view-layout-projection-re-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: exact AST and call-graph re-audit accepted the Data List default-view LayoutView boundary for a future shadow only: DATA_LIST_DEFAULT_VIEW_LAYOUT_PROJECTION_REAUDIT_ACCEPTED. Phase 5I provides the explicit fixed-filter intent, host key allocation, and host findings-lowering boundary. The future Core input must use supplied FieldIDs, immutable view intent, and a static template snapshot; Local Runtime remains responsible for key validation, findings append, and final resource integration. No Core runtime export, adapter, distribution artifact, Legacy materializer source, or production route changed."
+    },
+    {
+      "id": "phase-5j1-fixed-filter-core-distribution-contract-drift-remediation",
+      "status": "complete",
+      "evidence": "2026-07-18: projectFixedFilterIntents was confirmed as an approved public Materializer Core runtime export required by the Phase 5I parser/lowering and future Phase 5K shadow boundary. The public API contract, distribution contract, official builder, validator, generated artifact metadata, and source/archive/installed proof now declare the same ten Materializer exports. The official Materializer artifact SHA-256 is defe930672c1bd4c6104a7a696bb6b9f587f84bce14b637fc139fd98a0447855; generic distribution gates passed 27 cases and the eleven-case fixed-filter corpus passed source, temporary official ZIP, and simulated installed Plugin surfaces. No production route changed."
+    },
+    {
+      "id": "phase-5k-data-list-default-view-layout-projection-internal-shadow",
+      "status": "complete",
+      "evidence": "2026-07-18: the non-public projectDataListDefaultViewLayoutInternal workspace shadow passed a twelve-case controlled-Legacy UUID differential corpus. It preserved Title-first selection, fallback and deduplication, the twelve-column maximum, supplied FieldIDs, static query descriptors, fixed-filter request ordering, findings ordering, JSON serialization, and Core input/template/finding immutability. Local Runtime lowering supplied opaque keys and performed the only findings append for ten normal cases. The public-export guard and eight negative gates prove the shadow is absent from the public Materializer Core index, public API contract, generated artifact metadata, and official distribution contract. No adapter, Legacy materializer, Plugin dist, or production route changed."
+    },
+    {
+      "id": "phase-5l-data-list-default-view-layout-distribution-readiness-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_DEFAULT_VIEW_LAYOUT_DISTRIBUTION_READINESS_REJECTED after revalidating the Phase 5K twelve-case corpus and public-export guard. The bounded prospective Core API is documented but not promoted. The blocker is explicit: lowerFixedFilterProjectionAtHost remains a private workspace Local Runtime export with no separately versioned, Plugin-resolvable distribution contract. Four negative readiness regressions reject public host or Legacy shape leakage, missing Local Runtime contract decision, incomplete source/archive/installed/rollback routing proof, and internal export promotion. No public export, distribution artifact, adapter, Legacy materializer, or route changed."
+    },
+    {
+      "id": "phase-5m-local-runtime-fixed-filter-lowering-distribution-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: LOCAL_RUNTIME_FIXED_FILTER_LOWERING_DISTRIBUTION_READINESS_ACCEPTED for the prospective Local Runtime contract only. The contract retains explicit optional caller-owned findings append as the sole Local Runtime host side effect, requires host-supplied opaque keys and exact allocation errors, and defines a future self-contained Plugin-resolvable artifact with source, dist, ZIP, installed, checksum, export, and leakage proof. Six negative regressions passed. No Local Runtime behavior, public distribution export, artifact, Materializer Core export, adapter, or production route changed."
+    },
+    {
+      "id": "phase-5n-local-runtime-fixed-filter-lowering-distribution-proof",
+      "status": "complete",
+      "evidence": "2026-07-18: LOCAL_RUNTIME_FIXED_FILTER_LOWERING_DISTRIBUTION_VALID. The official builder added the self-contained Local Runtime artifact with exactly capabilityMetadata and lowerFixedFilterProjectionAtHost, SHA-256 c474be829f658b9389ce6c99b5116507f23814831e7b1362b892072edfd66b3f. The eleven-case fixed-filter parser/lowering corpus passed compiled source, Plugin dist, temporary official ZIP, and simulated installed Plugin surfaces with exact filters, findings append, serialization, and allocation errors. Generic multi-artifact and eight focused Local Runtime negative gates passed. No LayoutView public export, adapter, or production route changed."
+    },
+    {
+      "id": "phase-5o-data-list-default-view-layout-public-api-readiness",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_DEFAULT_VIEW_LAYOUT_PUBLIC_API_READINESS_ACCEPTED. The Phase 5K twelve-case immutable internal shadow, Phase 5I fixed-filter intent contract, and Phase 5N distributed Local Runtime lowering artifact were revalidated. The prospective API is projectDataListDefaultViewLayout with structural immutable DTOs only; Local Runtime retains allocation validation, filter lowering, and optional explicit findings append. Six readiness regressions passed. No public export, builder, artifact, adapter, Legacy route, active installation, archive, or release changed."
+    },
+    {
+      "id": "phase-5p-data-list-default-view-layout-public-api-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_DEFAULT_VIEW_LAYOUT_DISTRIBUTION_VALID. projectDataListDefaultViewLayout and only its approved immutable DTOs were promoted through the official self-contained Materializer Core artifact, SHA-256 7dd924c2d6558f6ffd20726f60bd75d2cb7c6116e3670f887c2f361ae004b441. The twelve-case LayoutView corpus passed compiled source, Plugin dist, temporary official ZIP, and simulated installed Plugin surfaces with layout, fixed-filter intent, findings, error, serialization, and frozen-value parity. Eleven negative gates passed. Local Runtime retained allocation validation, Legacy-shaped filter lowering, and optional explicit findings append. No adapter, Legacy materializer route, active installation, historical ZIP, or release changed."
+    },
+    {
+      "id": "phase-5q-data-list-default-view-layout-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-18: the default Data List Type 0 LayoutView call expression alone routes through projectDataListDefaultViewLayout and the separately distributed Local Runtime lowerFixedFilterProjectionAtHost adapter. The two-case actual-materializer integration matrix passed against a temporary-copy-only Legacy baseline in source, temporary official ZIP, and simulated installed Plugin layouts, including normalized decoded-resource parity, output-file shape, fixed-filter finding behavior, deterministic UUID-normalized output, and rollback. The additional Data List view call expression remains explicitly Legacy-excluded because it is outside the approved default-view corpus. Local Runtime adapter failure gates passed all four required stable codes. Historical ZIP SHA-256 remained 377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2."
+    },
+    {
+      "id": "phase-5r-data-list-additional-view-layout-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_ADDITIONAL_VIEW_LAYOUT_CONTRACT_ACCEPTED. TypeScript AST re-audit confirmed one default and one explicitly Legacy additional Type 0 LayoutView call. Both use the same structural fragment builder, but additional views have host-owned LayoutID index, title, URL, IsDefault, and fixed-filter request scope differences. The selected future vertical is a Data List-only additional Type 0 LayoutView projection requiring an extended immutable view-intent contract. Five audit regressions reject premature routing, default-proof reuse, implicit identities, missing Local Runtime lowering, and cross-resource scope. No production route, adapter, artifact, or active installation changed."
+    },
+    {
+      "id": "phase-5s-data-list-additional-view-layout-shadow-contract",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_ADDITIONAL_VIEW_LAYOUT_INTERNAL_SHADOW_IMPLEMENTED. The TypeScript AST boundary remains one default Core route and one additional Legacy route with routeDefaultViewThroughCore false. Seven controlled-UUID Legacy/Core parity cases and three explicit intent-boundary cases passed. The internal-only shadow accepts supplied FieldIDs, an immutable static template snapshot, a required isDefault false intent, and a stable non-default view scope; it returns only frozen fragment, fixed-filter intent, key-request, and finding data. Local Runtime alone lowers supplied keys and appends host-owned findings. Seven negative gates reject UUID generation, findings or template mutation, host lowering, host identity input, public export, and distribution export. No Legacy materializer source, adapter, public export, Plugin dist artifact, production route, active installation, historical ZIP, or release changed."
+    },
+    {
+      "id": "phase-5t-data-list-additional-view-layout-public-api-readiness-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_ADDITIONAL_VIEW_LAYOUT_PUBLIC_API_READINESS_ACCEPTED. The accepted future shape is a separate additive projectDataListAdditionalViewLayout API, preserving projectDataListDefaultViewLayout unchanged. It requires immutable supplied FieldIDs and template snapshot, viewIntent.isDefault false, and a non-empty scope that cannot end in /default. Materializer Core returns layout and fixed-filter intent data only; Local Runtime retains allocation validation, filter lowering, and optional explicit findings append; the host retains all view identity, URL, route, index, UUID allocation, and final integration. Six readiness regressions reject use of default-view evidence, host-shape leakage, missing non-default scope, missing Local Runtime boundary, absent proof plans, and accidental promotion. No export, artifact, adapter, route, active installation, historical ZIP, or release changed."
+    },
+    {
+      "id": "phase-5u-data-list-additional-view-layout-public-api-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_ADDITIONAL_VIEW_LAYOUT_DISTRIBUTION_VALID. The official builder promoted only projectDataListAdditionalViewLayout and its approved immutable DTO contract into the Materializer Core artifact. The seven-case additional-view corpus passed compiled source, Plugin dist, temporary official ZIP, and simulated installed Plugin surfaces with exact output, errors, serialization, and immutability. Four focused distribution gates passed for missing export, internal export, workspace leakage, and source-map leakage. Default-view API, Planning artifact, Local Runtime artifact, adapters, Legacy materializer route, active installation, and historical ZIP remained unchanged."
+    },
+    {
+      "id": "phase-5v-data-list-additional-view-layout-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-18: the only extraDataViews Type 0 loop now resolves projectDataListAdditionalViewLayout through the Materializer Core adapter and lowerFixedFilterProjectionAtHost through the existing Local Runtime adapter. The host retains LayoutID, ListID, URL, route key, layout index, UUID allocation, and final resource integration. Source, temporary official ZIP, simulated installed Plugin, deterministic, scope-gate, and temporary Legacy rollback evidence passed without changing the default-view route."
+    },
+    {
+      "id": "phase-5w-data-list-layoutview-projection-family-closure",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_LAYOUTVIEW_PROJECTION_FAMILY_CLOSED. Default and additional Type 0 structural projection are separately Core and Local Runtime proven. Type 1 custom forms require a template-graph contract; list display-layout references require host identity and mutation; navigation and dashboard LayoutViews are cross-surface host orchestration. The next audit is Data List resource-record identity and allocation contract discovery."
+    },
+    {
+      "id": "phase-5x-data-list-resource-record-identity-allocation-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_RESOURCE_IDENTITY_CONTRACT_VALID. Root ListID, ListID, FieldID, LayoutID, and lookup target identities are lossless host-owned strings. The future scalar resource-definition intent shadow excludes allocation, lookup resolution, template mutation, package writing, and cross-resource mutation."
+    },
+    {
+      "id": "phase-5y-data-list-scalar-resource-definition-identity-shadow",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_SCALAR_RESOURCE_IDENTITY_CORE_SHADOW_IMPLEMENTED and host lowering passed five scalar Legacy parity cases with lossless 19-digit string IDs. Barcode errors and deferred lookup, sublist, identity, file, and image field families remain outside the shadow. No public export, distribution, adapter, or production route changed."
+    },
+    {
+      "id": "phase-5z-data-list-scalar-resource-definition-dual-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_SCALAR_RESOURCE_IDENTITY_CORE_PUBLIC_API_CONTRACT_PASSED, DATA_LIST_SCALAR_RESOURCE_IDENTITY_LOCAL_RUNTIME_PUBLIC_API_CONTRACT_PASSED, DATA_LIST_SCALAR_RESOURCE_IDENTITY_DUAL_DISTRIBUTION_VALID, DATA_LIST_SCALAR_RESOURCE_IDENTITY_ARTIFACT_SOURCE_PARITY_PASSED cases=11, DATA_LIST_SCALAR_RESOURCE_IDENTITY_ARTIFACT_ARCHIVE_PARITY_PASSED cases=11, DATA_LIST_SCALAR_RESOURCE_IDENTITY_ARTIFACT_INSTALLED_PARITY_PASSED cases=11, and DATA_LIST_SCALAR_RESOURCE_IDENTITY_DISTRIBUTION_GATES_PASSED. The official builder generated both artifacts. Legacy buildFieldRecord, both compatibility adapters, and production routing remain unchanged."
+    },
+    {
+      "id": "phase-5aa-data-list-scalar-resource-definition-routing-readiness-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_SCALAR_RESOURCE_IDENTITY_ROUTING_READINESS_ACCEPTED. TypeScript AST evidence records exactly one production buildFieldRecord caller with one ListID and FieldID-bearing scalar call site. A future route is bounded to the existing scalar projection branch before buildDataListScalarFieldRecordFromProjection. All seven identity errors, lossless 19-digit ID checks, source archive installed parity, deterministic output, scope gates, regression protection, and temporary Legacy rollback are mandatory before any routing."
+    },
+    {
+      "id": "phase-5ab-data-list-scalar-resource-definition-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_SCALAR_RESOURCE_IDENTITY_ADAPTER_ROUTING_PASSED, source archive installed parity, determinism, lossless ID, scope-gate, integration parity, and temporary Legacy rollback passed. The route is limited to the scalar Core projection branch in buildFieldRecord before the retained Legacy scalar record lowerer. Lookup, sublist, identity, binary, template-dependent, cross-resource, and all non-Data-List paths remain Legacy-owned."
+    },
+    {
+      "id": "phase-5ac-data-list-resource-definition-family-selection-and-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_SCALAR_RESOURCE_IDENTITY_ROUTE_RECONFIRMED, DATA_LIST_RESOURCE_DEFINITION_FAMILY_CLOSURE_VALID, DATA_LIST_RESOURCE_DEFINITION_FAMILY_CLOSURE_REGRESSIONS_PASSED cases=7, and PHASE_5_CLOSURE_ACCEPTED. The sole scalar identity route remains bounded to buildFieldRecord. Lookup requires cross-resource resolution; sublist, identity, binary, and Type 1 forms require an advanced-field template-graph contract; display-layout references require layout identity integration; and mutable record assembly remains host orchestration. Phase 6 begins with a cross-resource lookup-resolution contract audit."
+    },
+    {
+      "id": "phase-6a-cross-resource-lookup-resolution-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_LOOKUP_LEGACY_BOUNDARY_AUDITED, CROSS_RESOURCE_LOOKUP_RESOLUTION_CONTRACT_VALID, CROSS_RESOURCE_LOOKUP_RESOLUTION_CONTRACT_REGRESSIONS_PASSED cases=8, and PHASE_6_LOOKUP_CONTRACT_ACCEPTED. The future Core boundary is immutable Lookup intent validation only. Host or Local Runtime code must supply lossless target ListID mappings, validate source and target scope and relationship semantics, reject ambiguity, handle unresolved targets, and lower fresh Rules JSON. No Core shadow, adapter, artifact, or production route changed."
+    },
+    {
+      "id": "phase-6b-data-list-lookup-resolution-core-shadow",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_LOOKUP_RESOLUTION_CORE_SHADOW_IMPLEMENTED, DATA_LIST_LOOKUP_RESOLUTION_HOST_LOWERING_SHADOW_IMPLEMENTED, differential parity for four Legacy-resolved cases plus one Legacy empty-Rules unresolved case, serialization and immutability, lossless 19-digit target ID, and all six stable host-contract error gates passed. The shadows remain internal-only; Legacy materializer, adapters, public exports, artifacts, and production routing remain unchanged."
+    },
+    {
+      "id": "phase-6c-data-list-lookup-resolution-dual-public-distribution-readiness",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_LOOKUP_RESOLUTION_CORE_PUBLIC_API_READINESS_ACCEPTED, DATA_LIST_LOOKUP_RESOLUTION_LOCAL_RUNTIME_PUBLIC_API_READINESS_ACCEPTED, DATA_LIST_LOOKUP_RESOLUTION_DUAL_DISTRIBUTION_READINESS_VALID, and nine negative readiness regressions passed. The prospective Core API exposes immutable Lookup intent data only; the prospective Local Runtime API owns supplied map validation and fresh Rules lowering. No public index, distribution contract, artifact, adapter, Legacy materializer, or route changed."
+    },
+    {
+      "id": "phase-6d-data-list-lookup-resolution-dual-public-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_LOOKUP_RESOLUTION_CORE_PUBLIC_API_CONTRACT_PASSED, DATA_LIST_LOOKUP_RESOLUTION_LOCAL_RUNTIME_PUBLIC_API_CONTRACT_PASSED, DATA_LIST_LOOKUP_RESOLUTION_DUAL_DISTRIBUTION_VALID, source/archive/installed fifteen-case parity, and eight negative distribution gates passed. The official artifacts expose only projectDataListLookupResolutionIntent and lowerDataListLookupResolutionAtHost in addition to their pre-existing approved exports. Legacy routing and adapters remain unchanged."
+    },
+    {
+      "id": "phase-6e-data-list-lookup-resolution-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_LOOKUP_RESOLUTION_ADAPTER_ROUTING_PASSED, source/archive/installed actual-materializer parity, deterministic output, lossless target identity, scope gates, and temporary Legacy rollback passed. Only the Data List Lookup branch in buildFieldRecord uses the public Core intent and Local Runtime lowering APIs; all other field families and host integration remain Legacy-owned."
+    },
+    {
+      "id": "phase-6f-data-list-lookup-family-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_LOOKUP_RESOLUTION_ROUTE_RECONFIRMED, DATA_LIST_LOOKUP_RESOLUTION_FAMILY_CLOSURE_VALID, DATA_LIST_LOOKUP_RESOLUTION_FAMILY_CLOSURE_REGRESSIONS_PASSED cases=6, and PHASE_6_CLOSURE_ACCEPTED. Only the Data List Lookup branch in buildFieldRecord is routed. Remaining target integration, reverse relationships, Type 1 lookup controls, sublists, cross-surface Lookup semantics, layout identity, and package output require advanced template graph, cross-surface, or host-orchestration contracts. Phase 7 begins with the advanced-field template-graph contract audit."
+    },
+    {
+      "id": "phase-7a-advanced-field-template-graph-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_ADVANCED_FIELD_LEGACY_BOUNDARIES_AUDITED, ADVANCED_FIELD_TEMPLATE_GRAPH_CONTRACT_VALID, ADVANCED_FIELD_TEMPLATE_GRAPH_CONTRACT_REGRESSIONS_PASSED cases=8, and PHASE_7_TEMPLATE_GRAPH_CONTRACT_ACCEPTED. The accepted future Phase 7B shadow is restricted to Data List Type 1 view/workbench identity-user-people control placement intent with immutable template snapshots and explicit host references. Sublists, department, binary controls, Lookup placement, Type 1 resource assembly, layout references, runtime expressions, and cross-surface behavior remain deferred."
+    },
+    {
+      "id": "phase-7b-data-list-type1-identity-control-placement-shadow",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_CORE_SHADOW_IMPLEMENTED, host lowering, five Legacy/Core/host valid parity cases, serialization and immutability, lossless 19-digit IDs, all five template-reference errors, and eleven exclusions passed. The Core and Local Runtime modules remain internal-only; Legacy materializer, adapters, public APIs, artifacts, distribution, and production routing remain unchanged."
+    },
+    {
+      "id": "phase-7c-data-list-type1-identity-control-placement-dual-public-distribution-readiness",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_CORE_PUBLIC_API_READINESS_ACCEPTED, DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_LOCAL_RUNTIME_PUBLIC_API_READINESS_ACCEPTED, DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_DUAL_DISTRIBUTION_READINESS_VALID, six readiness negative regressions, and Phase 5 closure-proof lineage validation passed. No public export, distribution artifact, adapter, Legacy materializer, or production route changed."
+    },
+    {
+      "id": "phase-7d-data-list-type1-identity-control-placement-dual-public-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-18: DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_CORE_PUBLIC_API_CONTRACT_PASSED, DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_LOCAL_RUNTIME_PUBLIC_API_CONTRACT_PASSED, source/archive/installed 21-case parity, distribution gates, and sealed Phase 7D artifact-only closure lineage passed. Only the approved Core and Local Runtime public APIs were promoted; adapters and production routing remain unchanged."
+    },
+    {
+      "id": "phase-7e-data-list-type1-identity-control-placement-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-19: DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_ADAPTER_ROUTING_PASSED, source/archive/installed actual-materializer parity, determinism, nineteen-digit identity preservation, template-reference error coverage, scope gates, and temporary Legacy rollback passed. Only the Data List Type 1 view/workbench non-sublist identity-user-people-person control placement route uses the approved Core and Local Runtime APIs."
+    },
+    {
+      "id": "phase-7f-advanced-field-template-graph-family-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_ROUTE_RECONFIRMED, ADVANCED_FIELD_TEMPLATE_GRAPH_FAMILY_CLOSURE_VALID, and closure-lineage validation passed. No further safe Phase 7 advanced-field vertical remains. Phase 8 begins with a Sublist nested-template snapshot and parent-child row-schema identity contract audit."
+    },
+    {
+      "id": "phase-8a-data-list-sublist-nested-template-graph-contract-audit",
+      "status": "superseded",
+      "evidence": "2026-07-19: DATA_LIST_SUBLIST_LEGACY_BOUNDARIES_AUDITED, SUBLIST_NESTED_TEMPLATE_GRAPH_CONTRACT_VALID, and deterministic regressions passed. The selected Phase 8B candidate is explicit scalar Sublist row-schema intent only; nested control placement, summaries, Lookup and advanced rows, ID allocation, and graph mutation remain host-owned.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-8b-data-list-sublist-explicit-scalar-row-schema-shadow",
+      "status": "superseded",
+      "evidence": "2026-07-19: explicit scalar Sublist row-schema Core and host-lowering internal shadows passed six Legacy-parity, ten host-validation, five exclusion, serialization, immutability, and lossless-ID checks. No public export, artifact, adapter, or production route changed.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-8c-data-list-sublist-scalar-row-schema-dual-public-distribution-readiness",
+      "status": "superseded",
+      "evidence": "2026-07-19: DATA_LIST_SUBLIST_SCALAR_ROW_SCHEMA_CORE_PUBLIC_API_READINESS_ACCEPTED, DATA_LIST_SUBLIST_SCALAR_ROW_SCHEMA_LOCAL_RUNTIME_PUBLIC_API_READINESS_ACCEPTED, dual-distribution readiness validation, and deterministic negative regressions passed. No public export, artifact, adapter, Legacy materializer, or production route changed.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-8d-data-list-sublist-scalar-row-schema-dual-public-distribution-promotion",
+      "status": "superseded",
+      "evidence": "2026-07-19: DATA_LIST_SUBLIST_SCALAR_ROW_SCHEMA_CORE_PUBLIC_API_CONTRACT_PASSED, DATA_LIST_SUBLIST_SCALAR_ROW_SCHEMA_LOCAL_RUNTIME_PUBLIC_API_CONTRACT_PASSED, 21-case source/dist/archive/installed parity, distribution gates, and sealed Phase 8D artifact-only closure lineage passed. Only the approved public APIs were promoted; adapters and production routing remain unchanged.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-8e-data-list-sublist-scalar-row-schema-coupled-consumer-routing-proof",
+      "status": "superseded",
+      "evidence": "2026-07-19: NO_SAFE_DATA_LIST_SUBLIST_SCALAR_ROW_SCHEMA_ROUTING. The shared dataListSubListVariables seam has exactly two production consumers, but no explicit child ListID, child FieldID, or row-schema identity map. No Core or Local Runtime route, adapter, artifact, or Legacy materializer change was made.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-9a-data-list-sublist-child-resource-identity-map-and-row-schema-allocation-contract-audit",
+      "status": "superseded",
+      "evidence": "2026-07-19: SUBLIST_CHILD_RESOURCE_IDENTITY_FLOW_AUDITED, SUBLIST_CHILD_RESOURCE_IDENTITY_CONTRACT_VALID, and PHASE_9_SUBLIST_IDENTITY_CONTRACT_ACCEPTED. Current ID allocation contains only top-level ListID, FieldID, and LayoutID paths; a Sublist child ListID, child FieldID, and row-schema identity remain absent. Phase 8E remains blocked until a host-owned inventory and validated immutable descriptor are available to both coupled consumers. No route, adapter, API, artifact, or Legacy materializer changed.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-9b-data-list-sublist-child-resource-inventory-host-shadow",
+      "status": "superseded",
+      "evidence": "2026-07-19: SUBLIST_CHILD_RESOURCE_INVENTORY_HOST_SHADOW_IMPLEMENTED, identity validation, serialization, immutability, lossless nineteen-digit identity, and two-consumer simulation passed over a 20-case corpus. The module is internal-only and the current materializer has no child allocation paths or routed consumers. Phase 8E remains blocked.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-9c-data-list-sublist-child-resource-inventory-local-runtime-distribution-readiness",
+      "status": "superseded",
+      "evidence": "2026-07-19: SUBLIST_CHILD_RESOURCE_INVENTORY_LOCAL_RUNTIME_PUBLIC_API_READINESS_ACCEPTED and distribution-readiness validation/regressions passed. No Local Runtime public export, distribution artifact, adapter, Legacy materializer, or route changed. Phase 8E remains blocked until separately authorized post-allocation identity inventory integration proves both coupled consumers.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-9d-data-list-sublist-child-resource-inventory-local-runtime-public-api-and-distribution-promotion",
+      "status": "superseded",
+      "evidence": "2026-07-19: SUBLIST_CHILD_RESOURCE_INVENTORY_LOCAL_RUNTIME_PUBLIC_API_CONTRACT_PASSED, 20-case source/dist/archive/installed parity, distribution gates, and sealed Phase 9D artifact-only closure lineage passed. Only buildDataListSublistChildResourceInventoryAtHost was promoted; adapters, Legacy materializer, and production routing remain unchanged.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-9e-data-list-sublist-child-resource-inventory-post-allocation-integration-readiness",
+      "status": "superseded",
+      "evidence": "2026-07-19: SUBLIST_CHILD_RESOURCE_INVENTORY_POST_ALLOCATION_BOUNDARY_AUDITED and rejected readiness recorded. Current allocation has no API-issued child ListID, child FieldID, or row-schema identity, so no production integration or Phase 8E route was attempted.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-9f-data-list-sublist-child-identity-provenance-and-host-provider-audit",
+      "status": "superseded",
+      "evidence": "2026-07-19: SUBLIST_LEGACY_IDENTITY_PROVENANCE_AUDITED and SUBLIST_LEGACY_IDENTITY_PROVIDER_REJECTED. Legacy has no child ListID, child FieldID, or row-schema identity provider; planned idx and deterministic UUID values are post-divergence presentation keys, not shared host identities.",
+      "supersededBy": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "supersededReason": "The product export proves an embedded parent-field schema and no required child product-resource identity."
+    },
+    {
+      "id": "phase-9g-export-proven-data-list-sublist-embedded-schema-reconciliation",
+      "status": "complete",
+      "evidence": "2026-07-19: DATA_LIST_SUBLIST_EXPORT_EVIDENCE_VALID, DATA_LIST_SUBLIST_EMBEDDED_SCHEMA_CONTRACT_VALID, DATA_LIST_SUBLIST_EMBEDDED_SCHEMA_DIFFERENTIAL_PASSED, and DATA_LIST_SUBLIST_CHILD_IDENTITY_PREMISE_SUPERSEDED. The product export proves parent ListID and FieldID are the only product resource identities; Rules and custom-form list-fields share one embedded descriptor."
+    },
+    {
+      "id": "phase-9h-export-proven-sublist-frozen-descriptor-routing-readiness-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_EMBEDDED_SCHEMA_PRE_DIVERGENCE_BOUNDARY_AUDITED, SUBLIST_EMBEDDED_SCHEMA_FROZEN_DESCRIPTOR_READINESS_VALID, SUBLIST_EMBEDDED_SCHEMA_FROZEN_DESCRIPTOR_READINESS_REGRESSIONS_PASSED, SUBLIST_CHILD_IDENTITY_PREREQUISITE_SUPERSESSION_RECONFIRMED, and PHASE_9H_SUBLIST_DESCRIPTOR_ROUTE_ACCEPTED. The bounded future route selects one frozen embedded descriptor before buildFieldRecord and serves Rules plus custom-form lowering without child product identities or product/API changes."
+    },
+    {
+      "id": "phase-9i-data-list-sublist-frozen-descriptor-internal-shadow",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_EMBEDDED_SCHEMA_FROZEN_DESCRIPTOR_CORE_SHADOW_IMPLEMENTED, SUBLIST_EMBEDDED_SCHEMA_FROZEN_DESCRIPTOR_HOST_CONTEXT_SHADOW_IMPLEMENTED, SUBLIST_EMBEDDED_SCHEMA_FROZEN_DESCRIPTOR_DIFFERENTIAL_PARITY_PASSED, SUBLIST_EMBEDDED_SCHEMA_FROZEN_DESCRIPTOR_SELECTION_DETERMINISM_PASSED, SUBLIST_EMBEDDED_SCHEMA_FROZEN_DESCRIPTOR_SERIALIZATION_PARITY_PASSED, SUBLIST_EMBEDDED_SCHEMA_FROZEN_DESCRIPTOR_IMMUTABILITY_PASSED, SUBLIST_EMBEDDED_SCHEMA_NON_SERIALIZED_CONTEXT_GUARD_PASSED, SUBLIST_EMBEDDED_SCHEMA_LEGACY_UNCHANGED, PHASE_6_CLOSURE_PROOF_LINEAGE_RECONCILED, and PHASE_CLOSURE_PROOF_LINEAGE_VALID."
+    },
+    {
+      "id": "phase-9j-data-list-sublist-frozen-descriptor-propagation-readiness",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_FROZEN_DESCRIPTOR_HOST_CONTEXT_BOUNDARY_AUDITED, SUBLIST_FROZEN_DESCRIPTOR_PROPAGATION_READINESS_VALID, SUBLIST_FROZEN_DESCRIPTOR_PROPAGATION_READINESS_REGRESSIONS_PASSED, SUBLIST_FROZEN_DESCRIPTOR_SHARED_SELECTION_CONTRACT_VALID, and SUBLIST_CHILD_IDENTITY_PREREQUISITE_SUPERSESSION_RECONFIRMED. One per-build closure-owned two-WeakMap context is accepted for a future route only."
+    },
+    {
+      "id": "phase-9k-data-list-sublist-frozen-descriptor-plugin-local-host-context-integration-shadow",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_FROZEN_DESCRIPTOR_HOST_CONTEXT_INTEGRATION_SHADOW_IMPLEMENTED, SUBLIST_FROZEN_DESCRIPTOR_SHARED_INSTANCE_PARITY_PASSED, SUBLIST_FROZEN_DESCRIPTOR_SINGLE_SELECTION_DETERMINISM_PASSED, SUBLIST_FROZEN_DESCRIPTOR_CONTEXT_ISOLATION_PASSED, SUBLIST_FROZEN_DESCRIPTOR_CONTEXT_DISPOSAL_PASSED, SUBLIST_FROZEN_DESCRIPTOR_CONTEXT_FAIL_CLOSED_GATES_PASSED, SUBLIST_FROZEN_DESCRIPTOR_NON_SERIALIZED_CONTEXT_GUARD_PASSED, and SUBLIST_FROZEN_DESCRIPTOR_LEGACY_UNCHANGED."
+    },
+    {
+      "id": "phase-9l-data-list-sublist-frozen-descriptor-public-contract-and-production-integration-readiness-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_EMBEDDED_SCHEMA_CORE_PUBLIC_API_READINESS_ACCEPTED, SUBLIST_FROZEN_DESCRIPTOR_PRODUCTION_INTEGRATION_READINESS_ACCEPTED, SUBLIST_EMBEDDED_SCHEMA_PUBLIC_CONTRACT_AND_ROUTING_READINESS_VALID, and SUBLIST_EMBEDDED_SCHEMA_PUBLIC_CONTRACT_AND_ROUTING_READINESS_REGRESSIONS_PASSED."
+    },
+    {
+      "id": "phase-9m-data-list-sublist-embedded-schema-core-public-api-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_EMBEDDED_SCHEMA_CORE_PUBLIC_API_CONTRACT_PASSED, SUBLIST_EMBEDDED_SCHEMA_DISTRIBUTION_VALID, SUBLIST_EMBEDDED_SCHEMA_ARTIFACT_SOURCE_PARITY_PASSED, SUBLIST_EMBEDDED_SCHEMA_ARTIFACT_ARCHIVE_PARITY_PASSED, SUBLIST_EMBEDDED_SCHEMA_ARTIFACT_INSTALLED_PARITY_PASSED, and SUBLIST_EMBEDDED_SCHEMA_DISTRIBUTION_GATES_PASSED."
+    },
+    {
+      "id": "phase-9n-selective-data-list-embedded-sublist-frozen-descriptor-production-host-context-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_EMBEDDED_SCHEMA_ADAPTER_ROUTING_PASSED, SUBLIST_EMBEDDED_SCHEMA_HOST_CONTEXT_ROUTING_PASSED, SUBLIST_EMBEDDED_SCHEMA_SOURCE_ROUTING_PASSED, SUBLIST_EMBEDDED_SCHEMA_ARCHIVE_ROUTING_PASSED, SUBLIST_EMBEDDED_SCHEMA_INSTALLED_ROUTING_PASSED, SUBLIST_EMBEDDED_SCHEMA_MATERIALIZER_INTEGRATION_PARITY_PASSED, SUBLIST_EMBEDDED_SCHEMA_SHARED_INSTANCE_PARITY_PASSED, SUBLIST_EMBEDDED_SCHEMA_SINGLE_SELECTION_DETERMINISM_PASSED, SUBLIST_EMBEDDED_SCHEMA_CONTEXT_ISOLATION_PASSED, SUBLIST_EMBEDDED_SCHEMA_ROUTING_SCOPE_GATES_PASSED, SUBLIST_EMBEDDED_SCHEMA_LEGACY_ROLLBACK_PASSED, and PHASE_CLOSURE_PROOF_LINEAGE_VALID. Only export-proven scalar embedded Sublist semantics were routed; child-resource identity remains superseded."
+    },
+    {
+      "id": "phase-9o-export-proven-data-list-embedded-sublist-descriptor-family-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_EMBEDDED_SCHEMA_ROUTE_RECONFIRMED, SUBLIST_EMBEDDED_SCHEMA_FAMILY_CLOSURE_VALID, SUBLIST_EMBEDDED_SCHEMA_FAMILY_CLOSURE_REGRESSIONS_PASSED, SUBLIST_CHILD_IDENTITY_PREREQUISITE_SUPERSESSION_RECONFIRMED, PHASE_9_CLOSURE_ACCEPTED, and PHASE_CLOSURE_PROOF_LINEAGE_VALID. Phase 9N remains the only safe scalar embedded-schema route; all remaining Sublist families require separate evidence and contracts."
+    },
+    {
+      "id": "phase-8f-data-list-sublist-family-reconciliation-and-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: DATA_LIST_SUBLIST_EMBEDDED_SCHEMA_ROUTE_RECONFIRMED, DATA_LIST_SUBLIST_CHILD_IDENTITY_PREMISE_SUPERSEDED, DATA_LIST_SUBLIST_SCALAR_ROW_SCHEMA_CAPABILITY_RECONCILED, DATA_LIST_SUBLIST_FAMILY_CLOSURE_VALID, DATA_LIST_SUBLIST_FAMILY_CLOSURE_REGRESSIONS_PASSED, PHASE_8_CLOSURE_ACCEPTED, and PHASE_CLOSURE_PROOF_LINEAGE_VALID. Phase 8B/8D remain dormant public capability proof only; the Phase 8E blocker is retained unchanged as superseded history."
+    },
+    {
+      "id": "phase-10a-data-list-sublist-summary-temporary-variable-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: DATA_LIST_SUBLIST_SUMMARY_LEGACY_BOUNDARIES_AUDITED, SUBLIST_SUMMARY_TEMP_VARIABLE_CONTRACT_VALID, SUBLIST_SUMMARY_TEMP_VARIABLE_CONTRACT_REGRESSIONS_PASSED, and PHASE_10_SUBLIST_SUMMARY_CONTRACT_ACCEPTED. Only the scalar aggregate-intent internal-shadow candidate is selected; temporary-variable allocation, runtime expressions, bindings, and mutation remain host-owned."
+    },
+    {
+      "id": "phase-10b-data-list-sublist-scalar-summary-intent-internal-shadow",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_SCALAR_SUMMARY_INTENT_CORE_SHADOW_IMPLEMENTED, SUBLIST_SCALAR_SUMMARY_INTENT_HOST_LOWERING_SHADOW_IMPLEMENTED, SUBLIST_SCALAR_SUMMARY_INTENT_DIFFERENTIAL_PARITY_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_SERIALIZATION_PARITY_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_CORE_IMMUTABILITY_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_DETERMINISM_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_REFERENCE_VALIDATION_GATES_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_TEMP_VARIABLE_EXCLUSION_PASSED, and SUBLIST_SCALAR_SUMMARY_INTENT_LEGACY_UNCHANGED. Internal-only scalar aggregate intent and test-only lowering passed; public distribution remains not accepted."
+    },
+    {
+      "id": "phase-10c-data-list-sublist-scalar-summary-intent-dual-public-distribution-readiness-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_SCALAR_SUMMARY_INTENT_CORE_PUBLIC_API_READINESS_ACCEPTED, SUBLIST_SCALAR_SUMMARY_INTENT_LOCAL_RUNTIME_PUBLIC_API_READINESS_ACCEPTED, SUBLIST_SCALAR_SUMMARY_INTENT_DUAL_DISTRIBUTION_READINESS_VALID, and SUBLIST_SCALAR_SUMMARY_INTENT_DUAL_DISTRIBUTION_READINESS_REGRESSIONS_PASSED. The prospective APIs are accepted_not_promoted only; temporary variables, runtime expressions, bindings, mutation, and production routing remain host-owned and unchanged."
+    },
+    {
+      "id": "phase-10d-data-list-sublist-scalar-summary-intent-dual-public-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_SCALAR_SUMMARY_INTENT_CORE_PUBLIC_API_CONTRACT_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_LOCAL_RUNTIME_PUBLIC_API_CONTRACT_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_DUAL_DISTRIBUTION_VALID, SUBLIST_SCALAR_SUMMARY_INTENT_ARTIFACT_SOURCE_PARITY_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_ARTIFACT_ARCHIVE_PARITY_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_ARTIFACT_INSTALLED_PARITY_PASSED, SUBLIST_SCALAR_SUMMARY_INTENT_DISTRIBUTION_GATES_PASSED, and PHASE_CLOSURE_PROOF_LINEAGE_VALID. Only the two approved static APIs were promoted; no production route or adapter changed."
+    },
+    {
+      "id": "phase-10e-data-list-sublist-scalar-summary-intent-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-19: static scalar summary production routing passed source, archive, installed, determinism, temporary-variable noninterference, scope gates, Legacy rollback, and closure lineage validation."
+    },
+    {
+      "id": "phase-10f-data-list-sublist-summary-family-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: static scalar summary family closure accepted after Phase 10D/10E lineage, static-route, temporary-variable noninterference, and deferred-family validation."
+    },
+    {
+      "id": "phase-11a-data-list-sublist-summary-runtime-temporary-variable-lifecycle-and-scope-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_SUMMARY_TEMP_VARIABLE_LIFECYCLE_AUDITED, SUBLIST_SUMMARY_TEMP_VARIABLE_SCOPE_CONTRACT_VALID, and deterministic lifecycle/scope negative regressions passed. No Phase 11B internal shadow was selected because Legacy lacks explicit list, form, summary, and inventory scope evidence."
+    },
+    {
+      "id": "phase-11b-sublist-summary-runtime-temporary-variable-scope-evidence-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: SUBLIST_SUMMARY_TEMP_VARIABLE_EXPORT_SCOPE_EVIDENCE_ACCEPTED. Read-only Employee Leave Balances export proves a composite Data List scope chain from ListID and Type 1 Layout resource to parent field/control, summary, and target inventory entry. The earlier Legacy-only blocked conclusion is superseded for non-serialized host context only; Core shadow, public distribution, runtime lifecycle, and production routing remain unauthorized."
+    },
+    {
+      "id": "phase-11c-sublist-summary-scoped-dynamic-intent-internal-shadow",
+      "status": "complete",
+      "evidence": "2026-07-19: internal-only Core dynamic-summary intent and per-layout host scope-context shadow passed export-scope parity, composite scope gates, serialization, deep immutability, temporary-variable nonmutation, and Approval Form exclusion. Runtime writeback parity is not claimed; public distribution and production routing remain unauthorized."
+    },
+    {
+      "id": "phase-11d-sublist-summary-dynamic-intent-dual-public-distribution-readiness",
+      "status": "complete",
+      "evidence": "2026-07-19: accepted but unpromoted Core and Local Runtime dynamic-summary APIs retain all temporary-variable lifecycle, scope resolution, runtime, mutable-host, and package work outside the public boundary. Phase 5R historical evidence was reconciled through its approved successors and sealed lineage."
+    },
+    {
+      "id": "phase-11e-sublist-summary-dynamic-intent-dual-public-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-19: dynamic summary Core and Local Runtime public APIs promoted with source, dist, ZIP, installed, leakage, and lineage proof; production routing remains unchanged."
+    },
+    {
+      "id": "phase-11f-sublist-summary-dynamic-intent-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-19: dynamic Data List Sublist summary routing passed source, archive, installed, determinism, isolation, temp-variable noninterference, and Legacy rollback proof."
+    },
+    {
+      "id": "phase-11g-sublist-summary-dynamic-family-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: Phase 11 family closure accepted; no additional safe dynamic summary vertical remains under the immutable resolved-binding contract."
+    },
+    {
+      "id": "phase-12a-data-list-sublist-nested-control-template-graph-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: nested-control template snapshot, node/slot, child-reference, and host-ownership contract accepted for the bounded scalar child-control shadow."
+    },
+    {
+      "id": "phase-12b-data-list-sublist-scalar-nested-control-placement-intent-internal-shadow",
+      "status": "complete",
+      "evidence": "2026-07-19: immutable scalar nested child-control placement Core and test-only host shadows passed parity, serialization, immutability, and nonmutation proof."
+    },
+    {
+      "id": "phase-12c-data-list-sublist-nested-control-placement-dual-public-distribution-readiness",
+      "status": "complete",
+      "evidence": "2026-07-19: bounded immutable nested child-control Core and Local Runtime public-distribution readiness accepted without promotion."
+    },
+    {
+      "id": "phase-12d-data-list-sublist-nested-control-placement-dual-public-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-19: exactly two immutable nested-control placement APIs promoted through official source, dist, ZIP, installed, leakage, and lineage proof; production routing remains unchanged."
+    },
+    {
+      "id": "phase-12e-data-list-sublist-nested-control-placement-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-19: scalar embedded nested-control placement route passed source, ZIP, installed, determinism, rollback, and lineage proof."
+    },
+    {
+      "id": "phase-12f-data-list-sublist-nested-control-family-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: nested-control family closed after the bounded scalar placement route; all recursive, mutation, non-scalar, runtime, and package surfaces remain explicitly deferred."
+    },
+    {
+      "id": "phase-13b-data-list-sublist-embedded-lookup-export-scope-evidence-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: authoritative Data List export proves lossless embedded Lookup target/display scope; additional-field writeback is explicitly deferred."
+    },
+    {
+      "id": "phase-13b-data-list-sublist-embedded-lookup-export-scope-evidence-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: authoritative Data List export proves lossless embedded Lookup target/display scope; additional-field writeback is explicitly deferred."
+    },
+    {
+      "id": "phase-13c-sublist-embedded-lookup-target-display-intent-internal-shadow",
+      "status": "complete",
+      "evidence": "2026-07-19: internal embedded Lookup target/display Core and host shadows passed export parity, lossless identity, immutability, and additional-writeback exclusion proof."
+    },
+    {
+      "id": "phase-13d-sublist-embedded-lookup-dual-public-distribution-readiness-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: embedded Lookup target/display Core and Local Runtime public-distribution readiness accepted; writeback remains deferred."
+    },
+    {
+      "id": "phase-13e-data-list-sublist-embedded-lookup-dual-public-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-19: exactly two immutable Data List embedded-Sublist Lookup APIs promoted through the official distribution builder."
+    },
+    {
+      "id": "phase-13f-data-list-sublist-embedded-lookup-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-19: direct export-proven Lookup target/display configuration routed only to Data List Sublist custom-form list-fields; addition writeback remains deferred."
+    },
+    {
+      "id": "phase-13g-data-list-sublist-embedded-lookup-family-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: direct export-proven Data List embedded Lookup target/display route closed; additional-field writeback is separately deferred as runtime cross-field behavior."
+    },
+    {
+      "id": "phase-14a-data-list-sublist-lookup-additional-field-writeback-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: authoritative Data List export proves one static embedded Lookup additional-field mapping; runtime event and writeback semantics remain unproven and excluded."
+    },
+    {
+      "id": "phase-14b-data-list-sublist-lookup-additional-field-writeback-intent-internal-shadow",
+      "status": "complete",
+      "evidence": "2026-07-19: internal-only static additional-field mapping shadow passed immutable export metadata parity; runtime writeback parity is explicitly not claimed."
+    },
+    {
+      "id": "phase-14d-data-list-sublist-lookup-additional-field-configuration-readiness-reconciliation",
+      "status": "complete",
+      "evidence": "2026-07-19: Phase 14C is superseded only for declarative configuration generation; frontend runtime execution remains historical deferred evidence."
+    },
+    {
+      "id": "phase-14e-data-list-sublist-lookup-additional-field-configuration-public-distribution-promotion",
+      "status": "complete",
+      "evidence": "2026-07-19: exactly one immutable Materializer Core configuration projection API passed source, dist, temporary ZIP, and installed-plugin proof."
+    },
+    {
+      "id": "phase-14f-data-list-sublist-lookup-additional-field-configuration-selective-routing-proof",
+      "status": "complete",
+      "evidence": "2026-07-19: Data List embedded-Sublist static addition metadata and destination readonly configuration routed with source, ZIP, installed, determinism, strict scope, and rollback proof."
+    },
+    {
+      "id": "phase-14g-data-list-sublist-lookup-additional-field-configuration-family-closure-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: the declarative configuration family closed; frontend runtime behavior remains product-owned and out of scope."
+    },
+    {
+      "id": "phase-15-data-list-sublist-remaining-configuration-family-selection-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: remaining embedded-Sublist configuration families audited; no export- or source-proven static candidate remains."
+    },
+    {
+      "id": "phase-16-data-list-sublist-identity-control-configuration-closure",
+      "status": "complete",
+      "evidence": "2026-07-19: export-proven embedded user identity-picker configuration completed through Core, Local Runtime, distribution, selective routing, and closure; all runtime identity behavior remains excluded."
+    },
+    {
+      "id": "phase-17-cross-surface-capability-portfolio-and-next-vertical-selection-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: Approval Form, Document Library, Dashboard, workflow, and top-level Data List surfaces audited separately; no safe next vertical is selected."
+    },
+    {
+      "id": "phase-18a-approval-form-sublist-lookup-legacy-parity-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: Approval Form-only Lookup target/display parity audit found that target identifiers are discarded and display-field metadata is export-only."
+    },
+    {
+      "id": "phase-18a-approval-form-sublist-lookup-legacy-parity-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: Approval Form-only Lookup target/display parity audit found that target identifiers are discarded and display-field metadata is export-only."
+    },
+    {
+      "id": "phase-18a-approval-form-sublist-lookup-legacy-parity-contract-audit",
+      "status": "complete",
+      "evidence": "2026-07-19: Approval Form-only Lookup target/display parity audit found that target identifiers are discarded and display-field metadata is export-only."
+    },
+    {
+      "id": "phase-18b-approval-form-sublist-lookup-configuration-preservation",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/approval-form-sublist-lookup-configuration-preservation.v0.1.0.json: static Approval Form Submission Form Sublist Lookup configuration preservation passed on source, official temporary ZIP, simulated installed Plugin, actual materializer, and rollback surfaces."
+    },
+    {
+      "id": "core-extraction-program-baseline-and-finite-wave-plan",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-production-ownership-inventory.v0.1.0.json, compatibility/capability-manifests/core-extraction-ownership-dependency-graph.v0.1.0.json, and compatibility/capability-manifests/core-extraction-finite-wave-plan.v0.1.0.json: 3594 production functions have exactly one ownership category and finite migration-wave assignment."
+    },
+    {
+      "id": "core-extraction-wave-plan-calibration-and-proof-envelope-clustering",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-proof-envelope-registry.v0.1.0.json and compatibility/capability-manifests/core-extraction-finite-wave-plan.v0.2.0.json: 451 candidates are assigned to 96 deterministic proof envelopes without production migration."
+    },
+    {
+      "id": "core-extraction-wave-1-planning-normalization-execution",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave1-planning-normalization-execution.v0.1.0.json: six Wave 1 planning-only proof envelopes and 24 functions passed frozen Legacy/Core differential, source, temporary official ZIP, simulated installed Plugin, determinism, and temporary-copy rollback proof."
+    },
+    {
+      "id": "core-extraction-wave-2-approval-form-sublist-lookup-static-configuration-projection",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave2-approval-form-sublist-lookup-static-configuration-projection.v0.1.0.json: Approval Form-only static Lookup configuration passed Phase 18B baseline, four-surface, materializer, determinism, and Phase 18B Legacy rollback proof."
+    },
+    {
+      "id": "core-extraction-wave3-batch-a-workflow-set-data-list-projection",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-a-workflow-set-data-list-projection.v0.1.0.json: Workflow Set Data List static record and variable/list-reference projection passed source, archive, installed, actual-materializer, determinism, host-exclusion, and Legacy rollback proof."
+    },
+    {
+      "id": "core-extraction-wave3-batch-b-workflow-query-data-static-plan",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-b-workflow-query-data-static-plan.v0.1.0.json: all six Workflow Query Data static-plan envelopes passed source, archive, installed, materializer, determinism, leakage, and rollback proof."
+    },
+    {
+      "id": "core-extraction-wave3-batch-c-data-list-sublist-static-configuration",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-c-data-list-sublist-static-configuration.v0.1.0.json: three Data List planning-only envelopes route through one Core facade; five overlapping Host/specialist-route envelopes were reclassified with Phase 9-16 evidence."
+    },
+    {
+      "id": "core-extraction-wave3-batch-d-workflow-static-plan",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-d-workflow-static-plan.v0.1.0.json"
+    },
+    {
+      "id": "core-extraction-wave3-batch-e-template-static-normalization",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-e-template-static-normalization.v0.1.0.json"
+    },
+    {
+      "id": "core-extraction-caller-graph-reconciliation",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-caller-graph.v0.1.0.json, compatibility/capability-manifests/core-extraction-caller-graph-reconciliation.v0.1.0.json, compatibility/capability-manifests/core-extraction-production-ownership-inventory.v0.5.0.json, compatibility/capability-manifests/core-extraction-proof-envelope-registry.v0.5.0.json, compatibility/capability-manifests/core-extraction-ownership-dependency-graph.v0.2.0.json, and compatibility/capability-manifests/core-extraction-finite-wave-plan.v0.6.0.json: production-only AST caller evidence reconciles direct, imported, exported-consumer, callback-only, and unreachable semantics without changing routes or artifacts."
+    },
+    {
+      "id": "core-extraction-wave3-batch-f-small-static-leaf-cohort",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-f-small-static-leaf-cohort.v0.1.0.json"
+    },
+    {
+      "id": "core-extraction-wave3-batch-g-approval-form-static-configuration",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-g-approval-form-static-configuration.v0.1.0.json"
+    },
+    {
+      "id": "core-extraction-wave3-batch-h-application-plan-foundation-selection-and-execution",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-h-application-plan-foundation-selection-and-execution.v0.1.0.json"
+    },
+    {
+      "id": "core-extraction-wave3-batch-i-data-list-static-configuration-selection-and-execution",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-i-data-list-static-configuration-selection-and-execution.v0.1.0.json"
+    },
+    {
+      "id": "core-extraction-wave3-batch-j-dashboard-static-configuration-selection-and-execution",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-j-dashboard-static-configuration-selection-and-execution.v0.1.0.json"
+    },
+    {
+      "id": "dashboard-v11-summary-host-dynamic-user-fixture-and-slot-selection-reconciliation",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/dashboard-v11-summary-host-dynamic-user-fixture-and-slot-selection-reconciliation.v0.1.0.json: stale list-table fixture reconciled to the current list-scoped parsing contract; production materializer, Core artifact, distribution, and lineage remain unchanged."
+    },
+    {
+      "id": "core-extraction-wave3-batch-k-approval-form-sublist-static-configuration-selection-and-execution",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-k-approval-form-sublist-static-configuration.v0.1.0.json"
+    },
+    {
+      "id": "core-extraction-wave3-batch-l-final-residual-envelope-reconciliation-and-disposition",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-wave3-batch-l-final-residual-envelope-reconciliation-and-disposition.v0.1.0.json"
+    },
+    {
+      "id": "core-extraction-core-v1-closure",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-extraction-core-v1-closure.v1.0.0.json"
+    },
+    {
+      "id": "core-v1-release-candidate-integration-and-application-e2e-readiness",
+      "status": "complete",
+      "evidence": "compatibility/capability-manifests/core-v1-rc-integration-readiness.v1.0.0.json"
+    }
+  ],
+  "inProgress": [],
+  "blocked": [
+    {
+      "id": "core-v1-rc2-oauth-browser-login-entrypoint-platform-support-audit",
+      "status": "superseded_for_host_triggered_browser_oauth",
+      "evidence": "2026-07-20 historical evidence: the installed Codex Plugin contract has no supported declarative user-action or local browser-login registration surface. This remains valid only for custom Plugin UI and MCP designs. It does not block the existing host-triggered browser OAuth flow, which starts only from an already authorized API operation and does not require a Plugin UI action. See compatibility/capability-manifests/yeeflow-oauth-browser-login-entrypoint-platform-support.v1.0.0.json."
+    },
+    {
+      "id": "phase-5g-data-list-default-view-layout-projection-shadow",
+      "status": "blocked",
+      "marker": "NO_SAFE_DATA_LIST_DEFAULT_VIEW_LAYOUT_PROJECTION_SHADOW",
+      "evidence": "2026-07-18 historical blocker: TypeScript AST re-audit found parseDataViewFixedFilterConditionPart calls crypto.randomUUID for every materialized fixed-filter condition key, while buildDataListViewLayoutViewChecked mutates the caller-owned findings array. Phase 5H/5I subsequently established and shadow-proved an explicit host-owned filter-key and findings-lowering contract; Phase 5J accepted a future bounded Core shadow without reopening this historical production-routing block."
+    },
+    {
+      "id": "phase-11b-dynamic-summary-runtime-scope-evidence-missing",
+      "status": "superseded_by_read_only_export_scope_evidence",
+      "marker": "SUBLIST_SUMMARY_TEMP_VARIABLE_RUNTIME_SCOPE_EVIDENCE_MISSING",
+      "reason": "No available export, Legacy, or product-runtime evidence proves a lossless stable relationship among parent ListID, parent FieldID, form/resource, summary, temporary-variable inventory, and temporary-variable identity. Names and mutable resource traversal are insufficient.",
+      "supersededBy": "SUBLIST_SUMMARY_TEMP_VARIABLE_EXPORT_SCOPE_EVIDENCE_ACCEPTED",
+      "note": "The original Legacy-only conclusion remains historical evidence. The new read-only Data List export proves configuration containment and binding relationships, not runtime lifecycle behavior."
+    },
+    {
+      "id": "phase-13a-data-list-sublist-embedded-lookup-control-contract-audit",
+      "status": "superseded_by_export_scope_evidence",
+      "evidence": "2026-07-19: embedded Sublist Lookup child target declaration, resolved target ListID propagation, and Legacy parity shape are absent from the current model; Phase 6 top-level resolution cannot be widened by inference.",
+      "supersededBy": "phase-13b-data-list-sublist-embedded-lookup-export-scope-evidence-audit"
+    },
+    {
+      "id": "phase-14c-data-list-sublist-lookup-additional-field-runtime-distribution-and-routing",
+      "status": "superseded_for_configuration_generation_only",
+      "reason": "The authoritative static export still does not prove Data List Lookup selection-event timing, retrieval, clear-selection, invalid-target, destination mutation, or runtime read-only behavior. The configuration-only materializer route is now separately proven and does not claim those behaviors."
+    },
+    {
+      "id": "phase-14c-data-list-sublist-lookup-additional-field-runtime-evidence-blocker",
+      "status": "retained_runtime_deferred",
+      "reason": "Provide Data List runtime/designer evidence covering selection, initialization, edit, repeat, clear, missing target, destination mutation, and readonly enforcement before any product runtime work."
+    },
+    {
+      "id": "phase-15-data-list-sublist-remaining-configuration-family-selection",
+      "status": "superseded_by_phase16_export_evidence",
+      "marker": "PHASE_15_CONFIGURATION_NO_SAFE_CANDIDATE",
+      "reason": "No authoritative Data List export proves an un-routed embedded special-control configuration with an immutable deterministic boundary.",
+      "smallestPrerequisite": "A read-only Data List export containing the exact embedded special-control configuration",
+      "supersededBy": "phase-16-data-list-sublist-identity-control-configuration-closure"
+    },
+    {
+      "id": "phase-17-cross-surface-capability-portfolio-and-next-vertical-selection-audit",
+      "status": "no_safe_candidate",
+      "marker": "PHASE_17_NO_SAFE_CANDIDATE",
+      "reason": "The authoritative Approval Form export proves a narrow Sublist Lookup target/display configuration, but the current Approval Form Legacy lowerer does not emit its lossless target/display keys. The other audited surfaces lack a matching authoritative export or an isolated immutable boundary. A Data List route cannot be reused because the two products have separate models and identities.",
+      "smallestPrerequisite": "Establish, without changing production routing, an Approval Form-specific Legacy parity contract for embedded Sublist Lookup target/display metadata that preserves listid, appid, listsetid, and listfield as lossless configuration values."
+    },
+    {
+      "id": "phase-18a-approval-form-sublist-lookup-legacy-parity-contract-audit",
+      "status": "superseded_by_authorized_product_behavior_enhancement",
+      "marker": "APPROVAL_FORM_SUBLIST_LOOKUP_LEGACY_PARITY_UNAVAILABLE",
+      "reason": "All four required Lookup target/display keys are either intentionally discarded before Approval Form materialization or exist only in imported/exported product data. No exact Legacy-generated representation exists.",
+      "smallestPrerequisite": "A separately authorized Approval Form product-behavior enhancement with product/export/runtime evidence.",
+      "supersededBy": "phase-18b-approval-form-sublist-lookup-configuration-preservation"
+    }
+  ],
+  "nextSteps": [
+    {
+      "order": 0,
+      "id": "core-v1-rc-candidate-build-and-isolated-e2e-validation",
+      "description": "Create a checksummed isolated 1.0.0-rc.1 candidate workspace, build only there, and execute the declared source/archive/installed and application E2E matrix before any signing or isolated-install request."
+    },
+    {
+      "order": 0,
+      "id": "core-extraction-wave3-batch-b-workflow-query-data-static-plan",
+      "description": "Start Wave 3 Batch B only after this AST caller graph is used for its scoped caller, parity, distribution, and rollback proof."
+    },
+    {
+      "order": 0,
+      "id": "Wave 3 Batch F proof-envelope selection",
+      "description": "Continue the calibrated Wave 3 registry with caller evidence, parity, distribution proof, and rollback."
+    },
+    {
+      "order": 0,
+      "id": "Wave 3 Batch E proof-envelope selection",
+      "description": "Continue the calibrated Wave 3 registry with caller evidence, parity, distribution proof, and rollback."
+    },
+    {
+      "order": 1,
+      "id": "phase-11e-sublist-summary-dynamic-intent-dual-public-distribution-promotion",
+      "description": "Promote only the accepted immutable Core intent and non-mutating Local Runtime metadata APIs through the official builder, with four-surface and rollback proof."
+    },
+    {
+      "order": 7,
+      "id": "phase-5v-data-list-additional-view-layout-selective-routing-proof",
+      "description": "Add adapter and routing proof only for the approved additional Type 0 Data List LayoutView boundary after separate authorization."
+    },
+    {
+      "order": 8,
+      "id": "mixed-file-decomposition-follow-up",
+      "description": "Use the versioned decomposition ledger to split subsequent mixed modules only after each selected vertical slice has Legacy/Core differential evidence."
+    },
+    {
+      "order": 9,
+      "id": "publish-local-migration-report",
+      "description": "Run focused tests and record results without commit, PR, release, or stable promotion."
+    }
+  ],
+  "protectedPaths": [
+    "dist/yeeflow-app-builder-plugin/**/* 2.*",
+    "dist/yeeflow-app-builder-plugin/**/* 3.*",
+    ".codex/plugins/cache/**",
+    ".codex/.tmp/marketplaces/**"
+  ],
+  "worktreeProtection": {
+    "capturedAt": "2026-07-17",
+    "preservedModifiedPaths": [
+      ".gitignore"
+    ],
+    "preservedUntrackedPaths": [
+      "docs/architecture/yeeflow-app-builder-core-handoff.md",
+      "docs/architecture/yeeflow-app-builder-core-migration-state.json",
+      "dist/yeeflow-app-builder-plugin/docs/studies/normalized/workflow-expressions/scheduled-workflow-expression-context.normalized 2.json"
+    ],
+    "protectedDuplicatePaths": [
+      "dist/yeeflow-app-builder-plugin/docs/studies/normalized/workflow-expressions/scheduled-workflow-expression-context.normalized 2.json"
+    ],
+    "policy": "Preserve all listed paths. Do not delete, stage, rename, or include protected duplicate files in migration scope."
+  },
+  "realtimeBaseline": {
+    "verifiedAt": "2026-07-17",
+    "head": "fcc8b8e16b784f1032759ee1b6b588a144497feb",
+    "tag": "yeeflow-app-builder-plugin-v0.9.71",
+    "sourceReleaseVersion": "0.9.71",
+    "sourceReleaseEvidence": "README.md and CHANGELOG.md",
+    "distPluginVersion": "0.9.71",
+    "installedPluginVersion": "0.9.71",
+    "distInstalledMetadataSha256": "ce105efe3a8a71a31cd96ddabca5e5df3a4fde58fe1c74c3cd30cfaa0a71be8b",
+    "sourceDistParity": "passed",
+    "sourceDistParityEvidence": "The versioned topology contract classifies every source and dist script as exact mirror, transformed mirror, root compatibility copy, source-only development tool, or generated distribution artifact. SHA-256 verification passed for exact mirrors and no unknown topology or semantic-classification finding remains."
+  },
+  "focusedVerification": {
+    "englishOnlyGate": {
+      "validator": "scripts/validate-english-only-content.mjs",
+      "tests": "scripts/test-english-only-content-gate.mjs",
+      "allowlist": "compatibility/capability-manifests/english-only-allowlist.json",
+      "status": "passed",
+      "scope": "migration-owned changed files by default; explicit path, Git changed file, and generated artifact directory inputs are supported"
+    },
+    "sourceDistTopology": {
+      "contract": "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json",
+      "validator": "scripts/validate-source-dist-topology.mjs",
+      "tests": "scripts/test-phase0-topology-and-capability-manifests.mjs",
+      "status": "passed",
+      "unknownRelationshipCount": 0
+    },
+    "workspaceSkeleton": {
+      "packageManager": "pnpm@11.9.0",
+      "typescript": "5.7.3",
+      "packageCount": 12,
+      "typecheck": "passed",
+      "tests": "passed",
+      "packageBoundaryValidation": "passed"
+    },
+    "dependencyBoundary": {
+      "validator": "scripts/validate-dependency-boundaries.mjs",
+      "tests": "scripts/test-dependency-boundaries.mjs",
+      "parser": "TypeScript compiler API",
+      "status": "passed",
+      "sourceFileCount": 13
+    },
+    "mixedFileDecomposition": {
+      "ledger": "compatibility/capability-manifests/yeeflow-app-builder-mixed-file-decomposition.v0.9.71.json",
+      "report": "docs/architecture/yeeflow-app-builder-mixed-file-decomposition-audit.v0.9.71.md",
+      "generator": "scripts/create-mixed-file-decomposition-ledger.mjs",
+      "validator": "scripts/validate-mixed-file-decomposition-ledger.mjs",
+      "tests": "scripts/test-mixed-file-decomposition-ledger.mjs",
+      "status": "passed",
+      "auditedRecordCount": 461,
+      "selectedFirstVerticalSlice": "scripts/lib/markdown-planning-utils.mjs"
+    },
+    "architectureConvergence": {
+      "contract": "compatibility/capability-manifests/yeeflow-app-builder-core-architecture-convergence.v0.1.0.json",
+      "report": "docs/architecture/yeeflow-app-builder-core-architecture-convergence.v0.1.0.md",
+      "approvedPackageGraphVersion": "0.1.0",
+      "packageCount": 17,
+      "status": "passed"
+    },
+    "markdownPlanningDifferential": {
+      "coreModule": "packages/app-builder-core-planning/src/markdown-planning-utils.ts",
+      "legacyModule": "scripts/lib/markdown-planning-utils.mjs",
+      "corpus": "compatibility/differential-fixtures/markdown-planning-utils.v0.9.71.json",
+      "validator": "scripts/validate-markdown-planning-differential.mjs",
+      "tests": "scripts/test-markdown-planning-differential.mjs",
+      "status": "passed",
+      "fixtureCount": 8,
+      "callCount": 36,
+      "repositoryWideParity": "not_complete"
+    },
+    "markdownPlanningCoreCompatibilityAdapter": {
+      "adapter": "scripts/lib/markdown-planning-core-adapter.mjs",
+      "validator": "scripts/validate-markdown-planning-core-adapter.mjs",
+      "parityTest": "scripts/test-markdown-planning-core-adapter-parity.mjs",
+      "resolutionTest": "scripts/test-markdown-planning-core-adapter-resolution.mjs",
+      "selectedCallerTest": "scripts/test-markdown-planning-core-adapter-selected-callers.mjs",
+      "status": "passed",
+      "fixtureCount": 8,
+      "callCount": 36,
+      "selectedCallerCount": 7,
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2"
+    },
+    "printBarcodePlanCompatibilityCutover": {
+      "validator": "scripts/validate-form-action-print-barcode-plan.mjs",
+      "requiredApi": "parseMarkdownTables",
+      "fixture": "compatibility/differential-fixtures/form-action-print-barcode-plan.v0.9.71.json",
+      "parityTest": "scripts/test-form-action-print-barcode-core-adapter-parity.mjs",
+      "resolutionTest": "scripts/test-form-action-print-barcode-core-adapter-resolution.mjs",
+      "status": "passed",
+      "fixtureCount": 2,
+      "callCount": 6,
+      "existingRegressionCaseCount": 16,
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "remainingLegacyCallers": [
+        "scripts/materialize-full-app-generated-final.mjs",
+        "scripts/validate-app-plan-resource-order.mjs",
+        "scripts/validate-functional-spec-to-app-plan-traceability.mjs",
+        "scripts/validate-generation-readiness-review.mjs"
+      ]
+    },
+    "approvalLayoutTemplateCompatibilityCutover": {
+      "validator": "scripts/validate-approval-form-layout-template.mjs",
+      "requiredApi": [
+        "extractMarkdownSubsection",
+        "findMarkdownTable",
+        "markdownRowValue"
+      ],
+      "fixture": "compatibility/differential-fixtures/approval-form-layout-template.v0.9.71.json",
+      "parityTest": "scripts/test-approval-form-layout-core-adapter-parity.mjs",
+      "resolutionTest": "scripts/test-approval-form-layout-core-adapter-resolution.mjs",
+      "existingRegressions": [
+        "scripts/test-approval-form-layout-template-gates.mjs",
+        "scripts/test-validator-parsing-hardening-gates.mjs"
+      ],
+      "status": "passed",
+      "fixtureCount": 6,
+      "callCount": 18,
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "remainingLegacyCallers": [
+        "scripts/materialize-full-app-generated-final.mjs",
+        "scripts/validate-app-plan-resource-order.mjs",
+        "scripts/validate-functional-spec-to-app-plan-traceability.mjs",
+        "scripts/validate-generation-readiness-review.mjs"
+      ]
+    },
+    "functionalSpecTraceabilityCompatibilityCutover": {
+      "validator": "scripts/validate-functional-spec-to-app-plan-traceability.mjs",
+      "requiredApi": [
+        "findMarkdownTable",
+        "isNegativeRequirementStatement",
+        "markdownRowValue",
+        "positivePlanningText"
+      ],
+      "fixture": "compatibility/differential-fixtures/functional-spec-to-app-plan-traceability.v0.9.71.json",
+      "parityTest": "scripts/test-functional-spec-traceability-core-adapter-parity.mjs",
+      "resolutionTest": "scripts/test-functional-spec-traceability-core-adapter-resolution.mjs",
+      "existingRegressions": [
+        "scripts/test-clarification-readiness-traceability-gates.mjs",
+        "scripts/test-validator-parsing-hardening-gates.mjs",
+        "scripts/test-app-plan-control-action-property-gates.mjs"
+      ],
+      "status": "passed",
+      "fixtureCount": 5,
+      "callCount": 15,
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "remainingLegacyCallers": [
+        "scripts/materialize-full-app-generated-final.mjs",
+        "scripts/validate-app-plan-resource-order.mjs",
+        "scripts/validate-generation-readiness-review.mjs"
+      ]
+    },
+    "resourceOrderCompatibilityCutover": {
+      "validator": "scripts/validate-app-plan-resource-order.mjs",
+      "requiredApi": [
+        "extractMarkdownSubsection",
+        "findMarkdownTable",
+        "hasTechnicalPlaceholderIdContext",
+        "markdownRowValue",
+        "parseMarkdownTables",
+        "positivePlanningText"
+      ],
+      "fixture": "compatibility/differential-fixtures/app-plan-resource-order.v0.9.71.json",
+      "parityTest": "scripts/test-resource-order-core-adapter-parity.mjs",
+      "resolutionTest": "scripts/test-resource-order-core-adapter-resolution.mjs",
+      "existingRegressions": [
+        "scripts/test-app-plan-schema-validator-consistency-gates.mjs",
+        "scripts/test-app-plan-dashboard-pages-plan-gates.mjs",
+        "scripts/test-planning-markdown-template-standardization-gates.mjs",
+        "scripts/test-functional-specification-and-app-plan-gates.mjs",
+        "scripts/test-data-list-form-layout-template-gates.mjs",
+        "scripts/test-validator-parsing-hardening-gates.mjs"
+      ],
+      "status": "passed",
+      "fixtureCount": 7,
+      "callCount": 21,
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "generatedFinalTargetProjectionValidation": "intentionally_out_of_scope_and_unchanged",
+      "remainingLegacyProductionCallers": [
+        "scripts/materialize-full-app-generated-final.mjs"
+      ],
+      "retainedTestOnlyLegacyComparators": [
+        "scripts/test-generation-readiness-markdown-parser-gates.mjs",
+        "scripts/test-validator-parsing-hardening-gates.mjs",
+        "scripts/test-markdown-planning-differential.mjs",
+        "scripts/test-markdown-planning-core-adapter-parity.mjs"
+      ]
+    },
+    "generationReadinessCompatibilityCutover": {
+      "validator": "scripts/validate-generation-readiness-review.mjs",
+      "requiredApi": [
+        "findMarkdownTable",
+        "markdownRowValue",
+        "positivePlanningText",
+        "splitMarkdownTableRow",
+        "stripMarkdownFencedBlocks"
+      ],
+      "fixture": "compatibility/differential-fixtures/generation-readiness-review.v0.9.71.json",
+      "parityTest": "scripts/test-generation-readiness-core-adapter-parity.mjs",
+      "resolutionTest": "scripts/test-generation-readiness-core-adapter-resolution.mjs",
+      "existingRegressions": [
+        "scripts/test-generation-readiness-markdown-parser-gates.mjs",
+        "scripts/test-clarification-readiness-traceability-gates.mjs",
+        "scripts/test-app-plan-schema-validator-consistency-gates.mjs",
+        "scripts/test-app-plan-control-action-property-gates.mjs",
+        "scripts/test-business-clarification-and-app-plan-precision-gates.mjs",
+        "scripts/test-planning-default-approval-and-exact-type-gates.mjs",
+        "scripts/test-validator-parsing-hardening-gates.mjs"
+      ],
+      "status": "passed",
+      "fixtureCount": 7,
+      "callCount": 21,
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "remainingLegacyProductionCallers": [
+        "scripts/materialize-full-app-generated-final.mjs"
+      ],
+      "retainedTestOnlyLegacyComparators": [
+        "scripts/test-generation-readiness-markdown-parser-gates.mjs",
+        "scripts/test-validator-parsing-hardening-gates.mjs",
+        "scripts/test-markdown-planning-differential.mjs",
+        "scripts/test-markdown-planning-core-adapter-parity.mjs"
+      ]
+    },
+    "materializerSeamAudit": {
+      "ledger": "compatibility/capability-manifests/materializer-seam-audit.v0.1.0.json",
+      "report": "docs/architecture/yeeflow-app-builder-materializer-seam-audit.v0.1.0.md",
+      "generator": "scripts/create-materializer-seam-audit.mjs",
+      "validator": "scripts/validate-materializer-seam-audit.mjs",
+      "tests": "scripts/test-materializer-seam-audit.mjs",
+      "status": "passed",
+      "analysisMethod": "TypeScript AST top-level function inventory, local call graph, direct helper module scan, and conservative host-effect propagation.",
+      "auditedFunctionCount": 482,
+      "directHelperModuleCount": 17,
+      "classificationCounts": {
+        "deterministic-core-candidate": 333,
+        "mixed-needs-boundary-adapter": 25,
+        "host-orchestration-only": 38,
+        "deferred-high-risk": 86
+      },
+      "detectedHostSideEffectCategories": [
+        "archive-compression",
+        "environment",
+        "filesystem",
+        "id-generation",
+        "package-writing",
+        "process"
+      ],
+      "selectedFirstSlice": "scripts/materialize-full-app-generated-final.mjs#normalizeHexColor",
+      "selectionStatus": "selected",
+      "implementationStatus": "normalize_hex_color_routed_through_distributed_core_with_actual_materializer_parity_passed",
+      "materializerBehaviorChanged": false,
+      "normalizeHexColorShadow": {
+        "legacyFunctionPath": "scripts/materialize-full-app-generated-final.mjs#normalizeHexColor",
+        "coreSourceFunctionPath": "packages/app-builder-core-materializer/src/index.ts#normalizeHexColor",
+        "compiledCoreFunctionPath": "packages/app-builder-core-materializer/lib/index.js#normalizeHexColor",
+        "corpus": "compatibility/differential-fixtures/materializer-normalize-hex-color.v0.1.0.json",
+        "corpusCaseCount": 13,
+        "test": "scripts/test-materializer-normalize-hex-differential.mjs",
+        "status": "passed",
+        "productionCallerSwitch": "passed_normalize_hex_color_only",
+        "distributionCutover": "passed",
+        "distributionArtifact": "dist/yeeflow-app-builder-plugin/core/yeeflow-app-builder-core-materializer.v0.1.0.mjs",
+        "distributionArtifactSha256": "5d06c22ddb8a462cd08910a2e1236aea69c0bfbd84850772a299bac5dd66f3d5",
+        "distributionSurfaces": [
+          "source",
+          "archive",
+          "installed"
+        ],
+        "compatibilityAdapterCutover": "passed_normalize_hex_color_only",
+        "adapter": "scripts/lib/materializer-core-adapter.mjs",
+        "preCutoverLegacyCallCount": 4,
+        "postCutoverCoreCallCount": 4,
+        "postCutoverLegacyCallCount": 0,
+        "rollback": "Temporary full Plugin copy removes the adapter import and replaces coreNormalizeHexColor with normalizeHexColor at the four scoped call expressions."
+      }
+    },
+    "materializerCoreDistribution": {
+      "publicApiContract": "compatibility/capability-manifests/app-builder-core-materializer-public-api.v0.1.0.json",
+      "publicApiTest": "scripts/test-materializer-core-public-api-contract.mjs",
+      "distributionTest": "scripts/test-materializer-core-distribution-resolution.mjs",
+      "status": "passed",
+      "artifacts": [
+        {
+          "packageName": "@yeeflow/app-builder-core-planning",
+          "path": "dist/yeeflow-app-builder-plugin/core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
+          "sha256": "de10000fc92ef0c65bfcc4e30ec7e9c01052bb4166a5bf4e08d86e86e5808ae0",
+          "exportCount": 11,
+          "preserved": true
+        },
+        {
+          "packageName": "@yeeflow/app-builder-core-materializer",
+          "path": "dist/yeeflow-app-builder-plugin/core/yeeflow-app-builder-core-materializer.v0.1.0.mjs",
+          "sha256": "d24060698b3bace9366c5436435e6cfcf177773d4fbf3083181f55a33bac6203",
+          "exportCount": 7,
+          "corpusCaseCount": 93,
+          "surfaces": [
+            "source",
+            "archive",
+            "installed"
+          ]
+        }
+      ],
+      "markers": [
+        "MATERIALIZER_CORE_DISTRIBUTION_VALID",
+        "MATERIALIZER_CORE_ARTIFACT_SOURCE_PARITY_PASSED",
+        "MATERIALIZER_CORE_ARTIFACT_ARCHIVE_PARITY_PASSED",
+        "MATERIALIZER_CORE_ARTIFACT_INSTALLED_PARITY_PASSED",
+        "MATERIALIZER_CORE_PUBLIC_API_CONTRACT_PASSED"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "legacyMaterializerProductionOwner": true
+    },
+    "materializerNormalizeHexCompatibilityAdapter": {
+      "adapter": "scripts/lib/materializer-core-adapter.mjs",
+      "validator": "scripts/validate-materializer-core-adapter.mjs",
+      "gateTest": "scripts/test-materializer-core-adapter-gates.mjs",
+      "integrationTest": "scripts/test-materializer-normalize-hex-adapter-routing.mjs",
+      "fixture": "compatibility/differential-fixtures/materializer-normalize-hex-materializer-integration.v0.1.0.json",
+      "status": "passed",
+      "stableCodes": [
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_LOAD_FAILED",
+        "MATERIALIZER_CORE_ADAPTER_EXPORT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_FORBIDDEN_RESOLUTION"
+      ],
+      "callSites": {
+        "preCutoverLegacy": 4,
+        "postCutoverCore": 4,
+        "postCutoverLegacy": 0
+      },
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "legacyRollback": "passed",
+      "productionScope": "normalizeHexColor call routing only"
+    },
+    "materializerDefaultValueCompatibilityAdapter": {
+      "adapter": "scripts/lib/materializer-core-adapter.mjs",
+      "validator": "scripts/validate-materializer-core-adapter.mjs",
+      "gateTest": "scripts/test-materializer-core-adapter-gates.mjs",
+      "differentialTest": "scripts/test-materializer-default-value-differential.mjs",
+      "integrationTest": "scripts/test-materializer-default-value-adapter-routing.mjs",
+      "fixture": "compatibility/differential-fixtures/materializer-default-value-for-field-type-integration.v0.1.0.json",
+      "status": "passed",
+      "corpusCaseCount": 15,
+      "markers": [
+        "MATERIALIZER_LOOSE_FORM_MATCH_CORE_SHADOW_IMPLEMENTED",
+        "MATERIALIZER_LOOSE_FORM_MATCH_DIFFERENTIAL_PARITY_PASSED",
+        "MATERIALIZER_LOOSE_FORM_MATCH_IMMUTABILITY_PASSED",
+        "MATERIALIZER_LOOSE_FORM_MATCH_SOURCE_ROUTING_PASSED",
+        "MATERIALIZER_LOOSE_FORM_MATCH_ARCHIVE_ROUTING_PASSED",
+        "MATERIALIZER_LOOSE_FORM_MATCH_INSTALLED_ROUTING_PASSED",
+        "MATERIALIZER_LOOSE_FORM_MATCH_MATERIALIZER_INTEGRATION_PARITY_PASSED",
+        "MATERIALIZER_LOOSE_FORM_MATCH_MATERIALIZER_DETERMINISM_PASSED",
+        "MATERIALIZER_LOOSE_FORM_MATCH_LEGACY_ROLLBACK_PASSED"
+      ],
+      "stableCodes": [
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_LOAD_FAILED",
+        "MATERIALIZER_CORE_ADAPTER_EXPORT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_FORBIDDEN_RESOLUTION"
+      ],
+      "callSites": {
+        "preCutoverLegacy": 1,
+        "postCutoverCore": 1,
+        "postCutoverLegacy": 0
+      },
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "legacyRollback": "passed",
+      "productionScope": "defaultValueForFieldType call routing only"
+    },
+    "materializerEscapeRegExpCompatibilityAdapter": {
+      "adapter": "scripts/lib/materializer-core-adapter.mjs",
+      "validator": "scripts/validate-materializer-core-adapter.mjs",
+      "gateTest": "scripts/test-materializer-core-adapter-gates.mjs",
+      "differentialTest": "scripts/test-materializer-escape-regexp-differential.mjs",
+      "integrationTest": "scripts/test-materializer-escape-regexp-adapter-routing.mjs",
+      "fixture": "compatibility/differential-fixtures/materializer-escape-regexp-materializer-integration.v0.1.0.json",
+      "status": "passed",
+      "corpusCaseCount": 13,
+      "stableCodes": [
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_LOAD_FAILED",
+        "MATERIALIZER_CORE_ADAPTER_EXPORT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_FORBIDDEN_RESOLUTION"
+      ],
+      "callSites": {
+        "preCutoverLegacy": 1,
+        "postCutoverCore": 1,
+        "postCutoverLegacy": 0
+      },
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "legacyRollback": "passed",
+      "productionScope": "escapeRegExp call routing only"
+    },
+    "materializerLooseFormMatchCompatibilityAdapter": {
+      "adapter": "scripts/lib/materializer-core-adapter.mjs",
+      "validator": "scripts/validate-materializer-core-adapter.mjs",
+      "gateTest": "scripts/test-materializer-core-adapter-gates.mjs",
+      "differentialTest": "scripts/test-materializer-normalize-loose-form-match-differential.mjs",
+      "integrationTest": "scripts/test-materializer-normalize-loose-form-match-adapter-routing.mjs",
+      "fixture": "compatibility/differential-fixtures/materializer-normalize-loose-form-match-integration.v0.1.0.json",
+      "status": "passed",
+      "corpusCaseCount": 15,
+      "stableCodes": [
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_LOAD_FAILED",
+        "MATERIALIZER_CORE_ADAPTER_EXPORT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_FORBIDDEN_RESOLUTION"
+      ],
+      "callSites": {
+        "preCutoverLegacy": 3,
+        "postCutoverCore": 3,
+        "postCutoverLegacy": 0
+      },
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "legacyRollback": "passed",
+      "productionScope": "normalizeForLooseFormMatch routing only"
+    },
+    "materializerStripPlanningSuffixCompatibilityAdapter": {
+      "adapter": "scripts/lib/materializer-core-adapter.mjs",
+      "validator": "scripts/validate-materializer-core-adapter.mjs",
+      "gateTest": "scripts/test-materializer-core-adapter-gates.mjs",
+      "differentialTest": "scripts/test-materializer-strip-planning-document-suffix-differential.mjs",
+      "integrationTest": "scripts/test-materializer-strip-planning-document-suffix-adapter-routing.mjs",
+      "fixture": "compatibility/differential-fixtures/materializer-strip-planning-document-suffix-integration.v0.1.0.json",
+      "status": "passed",
+      "corpusCaseCount": 19,
+      "markers": [
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_CORE_SHADOW_IMPLEMENTED",
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_DIFFERENTIAL_PARITY_PASSED",
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_IMMUTABILITY_PASSED",
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_SOURCE_ROUTING_PASSED",
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_ARCHIVE_ROUTING_PASSED",
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_INSTALLED_ROUTING_PASSED",
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_MATERIALIZER_INTEGRATION_PARITY_PASSED",
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_MATERIALIZER_DETERMINISM_PASSED",
+        "MATERIALIZER_STRIP_PLANNING_SUFFIX_LEGACY_ROLLBACK_PASSED"
+      ],
+      "stableCodes": [
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_LOAD_FAILED",
+        "MATERIALIZER_CORE_ADAPTER_EXPORT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_FORBIDDEN_RESOLUTION"
+      ],
+      "callSites": {
+        "preCutoverLegacy": 3,
+        "postCutoverCore": 3,
+        "postCutoverLegacy": 0
+      },
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "legacyRollback": "passed",
+      "productionScope": "stripPlanningDocumentSuffix routing only"
+    },
+    "materializerDependencyNameCompatibilityAdapter": {
+      "adapter": "scripts/lib/materializer-core-adapter.mjs",
+      "validator": "scripts/validate-materializer-core-adapter.mjs",
+      "gateTest": "scripts/test-materializer-core-adapter-gates.mjs",
+      "differentialTest": "scripts/test-materializer-dependency-name-differential.mjs",
+      "integrationTest": "scripts/test-materializer-dependency-name-adapter-routing.mjs",
+      "fixture": "compatibility/differential-fixtures/materializer-dependency-name-integration.v0.1.0.json",
+      "status": "passed",
+      "corpusCaseCount": 18,
+      "markers": [
+        "MATERIALIZER_DEPENDENCY_NAME_CORE_SHADOW_IMPLEMENTED",
+        "MATERIALIZER_DEPENDENCY_NAME_DIFFERENTIAL_PARITY_PASSED",
+        "MATERIALIZER_DEPENDENCY_NAME_IMMUTABILITY_PASSED",
+        "MATERIALIZER_DEPENDENCY_NAME_SOURCE_ROUTING_PASSED",
+        "MATERIALIZER_DEPENDENCY_NAME_ARCHIVE_ROUTING_PASSED",
+        "MATERIALIZER_DEPENDENCY_NAME_INSTALLED_ROUTING_PASSED",
+        "MATERIALIZER_DEPENDENCY_NAME_MATERIALIZER_INTEGRATION_PARITY_PASSED",
+        "MATERIALIZER_DEPENDENCY_NAME_MATERIALIZER_DETERMINISM_PASSED",
+        "MATERIALIZER_DEPENDENCY_NAME_LEGACY_ROLLBACK_PASSED"
+      ],
+      "stableCodes": [
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_ARTIFACT_LOAD_FAILED",
+        "MATERIALIZER_CORE_ADAPTER_EXPORT_MISSING",
+        "MATERIALIZER_CORE_ADAPTER_FORBIDDEN_RESOLUTION"
+      ],
+      "callSites": {
+        "preCutoverLegacy": 4,
+        "postCutoverCore": 4,
+        "postCutoverLegacy": 0
+      },
+      "surfaces": [
+        "source",
+        "archive",
+        "installed"
+      ],
+      "historicalZipSha256": "377dc6ddaf3b922c0543e3a77274e7a56f32b4e2f19452f4a73ed6ad7f8cd9e2",
+      "legacyRollback": "passed",
+      "productionScope": "dependencyName routing only"
+    },
+    "materializerPhase4fCandidateSelection": {
+      "ledger": "compatibility/capability-manifests/materializer-seam-audit.v0.1.0.json",
+      "report": "docs/architecture/yeeflow-app-builder-materializer-seam-audit.v0.1.0.md",
+      "generator": "scripts/create-materializer-seam-audit.mjs",
+      "validator": "scripts/validate-materializer-seam-audit.mjs",
+      "regression": "scripts/test-materializer-seam-audit.mjs",
+      "status": "passed",
+      "auditOnly": true,
+      "remainingDeterministicCandidateCount": 327,
+      "eligibleSingleSliceCount": 4,
+      "recommendedNextSlice": "scripts/materialize-full-app-generated-final.mjs#normalizeForLooseFormMatch",
+      "coreArtifactChanged": false,
+      "productionRoutingChanged": false
+    }
+  },
+  "forbiddenInitialActions": [
+    "bulk materializer migration",
+    "legacy script deletion",
+    "unrelated worktree cleanup",
+    "duplicate-file staging",
+    "independent repository extraction",
+    "Service Runtime implementation",
+    "commit",
+    "push",
+    "pull request",
+    "release",
+    "stable promotion"
+  ],
+  "proofStatus": {
+    "capabilityInventory": "passed",
+    "englishOnlyGate": "passed",
+    "dependencyBoundary": "passed",
+    "workspaceSkeleton": "passed",
+    "mixedFileDecomposition": "passed",
+    "architectureConvergence": "passed",
+    "legacyCoreDifferential": "partial_markdown_planning_utils_passed",
+    "markdownPlanningDifferential": "passed",
+    "sourceDistParity": "passed",
+    "packageValidation": "not_started",
+    "pluginInstallSmoke": "not_started",
+    "runtimeProof": "not_started",
+    "rollbackProof": "passed",
+    "materializerSeamAudit": "passed",
+    "materializerNormalizeHexShadow": "passed",
+    "materializerCoreDistribution": "passed",
+    "materializerNormalizeHexCompatibilityAdapter": "passed",
+    "materializerDefaultValueVerticalSlice": "passed",
+    "materializerDefaultValueCompatibilityAdapter": "passed",
+    "materializerEscapeRegExpVerticalSlice": "passed",
+    "materializerEscapeRegExpCompatibilityAdapter": "passed",
+    "materializerLooseFormMatchVerticalSlice": "passed",
+    "materializerLooseFormMatchCompatibilityAdapter": "passed",
+    "materializerStripPlanningSuffixVerticalSlice": "passed",
+    "materializerStripPlanningSuffixCompatibilityAdapter": "passed",
+    "materializerDependencyNameVerticalSlice": "passed",
+    "materializerDependencyNameCompatibilityAdapter": "passed",
+    "materializerDependencyIdentifierVerticalSlice": "passed",
+    "materializerDependencyIdentifierCompatibilityAdapter": "passed",
+    "materializerPhase4fCandidateSelection": "passed",
+    "materializerPhase4Closure": "passed",
+    "dataListScalarFieldProjectionShadow": "passed",
+    "dataListScalarFieldProjectionPublicApiDistribution": "passed",
+    "dataListScalarFieldProjectionRoutingReadiness": "accepted",
+    "dataListScalarFieldProjectionRouting": "passed",
+    "fieldControlProjectionFamilySelectionAudit": "passed",
+    "resourceDefinitionConstructionAudit": "passed",
+    "dataListDefaultViewLayoutProjectionShadow": "public_default_route_passed_additional_views_legacy_excluded",
+    "dataListDefaultViewLayoutProjectionInternalShadow": "passed",
+    "dataListDefaultViewLayoutProjectionDistributionReadiness": "passed",
+    "dataListDefaultViewLayoutProjectionPublicApiReadiness": "accepted_and_promoted",
+    "dataListDefaultViewLayoutProjectionPublicApiDistribution": "passed_default_route_proven",
+    "dataListDefaultViewLayoutProjectionRouting": "passed_default_view_only",
+    "dataListAdditionalViewLayoutContractAudit": "accepted_not_routed",
+    "dataListAdditionalViewLayoutInternalShadow": "passed_not_public_not_routed",
+    "dataListAdditionalViewLayoutPublicApiReadiness": "accepted_and_promoted",
+    "dataListAdditionalViewLayoutPublicApiDistribution": "passed_not_routed",
+    "dataListAdditionalViewLayoutRouting": "passed_additional_type_0_only",
+    "dataListDefaultViewLayoutProjectionReaudit": "passed",
+    "fixedFilterKeyFindingsHostContract": "passed",
+    "fixedFilterParserHostLoweringShadow": "passed",
+    "fixedFilterParserDistributionContract": "passed",
+    "localRuntimeFixedFilterLoweringDistributionReadiness": "accepted_and_distributed",
+    "localRuntimeFixedFilterLoweringDistribution": "passed",
+    "dataListScalarResourceIdentityShadow": "passed",
+    "dataListScalarResourceIdentityDualDistribution": "passed_not_routed",
+    "dataListScalarResourceIdentityRoutingReadiness": "accepted",
+    "dataListScalarResourceIdentityRouting": "passed",
+    "dataListResourceDefinitionFamilyClosure": "passed",
+    "phase5Closure": "accepted",
+    "crossResourceLookupResolutionContract": "accepted",
+    "dataListLookupResolutionInternalShadow": "passed_internal_only",
+    "dataListLookupResolutionDualPublicDistributionReadiness": "accepted",
+    "dataListLookupResolutionDualPublicDistribution": "passed",
+    "dataListLookupResolutionRoutingReadiness": "accepted",
+    "dataListLookupResolutionSelectiveRouting": "passed",
+    "dataListLookupResolutionFamilyClosure": "passed_lineage_reconciled",
+    "advancedFieldTemplateGraphContract": "accepted",
+    "dataListType1IdentityUserControlPlacement": "passed_internal_only",
+    "dataListType1IdentityControlPlacementDualPublicDistributionReadiness": "accepted",
+    "dataListType1IdentityControlPlacementDualPublicDistribution": "not_started",
+    "dataListType1IdentityUserControlPlacementDualPublicDistribution": "passed",
+    "dataListType1IdentityUserControlPlacementSelectiveRouting": "passed",
+    "advancedFieldTemplateGraphFamilyClosure": "passed",
+    "dataListSublistNestedTemplateGraphContract": "accepted",
+    "dataListSublistScalarRowSchemaShadow": "parity_passed_internal_only",
+    "dataListSublistScalarRowSchemaDualPublicDistributionReadiness": "accepted",
+    "dataListSublistScalarRowSchemaDualPublicDistribution": "passed",
+    "dataListSublistScalarRowSchemaCoupledConsumerRouting": "reassessed_not_routed_frozen_descriptor_seam_required",
+    "dataListSublistChildResourceIdentityContract": "superseded_embedded_schema_has_no_child_product_resources",
+    "dataListSublistChildResourceInventoryHostShadow": "superseded_not_applicable",
+    "dataListSublistChildResourceInventoryLocalRuntimePublicApiReadiness": "superseded_not_applicable",
+    "dataListSublistChildResourceInventoryDistributionReadiness": "superseded_not_applicable",
+    "dataListSublistChildResourceInventoryLocalRuntimePublicDistribution": "superseded_not_applicable",
+    "dataListSublistChildResourceInventoryPostAllocationBoundary": "superseded_not_applicable",
+    "dataListSublistChildResourceInventoryIntegrationReadiness": "superseded_no_child_api_identity_required",
+    "dataListSublistLegacyIdentityProvenance": "retained_observation_superseded_premise",
+    "dataListSublistExportEvidence": "passed_lossless_string_decode",
+    "dataListSublistEmbeddedSchemaContract": "passed",
+    "dataListSublistEmbeddedSchemaDifferential": "passed",
+    "dataListSublistEmbeddedSchemaPreDivergenceBoundary": "audited",
+    "dataListSublistFrozenDescriptorRoutingReadiness": "accepted_not_routed",
+    "dataListSublistFrozenDescriptorRegressions": "passed",
+    "dataListSublistChildIdentityPrerequisite": "supersession_reconfirmed",
+    "dataListSublistFrozenDescriptorLocalRuntimeLowerer": "not_required_for_first_route",
+    "dataListSublistFrozenDescriptorPublicDistribution": "rejected_pending_phase_9k_reassessment",
+    "dataListSublistFrozenDescriptorInternalShadow": "passed_internal_only",
+    "dataListSublistFrozenDescriptorHostContext": "passed_non_serialized",
+    "dataListSublistFrozenDescriptorPhase9JPublicDistributionReadiness": "not_accepted",
+    "dataListSublistFrozenDescriptorHostContextPropagation": "accepted_not_routed",
+    "dataListSublistFrozenDescriptorPluginLocalHostContextIntegration": "passed_test_only",
+    "dataListSublistFrozenDescriptorProductionRoute": "passed_scalar_embedded_schema_only",
+    "dataListSublistFrozenDescriptorCorePublicApiReadiness": "accepted_and_promoted",
+    "dataListSublistFrozenDescriptorProductionIntegrationReadiness": "passed_scalar_embedded_schema_only",
+    "dataListSublistEmbeddedSchemaFamilyClosure": "accepted",
+    "phase9Closure": "accepted",
+    "dataListSublistFamilyClosure": "accepted",
+    "phase8Closure": "accepted",
+    "dataListSublistSummaryTemporaryVariableContract": "accepted",
+    "phase10ASummaryCandidate": "accepted",
+    "dataListSublistScalarSummaryIntentShadow": "passed_internal_only",
+    "dataListSublistScalarSummaryIntentPublicDistribution": "passed",
+    "dataListSublistScalarSummaryIntentCorePublicApiReadiness": "accepted_and_promoted",
+    "dataListSublistScalarSummaryIntentLocalRuntimePublicApiReadiness": "accepted_and_promoted",
+    "dataListSublistScalarSummaryIntentDualDistributionReadiness": "passed",
+    "dataListSublistScalarSummaryIntentDualPublicDistribution": "passed",
+    "dataListSublistScalarSummaryIntentRouting": "passed",
+    "dataListSublistScalarSummaryIntentTemporaryVariableNoninterference": "passed",
+    "dataListSublistSummaryFamilyClosure": "accepted",
+    "phase10Closure": "accepted",
+    "dataListSublistSummaryTempVariableLifecycleScope": "audited_candidate_rejected_missing_scope_proof",
+    "phase11TempVariableContract": "accepted_candidate_rejected",
+    "dataListSublistSummaryTempVariableScopeEvidence": "accepted_export_proven_nonserialized_host_context",
+    "phase11DynamicSummaryMigration": "shadow_passed_internal_only",
+    "dataListSublistDynamicSummaryIntentShadow": "passed_internal_only",
+    "dataListSublistDynamicSummaryHostScopeContext": "passed_nonserialized_test_only",
+    "dataListSublistDynamicSummaryIntentPublicReadiness": "accepted_and_promoted",
+    "dataListSublistDynamicSummaryLocalRuntimePublicReadiness": "accepted_and_promoted",
+    "dataListSublistDynamicSummaryDualDistributionReadiness": "passed",
+    "phase5RHistoricalLineage": "reconciled",
+    "dataListSublistDynamicSummaryIntentPublicDistribution": "passed",
+    "dataListSublistDynamicSummaryIntentRouting": "passed",
+    "dataListSublistDynamicSummaryTempVariableNoninterference": "passed",
+    "dataListSublistDynamicSummaryFamilyClosure": "accepted",
+    "phase11Closure": "accepted",
+    "dataListSublistNestedControlTemplateGraphContract": "accepted",
+    "dataListSublistNestedControlPlacementShadow": "passed_internal_only",
+    "dataListSublistNestedControlPlacementPublicReadiness": "accepted_and_promoted",
+    "dataListSublistNestedControlPlacementPublicDistribution": "passed",
+    "dataListSublistNestedControlPlacementDualDistribution": "passed",
+    "dataListSublistNestedControlPlacementRouting": "passed_scalar_embedded_only",
+    "dataListSublistNestedControlPlacementFamilyClosure": "accepted",
+    "phase12Closure": "accepted",
+    "dataListSublistEmbeddedLookupControlContract": "blocked_missing_explicit_child_target_scope",
+    "dataListSublistEmbeddedLookupScopeEvidence": "accepted_export_proven_target_display_only",
+    "dataListSublistEmbeddedLookupIntentShadow": "passed_internal_only",
+    "dataListSublistEmbeddedLookupPublicReadiness": "accepted_and_promoted",
+    "dataListSublistEmbeddedLookupPublicDistribution": "passed",
+    "dataListSublistEmbeddedLookupRouting": "passed",
+    "dataListSublistEmbeddedLookupFamilyClosure": "accepted",
+    "phase13Closure": "accepted",
+    "dataListSublistLookupAdditionalFieldWritebackContract": "accepted_static_intent_only",
+    "dataListSublistLookupAdditionalFieldWritebackIntentShadow": "passed_static_only",
+    "dataListSublistLookupAdditionalFieldWritebackRuntime": "deferred_product_frontend_runtime_out_of_scope",
+    "dataListSublistLookupAdditionalFieldConfigurationReadiness": "accepted",
+    "dataListSublistLookupAdditionalFieldConfigurationPublicDistribution": "passed",
+    "dataListSublistLookupAdditionalFieldConfigurationRouting": "passed",
+    "dataListSublistLookupAdditionalFieldConfigurationFamilyClosure": "accepted",
+    "phase14ConfigurationClosure": "accepted",
+    "dataListSublistRemainingConfigurationFamilies": "audited_no_safe_candidate",
+    "phase15ConfigurationSelection": "no_safe_candidate",
+    "dataListSublistIdentityControlConfiguration": "passed",
+    "phase16IdentityControlFamilyClosure": "accepted",
+    "crossSurfaceCapabilityPortfolio": "audited_no_safe_candidate",
+    "phase17NextVerticalSelection": "no_safe_candidate",
+    "approvalFormSublistLookupLegacyParity": "historically_unavailable_superseded_by_authorized_configuration_preservation",
+    "phase18ApprovalFormSublistLookupParity": "superseded_by_authorized_configuration_preservation",
+    "approvalFormSublistLookupConfigurationPreservation": "passed_source_archive_installed_materializer_and_rollback",
+    "coreExtractionProgramBaseline": "accepted_zero_unclassified_finite_wave_plan",
+    "coreExtractionProofEnvelopeCalibration": "accepted_finite_envelope_execution_model",
+    "coreExtractionWave1PlanningNormalization": "passed_source_archive_installed_rollback",
+    "coreExtractionWave2ApprovalFormSublistLookupStaticConfiguration": "passed_source_archive_installed_materializer_rollback",
+    "coreExtractionWave3BatchAWorkflowSetDataListProjection": "passed_source_archive_installed_materializer_rollback",
+    "coreExtractionWave3AcceptedEnvelopeProgress": "10/89",
+    "coreExtractionProvisionalWeightedCompletionScore": 56.1236,
+    "coreExtractionCallerGraph": "reconciled_ast_production_only",
+    "coreExtractionWave3BatchBWorkflowQueryDataStaticPlan": "passed_source_archive_installed_materializer_rollback",
+    "coreExtractionWave3BatchCDataListSublistStaticConfiguration": "passed_source_archive_installed_materializer_rollback",
+    "coreExtractionWave3BatchDWorkflowStaticPlan": "passed_source_archive_installed_workflow_regressions",
+    "wave3CoreExtractedEnvelopes": "34/89",
+    "wave3TerminalDispositionEnvelopes": {
+      "total": "89/89",
+      "extracted": 34,
+      "reclassified": 55,
+      "deferred": 0
+    },
+    "coreExtractionWave3BatchETemplateStaticNormalization": "passed_source_archive_installed_materializer",
+    "coreExtractionWave3BatchFSmallStaticLeafCohort": "passed",
+    "coreExtractionWave3BatchGApprovalFormStaticConfiguration": "passed_source_archive_installed_materializer_rollback",
+    "coreExtractionWave3BatchHApplicationPlanStaticFoundation": "passed_source_archive_installed_materializer_rollback",
+    "coreExtractionWave3BatchIDataListStaticConfiguration": "passed_source_archive_installed_materializer_rollback",
+    "coreExtractionWave3BatchJDashboardStaticConfiguration": "passed_source_archive_installed_materializer_rollback",
+    "dashboardV11SummaryHostDynamicUserFixtureSlotSelection": "passed_fixture_reconciled_no_production_transition",
+    "coreExtractionWave3BatchKApprovalFormSublistStaticConfiguration": "passed_source_archive_installed_layout_lowering_rollback",
+    "coreExtractionWave3BatchLResidualReconciliation": "passed_source_archive_installed_materializer_rollback",
+    "coreV1Closure": "accepted_terminal_coverage_100_actual_core_ownership_56_1236",
+    "coreV1TerminalCoverage": "100%",
+    "actualCoreOwnershipScore": 56.1236,
+    "coreV1RcCandidateAssemblyContract": "passed",
+    "coreV1RcApplicationE2eCoverageMatrix": "passed",
+    "coreV1RcRollbackInstallPlan": "passed",
+    "coreV1RcIntegrationReadiness": "accepted",
+    "coreV1RcCandidateBuild": "in_progress_rc2_host_triggered_oauth_reconciliation",
+    "yeeflowOAuthBrowserLoginEntrypoint": "superseded_for_host_triggered_oauth_only",
+    "coreV1RcIsolatedInstallAcceptance": "not_started",
+    "coreV1RcPromotion": "not_authorized"
+  }
+}

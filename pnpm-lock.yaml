@@ -1,0 +1,281 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    devDependencies:
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+
+  adapters/codex-plugin-adapter:
+    dependencies:
+      '@yeeflow/app-builder-core-local-runtime':
+        specifier: workspace:*
+        version: link:../../runtimes/app-builder-core-local-runtime
+
+  packages/app-builder-core:
+    dependencies:
+      '@yeeflow/app-builder-core-builder':
+        specifier: workspace:*
+        version: link:../app-builder-core-builder
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-identity':
+        specifier: workspace:*
+        version: link:../app-builder-core-identity
+      '@yeeflow/app-builder-core-materializer':
+        specifier: workspace:*
+        version: link:../app-builder-core-materializer
+      '@yeeflow/app-builder-core-package-engine':
+        specifier: workspace:*
+        version: link:../app-builder-core-package-engine
+      '@yeeflow/app-builder-core-planning':
+        specifier: workspace:*
+        version: link:../app-builder-core-planning
+      '@yeeflow/app-builder-core-repair-engine':
+        specifier: workspace:*
+        version: link:../app-builder-core-repair-engine
+      '@yeeflow/app-builder-core-runtime-client':
+        specifier: workspace:*
+        version: link:../app-builder-core-runtime-client
+      '@yeeflow/app-builder-core-runtime-verification':
+        specifier: workspace:*
+        version: link:../app-builder-core-runtime-verification
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+      '@yeeflow/app-builder-core-templates':
+        specifier: workspace:*
+        version: link:../app-builder-core-templates
+      '@yeeflow/app-builder-core-validators':
+        specifier: workspace:*
+        version: link:../app-builder-core-validators
+
+  packages/app-builder-core-builder:
+    dependencies:
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-identity':
+        specifier: workspace:*
+        version: link:../app-builder-core-identity
+      '@yeeflow/app-builder-core-planning':
+        specifier: workspace:*
+        version: link:../app-builder-core-planning
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+      '@yeeflow/app-builder-core-templates':
+        specifier: workspace:*
+        version: link:../app-builder-core-templates
+      '@yeeflow/app-builder-core-validators':
+        specifier: workspace:*
+        version: link:../app-builder-core-validators
+
+  packages/app-builder-core-canonical-model:
+    dependencies:
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-identity':
+        specifier: workspace:*
+        version: link:../app-builder-core-identity
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+
+  packages/app-builder-core-contracts: {}
+
+  packages/app-builder-core-identity:
+    dependencies:
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+
+  packages/app-builder-core-materializer:
+    dependencies:
+      '@yeeflow/app-builder-core-builder':
+        specifier: workspace:*
+        version: link:../app-builder-core-builder
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-identity':
+        specifier: workspace:*
+        version: link:../app-builder-core-identity
+      '@yeeflow/app-builder-core-package-engine':
+        specifier: workspace:*
+        version: link:../app-builder-core-package-engine
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+      '@yeeflow/app-builder-core-templates':
+        specifier: workspace:*
+        version: link:../app-builder-core-templates
+      '@yeeflow/app-builder-core-validators':
+        specifier: workspace:*
+        version: link:../app-builder-core-validators
+
+  packages/app-builder-core-package-engine:
+    dependencies:
+      '@yeeflow/app-builder-core-builder':
+        specifier: workspace:*
+        version: link:../app-builder-core-builder
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-identity':
+        specifier: workspace:*
+        version: link:../app-builder-core-identity
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+      '@yeeflow/app-builder-core-validators':
+        specifier: workspace:*
+        version: link:../app-builder-core-validators
+
+  packages/app-builder-core-planning:
+    dependencies:
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+
+  packages/app-builder-core-repair-engine:
+    dependencies:
+      '@yeeflow/app-builder-core-builder':
+        specifier: workspace:*
+        version: link:../app-builder-core-builder
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-identity':
+        specifier: workspace:*
+        version: link:../app-builder-core-identity
+      '@yeeflow/app-builder-core-package-engine':
+        specifier: workspace:*
+        version: link:../app-builder-core-package-engine
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+      '@yeeflow/app-builder-core-validators':
+        specifier: workspace:*
+        version: link:../app-builder-core-validators
+
+  packages/app-builder-core-runtime-client:
+    dependencies:
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+
+  packages/app-builder-core-runtime-verification:
+    dependencies:
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-package-engine':
+        specifier: workspace:*
+        version: link:../app-builder-core-package-engine
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+
+  packages/app-builder-core-schemas:
+    dependencies:
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+
+  packages/app-builder-core-templates:
+    dependencies:
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+
+  packages/app-builder-core-test-fixtures:
+    dependencies:
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-identity':
+        specifier: workspace:*
+        version: link:../app-builder-core-identity
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+
+  packages/app-builder-core-validators:
+    dependencies:
+      '@yeeflow/app-builder-core-canonical-model':
+        specifier: workspace:*
+        version: link:../app-builder-core-canonical-model
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../app-builder-core-contracts
+      '@yeeflow/app-builder-core-schemas':
+        specifier: workspace:*
+        version: link:../app-builder-core-schemas
+      '@yeeflow/app-builder-core-templates':
+        specifier: workspace:*
+        version: link:../app-builder-core-templates
+
+  runtimes/app-builder-core-local-runtime:
+    dependencies:
+      '@yeeflow/app-builder-core':
+        specifier: workspace:*
+        version: link:../../packages/app-builder-core
+      '@yeeflow/app-builder-core-runtime-client':
+        specifier: workspace:*
+        version: link:../../packages/app-builder-core-runtime-client
+      '@yeeflow/app-builder-core-runtime-verification':
+        specifier: workspace:*
+        version: link:../../packages/app-builder-core-runtime-verification
+
+packages:
+
+  typescript@5.7.3:
+    resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+snapshots:
+
+  typescript@5.7.3: {}

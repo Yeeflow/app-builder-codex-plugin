@@ -13,7 +13,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Version: `0.9.71`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.71` hardens shared Markdown planning parsing and completes Workflow List-variable child projection into generated ContentList workflows.
+Current release `1.0.0` delivers Core v1 and the OAuth browser-login repair.
 
 ## Install In Codex App
 

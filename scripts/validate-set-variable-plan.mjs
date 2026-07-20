@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import setVariableContractUtils from "./lib/set-variable-contract-utils.cjs";
-import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-core-adapter.mjs";
 
 const { normalizeSetVariableHostType } = setVariableContractUtils;
 

@@ -1,0 +1,3 @@
+# Phase 12E Nested Control Placement Selective Routing Proof
+
+One immutable placement intent is projected before `attrs.list-fields` assignment for each eligible scalar embedded Sublist. Local Runtime consumes explicit host-generated control IDs and returns fresh metadata only. Actual materializer source, official temporary ZIP, simulated installed Plugin, double-run determinism, and temporary-copy Legacy rollback have normalized decoded-output parity. The route excludes summaries, nested controls, Lookup, identity/binary controls, actions, graph mutation, and package output. Embedded id and idx are never resource identities.

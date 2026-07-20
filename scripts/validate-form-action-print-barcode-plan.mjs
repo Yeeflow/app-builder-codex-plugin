@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { parseMarkdownTables } from "./lib/markdown-planning-utils.mjs";
+import { parseMarkdownTables } from "./lib/markdown-planning-core-adapter.mjs";
 
 export function extractPrintBarcodePlanRows(text) {
   const rows = [];

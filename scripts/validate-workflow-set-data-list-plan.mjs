@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-core-adapter.mjs";
 
 const HOSTS = new Set(["approval form", "data list", "scheduled"]);
 const OPERATIONS = new Set(["add", "edit", "remove"]);
@@ -212,7 +212,7 @@ function parseJson(raw, label, path, findings) {
 function add(findings, severity, code, message, path, detail = {}) { findings.push({ severity, code, message, path, ...detail }); }
 function value(row, name) { const key = Object.keys(row).find((candidate) => normalize(candidate) === normalize(name)); return key ? String(row[key] || "").trim() : ""; }
 function normalize(value) { return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
-function isNone(value) { return !String(value || "").trim() || /^(none|n\/a|not applicable|无|不适用)$/i.test(String(value).trim()); }
+function isNone(value) { return !String(value || "").trim() || /^(none|n\/a|not applicable|\u65e0|\u4e0d\u9002\u7528)$/i.test(String(value).trim()); }
 function isTableLine(line) { return /^\s*\|.*\|\s*$/.test(String(line || "")); }
 function splitRow(line) { return splitMarkdownTableRow(line); }
 function argument(name) { const index = process.argv.indexOf(name); return index === -1 ? "" : process.argv[index + 1] || ""; }

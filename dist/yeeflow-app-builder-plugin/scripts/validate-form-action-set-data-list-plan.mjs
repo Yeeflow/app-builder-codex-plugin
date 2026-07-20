@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-core-adapter.mjs";
 
 const OPERATIONS = new Set(["add", "edit", "remove"]);
 const TARGET_MODES = new Set(["current", "select"]);
@@ -132,7 +132,7 @@ function value(row, ...names) {
   return "";
 }
 function normalize(valueText) { return String(valueText || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
-function isNone(valueText) { return !String(valueText || "").trim() || /^(none|n\/a|not applicable|无|不适用)$/i.test(String(valueText).trim()) || /^<.*>$/.test(String(valueText).trim()); }
+function isNone(valueText) { return !String(valueText || "").trim() || /^(none|n\/a|not applicable|\u65e0|\u4e0d\u9002\u7528)$/i.test(String(valueText).trim()) || /^<.*>$/.test(String(valueText).trim()); }
 function isTableLine(line) { return /^\s*\|.*\|\s*$/.test(line || ""); }
 function splitRow(line) { return splitMarkdownTableRow(line); }
 function add(findings, severity, code, message, path, detail = {}) { findings.push({ severity, code, message, path, ...detail }); }
