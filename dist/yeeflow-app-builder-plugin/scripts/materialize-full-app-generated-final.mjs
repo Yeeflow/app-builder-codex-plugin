@@ -102,6 +102,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const APPLICATION_ICON_BY_DOMAIN = Object.freeze([
   { pattern: /leave|absence|time off|calendar/i, icon: "fa-regular fa-calendar-check" },
   { pattern: /travel|trip/i, icon: "fa-solid fa-plane-departure" },
+  { pattern: /office asset loan|it hardware|hardware asset|computer asset|device loan/i, icon: "fa-solid fa-laptop" },
   { pattern: /asset|inventory|equipment|loan/i, icon: "fa-solid fa-boxes-stacked" },
   { pattern: /procurement|purchase|vendor/i, icon: "fa-solid fa-cart-shopping" },
   { pattern: /customer|account health/i, icon: "fa-solid fa-chart-line" },

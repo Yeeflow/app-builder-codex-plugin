@@ -47,6 +47,35 @@ const packagePath = report.outputs.package;
 const { wrapper, decoded } = readDecodedYapk(packagePath);
 assert.match(wrapper.IconUrl, /calendar-check/);
 
+const officeAssetPlan = path.join(temp, "office-asset-plan.md");
+const officeAssetSpec = path.join(temp, "office-asset-spec.md");
+fs.writeFileSync(officeAssetPlan, leavePlan
+  .replace("# Leave Operations - Yeeflow App Plan", "# Office Asset Loan Management - Yeeflow App Plan")
+  .replace("- Application name: Leave Operations", "- Application name: Office Asset Loan Management"));
+fs.writeFileSync(officeAssetSpec, "# Functional Specification: Office Asset Loan Management\n\nBusiness defaults approval status: user-default-approved-for-generation.\n");
+const officeAsset = run("scripts/materialize-full-app-generated-final.mjs", [
+  "--functional-spec", officeAssetSpec,
+  "--app-plan", officeAssetPlan,
+  "--out-dir", path.join(temp, "office-asset-dist"),
+  "--allow-fixture-api-ids-for-tests",
+  "--json",
+]);
+assert.match(readDecodedYapk(JSON.parse(officeAsset.stdout).outputs.package).wrapper.IconUrl, /fa-solid fa-laptop/);
+
+const explicitIconPlan = path.join(temp, "explicit-icon-plan.md");
+fs.writeFileSync(explicitIconPlan, leavePlan.replace(
+  "- Application name: Leave Operations",
+  "- Application name: Leave Operations\n- Application icon selection: `fa-solid fa-microchip`",
+));
+const explicitIcon = run("scripts/materialize-full-app-generated-final.mjs", [
+  "--functional-spec", spec,
+  "--app-plan", explicitIconPlan,
+  "--out-dir", path.join(temp, "explicit-icon-dist"),
+  "--allow-fixture-api-ids-for-tests",
+  "--json",
+]);
+assert.match(readDecodedYapk(JSON.parse(explicitIcon.stdout).outputs.package).wrapper.IconUrl, /fa-solid fa-microchip/);
+
 const unknownDomainPlan = path.join(temp, "unknown-domain-plan.md");
 const unknownDomainSpec = path.join(temp, "unknown-domain-spec.md");
 fs.writeFileSync(unknownDomainPlan, leavePlan
