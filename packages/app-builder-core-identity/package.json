@@ -1,0 +1,9 @@
+{
+  "name": "@yeeflow/app-builder-core-identity",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": { "types": "./lib/index.d.ts", "default": "./lib/index.js" } },
+  "scripts": { "typecheck": "tsc -p tsconfig.json --noEmit" },
+  "dependencies": { "@yeeflow/app-builder-core-contracts": "workspace:*" }
+}

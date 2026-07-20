@@ -27,7 +27,7 @@ try {
   }
   const urlPath = buildPath(capability, params);
   const query = buildQuery(capability, params);
-  const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local" });
+  const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local", onDemandLogin: true, oauthOnly: true });
   if (auth.mode !== "oauth") {
     console.log(JSON.stringify(buildLoginRequiredResult({
       auth,

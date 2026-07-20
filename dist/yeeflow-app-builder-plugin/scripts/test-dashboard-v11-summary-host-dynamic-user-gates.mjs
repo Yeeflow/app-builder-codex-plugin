@@ -58,16 +58,16 @@ Business defaults approval status: user-default-approved-for-generation.
 
 ## 4. Data Lists and Document Libraries Plan
 
-### 4.1 Data List Schema Table
+### 4.1 Doctor Profiles
 
-| List | Field label | Internal field | Field type | Purpose |
-| --- | --- | --- | --- | --- |
-| Doctor Profiles | Title | Title | Text | Native title mirrors doctor name |
-| Doctor Profiles | Doctor Name | Text1 | Text | Doctor display name |
-| Doctor Profiles | Employee Number | Text2 | Text | Employee number identifier, not a user field |
-| Doctor Profiles | Department | Text3 | Text | Department name |
-| Doctor Profiles | Profile Owner | Text4 | identity-picker | Existing Yeeflow user responsible for profile maintenance |
-| Doctor Profiles | Employment Status | Text5 | Choice | Active, On Leave, Inactive |
+| Field label | Internal field | Field type | Purpose |
+| --- | --- | --- | --- |
+| Title | Title | Text | Native title mirrors doctor name |
+| Doctor Name | Text1 | Text | Doctor display name |
+| Employee Number | Text2 | Text | Employee number identifier, not a user field |
+| Department | Text3 | Text | Department name |
+| Profile Owner | Text4 | identity-picker | Existing Yeeflow user responsible for profile maintenance |
+| Employment Status | Text5 | Choice | Active, On Leave, Inactive |
 
 ## 14. Dashboard Pages Plan
 
@@ -152,15 +152,22 @@ Business defaults approval status: user-default-approved-for-generation.
 
   const employeeNumberControls = findAll(resource, (node) => node.type === "dynamic-field" && /employee number/i.test(`${node.name || ""} ${node.title || ""}`));
   assert.ok(employeeNumberControls.length > 0, "Employee Number should render as a normal dynamic-field identifier");
+  assert.ok(employeeNumberControls.every((entry) => entry.node.field === "Text2" && entry.node.attrs?.data?.field === "Text2"), "Employee Number dynamic-field slots must retain the planned Text2 field identity");
   const ownerControls = findAll(resource, (node) => /profile owner/i.test(`${node.name || ""} ${node.title || ""}`));
+  assert.ok(ownerControls.length > 0, "Profile Owner must be assigned to an eligible dynamic control slot");
   assert.ok(ownerControls.every((entry) => entry.node.type === "dynamic-user"), "Profile Owner identity fields must render as dynamic-user");
+  const dynamicSlotFields = findAll(resource, (node) => String(node.type || "").startsWith("dynamic-"))
+    .map((entry) => entry.node.field || entry.node.attrs?.data?.field);
+  assert.deepEqual(dynamicSlotFields, ["Title", "Text4", "Text2"], "The surviving grid-table dynamic slots must preserve the current Legacy field/type selection order after schema pruning");
 
   console.log(JSON.stringify({
     status: "pass",
+    marker: "DASHBOARD_V11_SUMMARY_HOST_DYNAMIC_USER_FIXTURE_SLOT_SELECTION_RECONCILED",
     cases: [
       "v1.1 Summary hidden host is nested inside approved KPI business slot",
       "Employee Number dynamic-field is not misclassified as a user field",
       "Profile Owner identity-picker renders as dynamic-user",
+      "fixture uses the current list-scoped field-table shape and asserts fixed grid-table slot selection",
       "generated package passes dashboard page-layout and golden conformance gates",
     ],
   }, null, 2));

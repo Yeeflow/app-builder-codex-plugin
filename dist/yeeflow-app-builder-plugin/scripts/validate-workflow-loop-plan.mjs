@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
+import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-core-adapter.mjs";
 
 if (isMainModule()) {
   const plan = argument("--plan") || process.argv.slice(2).find((item) => item !== "--json");
@@ -94,7 +94,7 @@ function normalize(value) {
 }
 
 function isNone(value) {
-  return !String(value || "").trim() || /^(none|n\/a|not applicable|无|不适用)$/i.test(String(value).trim());
+  return !String(value || "").trim() || /^(none|n\/a|not applicable|\u65e0|\u4e0d\u9002\u7528)$/i.test(String(value).trim());
 }
 
 function isTableLine(line) {

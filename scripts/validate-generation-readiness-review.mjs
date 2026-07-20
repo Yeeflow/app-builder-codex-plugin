@@ -16,7 +16,7 @@ import {
   positivePlanningText,
   splitMarkdownTableRow,
   stripMarkdownFencedBlocks,
-} from "./lib/markdown-planning-utils.mjs";
+} from "./lib/markdown-planning-core-adapter.mjs";
 
 const AREAS = [
   { key: "dataLists", title: "Data Lists and Document Libraries Plan", code: "GENERATION_READINESS_AREA_EMPTY", required: /data list|document library|not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required/i, extra: validateDataLists },

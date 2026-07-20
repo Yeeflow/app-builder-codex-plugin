@@ -262,7 +262,7 @@ const args = parseArgs(process.argv);
 const envPath = path.join(process.cwd(), ".env.local");
 const envFile = fs.existsSync(envPath) ? ".env.local" : "not-present";
 let auth;
-auth = await resolveYeeflowApiAuth({ dotenv: envPath });
+auth = await resolveYeeflowApiAuth({ dotenv: envPath, onDemandLogin: true, oauthOnly: true });
 if (auth.mode !== "oauth") {
   console.log(JSON.stringify({
     envFile,

@@ -1,0 +1,114 @@
+#!/usr/bin/env node
+
+import assert from "node:assert/strict";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const validator = resolve(root, "scripts/validate-phase-closure-proof-lineage.mjs");
+const lineage = "compatibility/capability-manifests/phase-closure-proof-lineage.v0.1.0.json";
+const source = "scripts/materialize-full-app-generated-final.mjs";
+const closure = "compatibility/capability-manifests/data-list-resource-definition-family-closure.v0.1.0.json";
+const evidence = "compatibility/capability-manifests/data-list-lookup-resolution-selective-routing-proof.v0.1.0.json";
+const promotion = "compatibility/capability-manifests/data-list-type1-identity-control-placement-dual-public-distribution-promotion.v0.1.0.json";
+const promotionReport = "docs/architecture/yeeflow-app-builder-phase-7d-data-list-type1-identity-control-placement-dual-public-distribution-promotion.v0.1.0.md";
+const routing = "compatibility/capability-manifests/data-list-type1-identity-control-placement-selective-routing-proof.v0.1.0.json";
+const routingReport = "docs/architecture/yeeflow-app-builder-phase-7e-data-list-type1-identity-control-placement-selective-routing-proof.v0.1.0.md";
+const sublistPromotion = "compatibility/capability-manifests/data-list-sublist-scalar-row-schema-dual-public-distribution-promotion.v0.1.0.json";
+const sublistPromotionReport = "docs/architecture/yeeflow-app-builder-phase-8d-data-list-sublist-scalar-row-schema-dual-public-distribution-promotion.v0.1.0.md";
+const inventoryPromotion = "compatibility/capability-manifests/data-list-sublist-child-resource-inventory-local-runtime-public-distribution-promotion.v0.1.0.json";
+const inventoryPromotionReport = "docs/architecture/yeeflow-app-builder-phase-9d-data-list-sublist-child-resource-inventory-local-runtime-public-distribution-promotion.v0.1.0.md";
+const summaryPromotion = "compatibility/capability-manifests/data-list-sublist-scalar-summary-intent-dual-public-distribution-promotion.v0.1.0.json";
+const summaryPromotionReport = "docs/architecture/yeeflow-app-builder-phase-10d-data-list-sublist-scalar-summary-intent-dual-public-distribution-promotion.v0.1.0.md";
+const summaryRouting = "compatibility/capability-manifests/data-list-sublist-scalar-summary-intent-production-routing.v0.1.0.json";
+const summaryRoutingReport = "docs/architecture/yeeflow-app-builder-phase-10e-data-list-sublist-scalar-summary-intent-selective-routing-proof.v0.1.0.md";
+const batchGEvidence = "compatibility/capability-manifests/core-extraction-wave3-batch-g-approval-form-static-configuration.v0.1.0.json";
+const batchGReport = "docs/architecture/yeeflow-app-builder-core-extraction-wave3-batch-g-approval-form-static-configuration.v0.1.0.md";
+const materializerArtifact = "dist/yeeflow-app-builder-plugin/core/yeeflow-app-builder-core-materializer.v0.1.0.mjs";
+const runtimeArtifact = "dist/yeeflow-app-builder-plugin/core/yeeflow-app-builder-core-local-runtime.v0.1.0.mjs";
+const originals = new Map([lineage, source, closure, evidence, promotion, promotionReport, routing, routingReport, sublistPromotion, sublistPromotionReport, inventoryPromotion, inventoryPromotionReport, summaryPromotion, summaryPromotionReport, summaryRouting, summaryRoutingReport, batchGEvidence, batchGReport, materializerArtifact, runtimeArtifact].map((path) => [path, readFileSync(resolve(root, path), "utf8")]));
+const temporary = mkdtempSync(resolve(tmpdir(), "yeeflow-closure-lineage-"));
+try {
+  assert.equal(run().status, 0);
+  mutate(lineage, (value) => value + "\n");
+  expect("tampered-lineage", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(lineage);
+  mutate(evidence, (value) => value + "\n");
+  expect("tampered-evidence", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(evidence);
+  mutate(promotion, (value) => value + "\n");
+  expect("tampered-promotion", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(promotion);
+  rmSync(resolve(root, promotionReport));
+  expect("missing-promotion-evidence", "PHASE_CLOSURE_PROOF_LINEAGE_BASELINE_STALE");
+  restore(promotionReport);
+  mutate(routing, (value) => value + "\n");
+  expect("tampered-routing-evidence", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(routing);
+  rmSync(resolve(root, routingReport));
+  expect("missing-routing-report", "PHASE_CLOSURE_PROOF_LINEAGE_BASELINE_STALE");
+  restore(routingReport);
+  mutate(sublistPromotion, (value) => value + "\n");
+  expect("tampered-sublist-promotion", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(sublistPromotion);
+  rmSync(resolve(root, sublistPromotionReport));
+  expect("missing-sublist-promotion-evidence", "PHASE_CLOSURE_PROOF_LINEAGE_BASELINE_STALE");
+  restore(sublistPromotionReport);
+  mutate(inventoryPromotion, (value) => value + "\n");
+  expect("tampered-inventory-promotion", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(inventoryPromotion);
+  rmSync(resolve(root, inventoryPromotionReport));
+  expect("missing-inventory-promotion-evidence", "PHASE_CLOSURE_PROOF_LINEAGE_BASELINE_STALE");
+  restore(inventoryPromotionReport);
+  mutate(summaryPromotion, (value) => value + "\n");
+  expect("tampered-summary-promotion", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(summaryPromotion);
+  rmSync(resolve(root, summaryPromotionReport));
+  expect("missing-summary-promotion-evidence", "PHASE_CLOSURE_PROOF_LINEAGE_BASELINE_STALE");
+  restore(summaryPromotionReport);
+  mutate(summaryRouting, (value) => value + "\n");
+  expect("tampered-summary-routing", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(summaryRouting);
+  mutate(batchGEvidence, (value) => value + "\n");
+  expect("tampered-wave3-batch-g-evidence", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(batchGEvidence);
+  rmSync(resolve(root, batchGReport));
+  expect("missing-wave3-batch-g-report", "PHASE_CLOSURE_PROOF_LINEAGE_BASELINE_STALE");
+  restore(batchGReport);
+  rmSync(resolve(root, summaryRoutingReport));
+  expect("missing-summary-routing-report", "PHASE_CLOSURE_PROOF_LINEAGE_TAMPERED");
+  restore(summaryRoutingReport);
+  mutate(source, (value) => value.replace("DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_CORE_ROUTE_START", "DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_CORE_ROUTE_ALTERED"));
+  expect("altered-route-token", "PHASE_CLOSURE_PROOF_LINEAGE_UNDOCUMENTED_CHANGE");
+  restore(source);
+  mutate(source, (value) => value + "\n// undocumented shared materializer mutation\n");
+  expect("undocumented-source", "PHASE_CLOSURE_PROOF_LINEAGE_UNDOCUMENTED_CHANGE");
+  restore(source);
+  mutate(materializerArtifact, (value) => value + "\n// undocumented artifact drift\n");
+  expect("undocumented-artifact", "PHASE_CLOSURE_PROOF_LINEAGE_UNDOCUMENTED_CHANGE");
+  restore(materializerArtifact);
+  mutate(runtimeArtifact, (value) => value + "\n// undocumented artifact drift\n");
+  expect("undocumented-runtime-artifact", "PHASE_CLOSURE_PROOF_LINEAGE_UNDOCUMENTED_CHANGE");
+  restore(runtimeArtifact);
+  const stale = JSON.parse(originals.get(closure));
+  delete stale.closureProofLineage;
+  const stalePath = resolve(temporary, "stale-closure.json");
+  writeFileSync(stalePath, JSON.stringify(stale, null, 2) + "\n", "utf8");
+  expect("missing-baseline", "PHASE_CLOSURE_PROOF_LINEAGE_BASELINE_STALE", stalePath);
+  const broad = JSON.parse(originals.get(closure));
+  broad.closureProofLineage.path = "scripts";
+  const broadPath = resolve(temporary, "broad-closure.json");
+  writeFileSync(broadPath, JSON.stringify(broad, null, 2) + "\n", "utf8");
+  expect("broad-exception", "PHASE_CLOSURE_PROOF_LINEAGE_BASELINE_STALE", broadPath);
+  console.log("PHASE_CLOSURE_PROOF_LINEAGE_REGRESSIONS_PASSED cases=24");
+} finally {
+  for (const [path, value] of originals) writeFileSync(resolve(root, path), value, "utf8");
+  rmSync(temporary, { recursive: true, force: true });
+}
+function mutate(path, operation) { writeFileSync(resolve(root, path), operation(originals.get(path)), "utf8"); }
+function restore(path) { writeFileSync(resolve(root, path), originals.get(path), "utf8"); }
+function run(contractPath) { const argumentsList = contractPath ? [validator, "--closure-contract", contractPath] : [validator]; const result = spawnSync(process.execPath, argumentsList, { cwd: root, encoding: "utf8" }); return { status: result.status, output: result.stdout + result.stderr }; }
+function expect(id, code, contractPath) { const result = run(contractPath); assert.notEqual(result.status, 0, id); assert.match(result.output, new RegExp(code), id); }

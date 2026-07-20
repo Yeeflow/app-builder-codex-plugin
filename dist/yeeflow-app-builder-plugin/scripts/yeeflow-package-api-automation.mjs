@@ -214,7 +214,7 @@ async function loadWorkspaceDiscoverySummary(options) {
 
   try {
     const capability = getCapability("workspaces.listByCategory");
-    const auth = await resolveYeeflowApiAuth({ dotenv: options.dotenv || ".env.local" });
+    const auth = await resolveYeeflowApiAuth({ dotenv: options.dotenv || ".env.local", onDemandLogin: true, oauthOnly: true });
     if (auth.mode !== "oauth") {
       return {
         source: "oauth-read-only",
@@ -288,7 +288,7 @@ async function executeOperation(options, env, resolvedPackagePath) {
     }
     upgradeIdStability = stabilityGate;
   }
-  const auth = await resolveYeeflowApiAuth({ loadDotenv: false });
+  const auth = await resolveYeeflowApiAuth({ loadDotenv: false, onDemandLogin: true, oauthOnly: true });
   if (auth.mode !== "oauth") {
     process.exitCode = 1;
     return buildLoginRequiredResult({

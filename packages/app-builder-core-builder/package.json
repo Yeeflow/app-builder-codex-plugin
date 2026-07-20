@@ -1,0 +1,17 @@
+{
+  "name": "@yeeflow/app-builder-core-builder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": { "types": "./lib/index.d.ts", "default": "./lib/index.js" } },
+  "scripts": { "typecheck": "tsc -p tsconfig.json --noEmit" },
+  "dependencies": {
+    "@yeeflow/app-builder-core-contracts": "workspace:*",
+    "@yeeflow/app-builder-core-schemas": "workspace:*",
+    "@yeeflow/app-builder-core-identity": "workspace:*",
+    "@yeeflow/app-builder-core-canonical-model": "workspace:*",
+    "@yeeflow/app-builder-core-planning": "workspace:*",
+    "@yeeflow/app-builder-core-templates": "workspace:*",
+    "@yeeflow/app-builder-core-validators": "workspace:*"
+  }
+}

@@ -16,7 +16,7 @@ import {
 } from "./lib/approval-workflow-designer-shape-utils.mjs";
 import { encodeYapkResourceOfficial } from "./lib/yapk-decode-utils.mjs";
 import { cleanPlanningLabel, isPlanningPlaceholder } from "./lib/planning-placeholder-utils.mjs";
-import { resolveSchemaAuthoritativeFormControlType } from "./lib/form-control-type-authority.mjs";
+import { resolveSchemaAuthoritativeFormControlType } from "./lib/form-control-type-authority-core-adapter.mjs";
 import {
   buildWorkflowQueryDataProperties,
   buildWorkflowLoopProperties,
@@ -34,10 +34,54 @@ import choiceFieldOptionUtils from "./lib/choice-field-option-utils.cjs";
 import { validateWorkflowSetDataListPlan } from "./validate-workflow-set-data-list-plan.mjs";
 import { splitMarkdownTableRow, stripMarkdownFencedBlocks } from "./lib/markdown-planning-utils.mjs";
 import {
+  defaultValueForFieldType as coreDefaultValueForFieldType,
+  dependencyName as coreDependencyName,
+  escapeRegExp as coreEscapeRegExp,
+  normalizeForLooseFormMatch as coreNormalizeForLooseFormMatch,
+  normalizeHexColor as coreNormalizeHexColor,
+  projectDataListAdditionalViewLayout as coreProjectDataListAdditionalViewLayout,
+  projectDataListEmbeddedSublistDescriptor as coreProjectDataListEmbeddedSublistDescriptor,
+  projectDataListSublistStaticConfiguration as coreProjectDataListSublistStaticConfiguration,
+  projectDataListSublistDynamicSummaryIntent as coreProjectDataListSublistDynamicSummaryIntent,
+  projectDataListSublistNestedControlPlacementIntent as coreProjectDataListSublistNestedControlPlacementIntent,
+  projectDataListSublistEmbeddedLookupIntent as coreProjectDataListSublistEmbeddedLookupIntent,
+  projectDataListSublistIdentityControlIntent as coreProjectDataListSublistIdentityControlIntent,
+  projectDataListSublistLookupAdditionalFieldIntent as coreProjectDataListSublistLookupAdditionalFieldIntent,
+  projectDataListSublistScalarSummaryIntent as coreProjectDataListSublistScalarSummaryIntent,
+  projectDataListType1IdentityControlPlacement as coreProjectDataListType1IdentityControlPlacement,
+  projectDataListLookupResolutionIntent as coreProjectDataListLookupResolutionIntent,
+  projectDataListDefaultViewLayout as coreProjectDataListDefaultViewLayout,
+  projectDataListDefaultViewSelector as coreProjectDataListDefaultViewSelector,
+  projectDataListScalarField as coreProjectDataListScalarField,
+  projectDataListScalarResourceDefinitionIntent as coreProjectDataListScalarResourceDefinitionIntent,
+  projectTemplateStaticNormalization as coreProjectTemplateStaticNormalization,
+  projectResourceDefinitionStaticIntent as coreProjectResourceDefinitionStaticIntent,
+  projectDocumentLibraryStaticConfiguration as coreProjectDocumentLibraryStaticConfiguration,
+  projectApprovalFormStaticConfiguration as coreProjectApprovalFormStaticConfiguration,
+  projectDashboardStaticConfiguration as coreProjectDashboardStaticConfiguration,
+  safeDependencyIdentifier as coreSafeDependencyIdentifier,
+  stripPlanningDocumentSuffix as coreStripPlanningDocumentSuffix,
+} from "./lib/materializer-core-adapter.mjs";
+import { createDataListEmbeddedSublistDescriptorHostContext } from "./lib/data-list-sublist-frozen-descriptor-host-context.mjs";
+import { createDataListSublistDynamicSummaryHostScopeContext } from "./lib/data-list-sublist-dynamic-summary-host-scope-context.mjs";
+import {
+  lowerDataListScalarResourceIdentityAtHost as coreLowerDataListScalarResourceIdentityAtHost,
+  lowerDataListLookupResolutionAtHost as coreLowerDataListLookupResolutionAtHost,
+  lowerFixedFilterProjectionAtHost as coreLowerFixedFilterProjectionAtHost,
+  lowerDataListType1IdentityControlPlacementAtHost as coreLowerDataListType1IdentityControlPlacementAtHost,
+  lowerDataListSublistScalarSummaryIntentAtHost as coreLowerDataListSublistScalarSummaryIntentAtHost,
+  lowerDataListSublistDynamicSummaryIntentAtHost as coreLowerDataListSublistDynamicSummaryIntentAtHost,
+  lowerDataListSublistNestedControlPlacementAtHost as coreLowerDataListSublistNestedControlPlacementAtHost,
+  lowerDataListSublistEmbeddedLookupIntentAtHost as coreLowerDataListSublistEmbeddedLookupIntentAtHost,
+  lowerDataListSublistIdentityControlIntentAtHost as coreLowerDataListSublistIdentityControlIntentAtHost,
+} from "./lib/local-runtime-core-adapter.mjs";
+import {
   buildWorkflowVariablesFromSetDataListRecords,
   mergeWorkflowVariableProjection,
   workflowSetDataListProjectionRecord,
 } from "./lib/workflow-set-data-list-projection-utils.mjs";
+import { projectWorkflowStaticPlan as coreProjectWorkflowStaticPlan } from "./lib/workflow-static-plan-core-adapter.mjs";
+import { projectApplicationPlanStaticFoundation as coreProjectApplicationPlanStaticFoundation } from "./lib/application-plan-static-foundation-core-adapter.mjs";
 
 const {
   buildWorkflowExpressionButton,
@@ -492,12 +536,8 @@ function seedRequirementForField(field, context = {}) {
 }
 
 function parseJsonMaybe(value) {
-  if (!value || typeof value !== "string") return null;
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
+  const projected = coreProjectApplicationPlanStaticFoundation({ kind: "parse-json-maybe", value }).value;
+  return projected === null ? null : JSON.parse(JSON.stringify(projected));
 }
 
 function buildDefaultApplicationControlStyles({ rootListId, appPlanText = "" }) {
@@ -552,7 +592,7 @@ function extractApplicationColorPatternFromPlan(planText) {
     for (const row of table.rows) {
       const normalized = normalizeRowKeys(row);
       const role = normalizeColorRole(normalized["color role"] || normalized.role || normalized.token || normalized["color pattern"]);
-      const value = normalizeHexColor(normalized["base color"] || normalized.value || normalized.color || normalized["normal color"]);
+      const value = coreNormalizeHexColor(normalized["base color"] || normalized.value || normalized.color || normalized["normal color"]);
       const lightmodel = cleanResourceName(normalized["light model"] || normalized.lightmodel || normalized["lightmodel"] || "Luminance");
       if (role && value) out[role] = { value, lightmodel: lightmodel || "Luminance" };
     }
@@ -561,7 +601,7 @@ function extractApplicationColorPatternFromPlan(planText) {
   let match;
   while ((match = regex.exec(section))) {
     const role = normalizeColorRole(match[1]);
-    if (role && !out[role]) out[role] = { value: normalizeHexColor(match[2]), lightmodel: "Luminance" };
+    if (role && !out[role]) out[role] = { value: coreNormalizeHexColor(match[2]), lightmodel: "Luminance" };
   }
   return out;
 }
@@ -584,19 +624,18 @@ function selectBusinessApplicationColorPalette(text) {
 function isDefaultApplicationColorPattern(pattern, defaults = DEFAULT_APPLICATION_COLOR_PATTERN) {
   return ["primary", "secondary", "neutral"].every((role) => {
     if (!pattern?.[role]) return false;
-    return normalizeHexColor(pattern[role].value) === normalizeHexColor(defaults?.[role]?.value)
+    return coreNormalizeHexColor(pattern[role].value) === coreNormalizeHexColor(defaults?.[role]?.value)
       && String(pattern[role].lightmodel || "Luminance") === String(defaults?.[role]?.lightmodel || "Luminance");
   });
 }
 
 function hasExplicitDefaultColorApproval(text) {
   const section = extractNamedSection(text, "Application Color Pattern Selection") || String(text || "");
-  return /\b(user|customer|client|admin|stakeholder|business)\s+(explicitly\s+)?(approved|requested|selected|confirmed)\b[^.\n]{0,120}\b(default|yeeflow default|standard yeeflow)\b/i.test(section)
-    || /\b(default|yeeflow default|standard yeeflow)\b[^.\n]{0,120}\b(user|customer|client|admin|stakeholder|business)\s+(approved|requested|selected|confirmed)\b/i.test(section);
+  return coreProjectApprovalFormStaticConfiguration({ kind: "explicit-default-approval", value: section }).value;
 }
 
 function extractNamedSection(text, heading) {
-  const pattern = new RegExp(`^#{2,6}\\s+${escapeRegExp(heading)}\\s*$`, "im");
+  const pattern = new RegExp(`^#{2,6}\\s+${coreEscapeRegExp(heading)}\\s*$`, "im");
   const match = pattern.exec(String(text || ""));
   if (!match) return "";
   const start = match.index + match[0].length;
@@ -625,10 +664,7 @@ function normalizeHexColor(value) {
 }
 
 function inferPlannedChildResourceType(value, fallback = "data-list") {
-  const text = normKey(value);
-  if (/\b(document library|doc library|document libraries|type 16|native document)\b/.test(text)) return "document-library";
-  if (/\b(data list|list|type 1)\b/.test(text)) return "data-list";
-  return fallback;
+  return coreProjectResourceDefinitionStaticIntent({ kind: "infer-resource-type", value, fallback }).value;
 }
 
 function collectPlannedChildResourceRecords(planText) {
@@ -1436,27 +1472,14 @@ function validatePlannedOpenApprovalVariables(rules, targetMeta, record) {
 }
 
 function openResourceValueType(value) {
-  const text = normKey(value);
-  if (/^(text|string|input|textarea|radio|dict)$/.test(text)) return "text";
-  if (/^(number|decimal|integer|percent|currency)$/.test(text)) return "number";
-  if (/^(bool|boolean|bit|switch)$/.test(text)) return "boolean";
-  if (/^(date|datetime|datepicker)$/.test(text)) return "date";
-  if (/^(user|identity|identity picker)$/.test(text)) return "user";
-  if (/^(department|organization|org)$/.test(text)) return "department";
-  if (/^(lookup|list item)$/.test(text)) return "lookup";
-  if (/^(file|attachment|attachments)$/.test(text)) return "file";
-  if (/^(list|sublist|array)$/.test(text)) return "list";
-  return text;
+  return coreProjectResourceDefinitionStaticIntent({ kind: "open-resource-value-type", value }).value;
 }
 
 function openItemOperationMatchesLayoutPurpose(operation, purpose) {
-  const op = normKey(operation);
-  const kind = normKey(purpose);
-  if (kind === "view") return op === "view";
-  if (kind === "new edit") return op === "add" || op === "edit";
-  if (kind === "new") return op === "add";
-  if (kind === "edit") return op === "edit";
-  return false;
+  return coreProjectTemplateStaticNormalization({
+    kind: "layout-purpose-match",
+    value: { operation, purpose },
+  }).value;
 }
 
 function customFormAssignmentPurpose(assignment = {}) {
@@ -1841,11 +1864,11 @@ function collectDashboardDataTableRecords(planText) {
 }
 
 function extractApprovedDataTableTemplateId(text) {
-  for (const templateId of APPROVED_DATA_TABLE_TEMPLATE_IDS) {
-    const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
-  }
-  return "";
+  return coreProjectTemplateStaticNormalization({
+    kind: "data-table-template-id",
+    value: String(text || ""),
+    options: { approvedTemplateIds: APPROVED_DATA_TABLE_TEMPLATE_IDS },
+  }).value;
 }
 
 function collectDataListFieldSpecs(planText) {
@@ -1906,8 +1929,8 @@ function collectDataListFieldSpecs(planText) {
         controlType,
         choiceValues,
         lookupTarget: lookupTargetColumn === -1 ? lookupTargetFromPurpose(purpose) : cleanResourceName(cells[lookupTargetColumn]) || lookupTargetFromPurpose(purpose),
-        listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn]),
-        listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cells[subListSummariesColumn]),
+        listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn], { surface: "data-list" }),
+        listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cells[subListSummariesColumn], { surface: "data-list" }),
         allowScan: allowScanColumn !== -1 && /^(?:yes|true|on|enabled)$/i.test(cleanResourceName(cells[allowScanColumn])),
       });
       rowIndex += 1;
@@ -2091,7 +2114,8 @@ function collectApprovalFormFieldSpecs(planText) {
   return byForm;
 }
 
-function parseSubListRowFields(value) {
+function parseSubListRowFields(value, options = {}) {
+  if (options?.surface === "data-list") return coreProjectDataListSublistStaticConfiguration(Object.freeze({ surface: "data-list-sublist-static-configuration", kind: "parse-row-fields", value })).value;
   const text = String(value || "").trim();
   if (!text || /^(?:none|n\/a|not applicable)$/i.test(text)) return [];
   if (text.startsWith("[")) {
@@ -2103,18 +2127,51 @@ function parseSubListRowFields(value) {
     }
   }
   return text.split(/\s*;\s*/).map((entry) => {
-    const [id, displayName, fieldType, controlType] = entry.split(/\s*:\s*/);
+    const [id, displayName, fieldType, controlType, idx, editable, lookupTarget] = entry.split(/\s*:\s*/);
+    const lookup = parseEmbeddedSublistLookupTarget(lookupTarget);
     return {
       id: cleanResourceName(id),
+      idx: cleanResourceName(idx),
       displayName: cleanResourceName(displayName || id),
       columnTitle: cleanResourceName(displayName || id),
       fieldType: cleanResourceName(fieldType) || "Text",
       controlType: cleanResourceName(controlType),
+      editable: !/^(?:false|no|off|readonly)$/i.test(cleanResourceName(editable)),
+      value: lookup?.value,
+      lookupDisplayField: lookup?.displayField,
+      lookupAddition: lookup?.addition,
+      lookupAdditionInvalid: lookup?.additionInvalid === true,
     };
   }).filter((field) => field.id && field.displayName);
 }
 
-function parseSubListSummaries(value) {
+function parseEmbeddedSublistLookupTarget(value) {
+  // APPROVAL_FORM_SUBLIST_LOOKUP_CONFIGURATION_PRESERVATION_ROUTE_START
+  const text = cleanStructuredPlanCell(value).replace(/\\\|/g, "|");
+  if (!text) return undefined;
+  const [targetText, additionText = ""] = text.split("|");
+  const fields = Object.fromEntries(targetText.split(/\s*,\s*/).map((entry) => {
+    const separator = entry.indexOf("=");
+    return separator === -1 ? ["", ""] : [entry.slice(0, separator).trim(), entry.slice(separator + 1).trim()];
+  }));
+  if (String(fields.AppID || "") !== "41" || !/^\d{19}$/.test(String(fields.ListID || "")) || !/^\d{19}$/.test(String(fields.ListSetID || ""))) return undefined;
+  const additionFields = Object.fromEntries(additionText.split(/\s*,\s*/).filter(Boolean).map((entry) => {
+    const separator = entry.indexOf("=");
+    return separator === -1 ? ["", ""] : [entry.slice(0, separator).trim(), entry.slice(separator + 1).trim()];
+  }));
+  const addition = additionText
+    ? (additionFields.FieldName && /^\d{19}$/.test(String(additionFields.FieldID || "")) && additionFields.RelationName && /^\d+$/.test(String(additionFields.Order || "")) && String(additionFields.IsShow) === "true"
+      ? Object.freeze([{ FieldName: additionFields.FieldName, FieldID: additionFields.FieldID, RelationName: additionFields.RelationName, Order: additionFields.Order, IsShow: true }])
+      : undefined)
+    : Object.freeze([]);
+  const displayField = cleanResourceName(fields.ListField || fields.listfield || fields.DisplayField || fields.displayField);
+  const parsed = Object.freeze({ value: Object.freeze({ AppID: "41", ListID: fields.ListID, ListSetID: fields.ListSetID }), displayField, addition, additionInvalid: Boolean(additionText && !addition) });
+  // APPROVAL_FORM_SUBLIST_LOOKUP_CONFIGURATION_PRESERVATION_ROUTE_END
+  return parsed;
+}
+
+function parseSubListSummaries(value, options = {}) {
+  if (options?.surface === "data-list") return coreProjectDataListSublistStaticConfiguration(Object.freeze({ surface: "data-list-sublist-static-configuration", kind: "parse-summaries", value })).value;
   const text = String(value || "").trim();
   if (!text || /^(?:none|n\/a|not applicable)$/i.test(text)) return [];
   if (text.startsWith("[")) {
@@ -2482,8 +2539,7 @@ function collectDashboardSummaryMetricRecords(planText) {
 }
 
 function findHeaderIndex(normalizedHeaders, candidates) {
-  const normalizedCandidates = candidates.map(normKey);
-  return normalizedHeaders.findIndex((header) => normalizedCandidates.includes(header));
+  return coreProjectApplicationPlanStaticFoundation({ kind: "find-header-index", value: { headers: normalizedHeaders, candidates } }).value;
 }
 
 function dashboardHeadingPageName(value) {
@@ -2720,51 +2776,27 @@ function buildIdPaths(planDemand) {
 }
 
 function documentLibraryFoldersForList(planDemand, listName) {
-  return (planDemand?.documentLibraryFolderRecords || [])
-    .filter((record) => normKey(record.libraryName) === normKey(listName));
+  return coreProjectDocumentLibraryStaticConfiguration({ kind: "folders-for-list", value: { records: planDemand?.documentLibraryFolderRecords || [], listName } }).value;
 }
 
 function documentLibraryFolderIdPath(childIndex, folderIndex) {
-  return `decoded.Childs[${childIndex}].List.Items[${folderIndex}].$key`;
+  return coreProjectDocumentLibraryStaticConfiguration({ kind: "folder-id-path", value: { childIndex, folderIndex } }).value;
 }
 
 function documentLibraryFolderUniqueName(folderName) {
-  return `0_${String(folderName || "").trim().toLowerCase()}`;
+  return coreProjectDocumentLibraryStaticConfiguration({ kind: "folder-unique-name", value: { folderName } }).value;
 }
 
 function buildDocumentLibraryFolderItems({ planDemand, listName, childIndex, ids }) {
-  return Object.fromEntries(documentLibraryFoldersForList(planDemand, listName).map((folder, folderIndex) => {
-    const folderId = stringId(ids[documentLibraryFolderIdPath(childIndex, folderIndex)]);
-    return [folderId, {
-      Title: folder.folderName,
-      Bigint1: "0",
-      Text1: "folder",
-      Bigint2: "",
-      Text2: "",
-      Text3: documentLibraryFolderUniqueName(folder.folderName),
-    }];
-  }));
+  return coreProjectDocumentLibraryStaticConfiguration({ kind: "folder-items", value: { folders: documentLibraryFoldersForList(planDemand, listName), childIndex, ids } }).value;
 }
 
 function plannedChildResources(planDemand, fallbackNames = []) {
-  const records = Array.isArray(planDemand?.childResourceRecords) ? planDemand.childResourceRecords : [];
-  if (records.length) return records.map((record) => ({
-    name: record.name,
-    resourceType: record.resourceType === "document-library" ? "document-library" : "data-list",
-  }));
-  const dataLists = (planDemand?.resources?.dataLists || []).map((name) => ({ name, resourceType: "data-list" }));
-  const documentLibraries = (planDemand?.resources?.documentLibraries || []).map((name) => ({ name, resourceType: "document-library" }));
-  const combined = dataLists.concat(documentLibraries);
-  if (combined.length) return combined;
-  return fallbackNames.map((name) => ({ name, resourceType: "data-list" }));
+  return coreProjectResourceDefinitionStaticIntent({ kind: "planned-child-resources", value: planDemand || {}, fallback: fallbackNames }).value;
 }
 
 function extractNumberedSection(text, marker) {
-  const match = marker.exec(text);
-  if (!match) return "";
-  const start = match.index;
-  const next = text.slice(start + match[0].length).search(/\n##\s+\d+\.\s+/);
-  return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
+  return coreProjectApplicationPlanStaticFoundation({ kind: "extract-numbered-section", value: { text, marker: { source: marker.source, flags: marker.flags } } }).value;
 }
 
 function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = {}) {
@@ -2891,10 +2923,10 @@ function dataListViewRequiresParsedBusinessFields(viewRecord) {
 }
 
 function selectDefaultDataListViewRecord(records) {
-  if (!records.length) return null;
-  return records.find((record) => record.isDefault)
-    || records.find((record) => /\b(?:all|all items|all records)\b/i.test(record.viewName))
-    || null;
+  const projected = coreProjectDataListDefaultViewSelector(Object.freeze({
+    views: records.map((record) => Object.freeze({ viewName: record?.viewName, isDefault: record?.isDefault === true })),
+  }));
+  return projected.selectedIndex === null ? null : records[projected.selectedIndex] || null;
 }
 
 function collectReverseRelatedPlanRows(planText) {
@@ -2941,16 +2973,7 @@ function collectReverseRelatedPlanRows(planText) {
 }
 
 function extractSubsections(text, marker) {
-  const flags = marker.flags.includes("g") ? marker.flags : `${marker.flags}g`;
-  const globalMarker = new RegExp(marker.source, flags);
-  const matches = [...text.matchAll(globalMarker)];
-  if (!matches.length) return [];
-  return matches.map((match) => {
-    const start = match.index;
-    const remainder = text.slice(start + match[0].length);
-    const next = remainder.search(/\n#{2,4}\s+/);
-    return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
-  });
+  return [...coreProjectApplicationPlanStaticFoundation({ kind: "extract-subsections", value: { text, marker: { source: marker.source, flags: marker.flags } } }).value];
 }
 
 function extractSubsection(text, marker) {
@@ -3044,6 +3067,11 @@ function approvalWorkflowNodeSpecsForForm(planDemand, formName) {
 }
 
 function uniqueApprovalFieldSpecs(fields) {
+  return coreProjectApprovalFormStaticConfiguration({ kind: "unique-field-specs", value: fields || [] }).value;
+}
+
+// Retained as the temporary-copy rollback reference; production uses the frozen Core projection above.
+function legacyUniqueApprovalFieldSpecs(fields) {
   const normalized = [];
   const seen = new Set();
   for (const field of fields) {
@@ -3133,15 +3161,11 @@ function uniqueApprovalWorkflowNodes(nodes) {
 }
 
 function isDefaultWorkflowActionName(value) {
-  const text = cleanResourceName(value);
-  if (!text) return true;
-  return /^(assignment\s*task|candidate\s*task|claim\s*task|content\s*list|inclusive\s*gateway|gateway|task|workflow\s*task|sequence\s*flow(?:[_\s-]*\d+)?)$/i.test(text);
+  return coreProjectWorkflowStaticPlan({ kind: "is-default-action-name", value }).value;
 }
 
 function truncateWorkflowActionName(value, maxLength = 48) {
-  const text = cleanResourceName(value).replace(/\s+/g, " ");
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).replace(/\s+\S*$/, "").trim() || text.slice(0, maxLength).trim();
+  return coreProjectWorkflowStaticPlan({ kind: "truncate-action-name", value, options: { maxLength } }).value;
 }
 
 function workflowBusinessActionName(node, index = 0) {
@@ -3187,6 +3211,8 @@ function workflowBusinessActionName(node, index = 0) {
 }
 
 function normalizeApprovalWorkflowNodeType(value) {
+  return coreProjectWorkflowStaticPlan({ kind: "normalize-node-type", value }).value;
+  /* Legacy parity reference retained below for temporary-copy rollback. */
   const text = cleanResourceName(value);
   const key = normKey(text);
   if (!key) return "";
@@ -3335,17 +3361,50 @@ function buildDataListFormDisplaySettings({ customLayoutsForList, ids }) {
 }
 
 function isWorkbenchCustomForm(record) {
-  const text = `${record?.formType || ""} ${record?.formName || ""} ${record?.selectedTemplate || ""} ${record?.openIn || ""}`.toLowerCase();
-  return /\bworkbench\b/.test(text) || text.includes("data_list_form_layout_workbench");
+  return coreProjectApplicationPlanStaticFoundation({ kind: "is-workbench-custom-form", value: record || {} }).value;
 }
 
-function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetListId = "" }) {
+function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetListId = "", lookupTargetIdentityMap = null, sourceResourceKey = "", embeddedSublistDescriptorHostContext = null }) {
+  // DATA_LIST_SCALAR_FIELD_PROJECTION_CORE_ROUTE_START
+  if (shouldRouteDataListScalarFieldProjection(field)) {
+    const result = coreProjectDataListScalarField(Object.freeze({
+      displayName: field?.displayName ?? null,
+      fieldName: field?.fieldName ?? null,
+      fieldType: field?.fieldType ?? null,
+      controlType: field?.controlType ?? null,
+      choiceValues: field?.choiceValues ?? null,
+      allowScan: field?.allowScan === true,
+      fieldIndex,
+    }));
+    if (!result?.projection) {
+      throw new Error(`DATA_LIST_SCALAR_FIELD_PROJECTION_UNEXPECTED_DEFERRED: ${field?.displayName || field?.fieldName || "field"}`);
+    }
+    const scalarListId = requireLosslessHostIdentity(listId, "ListID");
+    const scalarFieldId = requireLosslessHostIdentity(fieldId, "FieldID");
+    const resourceScope = `data-list:${scalarListId}`;
+    const intent = coreProjectDataListScalarResourceDefinitionIntent(Object.freeze({
+      resourceScope,
+      fieldOrdinal: fieldIndex,
+      projection: result.projection,
+    }));
+    return coreLowerDataListScalarResourceIdentityAtHost(intent, Object.freeze({
+      listId: scalarListId,
+      fieldIdsByRequestId: Object.freeze({ [intent.fieldRequest.requestId]: scalarFieldId }),
+      fieldScopesByRequestId: Object.freeze({ [intent.fieldRequest.requestId]: resourceScope }),
+    }));
+  }
+  // DATA_LIST_SCALAR_FIELD_PROJECTION_CORE_ROUTE_END
   const fieldType = normalizeFieldType(field.fieldType);
   const type = controlTypeForFieldType(field, fieldType);
   const isTitle = fieldIndex === 0 || /^title$/i.test(field.fieldName);
   const fieldName = isTitle ? "Title" : schemaSafeFieldName(field.fieldName) || `${fieldPrefix(field.fieldType || fieldType)}${fieldIndex}`;
   const schemaFieldIndex = isTitle ? 0 : fieldIndexFromName(fieldName) || fieldIndex;
-  const rules = buildFieldRules({ field, type, lookupTargetListId });
+  // DATA_LIST_LOOKUP_RESOLUTION_CORE_ROUTE_START
+  const lookupRoute = shouldRouteDataListLookupResolution(field, type, lookupTargetIdentityMap)
+    ? resolveDataListLookupRulesThroughCore({ field, fieldIndex, listId, fieldId, sourceResourceKey, lookupTargetIdentityMap })
+    : null;
+  // DATA_LIST_LOOKUP_RESOLUTION_CORE_ROUTE_END
+  const rules = lookupRoute ? lookupRoute.rules : buildFieldRules({ field, type, lookupTargetListId, embeddedSublistDescriptorHostContext });
   const record = {
     FieldID: fieldId,
     ListID: listId,
@@ -3357,7 +3416,7 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
     Type: type,
     Status: isTitle ? 0 : 1,
     Category: 0,
-    DefaultValue: defaultValueForFieldType(fieldType),
+    DefaultValue: coreDefaultValueForFieldType(fieldType),
     Rules: rules,
     IsSort: false,
     IsSystem: isTitle,
@@ -3373,34 +3432,90 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
       enumerable: false,
     });
   }
+  if (Array.isArray(field.listFields) && field.listFields.length) {
+    Object.defineProperty(record, "__plannedListFields", {
+      value: field.listFields.map((row) => clone(row)),
+      enumerable: false,
+    });
+  }
+  if (embeddedSublistDescriptorHostContext?.isSelectedRaw(field)) {
+    embeddedSublistDescriptorHostContext.bindCompletedRecord(field, record);
+  }
   return record;
 }
 
+function requireLosslessHostIdentity(value, label) {
+  if (typeof value !== "string") throw new Error(`DATA_LIST_IDENTITY_LOSSY_INPUT: ${label}`);
+  return value;
+}
+
+function shouldRouteDataListScalarFieldProjection(field) {
+  const fieldType = normalizeFieldType(field?.fieldType);
+  const controlType = controlTypeForFieldType(field || {}, fieldType);
+  const rawKind = normKey(`${field?.fieldType || ""} ${field?.controlType || ""}`);
+  if (["lookup", "list", "identity-picker", "file-upload", "icon-upload"].includes(controlType)) return false;
+  if (/lookup|reference|relation|sub list|sublist|\blist\b|user|people|person|identity|file|attachment|image|photo|picture|icon/.test(rawKind)) return false;
+  if (Array.isArray(field?.listFields) && field.listFields.length) return false;
+  if (Array.isArray(field?.listSummaries) && field.listSummaries.length) return false;
+  return true;
+}
+
+function shouldRouteDataListLookupResolution(field, type, lookupTargetIdentityMap) {
+  return type === "lookup"
+    && lookupTargetIdentityMap
+    && typeof lookupTargetIdentityMap === "object"
+    && !(Array.isArray(field?.listFields) && field.listFields.length)
+    && !(Array.isArray(field?.listSummaries) && field.listSummaries.length);
+}
+
+function resolveDataListLookupRulesThroughCore({ field, fieldIndex, listId, fieldId, sourceResourceKey, lookupTargetIdentityMap }) {
+  const projection = coreProjectDataListLookupResolutionIntent(Object.freeze({
+    surface: "data-list",
+    sourceResourceKey: String(sourceResourceKey || ""),
+    sourceFieldKey: String(field?.fieldName || ""),
+    sourceFieldOrdinal: fieldIndex,
+    lookupTarget: field?.lookupTarget ?? null,
+    displayName: field?.displayName ?? null,
+    controlType: "lookup",
+  }));
+  // The proven empty-candidate contract intentionally keeps the Legacy empty Rules value.
+  if (!projection.intent) return Object.freeze({ rules: "" });
+  const sourceListId = requireLosslessHostIdentity(listId, "ListID");
+  const sourceFieldId = requireLosslessHostIdentity(fieldId, "FieldID");
+  const lowered = coreLowerDataListLookupResolutionAtHost(projection.intent, lookupTargetIdentityMap, Object.freeze({
+    sourceListId,
+    sourceFieldId,
+    sourceFieldListId: sourceListId,
+  }));
+  return Object.freeze({ rules: lowered.rules });
+}
+
+function buildDataListScalarFieldRecordFromProjection({ projection, listId, fieldId }) {
+  return {
+    FieldID: fieldId,
+    ListID: listId,
+    FieldName: projection.fieldName,
+    FieldType: projection.canonicalFieldType,
+    FieldIndex: projection.fieldIndex,
+    DisplayName: projection.displayName,
+    InternalName: projection.internalName,
+    Type: projection.canonicalControlType,
+    Status: projection.status,
+    Category: projection.category,
+    DefaultValue: projection.defaultValue,
+    Rules: projection.rules,
+    IsSort: projection.sortable,
+    IsSystem: projection.system,
+    IsUnique: projection.unique,
+    IsIndex: projection.index,
+    Ext1: "",
+    Ext2: "",
+    Ext3: "",
+  };
+}
+
 function buildDocumentLibraryFieldRecords({ listId, ids, childIndex }) {
-  return DOCUMENT_LIBRARY_DEFAULT_FIELDS.map((field, fieldIndex) => {
-    const rules = field.Rules && typeof field.Rules === "object" ? JSON.stringify(field.Rules) : field.Rules || "";
-    return {
-      FieldID: stringId(ids[`decoded.Childs[${childIndex}].Fields[${fieldIndex}].FieldID`]),
-      ListID: listId,
-      FieldName: field.FieldName,
-      FieldType: field.FieldType,
-      FieldIndex: field.FieldIndex,
-      DisplayName: field.DisplayName,
-      InternalName: field.FieldName,
-      Type: field.Type,
-      Status: field.Status,
-      Category: 0,
-      DefaultValue: "",
-      Rules: rules,
-      IsSort: false,
-      IsSystem: Boolean(field.IsSystem),
-      IsUnique: false,
-      IsIndex: Boolean(field.IsIndex),
-      Ext1: "",
-      Ext2: "",
-      Ext3: "",
-    };
-  });
+  return coreProjectDocumentLibraryStaticConfiguration({ kind: "field-records", value: { listId, ids, childIndex, defaultFields: DOCUMENT_LIBRARY_DEFAULT_FIELDS } }).value;
 }
 
 function buildDataListViewLayoutView({ fields, viewRecord = null }) {
@@ -3446,10 +3561,14 @@ function uniqueFieldsByName(fields) {
   return out;
 }
 
-function buildDataListViewLayoutViewChecked({ fields, viewRecord = null, listName = "", findings = null }) {
-  const layoutView = buildDataListViewLayoutView({ fields, viewRecord });
+function buildDataListViewLayoutViewChecked({ fields, viewRecord = null, listName = "", findings = null, routeDefaultViewThroughCore = false, routeAdditionalViewThroughCore = false }) {
+  const layoutView = routeDefaultViewThroughCore
+    ? buildDataListDefaultViewLayoutViewThroughCore({ fields, viewRecord, listName, findings })
+    : routeAdditionalViewThroughCore
+      ? buildDataListAdditionalViewLayoutViewThroughCore({ fields, viewRecord, listName, findings })
+    : buildDataListViewLayoutView({ fields, viewRecord });
   const plannedFilterText = viewRecord?.filterConditions || "";
-  if (viewRecord && !isNoFixedDataViewFilterText(plannedFilterText) && layoutView.filter.length === 0) {
+  if (!routeDefaultViewThroughCore && !routeAdditionalViewThroughCore && viewRecord && !isNoFixedDataViewFilterText(plannedFilterText) && layoutView.filter.length === 0) {
     findings?.push(error(
       "DATA_VIEW_FILTER_PLANNED_BUT_NOT_MATERIALIZED",
       "Planned Data List View fixed filter text did not materialize into LayoutView.filter[]. Use concrete field-level filters such as `Meeting Date is not empty` or `Status = Active`; vague business phrases are not signing-ready.",
@@ -3461,6 +3580,69 @@ function buildDataListViewLayoutViewChecked({ fields, viewRecord = null, listNam
     ));
   }
   return layoutView;
+}
+
+function buildDataListDefaultViewLayoutViewThroughCore({ fields, viewRecord = null, listName = "", findings = null }) {
+  const projection = coreProjectDataListDefaultViewLayout({
+    viewScope: `${normKey(listName) || "data-list"}/default`,
+    fields: fields.map((field) => ({
+      FieldID: field.FieldID,
+      FieldName: field.FieldName,
+      DisplayName: field.DisplayName,
+      InternalName: field.InternalName,
+      Type: field.Type,
+      FieldType: field.FieldType,
+      Rules: field.Rules || {},
+    })),
+    viewIntent: viewRecord,
+    templateSnapshot: {
+      staticQueryFields: [
+        { FieldName: "ListDataID", field: "ListDataID" },
+        { FieldName: "CreatedBy", field: "CreatedBy" },
+        { FieldName: "ModifiedBy", field: "ModifiedBy" },
+        { FieldName: "Created", field: "Created" },
+        { FieldName: "Modified", field: "Modified" },
+      ],
+    },
+    listName,
+  });
+  const keysByRequestId = Object.fromEntries(projection.fixedFilterProjection.keyRequests.map((request) => [request.requestId, crypto.randomUUID()]));
+  const lowered = coreLowerFixedFilterProjectionAtHost(projection.fixedFilterProjection, { keysByRequestId }, findings);
+  return {
+    ...projection.fragment,
+    filter: lowered.filter,
+  };
+}
+
+function buildDataListAdditionalViewLayoutViewThroughCore({ fields, viewRecord = null, listName = "", findings = null }) {
+  const viewName = String(viewRecord?.viewName || "").trim();
+  const viewScope = `${slugify(listName) || "data-list"}/${slugify(viewName) || "additional-view"}`;
+  const projection = coreProjectDataListAdditionalViewLayout({
+    viewScope,
+    fields: fields.map((field) => ({
+      FieldID: field.FieldID,
+      FieldName: field.FieldName,
+      DisplayName: field.DisplayName,
+      InternalName: field.InternalName,
+      Type: field.Type,
+      FieldType: field.FieldType,
+      Rules: field.Rules || {},
+    })),
+    viewIntent: { ...viewRecord, isDefault: false },
+    templateSnapshot: {
+      staticQueryFields: [
+        { FieldName: "ListDataID", field: "ListDataID" },
+        { FieldName: "CreatedBy", field: "CreatedBy" },
+        { FieldName: "ModifiedBy", field: "ModifiedBy" },
+        { FieldName: "Created", field: "Created" },
+        { FieldName: "Modified", field: "Modified" },
+      ],
+    },
+    listName,
+  });
+  const keysByRequestId = Object.fromEntries(projection.fixedFilterProjection.keyRequests.map((request) => [request.requestId, crypto.randomUUID()]));
+  const lowered = coreLowerFixedFilterProjectionAtHost(projection.fixedFilterProjection, { keysByRequestId }, findings);
+  return { ...projection.fragment, filter: lowered.filter };
 }
 
 function buildDataViewLayoutColumn(field, fieldIndex) {
@@ -3507,7 +3689,7 @@ function splitPlannedFieldList(value) {
     .replace(/\bquery\b|\bsearch\b|\bfields?\b|\bcolumns?\b/gi, " ")
     .replace(/\s+and\s+/gi, ",");
   if (!text || isNonResourceName(text) || /^(all|all fields|default)$/i.test(text)) return [];
-  return text.split(/[,;，；、]/)
+  return text.split(/[,;\uFF0C\uFF1B\u3001]/)
     .map((item) => cleanResourceName(item))
     .filter((item) => item && !isNonResourceName(item));
 }
@@ -3531,8 +3713,8 @@ function parseDataViewFixedFilterConditions(value, fields) {
     .replace(/\btoday\b/gi, "now")
     .replace(/≥/g, ">=")
     .replace(/≤/g, "<=");
-  const joiner = /\s+(?:or|OR)\s+|或|任一|any of/i.test(normalized) ? "or" : "and";
-  const splitter = joiner === "or" ? /\s+(?:or|OR)\s+|或|；|;|，|,/ : /\s+(?:and|AND)\s+|且|；|;|，|,/;
+  const joiner = /\s+(?:or|OR)\s+|\u6216|\u4EFB\u4E00|any of/i.test(normalized) ? "or" : "and";
+  const splitter = joiner === "or" ? /\s+(?:or|OR)\s+|\u6216|\uFF1B|;|\uFF0C|,/ : /\s+(?:and|AND)\s+|\u4E14|\uFF1B|;|\uFF0C|,/;
   const parts = normalized.split(splitter)
     .map((part) => cleanResourceName(part))
     .filter(Boolean);
@@ -3546,11 +3728,11 @@ function parseDataViewFixedFilterConditions(value, fields) {
 
 function isNoFixedDataViewFilterText(value) {
   const text = cleanResourceName(value);
-  return !text || isNonResourceName(text) || /(?:no fixed|no filter|not filtered|all records|all items|无固定|不过滤|全集)/i.test(text);
+  return !text || isNonResourceName(text) || /(?:no fixed|no filter|not filtered|all records|all items|\u65E0\u56FA\u5B9A|\u4E0D\u8FC7\u6EE4|\u5168\u96C6)/i.test(text);
 }
 
 function parseDataViewFixedFilterConditionPart(part, fields, joiner, index) {
-  const nonEmptyMatch = part.match(/^(.+?)\s+(?:is\s+not\s+empty|is\s+not\s+blank|not\s+empty|has\s+value|有值|非空|不为空)$/i);
+  const nonEmptyMatch = part.match(/^(.+?)\s+(?:is\s+not\s+empty|is\s+not\s+blank|not\s+empty|has\s+value|\u6709\u503C|\u975E\u7A7A|\u4E0D\u4E3A\u7A7A)$/i);
   if (nonEmptyMatch) {
     const field = resolveDataViewField(fields, nonEmptyMatch[1]);
     if (!field) return null;
@@ -3650,10 +3832,10 @@ function defaultValueForFieldType(fieldType) {
   return fieldType === "Bit" ? "0" : "";
 }
 
-function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", selectedTemplate = "", openIn = "", fields, planDemand = {}, listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map(), rootListSetId = "" }) {
+function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", selectedTemplate = "", openIn = "", fields, planDemand = {}, listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map(), rootListSetId = "", embeddedSublistDescriptorHostContext = null }) {
   const templateKind = isWorkbenchCustomForm({ formName, formType, selectedTemplate, openIn }) ? "workbench" : (/\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit");
   const templateId = templateKind === "workbench" ? "data_list_form_layout_workbench" : (templateKind === "view" ? "data_list_form_layout_view_item_v1_1" : "data_list_form_layout_new_edit_v1_1");
-  const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields, planDemand, listMetaByName, approvalMetaByName, dashboardMetaByName, rootListSetId, layoutId });
+  const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields, planDemand, listMetaByName, approvalMetaByName, dashboardMetaByName, rootListSetId, layoutId, embeddedSublistDescriptorHostContext });
   const resourceJson = JSON.stringify(resource);
   return {
     ListID: listId,
@@ -3674,7 +3856,7 @@ function buildCustomFormLayout({ layoutId, listId, listName, formName, formType 
   };
 }
 
-function materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields, planDemand = {}, listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map(), rootListSetId = "", layoutId = "" }) {
+function materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields, planDemand = {}, listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map(), rootListSetId = "", layoutId = "", embeddedSublistDescriptorHostContext = null }) {
   const templateFile = DATA_LIST_FORM_TEMPLATE_PATHS[templateKind];
   const template = JSON.parse(fs.readFileSync(templateFile, "utf8"));
   const resource = clone(template.templateResource);
@@ -3690,9 +3872,12 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   }
   const slot = findBusinessSectionContentArea(resource);
   if (slot) {
-    slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
+    slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, layoutId, templateKind, embeddedSublistDescriptorHostContext })];
   }
   ensureDataListSubListSummaryTempVars(resource);
+  // DATA_LIST_SUBLIST_DYNAMIC_SUMMARY_CORE_ROUTE_START
+  routeDataListSublistDynamicSummaryIntentsAtHost({ resource, fields, listId, layoutId });
+  // DATA_LIST_SUBLIST_DYNAMIC_SUMMARY_CORE_ROUTE_END
   removeAllByIdentity(resource, "Operations");
   removeAllByIdentity(resource, "kpi_metrics_wrapper");
   removeAllByIdentity(resource, "kpi_cards_wrapper");
@@ -3772,17 +3957,7 @@ function buildPublicFormEntry({ record, publicFormId, listId, listName, fields, 
 }
 
 function resolvePublicFormFields(record, fields) {
-  const requested = splitPlannedFieldList(record.fields);
-  if (!requested.length) return fields;
-  const selected = [];
-  const seen = new Set();
-  for (const name of requested) {
-    const field = resolveDataViewField(fields, name);
-    if (!field || seen.has(field.FieldName)) continue;
-    seen.add(field.FieldName);
-    selected.push(field);
-  }
-  return selected;
+  return coreProjectApprovalFormStaticConfiguration({ kind: "public-field-selection", value: { fields, requested: splitPlannedFieldList(record.fields) } }).value;
 }
 
 function publicFormControlType(field) {
@@ -3868,18 +4043,7 @@ function materializePlannedPublicFormActions(resource, { records = [], hostList 
 }
 
 function normalizePublicFormPlannedStepType(value) {
-  const normalized = normKey(value);
-  const aliases = new Map([
-    ["set variables", "setvar"], ["set variable", "setvar"], ["setvar", "setvar"],
-    ["execute custom code", "customcode"], ["custom code", "customcode"], ["customcode", "customcode"],
-    ["show confirm dialog", "confirm"], ["confirm", "confirm"],
-    ["redirect page to", "redirect"], ["redirect", "redirect"],
-    ["submit form", "submit"], ["submit", "submit"],
-    ["start another action", "otheraction"], ["otheraction", "otheraction"],
-    ["barcode scan", "barcode"], ["barcode", "barcode"],
-    ["nfc reader", "nfc"], ["nfc", "nfc"],
-  ]);
-  return aliases.get(normalized) || normalized;
+  return coreProjectApprovalFormStaticConfiguration({ kind: "public-step-type", value }).value;
 }
 
 function parsePublicFormActionConfig(value, hostList, publicForm, stepName) {
@@ -3968,9 +4132,9 @@ function reverseRelatedRecordMatchesForm(record, { hostListName, formName }) {
   const planned = cleanResourceName(record?.viewItemForm);
   if (!planned) return true;
   if (normKey(planned) === normKey(formName)) return true;
-  const plannedText = normalizeForLooseFormMatch(planned);
-  const actualText = normalizeForLooseFormMatch(formName);
-  const hostText = normalizeForLooseFormMatch(hostListName);
+  const plannedText = coreNormalizeForLooseFormMatch(planned);
+  const actualText = coreNormalizeForLooseFormMatch(formName);
+  const hostText = coreNormalizeForLooseFormMatch(hostListName);
   const hostSingular = hostText.replace(/s\b/g, "");
   const plannedMentionsHost = plannedText.includes(hostText) || (hostSingular && plannedText.includes(hostSingular));
   const actualMentionsHost = actualText.includes(hostText) || (hostSingular && actualText.includes(hostSingular));
@@ -4364,11 +4528,7 @@ function removeDescendantControls(root, predicate) {
 }
 
 function isTemplateAddActionButton(node) {
-  if (!node || String(node.type || "") !== "action_button") return false;
-  const attrs = node.attrs || {};
-  const actionType = String(attrs["action-type"] || attrs.actionType || attrs.operation || "").trim();
-  const text = identityCandidates(node).concat([node?.label, attrs?.label?.value, attrs?.text?.value]).filter(Boolean).join(" ");
-  return actionType === "5" || /\badd\b|new item|create/i.test(text);
+  return coreProjectTemplateStaticNormalization({ kind: "template-add-action", value: node || {} }).value;
 }
 
 function isReverseRelatedOperationResidue(node) {
@@ -4455,22 +4615,51 @@ function currentHostListDataIdExpression() {
   };
 }
 
-function buildDataListFormFieldsGrid({ fields, formName, listId, listName, templateKind }) {
+function buildDataListFormFieldsGrid({ fields, formName, listId, listName, layoutId = "", templateKind, embeddedSublistDescriptorHostContext = null }) {
   const template = JSON.parse(fs.readFileSync(DATA_LIST_FORM_FIELDS_GRID_TEMPLATE_PATH, "utf8"));
   const wrapper = clone(template._ak_c || template.templateResource || template);
   wrapper.id = "form_grid_fields_wrapper";
   wrapper.nv_label = "form_grid_fields_wrapper";
   wrapper.dataListFormFieldsTemplateId = "data_list_form_fields_grid_v1_1";
   wrapper.derivedFromDataListFormFieldsTemplate = "data_list_form_fields_grid_v1_1";
-  wrapper.children = fields.map((field, index) => buildDataListFormFieldControl({ field, index, formName, listId, listName, templateKind }));
+  const type1PlacementHost = createDataListType1PlacementHost({ wrapper, listId, templateKind });
+  wrapper.children = fields.map((field, index) => buildDataListFormFieldControl({ field, index, formName, listId, listName, layoutId, templateKind, type1PlacementHost, embeddedSublistDescriptorHostContext }));
   return wrapper;
 }
 
-function buildDataListFormFieldControl({ field, index, formName, listId, listName, templateKind }) {
+function buildDataListFormFieldControl({ field, index, formName, listId, listName, layoutId = "", templateKind, type1PlacementHost = null, embeddedSublistDescriptorHostContext = null }) {
   const type = (templateKind === "view" || templateKind === "workbench") && !isSubListFormField(field) ? dynamicControlTypeForField(field) : normalizeControlType(field.Type || field.FieldType || field.DisplayName);
   if (isSubListFormField(field, type)) {
-    return buildDataListFormSubListControl({ field, index, formName, listId, listName });
+    return buildDataListFormSubListControl({ field, index, formName, listId, listName, layoutId, embeddedSublistDescriptorHostContext });
   }
+  // DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_CORE_ROUTE_START
+  if (shouldRouteDataListType1IdentityControlPlacement({ field, type, templateKind, listId, type1PlacementHost })) {
+    const controlId = `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`;
+    const projection = coreProjectDataListType1IdentityControlPlacement(Object.freeze({
+      surface: "data-list",
+      templateKind,
+      templateSnapshot: type1PlacementHost.templateSnapshot,
+      references: Object.freeze({
+        fieldsGridNodeRef: type1PlacementHost.fieldsGridNodeRef,
+        controlSlotRef: type1PlacementHost.controlSlotRef,
+        listId,
+        fieldId: field.FieldID,
+      }),
+      field: Object.freeze({
+        fieldName: field.FieldName,
+        displayName: field.DisplayName,
+        fieldType: field.FieldType,
+        controlType: field.Type,
+        type,
+      }),
+      formName,
+      listName,
+      ordinal: index,
+    }));
+    if (!projection?.intent) throw new Error(`DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_UNEXPECTED_DEFERRED: ${field?.DisplayName || field?.FieldName || "field"}`);
+    return clone(coreLowerDataListType1IdentityControlPlacementAtHost(projection.intent, type1PlacementHost.snapshot, Object.freeze({ controlId })));
+  }
+  // DATA_LIST_TYPE1_IDENTITY_CONTROL_PLACEMENT_CORE_ROUTE_END
   const fullRow = isFullRowFormField(field, type);
   const control = {
     type,
@@ -4500,7 +4689,37 @@ function buildDataListFormFieldControl({ field, index, formName, listId, listNam
   return control;
 }
 
-function buildDataListFormSubListControl({ field, index, formName, listId, listName }) {
+function createDataListType1PlacementHost({ wrapper, listId, templateKind }) {
+  if (templateKind !== "view" && templateKind !== "workbench") return null;
+  const listIdentity = typeof listId === "string" ? listId : "";
+  if (!/^\d{1,30}$/.test(listIdentity)) return null;
+  const templateId = String(wrapper?.dataListFormFieldsTemplateId || "").trim();
+  const fieldsGridNodeRef = String(wrapper?.id || "").trim();
+  if (!templateId || !fieldsGridNodeRef) return null;
+  const templateScope = `data-list:${listIdentity}:${templateKind}`;
+  const controlSlotRef = "slot:data-list-form-fields";
+  const templateSnapshot = Object.freeze({ templateId, templateScope });
+  const snapshot = Object.freeze({
+    templateId,
+    templateScope,
+    nodes: Object.freeze([Object.freeze({ reference: fieldsGridNodeRef, scope: templateScope })]),
+    slots: Object.freeze([Object.freeze({ reference: controlSlotRef, scope: templateScope, parentReference: fieldsGridNodeRef })]),
+  });
+  return Object.freeze({ templateSnapshot, snapshot, fieldsGridNodeRef, controlSlotRef });
+}
+
+function shouldRouteDataListType1IdentityControlPlacement({ field, type, templateKind, listId, type1PlacementHost }) {
+  return (templateKind === "view" || templateKind === "workbench")
+    && type === "dynamic-user"
+    && !isSubListFormField(field, type)
+    && Boolean(type1PlacementHost)
+    && typeof listId === "string"
+    && /^\d{1,30}$/.test(listId)
+    && typeof field?.FieldID === "string"
+    && /^\d{1,30}$/.test(field.FieldID);
+}
+
+function buildDataListFormSubListControl({ field, index, formName, listId, listName, layoutId = "", embeddedSublistDescriptorHostContext = null }) {
   const template = JSON.parse(fs.readFileSync(DATA_LIST_FORM_SUBLIST_TEMPLATE_PATH, "utf8"));
   const control = clone(template._ak_c || template.templateResource || template);
   const id = `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`;
@@ -4523,16 +4742,34 @@ function buildDataListFormSubListControl({ field, index, formName, listId, listN
     fieldName: field.FieldName,
     fieldId: field.FieldID,
   };
-  const listVariables = dataListSubListVariables(field, `${formName}:${field.FieldName}`);
+  // DATA_LIST_EMBEDDED_SUBLIST_FROZEN_DESCRIPTOR_CUSTOM_FORM_ROUTE_START
+  const descriptor = embeddedSublistDescriptorHostContext?.isBoundCompletedRecord(field)
+    ? embeddedSublistDescriptorHostContext.readForCustomForm(field)
+    : null;
+  const listVariables = descriptor
+    ? embeddedSublistDescriptorVariables(descriptor)
+    : dataListSubListVariables(field, `${formName}:${field.FieldName}`);
+  // DATA_LIST_EMBEDDED_SUBLIST_FROZEN_DESCRIPTOR_CUSTOM_FORM_ROUTE_END
   if (listVariables.length) {
-    control.attrs["list-variables"] = listVariables;
-    control.attrs["list-fields"] = listVariables.map((variable, columnIndex) => buildDataListSubListColumn({
-      variable,
-      columnIndex,
-      parentBinding: field.FieldName,
-      parentControlId: id,
-      seed: `${formName}:${field.FieldName}`,
-    }));
+    control.attrs["list-variables"] = listVariables.map(({ lookupAddition, lookupAdditionInvalid, ...exportVariable }) => exportVariable);
+    const lookupAdditionalBySource = new Map();
+    const readonlyLookupDestinations = new Set();
+    for (const sourceVariable of listVariables) {
+      if (sourceVariable.lookupAdditionInvalid) throw new Error("SUBLIST_LOOKUP_ADDITIONAL_CONFIGURATION_INVALID");
+      const mappings = Array.isArray(sourceVariable.lookupAddition) ? sourceVariable.lookupAddition.map((mapping) => {
+        const destination = listVariables.find((variable) => variable.id === mapping?.RelationName);
+        return destination ? Object.freeze({ source: mapping, destination }) : null;
+      }).filter(Boolean) : [];
+      if (Array.isArray(sourceVariable.lookupAddition) && sourceVariable.lookupAddition.length !== mappings.length) throw new Error("SUBLIST_LOOKUP_ADDITIONAL_CONFIGURATION_SCOPE_MISMATCH");
+      if (mappings.length) {
+        lookupAdditionalBySource.set(sourceVariable.id, Object.freeze(mappings));
+        mappings.forEach((mapping) => readonlyLookupDestinations.add(mapping.destination.id));
+      }
+    }
+    // DATA_LIST_SUBLIST_NESTED_CONTROL_PLACEMENT_CORE_ROUTE_START
+    control.attrs["list-fields"] = routeDataListSublistNestedControlPlacementAtHost({ descriptor, listVariables, field, listId, parentBinding: field.FieldName, parentControlId: id, seed: `${formName}:${field.FieldName}` })
+      || listVariables.map((variable, columnIndex) => buildDataListSubListColumn({ variable, columnIndex, parentBinding: field.FieldName, parentControlId: id, seed: `${formName}:${field.FieldName}`, listId, parentFieldId: field.FieldID, layoutId, lookupAdditionalMappings: lookupAdditionalBySource.get(variable.id) || Object.freeze([]), destinationReadonly: readonlyLookupDestinations.has(variable.id) }));
+    // DATA_LIST_SUBLIST_NESTED_CONTROL_PLACEMENT_CORE_ROUTE_END
   }
   const summaries = normalizeDataListSubListSummaries(field?.__plannedListSummaries, control, `${formName}:${field.FieldName}`);
   if (summaries.length) control.attrs["list-fields-summary"] = summaries;
@@ -4547,14 +4784,59 @@ function normalizeDataListSubListSummaries(summaries, control, seed) {
     if (!field) return null;
     const prefix = ["__list_", "__temp_"].includes(summary?.binding?.prefix) ? summary.binding.prefix : "";
     const value = cleanResourceName(summary?.binding?.value);
+    // DATA_LIST_SUBLIST_SCALAR_SUMMARY_INTENT_CORE_ROUTE_START
+    const staticMetadata = shouldRouteDataListSublistScalarSummaryIntent({ summary, control, field, prefix, value })
+      ? projectDataListSublistScalarSummaryIntentAtHost({ summary, control, field, index })
+      : null;
+    // DATA_LIST_SUBLIST_SCALAR_SUMMARY_INTENT_CORE_ROUTE_END
     return {
       id: deterministicUuid(`${seed}:summary:${field}:${index}`),
-      field,
-      type: normKey(summary?.type) || "total",
-      display: summary?.display !== false,
-      binding: prefix && value ? { prefix, value } : null,
+      field: staticMetadata?.field || field,
+      type: staticMetadata?.type || normKey(summary?.type) || "total",
+      display: staticMetadata ? staticMetadata.display : summary?.display !== false,
+      binding: staticMetadata ? staticMetadata.binding : (prefix && value ? { prefix, value } : null),
     };
   }).filter(Boolean);
+}
+
+function shouldRouteDataListSublistScalarSummaryIntent({ summary, control, field, prefix, value }) {
+  if (prefix || value || summary?.temporaryVariableReference !== undefined || summary?.runtimeExpression !== undefined) return false;
+  const sourceColumn = dataListSublistScalarSummarySourceColumn(control, field);
+  if (!sourceColumn) return false;
+  const operation = normKey(summary?.type) || "total";
+  return new Set(["total", "average", "minimum", "maximum", "count"]).has(operation);
+}
+
+function projectDataListSublistScalarSummaryIntentAtHost({ summary, control, field, index }) {
+  const sourceColumn = dataListSublistScalarSummarySourceColumn(control, field);
+  if (!sourceColumn) throw new Error("SUBLIST_SCALAR_SUMMARY_INTENT_SOURCE_COLUMN_MISSING");
+  const aggregateOperation = normKey(summary?.type) || "total";
+  const summaryKey = `static_${slugify(field)}_${aggregateOperation}_${index + 1}`;
+  const projected = coreProjectDataListSublistScalarSummaryIntent(Object.freeze({
+    surface: "data-list-sublist-summary",
+    summaryKey,
+    summaryReference: `summary:${summaryKey}`,
+    scope: "data-list-sublist",
+    knownSummaryReferences: Object.freeze([`summary:${summaryKey}`]),
+    sourceColumn: Object.freeze(sourceColumn),
+    aggregateOperation,
+    display: summary?.display !== false,
+    format: cleanResourceName(summary?.format),
+  }));
+  if (!projected?.intent || projected.findings?.length) {
+    throw new Error(`SUBLIST_SCALAR_SUMMARY_INTENT_PROJECTION_FAILED: ${(projected?.findings || []).map((finding) => finding.code).join(",") || "unknown"}`);
+  }
+  const lowered = coreLowerDataListSublistScalarSummaryIntentAtHost(projected.intent);
+  if (!lowered || lowered.binding !== null) throw new Error("SUBLIST_SCALAR_SUMMARY_INTENT_STATIC_LOWERING_INVALID");
+  return clone(lowered);
+}
+
+function dataListSublistScalarSummarySourceColumn(control, field) {
+  const rows = Array.isArray(control?.attrs?.["list-variables"]) ? control.attrs["list-variables"] : [];
+  const row = rows.find((candidate) => [candidate?.id, candidate?.name, candidate?.displayName].some((value) => normKey(value) === normKey(field)));
+  const scalarType = row?.type === "date" ? "date" : row?.type === "number" ? "number" : row?.type === "boolean" ? "boolean" : row?.type === "text" ? "text" : "";
+  if (!row || !scalarType) return null;
+  return { id: cleanResourceName(row.id), name: cleanResourceName(row.name || row.displayName), scalarType };
 }
 
 function ensureDataListSubListSummaryTempVars(resource) {
@@ -4580,6 +4862,50 @@ function ensureDataListSubListSummaryTempVars(resource) {
   }
 }
 
+function routeDataListSublistDynamicSummaryIntentsAtHost({ resource, fields, listId, layoutId }) {
+  if (!Array.isArray(fields) || !fields.length) return;
+  const context = createDataListSublistDynamicSummaryHostScopeContext({ parentListId: listId, layoutId, layoutResourceId: layoutId, fields, resource });
+  try {
+    for (const control of findDataListSublistSummaryControls(resource)) {
+      const summaries = Array.isArray(control?.attrs?.["list-fields-summary"]) ? control.attrs["list-fields-summary"] : [];
+      control.attrs["list-fields-summary"] = summaries.map((summary) => shouldRouteDataListSublistDynamicSummary({ summary, control, fields })
+        ? routeDataListSublistDynamicSummaryAtHost({ summary, control, context, listId, layoutId })
+        : summary);
+    }
+  } finally {
+    context.dispose();
+  }
+}
+
+function shouldRouteDataListSublistDynamicSummary({ summary, control, fields }) {
+  if (!summary || !["__list_", "__temp_"].includes(summary?.binding?.prefix)) return false;
+  const parent = fields.find((field) => String(field?.FieldID || "") === String(control?.fieldID || "") && field?.Type === "list");
+  const source = Array.isArray(control?.attrs?.["list-variables"])
+    ? control.attrs["list-variables"].find((column) => column?.id === summary.field)
+    : null;
+  return Boolean(parent && source && (source.type === "number" || source.type === "decimal"));
+}
+
+function routeDataListSublistDynamicSummaryAtHost({ summary, control, context, listId, layoutId }) {
+  const prefix = summary?.binding?.prefix;
+  if (prefix !== "__list_" && prefix !== "__temp_") return summary;
+  const descriptor = context.resolve(Object.freeze({ parentListId: listId, layoutId, layoutResourceId: layoutId, parentFieldId: String(control.fieldID || ""), sublistControlId: String(control.id || ""), summaryId: String(summary?.id || "") }));
+  // One frozen descriptor is selected by the closure-owned context before either public API consumes it.
+  const projected = coreProjectDataListSublistDynamicSummaryIntent(descriptor);
+  if (!projected?.intent || projected.findings?.length) throw new Error(`SUBLIST_DYNAMIC_SUMMARY_INTENT_PROJECTION_FAILED: ${(projected?.findings || []).map((finding) => finding.code).join(",") || "unknown"}`);
+  const lowered = coreLowerDataListSublistDynamicSummaryIntentAtHost(projected.intent);
+  if (!lowered || lowered.id !== summary.id || lowered.binding?.prefix !== prefix || lowered.binding?.value !== summary?.binding?.value) throw new Error("SUBLIST_DYNAMIC_SUMMARY_INTENT_LOWERING_INVALID");
+  return clone(lowered);
+}
+
+function findDataListSublistSummaryControls(value, output = []) {
+  if (Array.isArray(value)) { value.forEach((item) => findDataListSublistSummaryControls(item, output)); return output; }
+  if (!value || typeof value !== "object") return output;
+  if (value.type === "list" && Array.isArray(value?.attrs?.["list-fields-summary"])) output.push(value);
+  Object.values(value).forEach((item) => findDataListSublistSummaryControls(item, output));
+  return output;
+}
+
 function dataListSubListVariables(field, seed) {
   const rules = parseJsonMaybe(field?.Rules);
   const rows = Array.isArray(rules?.["list-variables"])
@@ -4587,9 +4913,11 @@ function dataListSubListVariables(field, seed) {
     : Array.isArray(field?.listFields)
       ? field.listFields
       : [];
+  const plannedRows = Array.isArray(field?.__plannedListFields) ? field.__plannedListFields : (Array.isArray(field?.listFields) ? field.listFields : []);
   return rows.map((row, index) => {
     const id = cleanResourceName(row?.id || row?.fieldName || row?.name) || `field_${index + 1}`;
     const type = normalizeSubListRowType(row?.type || row?.fieldType);
+    const planned = plannedRows.find((candidate) => cleanResourceName(candidate?.id || candidate?.fieldName || candidate?.name) === id);
     return {
       idx: cleanResourceName(row?.idx) || deterministicUuid(`${seed}:row:${id}:${index}`),
       id,
@@ -4598,11 +4926,74 @@ function dataListSubListVariables(field, seed) {
       type,
       editable: row?.editable !== false,
       controlType: cleanResourceName(row?.controlType || row?.control?.type),
+      value: row?.value,
+      lookupAddition: Array.isArray(row?.lookupAddition) ? row.lookupAddition : (Array.isArray(planned?.lookupAddition) ? planned.lookupAddition : []),
+      lookupAdditionInvalid: row?.lookupAdditionInvalid === true || planned?.lookupAdditionInvalid === true,
     };
   }).filter((row) => row.id && row.displayName);
 }
 
-function buildDataListSubListColumn({ variable, columnIndex, parentBinding, parentControlId, seed }) {
+function embeddedSublistDescriptorVariables(descriptor) {
+  if (!descriptor || !Array.isArray(descriptor.columns)) throw new Error("SUBLIST_DESCRIPTOR_INVALID");
+  return descriptor.columns.map((column) => ({
+    idx: column.idx,
+    id: column.id,
+    name: column.name,
+    displayName: column.name,
+    type: column.type,
+    editable: column.editable,
+    controlType: "",
+  }));
+}
+
+function selectExportProvenEmbeddedSublistDescriptor({ field, listId, fieldId, embeddedSublistDescriptorHostContext }) {
+  const input = exportProvenEmbeddedSublistDescriptorInput({ field, listId, fieldId });
+  if (!input) return field;
+  const result = coreProjectDataListEmbeddedSublistDescriptor(input);
+  if (!result?.descriptor) throw new Error("SUBLIST_EMBEDDED_SCHEMA_CORE_DESCRIPTOR_MISSING");
+  embeddedSublistDescriptorHostContext.selectAndBindRaw(field, result.descriptor);
+  return field;
+}
+
+function exportProvenEmbeddedSublistDescriptorInput({ field, listId, fieldId }) {
+  if (controlTypeForFieldType(field || {}, normalizeFieldType(field?.fieldType)) !== "list") return null;
+  if (Array.isArray(field?.listSummaries) && field.listSummaries.length) return null;
+  const rows = Array.isArray(field?.listFields) ? field.listFields : [];
+  if (!rows.length) return null;
+  const columns = [];
+  for (const row of rows) {
+    const rawKind = normKey(`${row?.fieldType || row?.type || ""} ${row?.controlType || ""}`);
+    if (/lookup|reference|relation|user|people|person|identity|file|attachment|image|photo|binary|barcode|action|sub list|sublist|\blist\b/.test(rawKind)) return null;
+    const type = normalizeSubListRowType(row?.type || row?.fieldType);
+    if (!new Set(["text", "date", "number", "boolean"]).has(type)) return null;
+    const idx = cleanResourceName(row?.idx);
+    const id = cleanResourceName(row?.id || row?.fieldName);
+    const name = cleanResourceName(row?.name || row?.displayName || row?.columnTitle || row?.label);
+    if (!idx || !id || !name || typeof row?.editable !== "boolean") return null;
+    columns.push(Object.freeze({ idx, id, name, type, editable: row.editable }));
+  }
+  try {
+    return Object.freeze({
+      parentListId: requireLosslessHostIdentity(listId, "ListID"),
+      parentFieldId: requireLosslessHostIdentity(fieldId, "FieldID"),
+      columns: Object.freeze(columns),
+    });
+  } catch {
+    return null;
+  }
+}
+
+function buildDataListSubListColumn({ variable, columnIndex, parentBinding, parentControlId, seed, listId = "", parentFieldId = "", layoutId = "", lookupAdditionalMappings = Object.freeze([]), destinationReadonly = false }) {
+  // DATA_LIST_SUBLIST_EMBEDDED_LOOKUP_CORE_ROUTE_START
+  const lookupField = routeDataListSublistEmbeddedLookupAtHost({ variable, columnIndex, parentBinding, parentControlId, seed, listId, parentFieldId, layoutId });
+  // DATA_LIST_SUBLIST_LOOKUP_ADDITIONAL_CONFIGURATION_CORE_ROUTE_START
+  if (lookupField) return applyDataListSublistLookupAdditionalFieldConfigurationAtHost({ lookupField, variable, lookupAdditionalMappings, listId, parentFieldId, layoutId, parentBinding, parentControlId });
+  // DATA_LIST_SUBLIST_LOOKUP_ADDITIONAL_CONFIGURATION_CORE_ROUTE_END
+  // DATA_LIST_SUBLIST_EMBEDDED_LOOKUP_CORE_ROUTE_END
+  // DATA_LIST_SUBLIST_IDENTITY_CONFIGURATION_CORE_ROUTE_START
+  const identityField = routeDataListSublistIdentityControlAtHost({ variable, columnIndex, parentBinding, parentControlId, seed, listId, parentFieldId, layoutId });
+  if (identityField) return identityField;
+  // DATA_LIST_SUBLIST_IDENTITY_CONFIGURATION_CORE_ROUTE_END
   const controlType = normalizeSubListColumnControlType(variable.controlType, variable.type);
   const control = {
     id: deterministicUuid(`${seed}:column:${variable.id}:${columnIndex}`),
@@ -4618,6 +5009,7 @@ function buildDataListSubListColumn({ variable, columnIndex, parentBinding, pare
   };
   if (controlType === "datepicker") control.value = null;
   if (controlType === "switch") control.value = false;
+  if (destinationReadonly) control.readonly = true;
   return {
     idx: variable.idx,
     id: variable.id,
@@ -4626,6 +5018,68 @@ function buildDataListSubListColumn({ variable, columnIndex, parentBinding, pare
     editable: variable.editable,
     control,
   };
+}
+
+function routeDataListSublistIdentityControlAtHost({ variable, columnIndex, parentBinding, parentControlId, seed, listId, parentFieldId, layoutId }) {
+  if (variable?.type !== "user" || !/^\d{1,30}$/.test(String(listId)) || !/^\d{1,30}$/.test(String(parentFieldId)) || !/^\d{1,30}$/.test(String(layoutId))) return null;
+  const result = coreProjectDataListSublistIdentityControlIntent(Object.freeze({
+    surface: "data-list-sublist-identity-control",
+    scope: Object.freeze({ parentListId: String(listId), parentFieldId: String(parentFieldId), layoutId: String(layoutId), layoutResourceId: String(layoutId), parentControlReference: parentControlId, listFieldsSlotReference: "attrs.list-fields", childControlSlotReference: "list-field.control" }),
+    column: Object.freeze({ id: variable.id, idx: variable.idx, name: variable.displayName, type: "user", editable: variable.editable === true }),
+  }));
+  if (!result?.intent || result.findings?.length) throw new Error("SUBLIST_IDENTITY_CONTROL_INTENT_PROJECTION_FAILED");
+  return clone(coreLowerDataListSublistIdentityControlIntentAtHost(result.intent, Object.freeze({ controlId: deterministicUuid(`${seed}:column:${variable.id}:${columnIndex}`), parentBinding, parentControlId })));
+}
+
+function applyDataListSublistLookupAdditionalFieldConfigurationAtHost({ lookupField, variable, lookupAdditionalMappings, listId, parentFieldId, layoutId, parentBinding, parentControlId }) {
+  if (!Array.isArray(lookupAdditionalMappings) || !lookupAdditionalMappings.length) return lookupField;
+  const configured = clone(lookupField);
+  configured.control ||= {};
+  configured.control.attrs ||= {};
+  const additions = [];
+  for (const mapping of lookupAdditionalMappings) {
+    const source = mapping?.source;
+    const destination = mapping?.destination;
+    const result = coreProjectDataListSublistLookupAdditionalFieldIntent(Object.freeze({
+      surface: "data-list-sublist-lookup-additional-field",
+      scope: Object.freeze({ parentListId: String(listId), parentFieldId: String(parentFieldId), layoutId: String(layoutId), layoutResourceId: String(layoutId), parentSublistBinding: parentBinding, parentSublistControlId: parentControlId }),
+      lookup: Object.freeze({ id: variable.id, idx: variable.idx, targetListId: configured.control.attrs.listid, targetListSetId: configured.control.attrs.listsetid, appId: 41, displayField: "Title", valueField: variable.id }),
+      source: Object.freeze({ fieldName: source?.FieldName, fieldId: source?.FieldID, order: source?.Order, isShow: source?.IsShow, relationName: source?.RelationName }),
+      destination: Object.freeze({ id: destination?.id, idx: destination?.idx, name: destination?.name, type: destination?.type, editable: destination?.editable, readonly: true, controlBinding: destination?.id }),
+    }));
+    if (!result?.intent || result.findings?.length) throw new Error("SUBLIST_LOOKUP_ADDITIONAL_CONFIGURATION_PROJECTION_FAILED");
+    additions.push({ FieldName: result.intent.source.fieldName, FieldID: result.intent.source.fieldId, IsShow: true, RelationName: result.intent.destination.id, Value: null, Order: result.intent.source.order });
+  }
+  configured.control.attrs.addition = additions;
+  return configured;
+}
+
+function routeDataListSublistEmbeddedLookupAtHost({ variable, columnIndex, parentBinding, parentControlId, seed, listId, parentFieldId, layoutId }) {
+  if (variable?.type !== "lookup" || !variable?.value || !/^\d{1,30}$/.test(String(listId)) || !/^\d{1,30}$/.test(String(parentFieldId)) || !/^\d{1,30}$/.test(String(layoutId))) return null;
+  let target; try { target = typeof variable.value === "string" ? JSON.parse(variable.value) : variable.value; } catch { throw new Error("SUBLIST_EMBEDDED_LOOKUP_TARGET_INVALID"); }
+  if (!target || String(target.AppID) !== "41" || !/^\d{19}$/.test(target.ListID) || !/^\d{19}$/.test(target.ListSetID)) throw new Error("SUBLIST_EMBEDDED_LOOKUP_TARGET_INVALID");
+  const result = coreProjectDataListSublistEmbeddedLookupIntent(Object.freeze({ surface:"data-list-sublist-embedded-lookup", scope:Object.freeze({parentListId:String(listId),parentFieldId:String(parentFieldId),layoutId:String(layoutId),layoutResourceId:String(layoutId),parentControlReference:parentControlId,listFieldsSlotReference:"attrs.list-fields",childControlSlotReference:"list-field.control"}), column:Object.freeze({id:variable.id,idx:variable.idx,name:variable.displayName,type:"lookup",editable:variable.editable===true}), target:Object.freeze({appId:41,listId:target.ListID,listSetId:target.ListSetID,displayField:"Title",valueField:variable.id}) }));
+  if (!result?.intent || result.findings?.length) throw new Error("SUBLIST_EMBEDDED_LOOKUP_INTENT_PROJECTION_FAILED");
+  return clone(coreLowerDataListSublistEmbeddedLookupIntentAtHost(result.intent,Object.freeze({controlId:deterministicUuid(`${seed}:column:${variable.id}:${columnIndex}`),parentBinding,parentControlId})));
+}
+
+
+function routeDataListSublistNestedControlPlacementAtHost({ descriptor, listVariables, field, listId, parentBinding, parentControlId, seed }) {
+  if (!descriptor || !Array.isArray(listVariables) || !listVariables.length || !/^\d{1,30}$/.test(String(listId || "")) || !/^\d{1,30}$/.test(String(field?.FieldID || ""))) return null;
+  const columns = listVariables.map((variable, ordinal) => {
+    if (!new Set(["text", "date", "number", "boolean"]).has(variable.type) || !variable.id || !variable.idx || !variable.displayName) return null;
+    return Object.freeze({ id: variable.id, idx: variable.idx, name: variable.displayName, type: variable.type, editable: variable.editable === true, childControlReference: `embedded-column:${ordinal}:${variable.id}` });
+  });
+  if (columns.some((column) => column === null)) return null;
+  const projected = coreProjectDataListSublistNestedControlPlacementIntent(Object.freeze({
+    surface: "data-list-sublist-nested-control-placement",
+    templateSnapshot: Object.freeze({ templateId: "data_list_form_control_sublist_v1_1", templateScope: `data-list:${listId}:type1`, parentNodeReference: `sublist:${parentControlId}`, listFieldsSlotReference: "attrs.list-fields", childControlSlotReference: "list-field.control" }),
+    scope: Object.freeze({ parentListId: String(listId), parentFieldId: String(field.FieldID), parentControlReference: parentControlId }),
+    columns: Object.freeze(columns),
+  }));
+  if (!projected?.intent || projected.findings?.length) throw new Error(`SUBLIST_NESTED_CONTROL_PLACEMENT_PROJECTION_FAILED: ${(projected?.findings || []).map((finding) => finding.code).join(",") || "unknown"}`);
+  const bindings = Object.freeze(projected.intent.placements.map((placement) => Object.freeze({ childControlReference: placement.childControlReference, controlId: deterministicUuid(`${seed}:column:${placement.column.id}:${placement.ordinal}`), parentBinding, parentControlId })));
+  return clone(coreLowerDataListSublistNestedControlPlacementAtHost(projected.intent, bindings));
 }
 
 function ensureDataListSubListColumnTitles(control) {
@@ -4654,30 +5108,11 @@ function ensureDataListSubListColumnTitles(control) {
 }
 
 function normalizeSubListRowType(value) {
-  const type = normKey(value);
-  if (/user|identity|person/.test(type)) return "user";
-  if (/date|time/.test(type)) return "date";
-  if (/bool|switch|yes no/.test(type)) return "boolean";
-  if (/number|decimal|currency|integer/.test(type)) return "number";
-  if (/file|attachment/.test(type)) return "file";
-  return "text";
+  return coreProjectDataListSublistStaticConfiguration(Object.freeze({ surface: "data-list-sublist-static-configuration", kind: "normalize-row-type", value })).value;
 }
 
 function normalizeSubListColumnControlType(controlType, rowType) {
-  const explicit = normKey(controlType);
-  if (/identity|user picker/.test(explicit)) return "identity-picker";
-  if (/date/.test(explicit)) return "datepicker";
-  if (/number/.test(explicit)) return "input_number";
-  if (/switch|toggle/.test(explicit)) return "switch";
-  if (/file|upload/.test(explicit)) return "file-upload";
-  if (/input/.test(explicit)) return "input";
-  return {
-    user: "identity-picker",
-    date: "datepicker",
-    number: "input_number",
-    boolean: "switch",
-    file: "file-upload",
-  }[rowType] || "input";
+  return coreProjectDataListSublistStaticConfiguration(Object.freeze({ surface: "data-list-sublist-static-configuration", kind: "normalize-control-type", value: Object.freeze({ controlType, rowType }) })).value;
 }
 
 function isFullRowFormField(field, controlType) {
@@ -4686,15 +5121,14 @@ function isFullRowFormField(field, controlType) {
 }
 
 function isSubListFormField(field, controlType = "") {
-  const raw = normKey(`${field?.DisplayName || ""} ${field?.FieldType || ""} ${field?.Type || ""} ${controlType || ""}`);
-  return /sub list|sublist|\blist\b/.test(raw);
+  return coreProjectDataListSublistStaticConfiguration(Object.freeze({ surface: "data-list-sublist-static-configuration", kind: "is-sublist-form-field", value: Object.freeze({ field: Object.freeze({ DisplayName: field?.DisplayName, FieldType: field?.FieldType, Type: field?.Type }), controlType }) })).value;
 }
 
 function fieldNavLabel(field) {
   return `field_${slugify(field?.FieldName || field?.DisplayName || "field")}`.replace(/-/g, "_");
 }
 
-function buildFieldRules({ field, type, lookupTargetListId = "" }) {
+function buildFieldRules({ field, type, lookupTargetListId = "", embeddedSublistDescriptorHostContext = null }) {
   if (type === "lookup") {
     if (!lookupTargetListId) return "";
     return JSON.stringify({
@@ -4706,8 +5140,15 @@ function buildFieldRules({ field, type, lookupTargetListId = "" }) {
     });
   }
   if (type === "list") {
-    const listVariables = dataListSubListVariables(field, `field-rules:${field?.fieldName || field?.displayName || "sublist"}`)
-      .map(({ idx, id, name, type: rowType, editable }) => ({ idx, id, name, type: rowType, editable }));
+    // DATA_LIST_EMBEDDED_SUBLIST_FROZEN_DESCRIPTOR_RULES_ROUTE_START
+    const descriptor = embeddedSublistDescriptorHostContext?.isSelectedRaw(field)
+      ? embeddedSublistDescriptorHostContext.readForRules(field)
+      : null;
+    const listVariables = (descriptor
+      ? embeddedSublistDescriptorVariables(descriptor)
+      : dataListSubListVariables(field, `field-rules:${field?.fieldName || field?.displayName || "sublist"}`))
+      .map(({ idx, id, name, type: rowType, editable, value }) => ({ idx, id, name, type: rowType, editable, ...(value === undefined ? {} : { value }) }));
+    // DATA_LIST_EMBEDDED_SUBLIST_FROZEN_DESCRIPTOR_RULES_ROUTE_END
     return listVariables.length ? JSON.stringify({ "list-variables": listVariables }) : "";
   }
   if (field?.allowScan === true) {
@@ -4790,7 +5231,7 @@ function splitRawTableLine(line) {
 }
 
 function isTableLine(line) {
-  return /^\s*\|.+\|\s*$/.test(line || "");
+  return coreProjectApplicationPlanStaticFoundation({ kind: "is-table-line", value: line }).value;
 }
 
 function splitTableLine(line) {
@@ -4798,15 +5239,7 @@ function splitTableLine(line) {
 }
 
 function unique(values) {
-  const seen = new Set();
-  const out = [];
-  for (const value of values) {
-    const key = value.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(value);
-  }
-  return out;
+  return [...coreProjectApplicationPlanStaticFoundation({ kind: "unique-case-insensitive", value: values }).value];
 }
 
 function cleanResourceName(value) {
@@ -4895,6 +5328,8 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
 }
 
 function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON, appPlanText = "", findings = [] }) {
+  const embeddedSublistDescriptorHostContext = createDataListEmbeddedSublistDescriptorHostContext();
+  try {
   const childResourceRecords = plannedChildResources(planDemand, planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`]);
   const dataListNames = childResourceRecords.map((record) => record.name);
   const dataListByName = new Map();
@@ -4948,11 +5383,22 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const fields = resourceType === "document-library"
       ? buildDocumentLibraryFieldRecords({ listId, ids, childIndex: index })
       : fieldSpecsForList(planDemand, name).map((field, fieldIndex) => buildFieldRecord({
-        field,
+        field: selectExportProvenEmbeddedSublistDescriptor({
+          field,
+          listId,
+          fieldId: stringId(ids[`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`]),
+          embeddedSublistDescriptorHostContext,
+        }),
         fieldIndex,
         listId,
         fieldId: stringId(ids[`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`]),
         lookupTargetListId: resolveLookupTargetListId(field, dataListByName),
+        lookupTargetIdentityMap: Object.freeze({
+          targetListIdsByLogicalKey: Object.freeze(Object.fromEntries(dataListByName.entries())),
+          targetScopesByLogicalKey: Object.freeze(Object.fromEntries([...dataListByName.entries()].map(([key, value]) => [key, `data-list:${value}`]))),
+        }),
+        sourceResourceKey: name,
+        embeddedSublistDescriptorHostContext,
       }));
     fieldRecordsByName.set(normKey(name), fields);
     const layoutByName = new Map(allCustomFormAssignments.filter((assignment) => assignment.listIndex === index).map((assignment) => [normKey(assignment.formName), {
@@ -4978,7 +5424,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         LayoutID: stringId(ids[`decoded.Childs[${index}].Layouts[0].LayoutID`]),
         Title: defaultPlannedView?.viewName || "Default View",
         Type: 0,
-        LayoutView: JSON.stringify(buildDataListViewLayoutViewChecked({ fields, viewRecord: defaultPlannedView, listName: name, findings })),
+        LayoutView: JSON.stringify(buildDataListViewLayoutViewChecked({ fields, viewRecord: defaultPlannedView, listName: name, findings, routeDefaultViewThroughCore: true })),
         Ext1: JSON.stringify({ Url: "default" }),
         IsDefault: true,
         IsItemPerm: false,
@@ -4988,7 +5434,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     ];
     for (const assignment of customLayoutsForList) {
       const layoutId = stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]);
-      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, selectedTemplate: assignment.selectedTemplate, openIn: assignment.openIn, fields, planDemand, listMetaByName, approvalMetaByName, dashboardMetaByName, rootListSetId: rootListId }));
+      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, selectedTemplate: assignment.selectedTemplate, openIn: assignment.openIn, fields, planDemand, listMetaByName, approvalMetaByName, dashboardMetaByName, rootListSetId: rootListId, embeddedSublistDescriptorHostContext }));
     }
     const extraDataViews = plannedViewsForList.filter((record) => record !== defaultPlannedView);
     const extraViewBaseIndex = customLayoutsForList.reduce((max, assignment) => Math.max(max, assignment.layoutIndex), 0) + 1;
@@ -4999,7 +5445,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         LayoutID: stringId(ids[`decoded.Childs[${index}].Layouts[${layoutIndex}].LayoutID`]),
         Title: viewRecord.viewName,
         Type: 0,
-        LayoutView: JSON.stringify(buildDataListViewLayoutViewChecked({ fields, viewRecord, listName: name, findings })),
+        LayoutView: JSON.stringify(buildDataListViewLayoutViewChecked({ fields, viewRecord, listName: name, findings, routeAdditionalViewThroughCore: true })),
         Ext1: JSON.stringify({ Url: viewRecord.routeKey || slugify(viewRecord.viewName) }),
         IsDefault: false,
         IsItemPerm: false,
@@ -5238,6 +5684,9 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     Components: [],
     Childs: childs,
   };
+  } finally {
+    embeddedSublistDescriptorHostContext.dispose();
+  }
 }
 
 function validatePlannedLookupTargetsMaterialized({ planDemand, dataListNames, dataListByName, findings }) {
@@ -6296,7 +6745,7 @@ function scrubEventPortfolioKpiTemplateVariables(root, contract) {
 }
 
 function normalizeDashboardFilters({ filters, listMeta, dashboardName }) {
-  return [];
+  return coreProjectDashboardStaticConfiguration(Object.freeze({ kind: "normalize-dashboard-filters", filters: Array.isArray(filters) ? filters : [] })).filters;
 }
 
 function materializeDashboardFilters(resource, { filters, listName, listId, filterIdPrefix, datasetRegion, host }) {
@@ -6523,19 +6972,19 @@ function buildTemplateDependencyNameMaps(pageDependencies, scopePrefix) {
     formAction: new Map(),
   };
   for (const item of normalizeDependencyArray(pageDependencies.filterVars)) {
-    const name = dependencyName(item);
+    const name = coreDependencyName(item);
     if (name) maps.filterVars.set(name, scopedDependencyName("filter", name, scopePrefix));
   }
   for (const item of normalizeDependencyArray(pageDependencies.tempVars)) {
-    const name = dependencyName(item);
+    const name = coreDependencyName(item);
     if (name) maps.tempVars.set(name, scopedDependencyName("temp", name, scopePrefix));
   }
   for (const item of normalizeDependencyArray(pageDependencies.actions)) {
-    const name = dependencyName(item);
+    const name = coreDependencyName(item);
     if (name) maps.actions.set(name, scopedDependencyName("action", name, scopePrefix));
   }
   for (const item of normalizeDependencyArray(pageDependencies.formAction)) {
-    const name = dependencyName(item);
+    const name = coreDependencyName(item);
     if (name) maps.formAction.set(name, scopedDependencyName("formAction", name, scopePrefix));
   }
   return maps;
@@ -6551,15 +7000,15 @@ function scopedDependencyName(kind, name, scopePrefix) {
   if (!raw) return raw;
   if (kind === "filter") {
     const suffix = raw.replace(/^__filter_/, "").replace(/^filter_/, "") || "value";
-    const normalizedSuffix = safeDependencyIdentifier(suffix, { lower: true }) || "value";
+    const normalizedSuffix = coreSafeDependencyIdentifier(suffix, { lower: true }) || "value";
     return `filter_${scope}_${normalizedSuffix}`;
   }
   if (kind === "temp") {
     const suffix = raw.replace(/^__temp_/, "").replace(/^var_/, "") || "value";
-    const normalizedSuffix = safeDependencyIdentifier(suffix) || "value";
+    const normalizedSuffix = coreSafeDependencyIdentifier(suffix) || "value";
     return `var_${scope}_${normalizedSuffix}`;
   }
-  const normalizedName = safeDependencyIdentifier(raw) || "action";
+  const normalizedName = coreSafeDependencyIdentifier(raw) || "action";
   return `${scope}_${normalizedName}`;
 }
 
@@ -6780,7 +7229,7 @@ function selectDateTrendRuntimeFunc({ groupingField, title }) {
 }
 
 function isDateLikeAnalyticsField(field) {
-  return /date|datetime|time|created|modified|period|month|week|year/i.test(`${field?.fieldName || field?.FieldName || ""} ${field?.displayName || field?.DisplayName || ""} ${field?.fieldType || field?.FieldType || ""} ${field?.controlType || field?.Type || ""}`);
+  return coreProjectDashboardStaticConfiguration(Object.freeze({ kind: "is-date-like-analytics-field", field: Object.freeze({ fieldName: field?.fieldName, FieldName: field?.FieldName, displayName: field?.displayName, DisplayName: field?.DisplayName, fieldType: field?.fieldType, FieldType: field?.FieldType, controlType: field?.controlType, Type: field?.Type }) })).isDateLike;
 }
 
 function runtimeFieldRef(field, role) {
@@ -7384,9 +7833,7 @@ function sanitizeCollectionRuntimeReferences(root, { rootListSetId, listId, deta
 }
 
 function isDetailLayoutAction(action) {
-  const text = JSON.stringify(action || {});
-  if (text.includes("{{DetailLayoutID}}")) return true;
-  return /"op_type"\s*:\s*"edit"/i.test(text) && /"type"\s*:\s*"listitem"/i.test(text);
+  return coreProjectTemplateStaticNormalization({ kind: "detail-layout-action", value: action || {} }).value;
 }
 
 function actionIdentityCandidates(action) {
@@ -8352,15 +8799,7 @@ function scrubDashboardSourceTemplateResidue(root, { listName, scrubMetadata = f
 }
 
 function hasSourceTemplateResidueText(node) {
-  const text = visibleBusinessText(node);
-  return /\bActive Loan Pipeline\b/i.test(text)
-    || /\bActive Loans\b/i.test(text)
-    || /\bCoordinator view of active loans/i.test(text)
-    || /\bCoordinator guidance: prioritize overdue items and returns/i.test(text)
-    || /\bcurrent loan volume\b/i.test(text)
-    || /\breturn activity signal\b/i.test(text)
-    || /\bwatch coordinator follow-up\b/i.test(text)
-    || /\bOffice Asset records\b/i.test(text);
+  return coreProjectTemplateStaticNormalization({ kind: "source-residue-text", value: node || {} }).value;
 }
 
 function visibleBusinessText(node) {
@@ -8666,28 +9105,7 @@ function buildApplicationLayoutContract() {
 }
 
 function defaultApplicationLayoutAttrs() {
-  return {
-    appearance: {
-      bgc: "var(--c--primary-dark-hover)",
-      color: "var(--c--background)",
-      height: 46,
-      ty: [null, "h6-semi-bold"],
-    },
-    "navigator-menu": {
-      bgc: "var(--c--primary-dark)",
-      color: "var(--c--background)",
-      position: "left",
-      active: {},
-    },
-    CustomColors: [
-      { id: "extra-color-1", label: "Extra Color 1", value: "#F9C434" },
-      { id: "extra-color-2", label: "Extra Color 2", value: "#F61515" },
-    ],
-    CustomFonts: [
-      { id: "3708306f-951b-40d5-b459-26c717e8f187", label: "Extra font 1" },
-      { id: "dc50649a-28d3-42ec-9714-e32cf78de678", label: "Extra font 2" },
-    ],
-  };
+  return coreProjectTemplateStaticNormalization({ kind: "default-layout-attrs" }).value;
 }
 
 function normalizeFontAwesomeIcon(value) {
@@ -8733,11 +9151,7 @@ function inferNavigationIcon({ title = "", type = "" } = {}) {
 }
 
 function inferNavigationType(value) {
-  if (/approval/i.test(value)) return 105;
-  if (/dashboard/i.test(value)) return 103;
-  if (/document\s+library|doc\s+library/i.test(value)) return 16;
-  if (/report/i.test(value)) return 106;
-  return 1;
+  return coreProjectApplicationPlanStaticFoundation({ kind: "infer-navigation-type", value }).value;
 }
 
 function exportResource(resource) {
@@ -8806,16 +9220,7 @@ function workflowUserExpressionAssignee(value, plannedAssigneeRole = "") {
 }
 
 function inferWorkflowVariableAssigneeName(step) {
-  const text = [
-    step?.nodeName,
-    step?.assigneeRole,
-    step?.assignmentStrategy,
-    step?.description,
-  ].map(cleanResourceName).join(" ");
-  const explicit = text.match(/\b(?:workflow\s+variables?|variable)\s*[:=]?\s*([A-Za-z][A-Za-z0-9_]*)\b/i);
-  if (explicit && !/^line|department|manager|user$/i.test(explicit[1])) return explicit[1];
-  if (/\bowner\b/i.test(text)) return "Owner";
-  return "";
+  return coreProjectWorkflowStaticPlan({ kind: "infer-variable-assignee-name", value: step }).value;
 }
 
 function inferRequiredJobPositionName(step) {
@@ -9060,17 +9465,7 @@ function workflowLayoutForSteps(workflowSteps) {
 }
 
 function workflowLayoutRows(entries, tolerance) {
-  const rows = [];
-  for (const entry of [...entries].sort((left, right) => left.position.y - right.position.y)) {
-    const existing = rows.find((row) => Math.abs(row.y - entry.position.y) <= tolerance);
-    if (existing) {
-      existing.entries.push(entry);
-      existing.y = existing.entries.reduce((sum, item) => sum + item.position.y, 0) / existing.entries.length;
-    } else {
-      rows.push({ y: entry.position.y, entries: [entry] });
-    }
-  }
-  return rows;
+  return coreProjectWorkflowStaticPlan({ kind: "layout-rows", value: entries, options: { tolerance } }).value;
 }
 
 function workflowVerticesBetween(sourcePosition, targetPosition, options = {}) {
@@ -9217,16 +9612,7 @@ function columnAverageX(column) {
 }
 
 function workflowRejectedVertices(sourcePosition, rejectPosition) {
-  if (!sourcePosition || !rejectPosition) return [];
-  const dx = Math.abs(rejectPosition.x - sourcePosition.x);
-  const dy = Math.abs(rejectPosition.y - sourcePosition.y);
-  if (dx < 520 && dy < 220) return [];
-  const bendX = sourcePosition.x + Math.max(120, Math.round(Math.abs(rejectPosition.x - sourcePosition.x) / 2));
-  return [
-    { x: bendX, y: sourcePosition.y },
-    { x: bendX, y: rejectPosition.y },
-    { x: rejectPosition.x - 120, y: rejectPosition.y },
-  ];
+  return coreProjectWorkflowStaticPlan({ kind: "rejected-vertices", value: sourcePosition, options: { rejectPosition } }).value;
 }
 
 function plannedWorkflowHostRecords(planDemand) {
@@ -9858,28 +10244,11 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
 }
 
 function workflowConnectorDescription(name, conditioninfo = null) {
-  const label = cleanResourceName(name).replace(/\s+/g, " ");
-  if (/^complete$/i.test(label)) return "Completed";
-  if (label && !/^sequence\s*flow(?:[_\s-]*\d+)?$/i.test(label)) return truncateWorkflowActionName(label, 42);
-  const conditionText = summarizeWorkflowCondition(conditioninfo);
-  return conditionText || "Next";
+  return coreProjectWorkflowStaticPlan({ kind: "connector-description", value: { name, conditioninfo } }).value;
 }
 
 function summarizeWorkflowCondition(conditioninfo) {
-  const rows = Array.isArray(conditioninfo) ? conditioninfo : [];
-  for (const row of rows) {
-    const op = cleanResourceName(row?.op);
-    const left = cleanResourceName(row?.left?.value?.name || row?.left?.value?.id);
-    const right = row?.right?.type === 0
-      ? cleanResourceName(row.right.value)
-      : cleanResourceName(row?.right?.value?.name || row?.right?.value?.id);
-    if (!left || !op) continue;
-    if (op === "isNull") return `${left} is empty`;
-    if (op === "isNotNull") return `${left} is not empty`;
-    const symbol = op.replace(/^[a-z]+\./i, "").replace("!=", "!=").replace("=", "=");
-    if (right) return truncateWorkflowActionName(`${left} ${symbol} ${right}`, 42);
-  }
-  return "";
+  return coreProjectWorkflowStaticPlan({ kind: "summarize-condition", value: conditioninfo }).value;
 }
 
 function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas = [], position = null }) {
@@ -10052,12 +10421,7 @@ function workflowAssignmentTaskType(step) {
 }
 
 function workflowContentListOperation(step) {
-  const text = [step?.nodeName, step?.description, step?.dataReadWrite]
-    .map(cleanResourceName)
-    .join(" ");
-  if (/\b(remove|delete)\b/i.test(text)) return "remove";
-  if (/\b(update|edit)\b/i.test(text)) return "edit";
-  return "add";
+  return coreProjectWorkflowStaticPlan({ kind: "content-list-operation", value: step }).value;
 }
 
 function workflowContentListDefaultMappings(targetList) {
@@ -10078,27 +10442,15 @@ function workflowContentListDefaultMappings(targetList) {
 }
 
 function workflowVariableIdFromName(value) {
-  const slug = slugify(cleanResourceName(value) || "workflow-variable").replace(/-/g, "_");
-  return slug || "workflow_variable";
+  return coreProjectWorkflowStaticPlan({ kind: "variable-id", value }).value;
 }
 
 function buildWorkflowQueryDataResultField(field) {
-  return {
-    FieldID: stringId(field?.FieldID || field?.fieldId || field?.id || field?.fieldName || field?.FieldName),
-    FieldName: cleanResourceName(field?.FieldName || field?.fieldName || field?.field || "Title"),
-    DisplayName: cleanResourceName(field?.DisplayName || field?.displayName || field?.name || field?.FieldName || "Title"),
-    Type: cleanResourceName(field?.Type || field?.type || field?.FieldType || field?.fieldType || "Text"),
-  };
+  return coreProjectWorkflowStaticPlan({ kind: "query-result-field", value: field }).value;
 }
 
 function workflowVariableTypeFromSourceFieldType(value) {
-  const key = normKey(value);
-  if (/user|identity/.test(key)) return "user";
-  if (/date|time/.test(key)) return "date";
-  if (/decimal|number|currency|percent|bigint/.test(key)) return "number";
-  if (/bit|boolean/.test(key)) return "boolean";
-  if (/file|image|upload/.test(key)) return "file";
-  return "text";
+  return coreProjectWorkflowStaticPlan({ kind: "variable-type", value }).value;
 }
 
 function buildPlannedWorkflowQueryFilters(step) {
@@ -10376,6 +10728,14 @@ function ensureApprovalBusinessSection(resource, { title, role }) {
 }
 
 function buildApprovalNoFieldsNotice({ title, role }) {
+  return coreProjectApprovalFormStaticConfiguration({
+    kind: "no-fields-notice",
+    value: { role, id: deterministicUuid(`${slugify(title)}-${role}-approval-no-additional-fields`) },
+  }).value;
+}
+
+// Retained as the temporary-copy rollback reference; host-generated IDs remain outside Core.
+function legacyBuildApprovalNoFieldsNotice({ title, role }) {
   return {
     id: deterministicUuid(`${slugify(title)}-${role}-approval-no-additional-fields`),
     name: "No additional fields required",
@@ -10480,8 +10840,7 @@ function approvalVariableType(field) {
 }
 
 function isFullRowApprovalField(field, controlType) {
-  const raw = normKey(`${field?.fieldType || ""} ${field?.controlType || ""} ${field?.displayName || ""}`);
-  return controlType === "textarea" || controlType === "richtext" || controlType === "list" || /business purpose|justification|description|notes?/.test(raw);
+  return coreProjectApprovalFormStaticConfiguration({ kind: "full-row-field", value: { ...field, controlType } }).value;
 }
 
 function listInfo({ listId, title, type, ext2 = "", iconUrl = "", layoutView = null }) {
@@ -10562,7 +10921,7 @@ function looksLikeRoundedGeneratedId(id) {
 function extractTitle(text) {
   const heading = text.match(/^#\s+(.+)$/m)?.[1];
   if (heading) {
-    return stripPlanningDocumentSuffix(heading)
+    return coreStripPlanningDocumentSuffix(heading)
       .replace(/^(Functional Specification|Yeeflow App Plan)\s*[:\-]\s*/i, "")
       .trim();
   }
@@ -10572,9 +10931,9 @@ function extractTitle(text) {
 function extractApplicationName(text) {
   const markdown = String(text || "");
   const bullet = markdown.match(/^\s*[-*]\s*(?:Application|App)\s+name\s*:\s*(.+?)\s*$/im)?.[1];
-  if (bullet) return stripPlanningDocumentSuffix(bullet).trim();
+  if (bullet) return coreStripPlanningDocumentSuffix(bullet).trim();
   const table = markdown.match(/\|\s*(?:Application|App) Name\s*\|\s*([^|]+)\|/i)?.[1];
-  if (table) return stripPlanningDocumentSuffix(table).trim();
+  if (table) return coreStripPlanningDocumentSuffix(table).trim();
   return "";
 }
 
@@ -10781,7 +11140,7 @@ function summarizePath(file) {
 }
 
 function buildFailure(findings, context = {}) {
-  return { status: "fail", ...context, findings };
+  return JSON.parse(JSON.stringify(coreProjectApplicationPlanStaticFoundation({ kind: "materialization-failure-dto", value: { findings, context } }).value));
 }
 
 function error(code, message, details = {}) {

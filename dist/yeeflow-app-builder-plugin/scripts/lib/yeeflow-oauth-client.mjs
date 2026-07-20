@@ -60,8 +60,8 @@ export function resolveOAuthConfig(env = process.env, options = {}) {
     callbackPath: CALLBACK_PATH,
     callbackPorts: CALLBACK_PORTS,
     tokenFile: resolveTokenFile(env, options),
-    certFile: env.YEEFLOW_OAUTH_CALLBACK_CERT_FILE || path.resolve(process.cwd(), ".yeeflow-oauth", "localhost-cert.pem"),
-    keyFile: env.YEEFLOW_OAUTH_CALLBACK_KEY_FILE || path.resolve(process.cwd(), ".yeeflow-oauth", "localhost-key.pem"),
+    certFile: env.YEEFLOW_OAUTH_CALLBACK_CERT_FILE || resolveLocalCallbackCredentialFile(env, "localhost-cert.pem"),
+    keyFile: env.YEEFLOW_OAUTH_CALLBACK_KEY_FILE || resolveLocalCallbackCredentialFile(env, "localhost-key.pem"),
   };
 }
 
@@ -390,6 +390,11 @@ function resolveTokenFile(env, options) {
   if (env.YEEFLOW_OAUTH_TOKEN_FILE) return path.resolve(env.YEEFLOW_OAUTH_TOKEN_FILE);
   const home = env.HOME || os.homedir();
   return path.join(home, ".yeeflow", "codex-oauth-token.json");
+}
+
+function resolveLocalCallbackCredentialFile(env, filename) {
+  const home = env.HOME || os.homedir();
+  return path.join(home, ".yeeflow", "oauth-callback", filename);
 }
 
 export function assertOAuthClientSecretConfigured(config) {

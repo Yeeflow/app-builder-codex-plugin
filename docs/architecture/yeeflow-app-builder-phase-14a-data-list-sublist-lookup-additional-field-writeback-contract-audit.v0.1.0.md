@@ -1,0 +1,5 @@
+# Phase 14A Embedded Sublist Lookup Additional-Field Writeback Contract Audit
+
+The authoritative Data List export proves one static Lookup additional-field mapping. In the Create Balance Type 1 layout, the parent Sublist field Text10 binds Lookup column LeaveUsage to target ListID 2076284286981328907. Its control has an attrs.addition entry for target field Decimal5 (FieldID 2076284286981328912) with RelationName LeaveUsageHours. The destination embedded number column is in the same parent Sublist control and its control has readonly true. The parent Rules list-variables and form list-variables/list-fields preserve the same static scope and Lookup target configuration.
+
+The export does not prove selection-change, initialization, edit-mode, repeat-selection, clear-selection, invalid-target, retrieval, expression, mutation, or writeback timing. Therefore only an immutable static mapping-intent shadow is accepted. Runtime behavior and production runtime writeback are not authorized. The Approval Form export is comparison-only.

@@ -2,8 +2,9 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { cleanPlanningLabel, isPlanningPlaceholder } from "./planning-placeholder-utils.mjs";
-import { resolveSchemaAuthoritativeFormControlType } from "./form-control-type-authority.mjs";
+import { resolveSchemaAuthoritativeFormControlType } from "./form-control-type-authority-core-adapter.mjs";
 import choiceFieldOptionUtils from "./choice-field-option-utils.cjs";
+import { projectApprovalFormStaticConfiguration, projectApprovalFormSubListLookupStaticConfiguration } from "./materializer-core-adapter.mjs";
 
 const { parseChoiceOptionValues } = choiceFieldOptionUtils;
 
@@ -239,6 +240,7 @@ function materializeApprovalSubListControl(control, field, role) {
         list_field: true,
         list_field_binding: control.binding,
         list_control_id: control.id,
+        ...(rowField.lookupConfiguration ? { listid: rowField.lookupConfiguration.listId, appid: 41, listsetid: rowField.lookupConfiguration.listSetId, listfield: rowField.lookupConfiguration.listField } : {}),
         ...(role === "task" ? { readonly: true, readOnly: true } : {}),
       },
       ...(role === "task" ? { readonly: true, readOnly: true } : {}),
@@ -336,13 +338,19 @@ function normalizeApprovalSubListRowFields(field) {
       type,
       controlType: firstNonEmpty(rowField.controlType, approvalRowControlType(type)),
       editable: rowField.editable !== false,
+      lookupConfiguration: normalizeApprovalSubListLookupConfiguration(rowField),
     });
   }
   return normalized;
 }
 
+function normalizeApprovalSubListLookupConfiguration(rowField) {
+  return projectApprovalFormSubListLookupStaticConfiguration(rowField);
+}
+
 function normalizeApprovalRowFieldType(value) {
   const raw = normKey(value);
+  if (raw === "lookup") return "lookup";
   if (/date|time/.test(raw)) return "date";
   if (/number|decimal|currency|amount|integer/.test(raw)) return "number";
   if (/boolean|bit|switch|yes no/.test(raw)) return "boolean";
@@ -351,11 +359,7 @@ function normalizeApprovalRowFieldType(value) {
 }
 
 function approvalRowControlType(type) {
-  if (type === "date") return "datepicker";
-  if (type === "number") return "input_number";
-  if (type === "boolean") return "switch";
-  if (type === "user") return "identity-picker";
-  return "input";
+  return projectApprovalFormStaticConfiguration({ kind: "sublist-row-control-type", value: type }).value;
 }
 
 function firstNonEmpty(...values) {

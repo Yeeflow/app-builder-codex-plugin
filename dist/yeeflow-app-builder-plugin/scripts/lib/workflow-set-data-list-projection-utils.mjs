@@ -1,86 +1,19 @@
+import { projectWorkflowSetDataListProjection } from "./workflow-set-data-list-projection-core-adapter.mjs";
+
 function text(value) {
   return String(value == null ? "" : value).trim();
 }
 
-function variableType(value) {
-  const normalized = text(value).toLowerCase();
-  if (normalized === "string") return "text";
-  if (["integer", "decimal", "currency", "bigint"].includes(normalized)) return "number";
-  if (["bool", "bit"].includes(normalized)) return "boolean";
-  if (["datetime", "time"].includes(normalized)) return "date";
-  return normalized || "text";
-}
-
-function childFieldId(declaration) {
-  const key = text(declaration?.key);
-  return key.startsWith("_list.") ? key.slice("_list.".length) : "";
+function cloneProjection(value) {
+  return JSON.parse(JSON.stringify(value));
 }
 
 export function workflowSetDataListProjectionRecord(record = {}) {
-  return {
-    ...record,
-    workflowVariableDeclarations: Array.isArray(record.workflowVariableDeclarations)
-      ? record.workflowVariableDeclarations.map((declaration) => ({
-        id: text(declaration?.id),
-        ...(text(declaration?.key) ? { key: text(declaration.key) } : {}),
-        type: text(declaration?.type),
-        valueType: text(declaration?.valueType),
-        name: text(declaration?.name),
-        expressionName: text(declaration?.expressionName),
-      }))
-      : [],
-  };
+  return cloneProjection(projectWorkflowSetDataListProjection({ record }).record);
 }
 
 export function buildWorkflowVariablesFromSetDataListRecords(records = []) {
-  const declarations = records.flatMap((record) => workflowSetDataListProjectionRecord(record).workflowVariableDeclarations);
-  const groups = new Map();
-  for (const declaration of declarations) {
-    if (!declaration.id) continue;
-    const key = declaration.id.toLowerCase();
-    if (!groups.has(key)) groups.set(key, { id: declaration.id, name: declaration.name || declaration.id, declarations: [] });
-    groups.get(key).declarations.push(declaration);
-  }
-
-  const basic = [];
-  const listref = [];
-  for (const group of groups.values()) {
-    const isList = group.declarations.some((declaration) => text(declaration.type).toLowerCase() === "list" || childFieldId(declaration));
-    if (!isList) {
-      const declaration = group.declarations[0];
-      basic.push({
-        id: group.id,
-        idx: group.id,
-        name: group.name,
-        title: group.name,
-        type: variableType(declaration.type || declaration.valueType),
-        source: "workflow-set-data-list-plan",
-      });
-      continue;
-    }
-
-    const listRefId = `${group.id}ListRef`;
-    const fields = [];
-    const seenFields = new Set();
-    for (const declaration of group.declarations) {
-      const id = childFieldId(declaration);
-      if (!id || seenFields.has(id.toLowerCase())) continue;
-      seenFields.add(id.toLowerCase());
-      const displayName = text(declaration.expressionName).split(":").filter(Boolean).at(-1) || id;
-      fields.push({ id, idx: id, name: displayName, type: variableType(declaration.valueType), editable: true });
-    }
-    basic.push({
-      id: group.id,
-      idx: group.id,
-      name: group.name,
-      title: group.name,
-      type: "list",
-      value: listRefId,
-      source: "workflow-set-data-list-plan",
-    });
-    listref.push({ id: listRefId, idx: listRefId, name: `${group.name} Rows`, fields });
-  }
-  return { basic, listref, filter: [] };
+  return cloneProjection(projectWorkflowSetDataListProjection({ records }).variables);
 }
 
 export function mergeWorkflowVariableProjection(target, projected) {

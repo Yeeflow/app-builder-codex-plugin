@@ -10,7 +10,7 @@ import {
   markdownRowValue,
   parseMarkdownTables,
   positivePlanningText,
-} from "./lib/markdown-planning-utils.mjs";
+} from "./lib/markdown-planning-core-adapter.mjs";
 
 const PLUGIN_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 

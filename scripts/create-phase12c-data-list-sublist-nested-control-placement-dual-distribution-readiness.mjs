@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const phase = "phase-12c-data-list-sublist-nested-control-placement-dual-public-distribution-readiness";
+const read = (path) => readFileSync(resolve(root, path), "utf8");
+const write = (path, value) => writeFileSync(resolve(root, path), `${JSON.stringify(value, null, 2)}\n`);
+const core = { schemaVersion: "1.0.0", phase, decision: { status: "accepted_not_promoted", marker: "SUBLIST_NESTED_CONTROL_CORE_PUBLIC_API_READINESS_ACCEPTED" }, prospectiveApi: { function: "projectDataListSublistNestedControlPlacementIntent" }, allowedInput: ["immutable parent template snapshot", "lossless parent ListID and FieldID", "immutable node and slot references", "ordered scalar column descriptors", "non-product child-control reference tokens"], output: ["immutable placement intent", "immutable findings"], excluded: ["WeakMap", "host bindings", "host control IDs", "templates", "resources", "package state", "child resource identity", "id or idx as identity", "runtime expressions"] };
+const runtime = { schemaVersion: "1.0.0", phase, decision: { status: "accepted_not_promoted", marker: "SUBLIST_NESTED_CONTROL_LOCAL_RUNTIME_PUBLIC_API_READINESS_ACCEPTED" }, prospectiveApi: { function: "lowerDataListSublistNestedControlPlacementAtHost" }, input: ["immutable Core intent", "explicit host-supplied child-control IDs", "explicit parent binding and parent control ID"], output: "fresh Legacy-shaped list-fields metadata", excluded: ["template loading", "graph mutation", "control insertion", "ID allocation", "runtime bindings", "resource mutation", "package output"] };
+const dual = { schemaVersion: "1.0.0", phase, decision: { status: "accepted_not_promoted", marker: "SUBLIST_NESTED_CONTROL_DUAL_DISTRIBUTION_READINESS_VALID", nextPhase: "phase-12d-data-list-sublist-nested-control-placement-dual-public-distribution-promotion" }, publicApis: [core.prospectiveApi.function, runtime.prospectiveApi.function], corpus: { path: "compatibility/differential-fixtures/data-list-sublist-nested-control-placement-shadow.v0.1.0.json", caseCount: 12 }, proofRequirements: ["compiled source, Plugin dist, temporary official ZIP extraction, and simulated installed Plugin layouts", "JSON serialization and deep immutability", "no source-map, repository-path, node_modules, or bare-package leakage", "temporary-copy-only Legacy rollback", "actual materializer routing proof only after promotion"], exclusions: core.excluded.concat(runtime.excluded) };
+write("compatibility/capability-manifests/data-list-sublist-nested-control-placement-core-public-api-readiness.v0.1.0.json", core);
+write("compatibility/capability-manifests/data-list-sublist-nested-control-placement-local-runtime-public-api-readiness.v0.1.0.json", runtime);
+write("compatibility/capability-manifests/data-list-sublist-nested-control-placement-dual-distribution-readiness.v0.1.0.json", dual);
+writeFileSync(resolve(root, "docs/architecture/yeeflow-app-builder-phase-12c-data-list-sublist-nested-control-placement-dual-public-distribution-readiness.v0.1.0.md"), `# Phase 12C Data List Sublist Nested-Control Placement Dual Public-Distribution Readiness\n\nThe prospective Core and Local Runtime APIs are accepted for future coordinated distribution only. Core exposes immutable intent/findings only. Local Runtime returns fresh metadata only from explicit host bindings. Neither API loads or mutates a template graph, allocates IDs, inserts controls, performs runtime binding, or integrates a resource/package.\n\n\`SUBLIST_NESTED_CONTROL_CORE_PUBLIC_API_READINESS_ACCEPTED\`\n\n\`SUBLIST_NESTED_CONTROL_LOCAL_RUNTIME_PUBLIC_API_READINESS_ACCEPTED\`\n\n\`SUBLIST_NESTED_CONTROL_DUAL_DISTRIBUTION_READINESS_VALID\`\n`);
+const state = JSON.parse(read("docs/architecture/yeeflow-app-builder-core-migration-state.json"));
+state.migration.currentPhase = phase; state.migration.currentPhaseStatus = "complete"; state.migration.nextPhase = dual.decision.nextPhase; state.migration.overallStatus = "in_progress";
+if (!state.completed.some((item) => item.id === phase)) state.completed.push({ id: phase, status: "complete", evidence: "2026-07-19: bounded immutable nested child-control Core and Local Runtime public-distribution readiness accepted without promotion." });
+state.proofStatus.dataListSublistNestedControlPlacementPublicReadiness = "accepted_not_promoted";
+write("docs/architecture/yeeflow-app-builder-core-migration-state.json", state);
+console.log("PHASE_12C_NESTED_CONTROL_READINESS_RECORDED");

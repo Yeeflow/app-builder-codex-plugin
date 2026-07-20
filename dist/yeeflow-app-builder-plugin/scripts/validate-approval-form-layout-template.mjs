@@ -8,7 +8,7 @@ import {
   extractMarkdownSubsection,
   findMarkdownTable,
   markdownRowValue,
-} from "./lib/markdown-planning-utils.mjs";
+} from "./lib/markdown-planning-core-adapter.mjs";
 import { asArray, isObject, parseJsonMaybe, quoteLargeJsonIntegers, readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");

@@ -17,7 +17,7 @@ try {
   if (!args.workspaceId) throw new Error("--workspace-id is required.");
   const appID = normalizeApplicationAppId(args.appId);
   const capability = getCapability("workspaces.applications.list");
-  const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local" });
+  const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local", onDemandLogin: true, oauthOnly: true });
   if (auth.mode !== "oauth") {
     console.log(JSON.stringify(buildLoginRequiredResult({
       auth,

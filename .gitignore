@@ -93,6 +93,14 @@ yeeflow-data-list-generator/
 
 # Large or decoded generated artifacts that may contain customer data.
 *.json
+!docs/architecture/yeeflow-app-builder-core-migration-state.json
+!compatibility/capability-manifests/yeeflow-app-builder-capability-classification.v0.9.71.json
+!compatibility/capability-manifests/english-only-allowlist.json
+!compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json
+!compatibility/capability-manifests/app-builder-core-package-dependency-graph.v0.1.0.json
+!compatibility/capability-manifests/yeeflow-app-builder-mixed-file-decomposition.v0.9.71.json
+packages/**/lib/
+*.tsbuildinfo
 !docs/reference/form-action-open-item-form.template.json
 !docs/reference/form-action-open-approval-form.template.json
 !docs/reference/form-action-open-dashboard.template.json
