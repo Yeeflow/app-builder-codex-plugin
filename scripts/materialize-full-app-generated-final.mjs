@@ -99,7 +99,16 @@ const { buildDashboardPrintStep, buildBarcodeScanStep } = formActionPrintBarcode
 const { parseChoiceOptionValues } = choiceFieldOptionUtils;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
+const APPLICATION_ICON_BY_DOMAIN = Object.freeze([
+  { pattern: /leave|absence|time off|calendar/i, icon: "fa-regular fa-calendar-check" },
+  { pattern: /travel|trip/i, icon: "fa-solid fa-plane-departure" },
+  { pattern: /asset|inventory|equipment|loan/i, icon: "fa-solid fa-boxes-stacked" },
+  { pattern: /procurement|purchase|vendor/i, icon: "fa-solid fa-cart-shopping" },
+  { pattern: /customer|account health/i, icon: "fa-solid fa-chart-line" },
+  { pattern: /doctor|hospital|healthcare|medical/i, icon: "fa-solid fa-user-doctor" },
+  { pattern: /document|library/i, icon: "fa-regular fa-file-lines" },
+  { pattern: /hardware|computer|laptop|device/i, icon: "fa-solid fa-laptop" },
+]);
 const APPLICATION_CONTROL_STYLE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/application-control-style-soft-outline-controls.template.json");
 const APPLICATION_LAYOUT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/application-layout-sidebar-workspace-1.template.json");
 const DASHBOARD_V11_TEMPLATE_PATH = path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json");
@@ -296,7 +305,8 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   const idPaths = buildIdPaths(planDemand);
   const ids = allocateIds(idSource.ids, idPaths, findings);
   if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
-  const appIconUrl = options.iconUrl || DEFAULT_ICON;
+  const appIconUrl = options.iconUrl || resolveApplicationIcon(planText, appTitle, findings);
+  if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
   const materializationTenantId = resolveMaterializationTenantId(options);
   if (!fixtureMode && !materializationTenantId) {
     findings.push(error("FULL_APP_MATERIALIZATION_TENANT_ID_REQUIRED", "Generated-final materialization requires a real TenantID from --tenant-id, YEEFLOW_TENANT_ID, or profile-specific tenant environment. Refusing to emit TenantID \"0\"."));
@@ -422,6 +432,20 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     proofBoundary: generationReport.hardStopsPreserved,
     findings: [],
   };
+}
+
+function resolveApplicationIcon(planText, appTitle, findings) {
+  const text = String(planText || "");
+  const explicitMatch = text.match(/(?:Application icon|Application icon selection)\s*:\s*`?((?:fa-(?:solid|regular|brands)\s+)?fa-[a-z0-9-]+)`?/i);
+  const declaredDomainMatch = text.match(/(?:Application domain|Business domain)\s*:\s*`?([^\n`]+)`?/i);
+  const controlledDomainText = `${appTitle}\n${declaredDomainMatch?.[1] || ""}`;
+  const explicit = explicitMatch?.[1];
+  const iconClass = explicit || APPLICATION_ICON_BY_DOMAIN.find((entry) => entry.pattern.test(controlledDomainText))?.icon;
+  if (!iconClass) {
+    findings.push(error("FULL_APP_APPLICATION_ICON_SELECTION_REQUIRED", "App Plan must select a domain-appropriate FontAwesome application icon when the business domain has no controlled icon mapping."));
+    return "";
+  }
+  return JSON.stringify({ b: "#E6F0FF", i: iconClass.includes(" ") ? iconClass : `fa-solid ${iconClass}`, c: "#0065FF" });
 }
 
 function buildSeedDataArtifact(decoded) {
@@ -2082,6 +2106,7 @@ function collectApprovalFormFieldSpecs(planText) {
     const keyColumn = findHeaderIndex(normalizedHeaders, ["field name", "field id / variable id", "variable id", "field key", "internal id field key"]);
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow variable type", "exact yeeflow field type", "field type", "variable type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "control type", "control"]);
+    const choiceValuesColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "option values"]);
     const readOnlyColumn = findHeaderIndex(normalizedHeaders, ["read only", "readonly"]);
     const dynamicDisplayColumn = findHeaderIndex(normalizedHeaders, ["dynamic display", "dynamic display rules"]);
     const subListFieldsColumn = findHeaderIndex(normalizedHeaders, ["sub list row fields", "sublist row fields", "sub list columns", "sublist columns", "row fields"]);
@@ -2101,6 +2126,7 @@ function collectApprovalFormFieldSpecs(planText) {
         fieldName: cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, cleanResourceName(cells[fieldTypeColumn]) || "Text", list.length),
         fieldType: cleanResourceName(cells[fieldTypeColumn]) || "Text",
         controlType: cleanResourceName(cells[controlTypeColumn]),
+        choiceValues: choiceValuesColumn === -1 ? "" : cleanResourceName(cells[choiceValuesColumn]),
         readOnly: readOnlyColumn !== -1 && /^(?:yes|true|read.?only)$/i.test(cleanResourceName(cells[readOnlyColumn])),
         dynamicDisplay: dynamicDisplayColumn === -1 ? "" : cleanStructuredPlanCell(cells[dynamicDisplayColumn]),
         listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn]),
@@ -3067,7 +3093,13 @@ function approvalWorkflowNodeSpecsForForm(planDemand, formName) {
 }
 
 function uniqueApprovalFieldSpecs(fields) {
-  return coreProjectApprovalFormStaticConfiguration({ kind: "unique-field-specs", value: fields || [] }).value;
+  const source = Array.isArray(fields) ? fields : [];
+  const projected = coreProjectApprovalFormStaticConfiguration({ kind: "unique-field-specs", value: source }).value;
+  const sourceByIdentity = new Map(source.map((field) => [normKey(field?.fieldName || field?.displayName), field]));
+  return Object.freeze(projected.map((field) => {
+    const original = sourceByIdentity.get(normKey(field?.fieldName || field?.displayName)) || {};
+    return Object.freeze({ ...field, choiceValues: cleanResourceName(original.choiceValues || field.choiceValues) });
+  }));
 }
 
 // Retained as the temporary-copy rollback reference; production uses the frozen Core projection above.
@@ -5266,7 +5298,7 @@ function isNonFieldName(value) {
   return /^(not applicable|n\/a|none|no|deferred|field name|display name|business label|label)$/i.test(text);
 }
 
-function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId, iconUrl = DEFAULT_ICON, appPlanText = "" }) {
+function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId, iconUrl, appPlanText = "" }) {
   return {
     ListSet: listInfo({ listId: rootListId, title: appTitle, type: 1024, ext2: "{\"src\":true}", iconUrl }),
     Pages: [
@@ -5327,7 +5359,7 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
   };
 }
 
-function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON, appPlanText = "", findings = [] }) {
+function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl, appPlanText = "", findings = [] }) {
   const embeddedSublistDescriptorHostContext = createDataListEmbeddedSublistDescriptorHostContext();
   try {
   const childResourceRecords = plannedChildResources(planDemand, planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`]);
@@ -7376,12 +7408,13 @@ function buildDashboardPageLayoutShell({ name, templateId = PAGE_LAYOUT_TEMPLATE
 }
 
 function summarySaveVariable(tempVar) {
+  const name = String(tempVar || "").replace(/^__temp_+/, "");
   return {
     exprType: "variable",
     valueType: "string",
-    id: `__temp_${tempVar}`,
+    id: `__temp_${name}`,
     type: "expr",
-    name: tempVar,
+    name,
   };
 }
 
@@ -8106,7 +8139,7 @@ function reconcilePageTempVariableReferences(resource) {
     if (!rawId.startsWith("__temp_")) return;
     const declaration = findScopedDeclaration(rawId);
     if (!declaration) return;
-    value.id = `__temp_${declaration.id}`;
+    value.id = String(declaration.id).startsWith("__temp_") ? declaration.id : `__temp_${declaration.id}`;
     value.name = declaration.name || declaration.id;
   };
   visit(resource);
@@ -9926,11 +9959,47 @@ function buildWorkflowSetDataListProperties({ record, target, rootListSetId, hos
     listtype: selected ? "select" : "current",
     listid: stringId(selected ? target.listId : hostListId),
     appid: selected ? 41 : "",
-    listdatas: operation === "remove" ? null : (record.mappings || []).map(({ TargetType, ...mapping }) => mapping),
+    listdatas: operation === "remove" ? null : (record.mappings || []).map(normalizeWorkflowContentListMapping),
   };
   if (selected) properties.listsetid = stringId(rootListSetId);
   if (operation === "edit" || operation === "remove") properties.wheres = record.filters || [];
   return properties;
+}
+
+function normalizeWorkflowContentListMapping(mapping = {}) {
+  const { TargetType, ...rest } = mapping;
+  const valueType = workflowMappingValueType(TargetType);
+  return {
+    ...rest,
+    Per: "0",
+    Data: (Array.isArray(mapping.Data) ? mapping.Data : []).map((token) => normalizeWorkflowExpressionToken(token, valueType)),
+  };
+}
+
+function normalizeWorkflowExpressionToken(token = {}, fallbackValueType = "string") {
+  if (!token || typeof token !== "object") return token;
+  if (token.exprType === "variable") {
+    return {
+      ...token,
+      valueType: workflowMappingValueType(cleanResourceName(token.valueType) || fallbackValueType),
+      type: "expr",
+      name: /^Workflow Variables:/i.test(String(token.name || "")) ? token.name : `Workflow Variables:${cleanResourceName(token.name || token.id)}`,
+    };
+  }
+  if (token.exprType === "application" && Object.hasOwn(token, "value") && !token.id) {
+    return { type: "str", value: String(token.value) };
+  }
+  if (token.exprType) return { ...token, valueType: workflowMappingValueType(cleanResourceName(token.valueType) || fallbackValueType), type: "expr" };
+  return token;
+}
+
+function workflowMappingValueType(targetType) {
+  const type = normKey(targetType);
+  if (/user|identity|person/.test(type)) return "user";
+  if (/number|decimal|currency|amount|integer/.test(type)) return "number";
+  if (/date|time/.test(type)) return "date";
+  if (type === "text") return "text";
+  return "string";
 }
 
 function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [], formActionSetVariableRecords = [], formActionSetDataListRecords = [], formActionOpenResourceRecords = [], formActionPrintBarcodeRecords = [], listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map() }) {

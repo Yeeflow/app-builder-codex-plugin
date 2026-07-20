@@ -11,6 +11,7 @@ import { decodeYapkResource } from "./lib/yapk-decode-utils.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const temp = mkdtempSync(resolve(tmpdir(), "yeeflow-approval-multi-field-"));
+process.env.YEEFLOW_CANDIDATE_CORE_VERSION ||= "1.0.0";
 
 try {
   const source = await materialize(root, "source");

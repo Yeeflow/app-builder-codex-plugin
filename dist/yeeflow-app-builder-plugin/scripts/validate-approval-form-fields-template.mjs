@@ -155,7 +155,7 @@ function validateAppPlan(planPath, findings) {
   const text = fs.readFileSync(planPath, "utf8");
   const section = extractSection(text, /^##\s+5\.\s+Approval Forms Plan/im);
   if (!section.trim()) return {};
-  const plannedApprovalFields = collectPlannedApprovalFields(section);
+  const plannedApprovalFields = collectPlannedApprovalFields(section, findings);
   const hasApprovalFieldPlanning = /Submission Form Fields|Task Form Fields|Approval Form Fields Layout Template Selection/i.test(section) && /\|/.test(section);
   if (!hasApprovalFieldPlanning) return plannedApprovalFields;
   if (/intentionally has no approval form field controls/i.test(section)) return plannedApprovalFields;
@@ -163,7 +163,7 @@ function validateAppPlan(planPath, findings) {
     findings.push(error("APPROVAL_FORM_FIELDS_APP_PLAN_SELECTION_TABLE_MISSING", "Approval Forms Plan must include an Approval Form Fields Layout Template Selection table when approval forms display fields."));
     return plannedApprovalFields;
   }
-  const selectionBlock = section.split(/#### Form Actions and Temp Variables|#### Sub List List Actions|##\s+6\./i)[0].split(/#### Approval Form Fields Layout Template Selection/i)[1] || "";
+  const selectionBlock = extractSubsection(section, /^####\s+Approval Form Fields Layout Template Selection\s*$/im);
   const rows = tableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row.raw));
   const selectedRows = rows.filter((row) => [...TEMPLATE_IDS].some((id) => row.raw.includes(id)));
   if (!selectedRows.length) {
@@ -397,7 +397,7 @@ function validateFullRowSpan(hostControl, columnCounts, context, gridLabel, orig
   }
 }
 
-function collectPlannedApprovalFields(section) {
+function collectPlannedApprovalFields(section, findings = []) {
   const planned = {};
   const lines = section.split(/\r?\n/);
   let currentApprovalForm = "";
@@ -421,6 +421,9 @@ function collectPlannedApprovalFields(section) {
     if (!currentApprovalForm || !currentRole || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableCells(lines[index]).map(norm);
     const displayIndex = findHeaderIndex(headers, ["business label", "display name", "field name", "label", "name"]);
+    const fieldTypeIndex = findHeaderIndex(headers, ["exact yeeflow variable type", "exact yeeflow field type", "field type", "variable type", "type"]);
+    const controlTypeIndex = findHeaderIndex(headers, ["exact yeeflow control type", "control type", "control"]);
+    const choiceValuesIndex = findHeaderIndex(headers, ["choice values", "choices", "options", "option values"]);
     if (displayIndex === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
@@ -428,7 +431,14 @@ function collectPlannedApprovalFields(section) {
       const displayName = cleanCell(cells[displayIndex]);
       if (displayName && !isPlaceholderFieldName(displayName)) {
         const target = planned[norm(currentApprovalForm)]?.[currentRole] || [];
-        if (!target.some((field) => norm(field.displayName) === norm(displayName))) target.push({ displayName });
+        const field = {
+          displayName,
+          fieldType: fieldTypeIndex === -1 ? "" : cleanCell(cells[fieldTypeIndex]),
+          controlType: controlTypeIndex === -1 ? "" : cleanCell(cells[controlTypeIndex]),
+          choiceValues: choiceValuesIndex === -1 ? "" : cleanCell(cells[choiceValuesIndex]),
+        };
+        validatePlannedFieldSemanticContract(field, findings);
+        if (!target.some((item) => norm(item.displayName) === norm(displayName))) target.push(field);
         planned[norm(currentApprovalForm)][currentRole] = target;
       }
       rowIndex += 1;
@@ -440,6 +450,17 @@ function collectPlannedApprovalFields(section) {
     if (!roles.submission.length && !roles.task.length) delete planned[formKey];
   }
   return planned;
+}
+
+function validatePlannedFieldSemanticContract(field, findings) {
+  const fieldType = norm(field.fieldType);
+  const controlType = norm(field.controlType);
+  if (fieldType === "text" && /^(select|radio)$/.test(controlType)) {
+    findings.push(error("APPROVAL_FORM_FIELDS_TEXT_CHOICE_CONTROL_FORBIDDEN", "Text fields must not use select or radio controls; declare a Choice field with explicit choice values.", { field: field.displayName, fieldType: field.fieldType, controlType: field.controlType }));
+  }
+  if (fieldType === "choice" && !cleanCell(field.choiceValues)) {
+    findings.push(error("APPROVAL_FORM_FIELDS_CHOICE_VALUES_REQUIRED", "Choice fields must declare explicit choice values in the App Plan.", { field: field.displayName }));
+  }
 }
 
 function validatePlannedApprovalFieldsMaterialized(formPages, plannedApprovalFields, findings) {
@@ -743,6 +764,15 @@ function extractSection(text, headingPattern) {
   const rest = text.slice(start);
   const next = rest.slice(match[0].length).search(/\n##\s+\d+\.\s+/);
   return next === -1 ? rest : rest.slice(0, match[0].length + next);
+}
+
+function extractSubsection(text, headingPattern) {
+  const match = headingPattern.exec(text);
+  if (!match) return "";
+  const headingLevel = (match[0].match(/^#+/) || [""])[0].length;
+  const rest = text.slice(match.index + match[0].length);
+  const nextHeading = rest.search(new RegExp(`\\n#{1,${headingLevel}}\\s+`));
+  return nextHeading === -1 ? rest : rest.slice(0, nextHeading);
 }
 
 function readJson(file, findings, code) {
