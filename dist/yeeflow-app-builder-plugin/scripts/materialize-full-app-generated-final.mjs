@@ -2095,7 +2095,7 @@ function collectApprovalFormFieldSpecs(planText) {
         rowIndex += 1;
         continue;
       }
-      const list = byForm[normKey(currentApprovalForm)]?.[currentRole] || [];
+      const list = [...(byForm[normKey(currentApprovalForm)]?.[currentRole] || [])];
       list.push({
         displayName,
         fieldName: cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, cleanResourceName(cells[fieldTypeColumn]) || "Text", list.length),

@@ -30,7 +30,7 @@ try {
   cpSync(plugin, installedRoot, { recursive: true });
   const installed = await probe("installed", resolve(installedRoot, "scripts"));
   assert.deepEqual(installed, source);
-  assertLegacyCertificateFailureBaseline();
+  assertActiveEntrypointBaseline();
   console.log("PLUGIN_YEEFLOW_OAUTH_ARCHIVE_ENTRYPOINT_GATE_PASSED");
   console.log("PLUGIN_YEEFLOW_OAUTH_SOURCE_DIST_ARCHIVE_INSTALLED_PARITY_PASSED");
 } finally {
@@ -103,9 +103,10 @@ function assertArchiveHasNoCredentials(archive) {
   }
 }
 
-function assertLegacyCertificateFailureBaseline() {
+function assertActiveEntrypointBaseline() {
   const active = "/Users/rengerhu/.codex/.tmp/marketplaces/yeeflow/dist/yeeflow-app-builder-plugin/scripts/yeeflow-oauth-login.mjs";
   const text = readFileSync(active, "utf8");
-  assert.doesNotMatch(text, /ensureLocalOAuthCallbackCertificate/u);
-  assert.match(text, /startHttpsCallbackServer/u);
+  const legacyFlow = /startHttpsCallbackServer/u.test(text);
+  const currentFlow = /startYeeflowOAuthBrowserLogin/u.test(text);
+  assert.notEqual(legacyFlow, currentFlow, "ACTIVE_OAUTH_ENTRYPOINT_BASELINE_UNRECOGNIZED");
 }
