@@ -7,6 +7,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { validateApprovalFormFieldsTemplate } from "./validate-approval-form-fields-template.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MATERIALIZER = path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs");
@@ -178,20 +179,20 @@ try {
     "",
     "##### Submission Form Fields",
     "",
-    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Proof Label |",
-    "| --- | --- | --- | --- | --- | --- |",
-    "| 1 | Requester | Requester | User | identity-picker | Generated-final validation |",
-    "| 2 | Asset | Asset | Text | input | Generated-final validation |",
-    "| 3 | Business Purpose | BusinessPurpose | Multiple line | textarea | Generated-final validation |",
-    "| 4 | Purpose | Purpose | Multiple line text | textarea | Generated-final validation |",
-    "| 5 | Payment Terms | PaymentTerms | Choice | radio dropdown | Generated-final validation |",
-    "| 6 | Tax Number | TaxNumber | Text | input | Generated-final validation |",
-    "| 7 | Bank Name | BankName | Text | input | Generated-final validation |",
-    "| 8 | Bank Account | BankAccount | Text | input | Generated-final validation |",
-    "| 9 | Risk Self Assessment | RiskSelfAssessment | Choice | radio dropdown | Generated-final validation |",
-    "| 10 | Risk Explanation | RiskExplanation | Multiple line | textarea | Generated-final validation |",
-    "| 11 | Business License Attachment | BusinessLicenseAttachment | File | file upload | Generated-final validation |",
-    "| 12 | Bank Proof Attachment | BankProofAttachment | File | file upload | Generated-final validation |",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Choice Values | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | Requester | Requester | User | identity-picker | | Generated-final validation |",
+    "| 2 | Asset | Asset | Text | input | | Generated-final validation |",
+    "| 3 | Business Purpose | BusinessPurpose | Multiple line | textarea | | Generated-final validation |",
+    "| 4 | Purpose | Purpose | Multiple line text | textarea | | Generated-final validation |",
+    "| 5 | Payment Terms | PaymentTerms | Choice | radio dropdown | Prepaid; Net 30; Net 60 | Generated-final validation |",
+    "| 6 | Tax Number | TaxNumber | Text | input | | Generated-final validation |",
+    "| 7 | Bank Name | BankName | Text | input | | Generated-final validation |",
+    "| 8 | Bank Account | BankAccount | Text | input | | Generated-final validation |",
+    "| 9 | Risk Self Assessment | RiskSelfAssessment | Choice | radio dropdown | Low; Medium; High | Generated-final validation |",
+    "| 10 | Risk Explanation | RiskExplanation | Multiple line | textarea | | Generated-final validation |",
+    "| 11 | Business License Attachment | BusinessLicenseAttachment | File | file upload | | Generated-final validation |",
+    "| 12 | Bank Proof Attachment | BankProofAttachment | File | file upload | | Generated-final validation |",
     "",
     "##### Task Form Fields",
     "",
@@ -218,20 +219,20 @@ try {
     "",
     "##### Submission Form Fields",
     "",
-    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Proof Label |",
-    "| --- | --- | --- | --- | --- | --- |",
-    "| 1 | Loan Number | LoanNumber | Text | input | Generated-final validation |",
-    "| 2 | Return Condition | ReturnCondition | Choice | radio | Generated-final validation |",
-    "| 3 | Workflow Proof Status | WorkflowProofStatus | Text | input | Generated-final validation |",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Choice Values | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | Loan Number | LoanNumber | Text | input | | Generated-final validation |",
+    "| 2 | Return Condition | ReturnCondition | Choice | radio | Good; Damaged; Lost | Generated-final validation |",
+    "| 3 | Workflow Proof Status | WorkflowProofStatus | Text | input | | Generated-final validation |",
     "",
     "##### Task Form Fields",
     "",
-    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Read Only | Proof Label |",
-    "| --- | --- | --- | --- | --- | --- | --- |",
-    "| 1 | Loan Number | LoanNumber | Text | input | Yes | Generated-final validation |",
-    "| 2 | Return Condition | ReturnCondition | Choice | radio | Yes | Generated-final validation |",
-    "| 3 | Reviewer Decision | ReviewerDecision | Choice | radio | No | Generated-final validation |",
-    "| 4 | Workflow Proof Status | WorkflowProofStatus | Text | input | Yes | Generated-final validation |",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Choice Values | Read Only | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | Loan Number | LoanNumber | Text | input | | Yes | Generated-final validation |",
+    "| 2 | Return Condition | ReturnCondition | Choice | radio | Good; Damaged; Lost | Yes | Generated-final validation |",
+    "| 3 | Reviewer Decision | ReviewerDecision | Choice | radio | Approve; Reject; Request Changes | No | Generated-final validation |",
+    "| 4 | Workflow Proof Status | WorkflowProofStatus | Text | input | | Yes | Generated-final validation |",
     "",
     "#### Approval Form Fields Layout Template Selection",
     "| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |",
@@ -375,6 +376,29 @@ try {
     "| Reports | Asset Loan Request Report | Form report |",
     "| Administration | Office Assets | Data list |",
   ].join("\n"));
+  const correctedApprovalFieldsReport = validateApprovalFormFieldsTemplate({ plan: resourcePlan });
+  assert.equal(correctedApprovalFieldsReport.status, "pass", JSON.stringify(correctedApprovalFieldsReport.findings));
+  cases.push("Office Asset Loan App Plan declares explicit Choice Values for every approval select and radio field");
+
+  for (const [field, populatedCell, emptyCell] of [
+    ["Payment Terms", "| Payment Terms | PaymentTerms | Choice | radio dropdown | Prepaid; Net 30; Net 60 |", "| Payment Terms | PaymentTerms | Choice | radio dropdown | |"],
+    ["Risk Self Assessment", "| Risk Self Assessment | RiskSelfAssessment | Choice | radio dropdown | Low; Medium; High |", "| Risk Self Assessment | RiskSelfAssessment | Choice | radio dropdown | |"],
+    ["Return Condition (Submission)", "| Return Condition | ReturnCondition | Choice | radio | Good; Damaged; Lost | Generated-final validation |", "| Return Condition | ReturnCondition | Choice | radio | | Generated-final validation |"],
+    ["Return Condition (Task)", "| Return Condition | ReturnCondition | Choice | radio | Good; Damaged; Lost | Yes |", "| Return Condition | ReturnCondition | Choice | radio | | Yes |"],
+    ["Reviewer Decision", "| Reviewer Decision | ReviewerDecision | Choice | radio | Approve; Reject; Request Changes |", "| Reviewer Decision | ReviewerDecision | Choice | radio | |"],
+  ]) {
+    const invalidPlan = path.join(tempDir, `missing-choice-values-${field.toLowerCase().replace(/[^a-z]+/g, "-")}.md`);
+    const source = fs.readFileSync(resourcePlan, "utf8");
+    assert.ok(source.includes(populatedCell), `${field} populated Choice Values cell must exist in fixture`);
+    fs.writeFileSync(invalidPlan, source.replace(populatedCell, emptyCell));
+    const invalidReport = validateApprovalFormFieldsTemplate({ plan: invalidPlan });
+    assert.ok(
+      invalidReport.findings.some((finding) => finding.code === "APPROVAL_FORM_FIELDS_CHOICE_VALUES_REQUIRED"),
+      `${field} must fail when its Choice Values cell is removed`,
+    );
+    cases.push(`${field} missing Choice Values fails approval-form planning validation`);
+  }
+
   const resourceOut = path.join(tempDir, "resource-plan");
   const resourceRun = expectPass("nontrivial App Plan materializes minimal resource graph instead of placeholder package", [
     MATERIALIZER,

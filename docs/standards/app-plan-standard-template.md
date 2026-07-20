@@ -158,6 +158,7 @@ Submission form rules:
 
 - Variable and control types must follow active plugin Approval Form standards.
 - Text fields must not use select or radio controls. Choice fields must use an approved choice control and list explicit business values in `Choice Values`; for example, `Leave Type` is `Choice` + `select`, not `Text` + `select`.
+- Choice/select values must appear in the `Choice Values` column. A value list written only in `Validation Rules` or `Custom Validation` does not satisfy the planning contract.
 - Distinguish business labels from exact Yeeflow implementation types. Slash-combined or vague implementation wording is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
 - Lookup fields must identify target list, display field, and additional fields.
 - Sublist fields must define row fields, summary fields, and any summary-to-form-field bindings.
@@ -504,6 +505,7 @@ Required for every Section 4 Data List or Document Library. Each business list m
 
 Rules:
 
+- Keep the heading exactly `#### Data List Form Layout Template Selection`; this table is mandatory before API ID allocation.
 - The Selected Data List Form Layout Template must be one of `data_list_form_layout_new_edit_v1_1`, `data_list_form_layout_view_item_v1_1`, or `data_list_form_layout_workbench` from `docs/reference/data-list-form-layout-templates.json`.
 - New Item and Edit Item custom forms must select `data_list_form_layout_new_edit_v1_1`. If New and Edit use separate forms, both must still select this template.
 - Standard View Item custom forms must select `data_list_form_layout_view_item_v1_1`.
@@ -578,6 +580,7 @@ Required for every generated custom Data List New/Edit/View form that displays c
 
 Rules:
 
+- Keep the heading exactly `#### Form Fields Layout Template Selection`; this table is mandatory before API ID allocation.
 - Select `data_list_form_fields_grid_v1_1` from `docs/reference/data-list-form-field-layout-templates.json` for every generated field group on a New/Edit/View custom Data List form.
 - Current-record field controls must be placed inside the selected `form_grid_fields_wrapper`, not directly inside `section_content_area`; the field grid itself must be hosted in the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 - Multiple line, Rich text, and Sub list controls must be listed as full-row field controls and generated with column span equal to the parent Grid's column count for each responsive breakpoint.

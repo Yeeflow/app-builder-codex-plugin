@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.0.3`
+- Version: `1.0.4`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `1.0.3` fixes clean-room planning and generated-final contract lowering for Approval field templates and choices, Approval ContentList mappings, Dashboard Summary temp variables, and domain-safe application icons.
+Current release `1.0.4` adds a fail-closed pre-ID planning gate for Data List form-layout, Data List form-field, and Approval Choice contracts before API-issued ID allocation.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.0.3
+Version: 1.0.4
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.3
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.4
 ```
 
 ## What Is Included

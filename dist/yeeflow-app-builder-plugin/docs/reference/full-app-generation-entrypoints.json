@@ -51,7 +51,11 @@
         "validate-app-plan-resource-order.mjs",
         "validate-business-clarification-gate.mjs --mode generation",
         "validate-generation-readiness-review.mjs",
-        "validate-functional-spec-to-app-plan-traceability.mjs"
+        "validate-functional-spec-to-app-plan-traceability.mjs",
+        "validate-pre-id-allocation-readiness.mjs",
+        "validate-data-list-form-layout-template.mjs",
+        "validate-data-list-form-fields-template.mjs",
+        "validate-approval-form-fields-template.mjs"
       ],
       "requiredGeneratedFinalGates": [
         "yapk-first-generation-preflight.mjs",
@@ -106,7 +110,11 @@
         "validate-app-plan-resource-order.mjs",
         "validate-business-clarification-gate.mjs --mode generation",
         "validate-generation-readiness-review.mjs",
-        "validate-functional-spec-to-app-plan-traceability.mjs"
+        "validate-functional-spec-to-app-plan-traceability.mjs",
+        "validate-pre-id-allocation-readiness.mjs",
+        "validate-data-list-form-layout-template.mjs",
+        "validate-data-list-form-fields-template.mjs",
+        "validate-approval-form-fields-template.mjs"
       ],
       "requiredGeneratedFinalGates": [
         "yapk-first-generation-preflight.mjs",
@@ -158,7 +166,11 @@
       "requiredPlanningGates": [
         "validate-functional-specification.mjs",
         "validate-app-plan-template.mjs",
-        "validate-app-plan-resource-order.mjs"
+        "validate-app-plan-resource-order.mjs",
+        "validate-pre-id-allocation-readiness.mjs",
+        "validate-data-list-form-layout-template.mjs",
+        "validate-data-list-form-fields-template.mjs",
+        "validate-approval-form-fields-template.mjs"
       ],
       "requiredGeneratedFinalGates": [
         "yapk-first-generation-preflight.mjs",

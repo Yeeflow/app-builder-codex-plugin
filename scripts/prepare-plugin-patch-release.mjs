@@ -16,7 +16,7 @@ if (!/^\d+\.\d+\.\d+$/u.test(packageManifest.version || "")) {
 pluginManifest.version = packageManifest.version;
 writeFileSync(resolve(root, pluginManifestPath), `${JSON.stringify(pluginManifest, null, 2)}\n`);
 
-for (const sourcePath of [
+const mirrors = [
   "scripts/validate-approval-workflow-publish-readiness.mjs",
   "scripts/test-approval-workflow-unicode-node-name-regressions.mjs",
   "scripts/test-approval-form-multi-field-immutable-projection.mjs",
@@ -24,14 +24,25 @@ for (const sourcePath of [
   "scripts/validate-approval-form-fields-template.mjs",
   "scripts/test-release-1.0.3-clean-room-contracts.mjs",
   "scripts/test-fixtures/release-1.0.3-clean-room-plan.mjs",
+  "scripts/test-full-app-materialization-entrypoint-gates.mjs",
   "docs/standards/app-plan-standard-template.md",
-]) {
-  const destination = resolve(root, "dist/yeeflow-app-builder-plugin", sourcePath);
+  "docs/reference/full-app-generation-entrypoints.json",
+  "scripts/validate-pre-id-allocation-readiness.mjs",
+  "scripts/test-pre-id-allocation-readiness-gates.mjs",
+].map((sourcePath) => [sourcePath, sourcePath]);
+
+mirrors.push(
+  ["skills/installed/yeeflow-application-builder/SKILL.md", "skills/yeeflow-application-builder/SKILL.md"],
+  ["skills/installed/yeeflow-application-generator/SKILL.md", "skills/yeeflow-application-generator/SKILL.md"],
+);
+
+for (const [sourcePath, destinationPath] of mirrors) {
+  const destination = resolve(root, "dist/yeeflow-app-builder-plugin", destinationPath);
   mkdirSync(dirname(destination), { recursive: true });
   copyFileSync(resolve(root, sourcePath), destination);
 }
 
-console.log(`PLUGIN_PATCH_RELEASE_PREPARED version=${packageManifest.version} mirroredFiles=8`);
+console.log(`PLUGIN_PATCH_RELEASE_PREPARED version=${packageManifest.version} mirroredFiles=${mirrors.length}`);
 
 function readJson(relativePath) {
   return JSON.parse(readFileSync(resolve(root, relativePath), "utf8"));
