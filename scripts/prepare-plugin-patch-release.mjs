@@ -26,6 +26,7 @@ const mirrors = [
   "scripts/test-fixtures/release-1.0.3-clean-room-plan.mjs",
   "scripts/test-full-app-materialization-entrypoint-gates.mjs",
   "docs/standards/app-plan-standard-template.md",
+  "docs/app-plan-standard-template.md",
   "docs/reference/full-app-generation-entrypoints.json",
   "scripts/validate-pre-id-allocation-readiness.mjs",
   "scripts/test-pre-id-allocation-readiness-gates.mjs",
@@ -34,6 +35,7 @@ const mirrors = [
 mirrors.push(
   ["skills/installed/yeeflow-application-builder/SKILL.md", "skills/yeeflow-application-builder/SKILL.md"],
   ["skills/installed/yeeflow-application-generator/SKILL.md", "skills/yeeflow-application-generator/SKILL.md"],
+  ["skills/installed/yeeflow-dashboard-generator/SKILL.md", "skills/yeeflow-dashboard-generator/SKILL.md"],
 );
 
 for (const [sourcePath, destinationPath] of mirrors) {

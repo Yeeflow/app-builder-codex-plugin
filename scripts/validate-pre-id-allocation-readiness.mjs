@@ -5,11 +5,13 @@ import { fileURLToPath } from "node:url";
 import { validateDataListFormLayoutTemplate } from "./validate-data-list-form-layout-template.mjs";
 import { validateDataListFormFieldsTemplate } from "./validate-data-list-form-fields-template.mjs";
 import { validateApprovalFormFieldsTemplate } from "./validate-approval-form-fields-template.mjs";
+import { validateDashboardDatasetPresentationGoldenReferences } from "./validate-dashboard-dataset-presentation-golden-references.mjs";
 
 const VALIDATORS = Object.freeze([
-  ["validate-data-list-form-layout-template.mjs", validateDataListFormLayoutTemplate],
-  ["validate-data-list-form-fields-template.mjs", validateDataListFormFieldsTemplate],
-  ["validate-approval-form-fields-template.mjs", validateApprovalFormFieldsTemplate],
+  ["validate-data-list-form-layout-template.mjs", validateDataListFormLayoutTemplate, "plan"],
+  ["validate-data-list-form-fields-template.mjs", validateDataListFormFieldsTemplate, "plan"],
+  ["validate-approval-form-fields-template.mjs", validateApprovalFormFieldsTemplate, "plan"],
+  ["validate-dashboard-dataset-presentation-golden-references.mjs", validateDashboardDatasetPresentationGoldenReferences, "appPlan"],
 ]);
 
 if (isMainModule()) {
@@ -25,8 +27,8 @@ if (isMainModule()) {
 
 export function validatePreIdAllocationReadiness(options = {}) {
   const appPlan = path.resolve(String(options.appPlan || options.plan || ""));
-  const gates = VALIDATORS.map(([validator, validate]) => {
-    const report = validate({ plan: appPlan });
+  const gates = VALIDATORS.map(([validator, validate, inputKey]) => {
+    const report = validate({ [inputKey]: appPlan });
     return {
       validator,
       status: report.status,

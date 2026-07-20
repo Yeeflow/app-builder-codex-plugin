@@ -17,7 +17,8 @@ try {
   fs.writeFileSync(malformedPlan, genericPlan()
     .replace("#### Data List Form Layout Template Selection", "#### Data List Form Layout Notes")
     .replace("#### Form Fields Layout Template Selection", "#### Form Fields Layout Notes")
-    .replaceAll("Open; Closed", ""));
+    .replaceAll("Open; Closed", "")
+    .replace("| Collection | collection_control_grid_table | Record Title, Record Status | Dense operational row/column scanning for audit-table review |", "| Collection | approved grid-table reference | Record Title, Record Status | General operational display |"));
 
   const archive = path.join(temporary, "official-plugin.zip");
   execFileSync(process.execPath, [path.join(ROOT, "scripts/build-plugin-archive.mjs"), "--output", archive], {
@@ -43,7 +44,7 @@ try {
     status: "pass",
     marker: "FULL_APP_PRE_ID_ALLOCATION_READINESS_PARITY_PASSED",
     surfaces: roots.map(([surface]) => surface),
-    cases: 16,
+    cases: 20,
   }, null, 2));
 } finally {
   fs.rmSync(temporary, { recursive: true, force: true });
@@ -64,6 +65,7 @@ async function verifySurface(surface, root, validPlan, malformedPlan) {
   assert.ok(codes.has("DATA_LIST_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING"), surface);
   assert.ok(codes.has("DATA_LIST_FORM_FIELDS_APP_PLAN_SELECTION_TABLE_MISSING"), surface);
   assert.ok(codes.has("APPROVAL_FORM_FIELDS_CHOICE_VALUES_REQUIRED"), surface);
+  assert.ok(codes.has("DASH_DATASET_APP_PLAN_REFERENCE_MISSING"), surface);
   assert.deepEqual(malformed.proofBoundary, {
     apiIdAllocationAllowed: false,
     packageMaterializationAllowed: false,
@@ -135,5 +137,21 @@ function genericPlan() {
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Operational Records | Record New/Edit | Record fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | None | None | Generated-final validation |
 | Operational Records | Record View | Record fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | None | None | Generated-final validation |
+
+## 14. Dashboard Pages Plan
+
+### 14.1 Operations Audit
+
+#### Record Display Control Selection
+
+| Section | Data Source | Display Need | Selected Record Display Control | Selected Collection Presentation Reference | Required Business Fields | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Audit Table | Operational Records | Dense audit table | Collection | collection_control_grid_table | Record Title, Record Status | Dense operational row/column scanning for audit-table review | No row open | Generated-final validation |
+
+#### Dashboard Golden Reference Selection
+
+| Dashboard Page | Dataset Region | Golden Reference |
+| --- | --- | --- |
+| Operations Audit | Audit Table | collection_control_grid_table |
 `;
 }
