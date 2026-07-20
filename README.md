@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.0.4`
+- Version: `1.0.5`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `1.0.4` adds a fail-closed pre-ID planning gate for Data List form-layout, Data List form-field, and Approval Choice contracts before API-issued ID allocation.
+Current release `1.0.5` extends the fail-closed pre-ID planning gate to require an approved Dashboard Collection dataset-presentation reference and business rationale in each concrete region/control row before API-issued ID allocation.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.0.4
+Version: 1.0.5
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.4
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.5
 ```
 
 ## What Is Included

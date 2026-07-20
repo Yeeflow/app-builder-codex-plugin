@@ -55,7 +55,8 @@
         "validate-pre-id-allocation-readiness.mjs",
         "validate-data-list-form-layout-template.mjs",
         "validate-data-list-form-fields-template.mjs",
-        "validate-approval-form-fields-template.mjs"
+        "validate-approval-form-fields-template.mjs",
+        "validate-dashboard-dataset-presentation-golden-references.mjs"
       ],
       "requiredGeneratedFinalGates": [
         "yapk-first-generation-preflight.mjs",
@@ -114,7 +115,8 @@
         "validate-pre-id-allocation-readiness.mjs",
         "validate-data-list-form-layout-template.mjs",
         "validate-data-list-form-fields-template.mjs",
-        "validate-approval-form-fields-template.mjs"
+        "validate-approval-form-fields-template.mjs",
+        "validate-dashboard-dataset-presentation-golden-references.mjs"
       ],
       "requiredGeneratedFinalGates": [
         "yapk-first-generation-preflight.mjs",
@@ -170,7 +172,8 @@
         "validate-pre-id-allocation-readiness.mjs",
         "validate-data-list-form-layout-template.mjs",
         "validate-data-list-form-fields-template.mjs",
-        "validate-approval-form-fields-template.mjs"
+        "validate-approval-form-fields-template.mjs",
+        "validate-dashboard-dataset-presentation-golden-references.mjs"
       ],
       "requiredGeneratedFinalGates": [
         "yapk-first-generation-preflight.mjs",

@@ -813,6 +813,7 @@ Required for every Dashboard/Page section that displays Data List records.
 | Section | Data Source | Display Need | Selected Record Display Control | Selected Collection Presentation Reference | Required Business Fields | Selection Reason | Detail/Open Behavior | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Section> | <Data List/Form Report/Document Library metadata list> | <Cards/table/status board/activity history/roadmap/etc.> | Data table / Collection / Kanban / Vertical timeline / Horizontal timeline | <approved Dashboard Collection reference ID or not applicable> | <Business fields only, no runtime IDs> | <Reason> | <Open/edit/detail behavior> | <Local/runtime proof boundary> |
+| Dense audit table | <Data List or Form Report> | Dense operational audit-table review | Collection | collection_control_grid_table | <Audit fields> | Dense operational row/column scanning for audit-table review | <Open behavior or No row open> | <Local/runtime proof boundary> |
 
 Rules:
 
@@ -822,6 +823,7 @@ Rules:
 - For Collection rows, state the required business fields and selection rationale. The rationale must use the selected template's `whenToUse`, `whenNotToUse`, `requiredBusinessSignals`, and `suitableSourceResourceTypes` guidance, such as card browsing, dense row/column scanning, free-text search, multiselect/bulk operation, or high-fidelity primary operations table.
 - The App Plan generator must write this rationale at generation time. It must not emit a row that only names `collection_control_grid_table`, `collection_control_responsive_card_grid`, or another approved template ID without a matching business signal such as dense row/column scanning, card browsing, multiselect/bulk operation, work queue, record list, or primary operations table.
 - Select exactly one approved Collection presentation reference per Dashboard dataset region. Do not list multiple possible templates for the same region and do not leave the template choice to generation.
+- The exact approved reference must appear in this concrete Dashboard region/control row. Mentioning it only in a separate Dashboard Golden Reference Selection or summary table does not satisfy the generation contract.
 - App Plan selection is a business decision only. It must not include generated `ListID`, `LayoutID`, `PageID`, action type codes, JSON property paths, placeholder IDs, or runtime payload fields in this App Plan table.
 - Use Kanban for status, lane, queue, or work-board patterns.
 - Use Vertical Timeline for activity, history, audit, event feed, and chronological log patterns.
