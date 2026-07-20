@@ -19,11 +19,12 @@ writeFileSync(resolve(root, pluginManifestPath), `${JSON.stringify(pluginManifes
 for (const sourcePath of [
   "scripts/validate-approval-workflow-publish-readiness.mjs",
   "scripts/test-approval-workflow-unicode-node-name-regressions.mjs",
+  "scripts/test-approval-form-multi-field-immutable-projection.mjs",
 ]) {
   copyFileSync(resolve(root, sourcePath), resolve(root, "dist/yeeflow-app-builder-plugin", sourcePath));
 }
 
-console.log(`PLUGIN_PATCH_RELEASE_PREPARED version=${packageManifest.version} mirroredFiles=2`);
+console.log(`PLUGIN_PATCH_RELEASE_PREPARED version=${packageManifest.version} mirroredFiles=3`);
 
 function readJson(relativePath) {
   return JSON.parse(readFileSync(resolve(root, relativePath), "utf8"));
