@@ -348,7 +348,7 @@ function validateSequenceFlowOutcomeConditions(def, context) {
   }
 }
 
-function validatePlanWorkflowNodeParity(def, context) {
+export function validatePlanWorkflowNodeParity(def, context) {
   const planned = asArray(context.plannedWorkflowNodes)
     .filter((node) => !["StartNoneEvent", "EndNoneEvent", "EndRejectEvent", "SequenceFlow"].includes(node.nodeType));
   if (!planned.length) return;
@@ -716,8 +716,12 @@ function isNonResourceName(value) {
   return false;
 }
 
-function normKey(value) {
-  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+export function normKey(value) {
+  return String(value || "")
+    .toLocaleLowerCase()
+    .normalize("NFKC")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
 }
 
 function normalizeWorkflowNodeType(value) {
