@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.71`
+- Version: `1.0.1`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `1.0.0` delivers Core v1 and the OAuth browser-login repair.
+Current release `1.0.1` fixes Unicode Approval Workflow node-name parity validation without changing workflow generation.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.71
+Version: 1.0.1
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.71
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.1
 ```
 
 ## What Is Included

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "coreVersion": "1.0.0",
   "packageGraphVersion": "0.1.0",
-  "sourceCommit": "fcc8b8e16b784f1032759ee1b6b588a144497feb",
+  "sourceCommit": "ac096e455bf4821dd5327d5a9fd30bc905473ee7",
   "sourceTreeState": "release-scoped-dirty",
   "primaryArtifactPath": "core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
   "sourceInputSha256": "2ca32dca26fee2ab58bf5e7ca7a0c156cf942b0e86091ce1b6967e5f9c4df599",

@@ -11,6 +11,13 @@ if (index < 0 || !process.argv[index + 1]) throw new Error("CORE_DISTRIBUTION_AR
 const outputPath = resolve(root, process.argv[index + 1]);
 execFileSync(process.execPath, [resolve(root, "scripts/build-core-distribution.mjs")], { cwd: root, stdio: "inherit" });
 rmSync(outputPath, { force: true });
-execFileSync("zip", ["-qr", outputPath, "yeeflow-app-builder-plugin"], { cwd: resolve(root, "dist") });
+execFileSync("zip", [
+  "-qr",
+  outputPath,
+  "yeeflow-app-builder-plugin",
+  "-x",
+  "* 2.*",
+  "* 3.*",
+], { cwd: resolve(root, "dist") });
 if (!existsSync(outputPath)) throw new Error("CORE_DISTRIBUTION_ARTIFACT_MISSING");
 console.log(`PLUGIN_ARCHIVE_BUILT ${outputPath}`);
