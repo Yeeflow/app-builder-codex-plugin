@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0.0",
+  "contractVersion": "0.1.0",
+  "protocolVersion": "app-builder.execution/1.0.0",
+  "packageGraphVersion": "0.2.0",
+  "strategy": "Plugin-production-only self-contained ESM artifacts under dist/execution; non-Plugin host adapters remain monorepo source and test fixtures.",
+  "artifactDirectory": "dist/yeeflow-app-builder-plugin/execution",
+  "manifest": "execution/yeeflow-app-builder-execution-service-distribution.v0.1.0.json",
+  "approvedArtifacts": [
+    {
+      "path": "execution/app-builder-core-domain-contracts.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-core-contracts",
+      "packageVersion": "0.1.0",
+      "exports": ["capabilityMetadata", "CORE_APPLICATION_INTENT_VERSION"]
+    },
+    {
+      "path": "execution/app-builder-execution-contracts.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-execution-contracts",
+      "packageVersion": "0.1.0",
+      "exports": ["capabilityMetadata", "EXECUTION_PROTOCOL_VERSION", "STRUCTURED_INTENT_VERSION"]
+    },
+    {
+      "path": "execution/app-builder-core-application-facade.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-core",
+      "packageVersion": "0.1.0",
+      "exports": ["capabilityMetadata", "buildApplicationFromCanonicalIntent"]
+    },
+    {
+      "path": "execution/app-builder-execution-service.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-execution-service",
+      "packageVersion": "0.1.0",
+      "exports": ["capabilityMetadata", "createInProcessExecutionKernel", "executeInProcess", "negotiateExecutionContext", "supportedExecutionCapabilities"]
+    },
+    {
+      "path": "execution/codex-plugin-adapter.v0.1.0.mjs",
+      "packageName": "@yeeflow/codex-plugin-adapter",
+      "packageVersion": "0.1.0",
+      "exports": ["capabilityMetadata", "executeWithCodexHost"]
+    }
+  ],
+  "requiredCoreArtifacts": [
+    "core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
+    "core/yeeflow-app-builder-core-materializer.v0.1.0.mjs"
+  ],
+  "requiredErrors": [
+    "EXECUTION_DISTRIBUTION_ARTIFACT_MISSING",
+    "EXECUTION_DISTRIBUTION_CHECKSUM_MISMATCH",
+    "EXECUTION_DISTRIBUTION_VERSION_MISMATCH",
+    "EXECUTION_DISTRIBUTION_EXPORT_UNRESOLVED",
+    "EXECUTION_DISTRIBUTION_WORKSPACE_LEAKAGE",
+    "EXECUTION_DISTRIBUTION_CORE_DEPENDENCY_MISMATCH"
+  ]
+}

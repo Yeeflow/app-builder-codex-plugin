@@ -40,7 +40,7 @@ export type DataListLookupIntentProjectionResult = Readonly<{
 
 /**
  * Internal-only deterministic Lookup intent projection. It deliberately has
- * no target identity, target map, host resource, or tenant-state input.
+ * no target identity, target map, host resource, or external-state input.
  */
 export function projectDataListLookupResolutionIntentInternal(input: DataListLookupIntentInput): DataListLookupIntentProjectionResult {
   if (!input || input.surface !== "data-list" || input.controlType !== "lookup") throw new TypeError("DATA_LIST_LOOKUP_INTENT_INVALID");

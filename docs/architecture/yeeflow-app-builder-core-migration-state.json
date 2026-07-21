@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "architectureName": "Yeeflow App Builder Core",
-  "lastUpdated": "2026-07-20",
+  "lastUpdated": "2026-07-21",
   "authority": {
     "handoffDocument": "docs/architecture/yeeflow-app-builder-core-handoff.md",
     "referenceConversation": "https://chatgpt.com/share/6a5a1125-f6c4-83ec-8fba-4caeb6c2290b",
@@ -14,13 +14,14 @@
     "baselineTag": "yeeflow-app-builder-plugin-v0.9.71",
     "baselinePluginVersion": "0.9.71",
     "installedPluginVersionObserved": "0.9.71",
-    "baselineVerifiedAt": "2026-07-17"
+    "baselineVerifiedAt": "2026-07-17",
+    "releaseFactsCurrentStatus": "historical_not_reverified_for_execution_service_incubation"
   },
   "migration": {
-    "currentPhase": "core-v1-release-candidate-integration-and-application-e2e-readiness",
-    "overallStatus": "core_v1_rc_readiness_accepted",
+    "currentPhase": "host-neutral-execution-service-incubation",
+    "overallStatus": "execution_service_incubation_verified",
     "currentPhaseStatus": "complete",
-    "nextPhase": "core-v1-rc-candidate-build-and-isolated-e2e-validation",
+    "nextPhase": "standalone-core-repository-extraction-readiness-decision",
     "selectedFirstVerticalSlice": {
       "sourcePath": "scripts/lib/markdown-planning-utils.mjs",
       "targetPackage": "@yeeflow/app-builder-core-planning",
@@ -28,9 +29,55 @@
       "rationale": "Deterministic Markdown planning parsing has stable exported functions, existing fixtures and consumers, no host side effects, a clear Legacy entry point, and no materializer dependency."
     },
     "implementationStarted": true,
-    "localRuntimeOnlyUntilParityClosure": true,
+    "localRuntimeOnlyUntilParityClosure": false,
     "independentRepositoryDeferred": true,
-    "serviceRuntimeDeferred": true
+    "serviceRuntimeDeferred": false
+  },
+  "executionServiceIncubation": {
+    "status": "verified",
+    "protocolVersion": "app-builder.execution/1.0.0",
+    "structuredIntentVersion": "app-builder.intent/1.0.0",
+    "packageGraphVersion": "0.2.0",
+    "packages": {
+      "contracts": "packages/app-builder-execution-contracts",
+      "serviceRuntime": "runtimes/app-builder-execution-service",
+      "codexAdapter": "adapters/codex-plugin-adapter",
+      "managedProviderFakeAdapter": "adapters/web-managed-provider-fake-adapter",
+      "futureHostFixtureAdapter": "adapters/host-extension-fixture-adapter"
+    },
+    "dependencyDirection": "adapters_to_execution_service_to_execution_contracts_and_core",
+    "coreExecutionDependencies": 0,
+    "noWriteAuthorityRequired": true,
+    "deterministicFakeModelPortsOnly": true,
+    "transport": "in_process_only",
+    "liveProviderIntegration": false,
+    "liveTenantProof": false,
+    "externalRepositoryCreated": false,
+    "evidence": [
+      "docs/architecture/app-builder-execution-service-incubation-contract.md",
+      "docs/architecture/app-builder-execution-adapter-boundary-map.md",
+      "docs/architecture/app-builder-execution-protocol-versioning-policy.md",
+      "docs/architecture/app-builder-core-extraction-readiness-checklist.md",
+      "docs/architecture/app-builder-execution-service-implementation-report.md",
+      "scripts/test-app-builder-execution-service.mjs",
+      "scripts/test-app-builder-execution-service-distribution-parity.mjs",
+      "scripts/validate-dependency-boundaries.mjs",
+      "scripts/validate-app-builder-execution-architecture.mjs"
+    ],
+    "verification": {
+      "crossHostEquivalenceAdapters": 3,
+      "distributionSurfaces": 4,
+      "dependencyNegativeCases": 16,
+      "distributionNegativeCases": 10,
+      "modelInvocationsOnNegotiationFailure": 0,
+      "corePackageCount": 15,
+      "workspacePackageCount": 21,
+      "sourceFileCountChecked": 80,
+      "archiveProtectedDuplicateCount": 0,
+      "englishOnlyCheckedPathCount": 90,
+      "gitDiffCheck": "passed"
+    },
+    "standaloneRepositoryExtractionVerdict": "not_ready_evidence_backed_remaining_blockers_listed_in_extraction_readiness_checklist"
   },
   "languagePolicy": {
     "conversationLanguages": [
@@ -56,6 +103,11 @@
     "status": "implemented_and_verified"
   },
   "completed": [
+    {
+      "id": "host-neutral-execution-service-incubation",
+      "status": "complete",
+      "evidence": "2026-07-21: runnable in-process service, open execution protocol, three source-only adapter proofs, deterministic fake model ports, no-write negotiation, Core input/output isolation, 16 dependency-boundary negatives, 10 distribution negatives, and Codex adapter source/dist/archive/simulated-installed parity passed. Non-Plugin adapters are excluded from the Plugin archive. Standalone repository extraction remains not ready for the explicitly listed follow-up decisions and proofs."
+    },
     {
       "id": "architecture-handoff",
       "status": "complete",

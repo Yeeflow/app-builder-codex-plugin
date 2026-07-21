@@ -27,6 +27,30 @@ Verified on 2026-07-17:
 
 The repository contains pre-existing untracked duplicate files with names ending in ` 2` under `dist/yeeflow-app-builder-plugin`. They are not part of this handoff and must not be deleted, staged, renamed, or included in migration commits without a separate, explicit repository-hygiene decision.
 
+## 2026-07-21 Execution Service Incubation Amendment
+
+This amendment is the current architecture authority for cross-host execution and supersedes any earlier wording that places host ports, model invocation, credentials, transport, or execution context in a Core package. The release and installed-version facts above are historical baseline facts; they were not reverified or advanced by this incubation.
+
+The Core packages are reusable deterministic packages inside this monorepo. They are not yet an independently deployed service or an independently versioned repository. The current incubation adds an in-process, host-neutral execution boundary without creating an external repository:
+
+```text
+Host UI or agent
+  -> host adapter plus host-owned model adapter
+  -> @yeeflow/app-builder-execution-contracts
+  -> @yeeflow/app-builder-execution-service
+  -> canonical domain intent
+  -> deterministic @yeeflow/app-builder-core facade
+  -> optional host runtime adapter outside Core
+```
+
+The execution protocol uses open, versioned capability descriptors. Host names are not an enum and origin is optional observability only. A future caller is added by implementing an adapter against the protocol; Core behavior must not branch on caller identity.
+
+Model and provider selection is owned entirely by the host. `ModelInvocationPort`, `ExecutionContext`, `CapabilityProfile`, authority declarations, opaque model profile references, and all adapter behavior belong to the separate execution-contracts or adapter packages. No existing `@yeeflow/app-builder-core*` package may import the execution contracts, runtime, adapters, host libraries, or provider libraries. The execution service maps accepted structured intent field by field into a canonical Core DTO, so context, authority, origin, model profile references, and unknown fields cannot enter Core input.
+
+The service is intentionally in-process. Network protocols, queues, persistence, retries, deployment, and live provider integration remain future concerns outside Core. The incubation proves deterministic fake-model behavior and package parity only; it does not claim live provider, Web deployment, tenant, installation, or runtime proof.
+
+The earlier `Required Ports` examples are not approved Core contracts for this incubation. Any future credential, artifact storage, confirmation, event, clock, logging, or runtime-probe interface must remain in a non-Core runtime or adapter package unless it is reduced to a domain-pure deterministic DTO with no host concern.
+
 ## Architecture Decisions
 
 ### 1. One Core, multiple hosts
@@ -155,7 +179,7 @@ The facade package should expose stable public entrypoints while internal packag
 
 ### Final Accepted Package Boundaries
 
-Contracts own neutral DTOs and ports; schemas own immutable versioned schemas; identity owns semantic identity and lineage; and canonical-model owns validated domain projections. Builder returns ResourceGraph data only. Materializer lowers validated structures without host orchestration. Package-engine owns deterministic wrapper and package encoding. Runtime-client defines typed transport contracts, while Local Runtime owns filesystem, OAuth, network, process, and host execution. Runtime-verification owns reusable assertions and RuntimeProbe contracts. Test-fixtures are sanitized and test-only; no production package may import them.
+Contracts own neutral domain DTOs; schemas own immutable versioned schemas; identity owns semantic identity and lineage; and canonical-model owns validated domain projections. Builder returns ResourceGraph data only. Materializer lowers validated structures without host orchestration. Package-engine owns deterministic wrapper and package encoding. The legacy-named runtime-client package is restricted to pure runtime-operation DTO capability metadata; every concrete communication concern remains outside Core. Runtime-verification owns reusable deterministic assertions. Test-fixtures are sanitized and test-only; no production package may import them.
 
 | Capability | Target owner |
 | --- | --- |

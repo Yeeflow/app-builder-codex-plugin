@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -12,6 +12,11 @@ if (!existsSync(graphPath)) fail("WORKSPACE_BOUNDARY_GRAPH_MISSING", "Package de
 const graph = JSON.parse(readFileSync(graphPath, "utf8"));
 const packages = Array.isArray(graph.packages) ? graph.packages : [];
 const names = new Set(packages.map((item) => item.name));
+const directories = new Set(packages.map((item) => item.directory));
+
+for (const workspaceDirectory of discoverWorkspaceDirectories()) {
+  if (!directories.has(workspaceDirectory)) findings.push(finding("WORKSPACE_BOUNDARY_PACKAGE_UNREGISTERED", workspaceDirectory, "Every workspace package must appear in the approved dependency graph."));
+}
 
 for (const item of packages) {
   const packagePath = resolve(repositoryRoot, item.directory, "package.json");
@@ -48,4 +53,16 @@ function finding(code, path, message) {
 function fail(code, message) {
   console.error(JSON.stringify({ status: "failed", findings: [{ code, message }] }, null, 2));
   process.exit(1);
+}
+
+function discoverWorkspaceDirectories() {
+  const directories = [];
+  for (const zone of ["packages", "runtimes", "adapters"]) {
+    const zoneRoot = resolve(repositoryRoot, zone);
+    if (!existsSync(zoneRoot)) continue;
+    for (const entry of readdirSync(zoneRoot, { withFileTypes: true })) {
+      if (entry.isDirectory() && existsSync(resolve(zoneRoot, entry.name, "package.json"))) directories.push(`${zone}/${entry.name}`);
+    }
+  }
+  return directories.sort();
 }

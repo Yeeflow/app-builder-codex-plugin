@@ -14,19 +14,25 @@ try {
   expectPass("Valid module syntax and approved zones pass", (fixture) => {
     fixture.write("packages/core-a/src/index.ts", 'import "@yeeflow/core-b"; import type { capability } from "@yeeflow/core-b"; export { capability } from "@yeeflow/core-b"; void import("@yeeflow/core-b"); require("@yeeflow/core-b");');
     fixture.write("runtimes/local/src/index.ts", 'import "node:fs"; import "@yeeflow/core-a";');
-    fixture.write("adapters/adapter/src/index.ts", 'import "@yeeflow/app-builder-core-local-runtime";');
+    fixture.write("runtimes/service/src/index.ts", 'import "@yeeflow/core-a"; import "@yeeflow/app-builder-execution-contracts";');
+    fixture.write("adapters/adapter/src/index.ts", 'import "@yeeflow/app-builder-execution-contracts"; import "@yeeflow/app-builder-execution-service";');
   });
   expectCode("Core to Runtime fails", "DEPENDENCY_BOUNDARY_CORE_FORBIDDEN_ZONE_IMPORT", (fixture) => fixture.write("packages/core-a/src/index.ts", 'import "@yeeflow/app-builder-core-local-runtime";'));
   expectCode("Core to Adapter fails", "DEPENDENCY_BOUNDARY_CORE_FORBIDDEN_ZONE_IMPORT", (fixture) => fixture.write("packages/core-a/src/index.ts", 'import "@yeeflow/codex-plugin-adapter";'));
+  expectCode("Core to execution contracts fails", "DEPENDENCY_BOUNDARY_CORE_FORBIDDEN_ZONE_IMPORT", (fixture) => { fixture.allow("@yeeflow/core-a", "@yeeflow/app-builder-execution-contracts"); fixture.write("packages/core-a/src/index.ts", 'import "@yeeflow/app-builder-execution-contracts";'); });
+  expectCode("Adapter direct Core bypass fails", "DEPENDENCY_BOUNDARY_ADAPTER_CORE_BYPASS", (fixture) => { fixture.allow("@yeeflow/codex-plugin-adapter", "@yeeflow/core-a"); fixture.write("adapters/adapter/src/index.ts", 'import "@yeeflow/core-a";'); });
+  expectCode("Runtime to adapter fails", "DEPENDENCY_BOUNDARY_RUNTIME_ADAPTER_IMPORT", (fixture) => { fixture.allow("@yeeflow/app-builder-execution-service", "@yeeflow/codex-plugin-adapter"); fixture.write("runtimes/service/src/index.ts", 'import "@yeeflow/codex-plugin-adapter";'); });
   expectCode("Undeclared workspace dependency fails", "DEPENDENCY_BOUNDARY_WORKSPACE_DEPENDENCY_UNDECLARED", (fixture) => { fixture.manifest("@yeeflow/core-a", []); fixture.write("packages/core-a/src/index.ts", 'import "@yeeflow/core-b";'); });
   expectCode("Cross-package relative import fails", "DEPENDENCY_BOUNDARY_CROSS_PACKAGE_RELATIVE_IMPORT", (fixture) => fixture.write("packages/core-a/src/index.ts", 'import "../../core-b/src/index";'));
   expectCode("Package root escape fails", "DEPENDENCY_BOUNDARY_RELATIVE_IMPORT_ESCAPE", (fixture) => fixture.write("packages/core-a/src/index.ts", 'import "../../../outside";'));
   expectCode("Deep workspace import fails", "DEPENDENCY_BOUNDARY_WORKSPACE_DEEP_IMPORT", (fixture) => fixture.write("packages/core-a/src/index.ts", 'import "@yeeflow/core-b/internal";'));
   expectCode("Dependency cycle fails", "DEPENDENCY_BOUNDARY_CYCLE", (fixture) => { fixture.allow("@yeeflow/core-b", "@yeeflow/core-a"); fixture.write("packages/core-a/src/index.ts", 'import "@yeeflow/core-b";'); fixture.write("packages/core-b/src/index.ts", 'import "@yeeflow/core-a";'); });
   expectCode("Core host imports fail", "DEPENDENCY_BOUNDARY_CORE_FORBIDDEN_HOST_IMPORT", (fixture) => fixture.write("packages/core-a/src/index.ts", 'import "react"; import "next"; import "@prisma/client"; import "openai";'));
+  expectCode("Core orchestration vocabulary fails", "DEPENDENCY_BOUNDARY_CORE_EXECUTION_VOCABULARY_FORBIDDEN", (fixture) => fixture.write("packages/core-a/src/index.ts", 'export const provider = "example";'));
+  expectCode("Core capability orchestration vocabulary fails", "DEPENDENCY_BOUNDARY_CORE_CAPABILITY_VOCABULARY_FORBIDDEN", (fixture) => fixture.capability("@yeeflow/core-a", "Typed provider transport contract."));
   expectCodes("Core Node and host side effects fail", ["DEPENDENCY_BOUNDARY_CORE_NODE_BUILTIN_FORBIDDEN", "DEPENDENCY_BOUNDARY_CORE_HOST_SIDE_EFFECT"], (fixture) => fixture.write("packages/core-a/src/index.ts", 'import "node:fs"; const value = process.env.VALUE; fetch("https://example.test");'));
   expectCode("Non-literal dynamic and require fail", "DEPENDENCY_BOUNDARY_NON_LITERAL_DYNAMIC_TARGET", (fixture) => fixture.write("packages/core-a/src/index.ts", 'const target = "@yeeflow/core-b"; import(target); require(target);'));
-  console.log("DEPENDENCY_BOUNDARY_TESTS_PASSED 11");
+  console.log("DEPENDENCY_BOUNDARY_TESTS_PASSED 16");
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });
 }
@@ -57,8 +63,10 @@ function createFixture() {
   const packages = [
     ["packages/core-a", "@yeeflow/core-a", ["@yeeflow/core-b"]],
     ["packages/core-b", "@yeeflow/core-b", []],
+    ["packages/execution-contracts", "@yeeflow/app-builder-execution-contracts", []],
     ["runtimes/local", "@yeeflow/app-builder-core-local-runtime", ["@yeeflow/core-a"]],
-    ["adapters/adapter", "@yeeflow/codex-plugin-adapter", ["@yeeflow/app-builder-core-local-runtime"]],
+    ["runtimes/service", "@yeeflow/app-builder-execution-service", ["@yeeflow/core-a", "@yeeflow/app-builder-execution-contracts"]],
+    ["adapters/adapter", "@yeeflow/codex-plugin-adapter", ["@yeeflow/app-builder-execution-contracts", "@yeeflow/app-builder-execution-service"]],
   ];
   const graph = { schemaVersion: "1.0.0", packages: packages.map(([directory, name, allowedDependencies]) => ({ directory, name, allowedDependencies })) };
   for (const [directory, name, dependencies] of packages) {
@@ -72,6 +80,7 @@ function createFixture() {
     root,
     write(path, source) { const output = join(root, path); mkdirSync(resolve(output, ".."), { recursive: true }); writeFileSync(output, `${source}\n`, "utf8"); },
     manifest(name, dependencies) { const item = packageInfo().find((entry) => entry.name === name); writeFileSync(join(root, item.directory, "package.json"), JSON.stringify({ name, dependencies: Object.fromEntries(dependencies.map((dependency) => [dependency, "workspace:*"])) }), "utf8"); },
+    capability(name, capability) { const item = packageInfo().find((entry) => entry.name === name); item.capabilities = [capability]; writeFileSync(join(root, "graph.json"), JSON.stringify(graph), "utf8"); },
     allow(name, dependency) { const item = packageInfo().find((entry) => entry.name === name); item.allowedDependencies.push(dependency); this.manifest(name, item.allowedDependencies); writeFileSync(join(root, "graph.json"), JSON.stringify(graph), "utf8"); },
   };
 }

@@ -184,6 +184,15 @@ packages/**/lib/
 !skills/README.md
 !package.json
 !package-lock.json
+!/tsconfig.json
+!packages/app-builder-execution-contracts/tsconfig.json
+!runtimes/app-builder-execution-service/tsconfig.json
+!adapters/codex-plugin-adapter/tsconfig.json
+!adapters/web-managed-provider-fake-adapter/tsconfig.json
+!adapters/host-extension-fixture-adapter/tsconfig.json
+!compatibility/capability-manifests/app-builder-core-package-dependency-graph.v0.1.0.json
+!compatibility/capability-manifests/yeeflow-app-builder-core-architecture-convergence.v0.1.0.json
+!compatibility/capability-manifests/app-builder-execution-service-distribution-contract.v0.1.0.json
 
 # Curated restored development assets from the legacy repository.
 !fixtures/runtime-test-specs/approval-form-control-runtime-coverage.json
