@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "1.0.0",
+  "strategy": "Official build-generated self-contained ESM artifacts under Plugin dist/core.",
+  "artifactDirectory": "dist/yeeflow-app-builder-plugin/core",
+  "manifest": "core/yeeflow-app-builder-core-distribution.v0.1.0.json",
+  "workspaceDependencyPolicy": "Installed Plugin artifacts must not resolve pnpm workspace symlinks or repository node_modules.",
+  "artifactManifestPolicy": "The distribution manifest must declare every approved artifact with path, package identity, source and compiled input SHA-256 values, artifact SHA-256, and an exact public export list.",
+  "approvedArtifacts": [
+    {
+      "path": "core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-core-planning",
+      "packageVersion": "1.0.0",
+      "exports": [
+        "splitMarkdownTableRow",
+        "isMarkdownTableSeparator",
+        "parseMarkdownTables",
+        "stripMarkdownFencedBlocks",
+        "findMarkdownTable",
+        "markdownRowValue",
+        "markdownRowValues",
+        "extractMarkdownSubsection",
+        "isNegativeRequirementStatement",
+        "positivePlanningText",
+        "hasTechnicalPlaceholderIdContext",
+        "projectPlanningLabel",
+        "projectWorkflowSetDataListProjection",
+        "projectWorkflowQueryDataStaticPlan",
+        "projectWorkflowStaticPlan",
+        "projectDataListFormControlStaticSchema",
+        "projectApplicationPlanStaticFoundation"
+      ]
+    },
+    {
+      "path": "core/yeeflow-app-builder-core-materializer.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-core-materializer",
+      "packageVersion": "1.0.0",
+      "exports": [
+        "capabilityMetadata",
+        "normalizeHexColor",
+        "defaultValueForFieldType",
+        "escapeRegExp",
+        "normalizeForLooseFormMatch",
+        "stripPlanningDocumentSuffix",
+        "dependencyName",
+        "safeDependencyIdentifier",
+        "projectDataListScalarField",
+        "projectFixedFilterIntents",
+        "projectDataListDefaultViewLayout",
+        "projectDataListDefaultViewSelector",
+        "projectDataListAdditionalViewLayout",
+        "projectDataListScalarResourceDefinitionIntent",
+        "projectDataListLookupResolutionIntent",
+        "projectDataListType1IdentityControlPlacement",
+        "projectDataListSublistScalarRowSchema",
+        "projectDataListEmbeddedSublistDescriptor",
+        "projectDataListSublistStaticConfiguration",
+        "projectDataListSublistScalarSummaryIntent",
+        "projectDataListSublistDynamicSummaryIntent",
+        "projectDataListSublistNestedControlPlacementIntent",
+        "projectDataListSublistEmbeddedLookupIntent",
+        "projectDataListSublistLookupAdditionalFieldIntent",
+        "projectDataListSublistIdentityControlIntent",
+        "projectApprovalFormSubListLookupStaticConfiguration",
+        "projectTemplateStaticNormalization",
+        "projectResourceDefinitionStaticIntent",
+        "projectDocumentLibraryStaticConfiguration",
+        "projectApprovalFormStaticConfiguration",
+        "projectDashboardStaticConfiguration"
+      ]
+    },
+    {
+      "path": "core/yeeflow-app-builder-core-local-runtime.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-core-local-runtime",
+      "packageVersion": "1.0.0",
+      "exports": [
+        "capabilityMetadata",
+        "lowerFixedFilterProjectionAtHost",
+        "lowerDataListScalarResourceIdentityAtHost",
+        "lowerDataListLookupResolutionAtHost",
+        "lowerDataListType1IdentityControlPlacementAtHost",
+        "lowerDataListSublistScalarRowSchemaAtHost",
+        "buildDataListSublistChildResourceInventoryAtHost",
+        "lowerDataListSublistScalarSummaryIntentAtHost",
+        "lowerDataListSublistDynamicSummaryIntentAtHost",
+        "lowerDataListSublistNestedControlPlacementAtHost",
+        "lowerDataListSublistEmbeddedLookupIntentAtHost",
+        "lowerDataListSublistIdentityControlIntentAtHost"
+      ]
+    }
+  ],
+  "requiredErrors": [
+    "CORE_DISTRIBUTION_ARTIFACT_MISSING",
+    "CORE_DISTRIBUTION_CHECKSUM_MISMATCH",
+    "CORE_DISTRIBUTION_VERSION_MISMATCH",
+    "CORE_DISTRIBUTION_EXPORT_UNRESOLVED",
+    "CORE_DISTRIBUTION_WORKSPACE_LEAKAGE"
+  ]
+}

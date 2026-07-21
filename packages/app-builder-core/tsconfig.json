@@ -1,0 +1,40 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "tsBuildInfoFile": "./lib/.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../app-builder-core-contracts"
+    },
+    {
+      "path": "../app-builder-core-canonical-model"
+    },
+    {
+      "path": "../app-builder-core-planning"
+    },
+    {
+      "path": "../app-builder-core-templates"
+    },
+    {
+      "path": "../app-builder-core-validators"
+    },
+    {
+      "path": "../app-builder-core-materializer"
+    },
+    {
+      "path": "../app-builder-core-package-engine"
+    },
+    {
+      "path": "../app-builder-core-repair-engine"
+    },
+    {
+      "path": "../app-builder-core-runtime-client"
+    }
+  ]
+}

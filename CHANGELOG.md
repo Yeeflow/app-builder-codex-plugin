@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.0.8
+
+- Publish the final zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` npm-compatible ESM tarball as a separate GitHub Release asset.
+- Repackage only the approved host-neutral Core application facade, execution contracts, in-process execution service, declarations, and deterministic compatibility metadata; exclude every host adapter, provider, credential, transport, persistence, queue, retry, telemetry transport, and UI responsibility.
+- Enforce exact SDK, Plugin product, Core distribution, execution protocol, structured-intent, package-graph, file-inventory, checksum, dependency, and export-map contracts with seven negative package gates.
+- Prove source, expanded package, archive, and isolated npm-installed consumer parity with a declaration TypeScript consumer, injected fake model, empty write authority, zero external calls, and zero credential access.
+
 ## 1.0.7
 
 - Add a versioned, host-neutral execution-contract package and an in-process execution-service facade with fail-closed capability negotiation and explicit no-write authority enforcement.

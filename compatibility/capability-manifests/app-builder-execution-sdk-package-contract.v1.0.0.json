@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "1.0.0",
+  "contractVersion": "1.0.0",
+  "packageName": "@yeeflow/app-builder-execution-sdk",
+  "sdkVersion": "1.0.0",
+  "pluginProductVersion": "1.0.8",
+  "coreDistributionVersion": "1.0.0",
+  "executionProtocolVersion": "app-builder.execution/1.0.0",
+  "structuredIntentVersion": "app-builder.intent/1.0.0",
+  "packageGraphVersion": "0.2.0",
+  "artifactFormat": "npm-compatible ESM tarball",
+  "capabilities": [
+    {
+      "id": "application.plan",
+      "version": "1.0.0"
+    },
+    {
+      "id": "application.validate",
+      "version": "1.0.0"
+    },
+    {
+      "id": "application.materialize",
+      "version": "1.0.0"
+    },
+    {
+      "id": "application.verify",
+      "version": "1.0.0"
+    },
+    {
+      "id": "application.repair",
+      "version": "1.0.0"
+    }
+  ],
+  "approvedRuntimeModules": [
+    {
+      "source": "dist/yeeflow-app-builder-plugin/execution/app-builder-core-domain-contracts.v0.1.0.mjs",
+      "target": "dist/core-contracts.js",
+      "packageName": "@yeeflow/app-builder-core-contracts"
+    },
+    {
+      "source": "dist/yeeflow-app-builder-plugin/execution/app-builder-execution-contracts.v0.1.0.mjs",
+      "target": "dist/execution-contracts.js",
+      "packageName": "@yeeflow/app-builder-execution-contracts"
+    },
+    {
+      "source": "dist/yeeflow-app-builder-plugin/core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
+      "target": "dist/core-planning.js",
+      "packageName": "@yeeflow/app-builder-core-planning"
+    },
+    {
+      "source": "dist/yeeflow-app-builder-plugin/core/yeeflow-app-builder-core-materializer.v0.1.0.mjs",
+      "target": "dist/core-materializer.js",
+      "packageName": "@yeeflow/app-builder-core-materializer"
+    },
+    {
+      "source": "dist/yeeflow-app-builder-plugin/execution/app-builder-core-application-facade.v0.1.0.mjs",
+      "target": "dist/core-application.js",
+      "packageName": "@yeeflow/app-builder-core"
+    },
+    {
+      "source": "dist/yeeflow-app-builder-plugin/execution/app-builder-execution-service.v0.1.0.mjs",
+      "target": "dist/execution-service.js",
+      "packageName": "@yeeflow/app-builder-execution-service"
+    }
+  ],
+  "approvedDeclarationModules": [
+    {
+      "source": "packages/app-builder-core-contracts/lib/index.d.ts",
+      "target": "dist/core-contracts.d.ts"
+    },
+    {
+      "source": "packages/app-builder-execution-contracts/lib/index.d.ts",
+      "target": "dist/execution-contracts.d.ts"
+    },
+    {
+      "source": "packages/app-builder-core/lib/index.d.ts",
+      "target": "dist/core-application.d.ts"
+    },
+    {
+      "source": "runtimes/app-builder-execution-service/lib/index.d.ts",
+      "target": "dist/execution-service.d.ts"
+    }
+  ],
+  "requiredExportMap": [
+    ".",
+    "./contracts",
+    "./core",
+    "./service",
+    "./manifest"
+  ],
+  "forbiddenBundledResponsibilities": [
+    "host adapters",
+    "skills and prompts",
+    "OAuth and credentials",
+    "provider SDKs and provider API calls",
+    "HTTP clients or servers",
+    "authentication and sessions",
+    "persistence and databases",
+    "queues and retries",
+    "telemetry transport",
+    "tenant policy",
+    "UI code"
+  ],
+  "requiredErrors": [
+    "EXECUTION_SDK_ARTIFACT_MISSING",
+    "EXECUTION_SDK_FILE_SET_INVALID",
+    "EXECUTION_SDK_CHECKSUM_MISMATCH",
+    "EXECUTION_SDK_CORE_VERSION_MISMATCH",
+    "EXECUTION_SDK_PROTOCOL_VERSION_MISMATCH",
+    "EXECUTION_SDK_PACKAGE_VERSION_MISMATCH",
+    "EXECUTION_SDK_EXPORT_MAP_INVALID",
+    "EXECUTION_SDK_DEPENDENCY_FORBIDDEN",
+    "EXECUTION_SDK_MODULE_FORBIDDEN"
+  ]
+}

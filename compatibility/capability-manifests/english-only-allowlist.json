@@ -1,4 +1,15 @@
 {
   "schemaVersion": "1.0.0",
-  "entries": []
+  "entries": [
+    {
+      "path": "CHANGELOG.md",
+      "reason": "Historical release text contains one literal legacy planning annotation; the 1.0.8 release diff is English-only.",
+      "reviewedBy": "Yeeflow App Builder release engineering"
+    },
+    {
+      "path": "dist/yeeflow-app-builder-plugin/skills/installed/yeeflow-application-generator/SKILL.md",
+      "reason": "The official preparation mirror retains one literal legacy planning annotation from its existing source; the 1.0.8 SDK release does not modify that guidance.",
+      "reviewedBy": "Yeeflow App Builder release engineering"
+    }
+  ]
 }

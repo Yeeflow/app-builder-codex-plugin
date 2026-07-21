@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "tsBuildInfoFile": "./lib/.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/markdown-planning-utils.ts"
+  ],
+  "references": [
+    {
+      "path": "../app-builder-core-contracts"
+    },
+    {
+      "path": "../app-builder-core-canonical-model"
+    }
+  ]
+}

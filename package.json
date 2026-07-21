@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
@@ -22,6 +22,10 @@
     "validate:execution-service-distribution": "node scripts/validate-execution-service-distribution.mjs",
     "test:execution-service-distribution-gates": "node scripts/test-execution-service-distribution-gates.mjs",
     "test:execution-service-distribution-parity": "node scripts/test-app-builder-execution-service-distribution-parity.mjs",
+    "build:execution-sdk-package": "node scripts/build-execution-sdk-package.mjs",
+    "validate:execution-sdk-package": "node scripts/validate-execution-sdk-package.mjs",
+    "test:execution-sdk-package-gates": "node scripts/test-execution-sdk-package-gates.mjs",
+    "test:execution-sdk-consumer": "node scripts/test-execution-sdk-consumer.mjs",
     "build:core-distribution": "node scripts/build-core-distribution.mjs",
     "test:core-distribution-resolution": "node scripts/test-core-distribution-resolution.mjs",
     "validate:core-distribution": "node scripts/validate-core-distribution.mjs",

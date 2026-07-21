@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `1.0.2`
+- Version: `1.0.8`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `1.0.2` fixes multi-field Approval Form materialization against immutable Core projections without changing Core, workflow generation, OAuth, or tenant behavior.
+Current release `1.0.8` publishes the final zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` ESM tarball as a separate GitHub Release asset while preserving the Plugin's Codex-only production adapter and exact Core/protocol compatibility boundaries.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
