@@ -1,22 +1,15 @@
 {
   "schemaVersion": "1.0.0",
-  "coreVersion": "1.0.0",
-  "packageGraphVersion": "0.2.0",
-  "sourceCommit": "a30444647208506db6b45829b4412faa75693585",
-  "sourceTreeState": "dirty",
-  "primaryArtifactPath": "core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
-  "sourceInputSha256": "2ca32dca26fee2ab58bf5e7ca7a0c156cf942b0e86091ce1b6967e5f9c4df599",
-  "compiledInputSha256": "bf4a6ce17b8530f13b2803990006984327ed137d3defa72f7457a519b43eef87",
-  "dependencyGraphSha256": "b99fafd3ed9d689ae58d3d578437198ed203a20c35efeb0089ffd5228bf9581a",
-  "artifactSha256": "b1040c4278065bdc8fbcb6807562272e2a4572d67907e91958f8c4e5616c9876",
-  "artifacts": [
+  "strategy": "Official build-generated self-contained ESM artifacts under Plugin dist/core.",
+  "artifactDirectory": "dist/yeeflow-app-builder-plugin/core",
+  "manifest": "core/yeeflow-app-builder-core-distribution.v0.1.0.json",
+  "workspaceDependencyPolicy": "Installed Plugin artifacts must not resolve pnpm workspace symlinks or repository node_modules.",
+  "artifactManifestPolicy": "The distribution manifest must declare every approved artifact with path, package identity, source and compiled input SHA-256 values, artifact SHA-256, and an exact public export list.",
+  "approvedArtifacts": [
     {
       "path": "core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
       "packageName": "@yeeflow/app-builder-core-planning",
       "packageVersion": "1.0.0",
-      "sourceInputSha256": "2ca32dca26fee2ab58bf5e7ca7a0c156cf942b0e86091ce1b6967e5f9c4df599",
-      "compiledInputSha256": "bf4a6ce17b8530f13b2803990006984327ed137d3defa72f7457a519b43eef87",
-      "sha256": "b1040c4278065bdc8fbcb6807562272e2a4572d67907e91958f8c4e5616c9876",
       "exports": [
         "splitMarkdownTableRow",
         "isMarkdownTableSeparator",
@@ -41,9 +34,6 @@
       "path": "core/yeeflow-app-builder-core-materializer.v0.1.0.mjs",
       "packageName": "@yeeflow/app-builder-core-materializer",
       "packageVersion": "1.0.0",
-      "sourceInputSha256": "8f18181850228a7e935c52534f753809645ae0d406aae1cae5b1e4e88986b2e9",
-      "compiledInputSha256": "34173d63d790619248230bd8f2d0b3d216a886024d01fb0dd0a2dc1a63aebf9a",
-      "sha256": "06e286915bb9e6529c2fba7db6bec1c00d07801c020ff6f37ce1d9822328d4e7",
       "exports": [
         "capabilityMetadata",
         "normalizeHexColor",
@@ -82,9 +72,6 @@
       "path": "core/yeeflow-app-builder-core-local-runtime.v0.1.0.mjs",
       "packageName": "@yeeflow/app-builder-core-local-runtime",
       "packageVersion": "1.0.0",
-      "sourceInputSha256": "c7edd36b6b6f45f760953fcda3579bd5b8d8f8f1364720247f0f1cf8bdeaa2c4",
-      "compiledInputSha256": "75c85091ab43df905d933ae1a520e9b88cb1c3ff32935ce7a3be8c0474e54a86",
-      "sha256": "a1be3615609957d49839339987e2e15c7e325a1698ce02012bfae66a537b6a73",
       "exports": [
         "capabilityMetadata",
         "lowerFixedFilterProjectionAtHost",
@@ -100,5 +87,12 @@
         "lowerDataListSublistIdentityControlIntentAtHost"
       ]
     }
+  ],
+  "requiredErrors": [
+    "CORE_DISTRIBUTION_ARTIFACT_MISSING",
+    "CORE_DISTRIBUTION_CHECKSUM_MISMATCH",
+    "CORE_DISTRIBUTION_VERSION_MISMATCH",
+    "CORE_DISTRIBUTION_EXPORT_UNRESOLVED",
+    "CORE_DISTRIBUTION_WORKSPACE_LEAKAGE"
   ]
 }

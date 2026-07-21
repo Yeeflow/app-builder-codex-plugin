@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "1.0.7",
-  "description": "Host-neutral execution-service incubation with Codex-only production distribution and deterministic Core boundaries.",
+  "version": "1.0.8",
+  "description": "Codex-only Plugin distribution with a separately published host-neutral Execution SDK 1.0.0 asset.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [

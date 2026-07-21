@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.0.7`
+- Version: `1.0.8`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `1.0.7` incubates a host-neutral, in-process App Builder Execution Service around deterministic Core packages. It adds versioned execution contracts, fail-closed capability and no-write authority negotiation, a Codex host adapter, source-only fake adapters for cross-host equivalence, and a Plugin production distribution that excludes non-Plugin host adapters. Core compatibility artifacts and the execution protocol remain independently versioned at `1.0.0`.
+Current release `1.0.8` publishes the final zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` ESM tarball as a separate GitHub Release asset. The Plugin keeps its Codex-only production adapter, while the SDK exposes only the host-neutral Core application facade, execution contracts, in-process execution service, declarations, compatibility manifest, and exact Core/protocol assertions. Core distribution and execution protocol compatibility remain independently versioned at `1.0.0`.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.0.7
+Version: 1.0.8
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.7
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.8
 ```
 
 ## What Is Included

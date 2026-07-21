@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.71`
+- Version: `1.0.8`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.71` hardens shared Markdown planning parsing and completes Workflow List-variable child projection into generated ContentList workflows.
+Current release `1.0.8` publishes the final zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` ESM tarball as a separate GitHub Release asset while preserving the Plugin's Codex-only production adapter and exact Core/protocol compatibility boundaries.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.71
+Version: 1.0.8
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.71
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.8
 ```
 
 ## What Is Included

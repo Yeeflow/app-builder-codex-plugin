@@ -1,0 +1,26 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/app-builder-core-contracts" },
+    { "path": "packages/app-builder-core-schemas" },
+    { "path": "packages/app-builder-core-identity" },
+    { "path": "packages/app-builder-core-canonical-model" },
+    { "path": "packages/app-builder-core-planning" },
+    { "path": "packages/app-builder-core-templates" },
+    { "path": "packages/app-builder-core-validators" },
+    { "path": "packages/app-builder-core-builder" },
+    { "path": "packages/app-builder-core-materializer" },
+    { "path": "packages/app-builder-core-package-engine" },
+    { "path": "packages/app-builder-core-repair-engine" },
+    { "path": "packages/app-builder-core-runtime-client" },
+    { "path": "packages/app-builder-core-runtime-verification" },
+    { "path": "packages/app-builder-core-test-fixtures" },
+    { "path": "packages/app-builder-core" },
+    { "path": "packages/app-builder-execution-contracts" },
+    { "path": "runtimes/app-builder-core-local-runtime" },
+    { "path": "runtimes/app-builder-execution-service" },
+    { "path": "adapters/codex-plugin-adapter" },
+    { "path": "adapters/web-managed-provider-fake-adapter" },
+    { "path": "adapters/host-extension-fixture-adapter" }
+  ]
+}

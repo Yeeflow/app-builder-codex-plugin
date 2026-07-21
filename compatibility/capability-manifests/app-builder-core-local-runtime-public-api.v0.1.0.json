@@ -1,0 +1,141 @@
+{
+  "schemaVersion": "1.0.0",
+  "contractVersion": "0.1.0",
+  "packageName": "@yeeflow/app-builder-core-local-runtime",
+  "packageVersion": "0.1.0",
+  "runtimeExports": [
+    "capabilityMetadata",
+    "lowerFixedFilterProjectionAtHost",
+    "lowerDataListScalarResourceIdentityAtHost",
+    "lowerDataListLookupResolutionAtHost",
+    "lowerDataListType1IdentityControlPlacementAtHost",
+    "lowerDataListSublistScalarRowSchemaAtHost",
+    "buildDataListSublistChildResourceInventoryAtHost",
+    "lowerDataListSublistScalarSummaryIntentAtHost",
+    "lowerDataListSublistDynamicSummaryIntentAtHost",
+    "lowerDataListSublistNestedControlPlacementAtHost",
+    "lowerDataListSublistEmbeddedLookupIntentAtHost",
+    "lowerDataListSublistIdentityControlIntentAtHost"
+  ],
+  "typeExports": [
+    "HostFixedFilterIntent",
+    "HostFixedFilterFinding",
+    "HostFixedFilterProjection",
+    "HostFixedFilterAllocation",
+    "LoweredFixedFilterCondition",
+    "FixedFilterHostLoweringResult",
+    "ScalarIdentityIntent",
+    "ScalarIdentityAllocation",
+    "DataListLookupHostIntent",
+    "DataListLookupTargetIdentityMap",
+    "DataListLookupSourceContext",
+    "DataListLookupResolutionResult",
+    "Type1IdentityPlacementIntent",
+    "Type1TemplateSnapshot",
+    "Type1IdentityPlacementHostContext",
+    "SublistScalarRowSchemaIntent",
+    "SublistScalarRowSchemaHostContext",
+    "DataListSublistChildResourceAllocation",
+    "DataListSublistChildResourceInventoryInput",
+    "DataListSublistChildResourceIdentityDescriptor",
+    "DataListSublistChildResourceInventory",
+    "SublistChildResourceIdentityError",
+    "DataListSublistScalarSummaryHostIntent",
+    "DataListSublistScalarSummaryStaticMetadata",
+    "DynamicSummaryOperation",
+    "DataListSublistDynamicSummaryHostIntent",
+    "DataListSublistDynamicSummaryMetadata",
+    "DataListSublistNestedControlPlacementHostIntent",
+    "DataListSublistNestedControlHostBinding"
+  ],
+  "lowerFixedFilterProjectionAtHost": {
+    "input": "A JSON-serializable HostFixedFilterProjection, a host-supplied HostFixedFilterAllocation with keysByRequestId, and an optional caller-owned findings array.",
+    "return": "A runtime-frozen, JSON-serializable FixedFilterHostLoweringResult with ordered Legacy-shaped filters and immutable lowered findings.",
+    "errors": [
+      "FIXED_FILTER_KEY_ALLOCATION_MISSING",
+      "FIXED_FILTER_KEY_ALLOCATION_INVALID",
+      "FIXED_FILTER_KEY_ALLOCATION_COLLISION"
+    ],
+    "mutationOwnership": "Only when a non-null callerFindings array is explicitly supplied, append converted findings in projection order. This is the sole permitted Local Runtime host side effect. Inputs, allocation maps, projection arrays, returned filters, and returned findings remain unmodified or frozen as applicable.",
+    "serialization": "Undefined showCus is omitted from lowered filter records. Returned filters and findings are JSON-serializable structural data.",
+    "hostSideEffects": "The explicit optional caller-owned findings-array append is the sole permitted Local Runtime host side effect. The function never allocates keys.",
+    "prohibited": "No filesystem, environment, network, process, OAuth, API, runtime lookup, UUID generation, package/archive output, TypeScript source resolution, workspace dependency resolution, or Legacy fallback is permitted.",
+    "internalHelpers": [
+      "request sorting implementation",
+      "collision Map implementation",
+      "finding conversion loop"
+    ]
+  },
+  "lowerDataListScalarResourceIdentityAtHost": {
+    "input": "An immutable scalar resource intent and explicit host allocation maps with lossless string ListID and FieldID values.",
+    "return": "A fresh frozen Legacy-shaped scalar field-record fragment.",
+    "errors": ["DATA_LIST_IDENTITY_ALLOCATION_MISSING", "DATA_LIST_IDENTITY_ALLOCATION_INVALID", "DATA_LIST_IDENTITY_ALLOCATION_COLLISION", "DATA_LIST_IDENTITY_SCOPE_MISMATCH", "DATA_LIST_IDENTITY_RELATIONSHIP_BROKEN", "DATA_LIST_LOOKUP_TARGET_UNRESOLVED", "DATA_LIST_IDENTITY_LOSSY_INPUT"],
+    "mutationOwnership": "The function does not mutate intent, allocation maps, lookup maps, or caller-owned resources.",
+    "prohibited": "No implicit allocation, fallback identity, lookup resolution, UUID, API, filesystem, environment, process, package output, or Legacy fallback."
+  },
+  "lowerDataListLookupResolutionAtHost": {
+    "input": "An immutable DataListLookupHostIntent, explicit readonly target ListID and scope maps, and explicit source ListID, FieldID, and source-field ListID context.",
+    "return": "A fresh frozen JSON-serializable DataListLookupResolutionResult with Legacy-shaped Rules JSON, validated lossless target ListID, and matched logical key.",
+    "errors": ["LOOKUP_RESOLUTION_TARGET_MAPPING_MISSING", "LOOKUP_RESOLUTION_TARGET_LIST_ID_INVALID", "LOOKUP_RESOLUTION_TARGET_SCOPE_MISMATCH", "LOOKUP_RESOLUTION_SOURCE_TARGET_RELATIONSHIP_BROKEN", "DATA_LIST_LOOKUP_TARGET_UNRESOLVED", "LOOKUP_RESOLUTION_TARGET_MAPPING_AMBIGUOUS"],
+    "mutationOwnership": "The function does not mutate its intent, target map, source context, template, resource, or returned Core data. It returns a fresh Rules payload and has no caller-owned findings append behavior.",
+    "hostSideEffects": "None. It validates explicit host data in memory and does not allocate or discover target identities.",
+    "prohibited": "No target discovery outside supplied map keys, fallback mapping, ID allocation, numeric identity coercion, lookup API access, template or resource mutation, package output, workspace/source resolution, or Legacy fallback. Internal validation helpers remain non-public."
+  },
+  "lowerDataListType1IdentityControlPlacementAtHost": {
+    "input": "An immutable Type1IdentityPlacementIntent, explicit immutable Type1TemplateSnapshot, and Type1IdentityPlacementHostContext containing a required host-supplied controlId.",
+    "return": "A fresh frozen JSON-serializable Legacy-shaped placement fragment with the supplied control ID and the immutable Core descriptor values.",
+    "errors": ["TEMPLATE_GRAPH_REFERENCE_MISSING", "TEMPLATE_GRAPH_REFERENCE_INVALID", "TEMPLATE_GRAPH_REFERENCE_SCOPE_MISMATCH", "TEMPLATE_GRAPH_REFERENCE_DUPLICATE", "TEMPLATE_GRAPH_REFERENCE_RELATIONSHIP_BROKEN"],
+    "mutationOwnership": "The function does not mutate intent, template snapshot, context, Core output, caller-owned findings, or templates. It returns a fresh fragment only.",
+    "hostSideEffects": "None. The host supplies the control ID explicitly; this Local Runtime function never allocates or falls back to one.",
+    "prohibited": "No template loading or mutation, control ID allocation, runtime expression evaluation, resource integration, package output, filesystem, environment, API, process, workspace/source resolution, or Legacy fallback. Internal validation helpers remain non-public."
+  },
+  "lowerDataListSublistScalarRowSchemaAtHost": {
+    "input": "An immutable Core SublistScalarRowSchemaIntent plus explicit host-supplied parent/child ListID and FieldID, row-schema, template scope, ordinal, and hierarchy context. It requires lossless strings and does not accept mutable templates, resources, allocation authority, or fallback discovery.",
+    "return": "A fresh frozen JSON-serializable Legacy-shaped scalar row-schema fragment in the original Core intent order. It contains only supplied identity values and does not allocate a child control, row-schema, field, or list ID.",
+    "errors": ["SUBLIST_TEMPLATE_GRAPH_REFERENCE_MISSING", "SUBLIST_TEMPLATE_GRAPH_REFERENCE_INVALID", "SUBLIST_TEMPLATE_GRAPH_REFERENCE_SCOPE_MISMATCH", "SUBLIST_TEMPLATE_GRAPH_REFERENCE_DUPLICATE", "SUBLIST_TEMPLATE_GRAPH_REFERENCE_RELATIONSHIP_BROKEN", "SUBLIST_ROW_SCHEMA_REFERENCE_MISSING", "SUBLIST_ROW_SCHEMA_REFERENCE_INVALID", "SUBLIST_ROW_SCHEMA_REFERENCE_SCOPE_MISMATCH", "SUBLIST_ROW_SCHEMA_REFERENCE_DUPLICATE", "SUBLIST_ROW_SCHEMA_REFERENCE_RELATIONSHIP_BROKEN"],
+    "mutationOwnership": "The caller owns all host context. This Local Runtime function validates it without mutation and returns a fresh fragment; it never appends caller findings or mutates a template/resource.",
+    "hostSideEffects": "None. Validation and lowering use only supplied JSON-safe values.",
+    "prohibited": "No implicit identity allocation, fallback schema discovery, template loading or mutation, nested control, summary, Lookup, non-scalar lowering, runtime action, package output, API, filesystem, environment, process, or Legacy fallback is allowed."
+  },
+  "buildDataListSublistChildResourceInventoryAtHost": {
+    "input": "An immutable DataListSublistChildResourceInventoryInput containing only explicit post-API-allocation Data List Sublist relationships with lossless non-empty string parent ListID, parent FieldID, child ListID, child FieldID, row-schema identity, logical field key, ordinal, and scopes.",
+    "return": "A fresh deeply frozen, JSON-serializable DataListSublistChildResourceInventory containing deterministic ordered descriptors and descriptorsByParentField only.",
+    "errors": ["SUBLIST_CHILD_RESOURCE_IDENTITY_MISSING", "SUBLIST_CHILD_RESOURCE_IDENTITY_INVALID", "SUBLIST_CHILD_RESOURCE_IDENTITY_LOSSY", "SUBLIST_CHILD_RESOURCE_IDENTITY_DUPLICATE", "SUBLIST_CHILD_RESOURCE_IDENTITY_SCOPE_MISMATCH", "SUBLIST_CHILD_RESOURCE_IDENTITY_RELATIONSHIP_BROKEN", "SUBLIST_ROW_SCHEMA_IDENTITY_MISSING", "SUBLIST_ROW_SCHEMA_IDENTITY_INVALID", "SUBLIST_ROW_SCHEMA_IDENTITY_DUPLICATE", "SUBLIST_ROW_SCHEMA_IDENTITY_SCOPE_MISMATCH", "SUBLIST_ROW_SCHEMA_IDENTITY_RELATIONSHIP_BROKEN"],
+    "mutationOwnership": "The caller owns post-allocation relationship input. This Local Runtime function validates without mutation and returns new frozen descriptor data; it does not mutate identity maps, resources, packages, templates, or caller findings.",
+    "hostSideEffects": "None. It validates explicit in-memory host data and has no allocation, API, resource, package, or row-schema creation authority.",
+    "prohibited": "No identity allocation, API call, mutable resource or package-state inspection, template access, row-schema generation, implicit child discovery, numeric identity coercion, filesystem, environment, process, workspace/source resolution, or Legacy fallback. Internal validation helpers remain non-public."
+  },
+  "lowerDataListSublistScalarSummaryIntentAtHost": {
+    "input": "Accepts only a frozen immutable static aggregate intent. Any temporary-variable reference, runtime expression, binding property, missing reference, invalid scalar source, or invalid operation fails closed.",
+    "return": "Returns a fresh frozen Legacy-shaped static metadata DTO only: { field, type, display, binding: null }.",
+    "errors": ["SUBLIST_SUMMARY_REFERENCE_MISSING", "SUBLIST_SUMMARY_REFERENCE_INVALID", "SUBLIST_SUMMARY_REFERENCE_WRONG_SCOPE", "SUBLIST_SUMMARY_REFERENCE_DUPLICATE", "SUBLIST_SUMMARY_REFERENCE_RELATIONSHIP_BROKEN", "SUBLIST_TEMP_VARIABLE_REFERENCE_MISSING", "SUBLIST_TEMP_VARIABLE_REFERENCE_INVALID", "SUBLIST_TEMP_VARIABLE_REFERENCE_WRONG_SCOPE", "SUBLIST_TEMP_VARIABLE_REFERENCE_DUPLICATE", "SUBLIST_TEMP_VARIABLE_REFERENCE_RELATIONSHIP_BROKEN"],
+    "mutationOwnership": "Does not mutate Core intent or any host state, and does not create, discover, validate scope for, mutate, bind, write back, or serialize temporary variables.",
+    "hostSideEffects": "None. Rules/control/template binding, resource mutation, runtime execution, and package output remain host-owned and excluded.",
+    "prohibited": "Any non-null binding, temporary-variable lifecycle operation, fallback discovery, runtime expression evaluation, Rules/control/template binding, resource mutation, Lookup, identity/binary fields, nested controls, actions, and package output are prohibited."
+  },
+  "lowerDataListSublistDynamicSummaryIntentAtHost": {
+    "input": "Accepts only a frozen Core dynamic-summary intent whose binding was already scope-resolved by the host. It accepts no tempVars inventory, host context, template, resource, Rules payload, control object, package state, or runtime expression.",
+    "return": "Returns a fresh frozen Legacy-shaped dynamic summary metadata DTO only: { id, field, type, display, binding: { prefix, value } }. The binding is copied from the already resolved immutable intent; no lookup or binding action is performed.",
+    "errors": ["SUBLIST_DYNAMIC_SUMMARY_INTENT_INVALID", "SUBLIST_DYNAMIC_SUMMARY_SCOPE_INVALID", "SUBLIST_DYNAMIC_SUMMARY_BINDING_INVALID", "SUBLIST_DYNAMIC_SUMMARY_RUNTIME_EXPRESSION_FORBIDDEN"],
+    "mutationOwnership": "Does not mutate Core intent, temporary variables, templates, resources, Rules, controls, package state, or caller-owned arrays. It never creates, discovers, validates scope for, binds, writes back, serializes, or cleans up temporary variables.",
+    "hostSideEffects": "None. The scope-resolution, lifecycle, runtime-expression lowering, template/control binding, resource mutation, runtime writeback, and package integration boundaries remain host-owned and outside this API.",
+    "prohibited": "No temporary-variable allocation, discovery, scope validation, fallback name matching, mutation, writeback, cleanup, runtime expression evaluation, Rules/control/template binding, resource mutation, package output, Lookup, identity/binary fields, nested controls, actions, dashboards, Approval Forms, Document Libraries, or workflows."
+  },
+  "lowerDataListSublistNestedControlPlacementAtHost": {
+    "input": "Accepts only a frozen immutable Core placement intent and a complete explicit host binding list containing supplied control IDs and parent binding/control IDs. It accepts no template, resource, graph, allocation authority, runtime binding object, package state, or fallback inventory.",
+    "return": "Returns a fresh frozen JSON-safe Legacy-shaped list-fields metadata array. It does not insert the fields into a template graph.",
+    "errors": ["SUBLIST_NESTED_CONTROL_LOWERING_INVALID", "SUBLIST_NESTED_CONTROL_HOST_BINDING_INVALID"],
+    "mutationOwnership": "The function does not mutate Core intent, bindings, templates, resources, controls, graph nodes, packages, or caller-owned arrays. The caller alone owns graph insertion and all host state.",
+    "hostSideEffects": "None. It validates explicit host values and creates fresh metadata only; it never allocates a control ID or mutates a template/resource.",
+    "prohibited": "No template loading or mutation, graph insertion, fallback binding discovery, child resource identity, runtime expression evaluation, nested Sublist, Lookup, identity/binary control lowering, actions, package output, or Legacy fallback."
+  },
+  "lowerDataListSublistEmbeddedLookupIntentAtHost": {
+    "input": "Accepts only a frozen immutable embedded-Lookup Core intent and explicit host-supplied child-control ID, parent binding, and parent control ID.",
+    "return": "Returns fresh frozen static Legacy-shaped list-fields metadata with direct target listid/listsetid/appid/listfield display configuration only.",
+    "errors": ["SUBLIST_EMBEDDED_LOOKUP_HOST_BINDING_INVALID", "SUBLIST_EMBEDDED_LOOKUP_LOWERING_INVALID"],
+    "mutationOwnership": "Does not mutate Core intent, bindings, templates, resources, controls, packages, or caller-owned arrays.",
+    "hostSideEffects": "None. It creates metadata only; target-map resolution, runtime Lookup, addition writeback, read-only enforcement, template/resource mutation, and package output remain host-owned.",
+    "prohibited": "No target discovery, allocation, numeric identity coercion, child-resource identity, addition mapping or writeback, runtime binding, template/resource mutation, package output, or Approval Form behavior."
+  },
+  "compatibility": "This 0.1.x Local Runtime contract consumes structural output from approved Materializer Core APIs. Any incompatible DTO, error, ordering, or mutation-ownership change requires a new contract version and source, dist, archive, and installed parity proof."
+}

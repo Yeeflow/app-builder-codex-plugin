@@ -98,6 +98,11 @@ yeeflow-data-list-generator/
 !compatibility/capability-manifests/english-only-allowlist.json
 !compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json
 !compatibility/capability-manifests/app-builder-core-package-dependency-graph.v0.1.0.json
+!compatibility/capability-manifests/yeeflow-app-builder-core-distribution-contract.v0.1.0.json
+!compatibility/capability-manifests/app-builder-core-planning-public-api.v0.1.0.json
+!compatibility/capability-manifests/app-builder-core-materializer-public-api.v0.1.0.json
+!compatibility/capability-manifests/app-builder-core-local-runtime-public-api.v0.1.0.json
+!compatibility/capability-manifests/app-builder-execution-sdk-package-contract.v1.0.0.json
 !compatibility/capability-manifests/yeeflow-app-builder-mixed-file-decomposition.v0.9.71.json
 packages/**/lib/
 *.tsbuildinfo
@@ -185,7 +190,11 @@ packages/**/lib/
 !package.json
 !package-lock.json
 !/tsconfig.json
+!/tsconfig.base.json
+!packages/app-builder-core-*/tsconfig.json
+!packages/app-builder-core/tsconfig.json
 !packages/app-builder-execution-contracts/tsconfig.json
+!runtimes/app-builder-core-local-runtime/tsconfig.json
 !runtimes/app-builder-execution-service/tsconfig.json
 !adapters/codex-plugin-adapter/tsconfig.json
 !adapters/web-managed-provider-fake-adapter/tsconfig.json

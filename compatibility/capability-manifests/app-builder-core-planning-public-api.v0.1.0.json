@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "packageName": "@yeeflow/app-builder-core-planning",
+  "packageVersion": "0.1.0",
+  "runtimeExports": [
+    "splitMarkdownTableRow", "isMarkdownTableSeparator", "parseMarkdownTables", "stripMarkdownFencedBlocks", "findMarkdownTable", "markdownRowValue", "markdownRowValues", "extractMarkdownSubsection", "isNegativeRequirementStatement", "positivePlanningText", "hasTechnicalPlaceholderIdContext", "projectPlanningLabel", "projectWorkflowSetDataListProjection", "projectWorkflowQueryDataStaticPlan", "projectWorkflowStaticPlan", "projectDataListFormControlStaticSchema", "projectApplicationPlanStaticFoundation"
+  ],
+  "projectWorkflowQueryDataStaticPlan": {
+    "input": "One immutable JSON-safe request with kind mode, query-properties, field-map, list-variable, or loop-properties and a matching static DTO value.",
+    "return": "A deeply frozen JSON-safe projection containing the same kind and deterministic static value.",
+    "errors": "Unsupported projection kinds, unsupported source types, and more than two sorts retain explicit deterministic failures.",
+    "excludes": ["Query execution", "data retrieval", "external APIs", "runtime expressions", "workflow execution", "mutable workflow/resource/template/package state", "browser behavior", "frontend rendering", "Local Runtime APIs"],
+    "immutability": "The Core projection does not mutate caller input and returns a deeply frozen result."
+  },
+  "projectWorkflowStaticPlan": {
+    "input": "One immutable JSON-safe Workflow static-plan request with an approved normalization, layout, condition, label, mapping, or static DTO kind.",
+    "return": "A deeply frozen JSON-safe projection containing the matching deterministic static value.",
+    "errors": "Unsupported projection kinds retain an explicit deterministic failure.",
+    "excludes": ["Workflow execution", "task assignment execution", "Job Position resolution", "runtime expression evaluation", "Host IDs", "mutable workflow/resource/template/package state", "browser behavior", "frontend rendering", "Local Runtime APIs"],
+    "immutability": "The Core projection does not mutate caller input and returns a deeply frozen result."
+  },
+  "projectDataListFormControlStaticSchema": {
+    "input": "A tagged, JSON-safe Data List form-control schema snapshot or scalar discriminator only.",
+    "return": "A frozen tagged deterministic string or boolean control-schema projection.",
+    "errors": "Unsupported kinds fail closed with an explicit deterministic error.",
+    "excludes": ["field records", "templates", "resources", "packages", "runtime state", "frontend rendering", "Host allocation"],
+    "immutability": "The Core projection does not mutate caller input and returns a frozen result."
+  },
+  "projectApplicationPlanStaticFoundation": {
+    "input": "One tagged JSON-safe request for approved application-plan parsing, scalar normalization, or a materialization failure DTO made only from JSON-safe findings and context.",
+    "return": "A deeply frozen JSON-safe tagged result with the deterministic parser, scalar, or failure DTO value.",
+    "errors": "Unsupported kinds, invalid regular-expression markers, and non-JSON-safe failure DTO inputs fail closed with explicit deterministic errors.",
+    "excludes": ["plans", "templates", "resources", "packages", "Host identities", "generated IDs", "runtime execution", "frontend behavior", "filesystem", "browser APIs", "Local Runtime APIs"],
+    "immutability": "The Core projection does not mutate caller input and returns a deeply frozen result."
+  }
+}
