@@ -597,7 +597,7 @@ export function projectDataListScalarResourceDefinitionIntent(input) {
 }
 /**
  * Internal-only deterministic Lookup intent projection. It deliberately has
- * no target identity, target map, host resource, or tenant-state input.
+ * no target identity, target map, host resource, or external-state input.
  */
 export function projectDataListLookupResolutionIntent(input) {
     if (!input || input.surface !== "data-list" || input.controlType !== "lookup")

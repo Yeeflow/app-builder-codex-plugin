@@ -12,6 +12,7 @@ const graphPath = resolve(workspaceRoot, optionValue("--graph") || "compatibilit
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs"]);
 const nodeBuiltins = new Set([...builtinModules, ...builtinModules.map((name) => `node:${name}`)]);
 const hostModules = /^(?:react(?:\/|$)|next(?:\/|$)|@prisma\/client(?:\/|$)|openai(?:\/|$)|ai(?:\/|$)|@ai-sdk(?:\/|$)|@openai(?:\/|$)|@codex(?:\/|$)|codex(?:\/|$)|simple-git(?:\/|$)|isomorphic-git(?:\/|$)|octokit(?:\/|$)|playwright(?:\/|$)|puppeteer(?:\/|$)|selenium(?:\/|$)|keytar(?:\/|$)|electron(?:\/|$))/u;
+const prohibitedCoreVocabulary = /\b(?:codex|workbuddy|web|cloud|openai|grok|deepseek|oauth|browser|https?|queue|persistence|retries?|telemetry|provider|credentials?|api[-_ ]?keys?|sessions?|tenant|executioncontext|capabilityprofile|modelinvocationport)\b/iu;
 const findings = [];
 
 if (!existsSync(graphPath)) fail("DEPENDENCY_BOUNDARY_GRAPH_MISSING", "Dependency boundary graph is missing.");
@@ -32,6 +33,7 @@ console.log(JSON.stringify({ status: "passed", code: "DEPENDENCY_BOUNDARIES_VALI
 function validatePackage(packageInfo) {
   const manifestPath = resolve(packageInfo.root, "package.json");
   if (!existsSync(manifestPath)) return add("DEPENDENCY_BOUNDARY_PACKAGE_MANIFEST_MISSING", packageInfo.directory, "Workspace package.json is missing.");
+  if (isCore(packageInfo) && prohibitedCoreVocabulary.test((packageInfo.capabilities || []).join(" "))) add("DEPENDENCY_BOUNDARY_CORE_CAPABILITY_VOCABULARY_FORBIDDEN", packageInfo.name, "Core capability metadata cannot assign host, provider, transport, authentication, or execution-orchestration responsibility to Core.");
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const declaredWorkspaceDependencies = new Set(Object.keys(manifest.dependencies || {}).filter((name) => packageByName.has(name)));
   const allowedDependencies = new Set(packageInfo.allowedDependencies || []);
@@ -42,6 +44,7 @@ function validatePackage(packageInfo) {
 
 function inspectSource(packageInfo, sourcePath, declaredWorkspaceDependencies, allowedDependencies) {
   const text = readFileSync(sourcePath, "utf8");
+  if (isCore(packageInfo) && prohibitedCoreVocabulary.test(text)) add("DEPENDENCY_BOUNDARY_CORE_EXECUTION_VOCABULARY_FORBIDDEN", sourcePath, "Core source cannot contain host, provider, transport, authentication, or execution-orchestration vocabulary.");
   const sourceFile = ts.createSourceFile(sourcePath, text, ts.ScriptTarget.ESNext, true, scriptKind(sourcePath));
   const inspectModule = (node, specifier, kind) => {
     if (!specifier || !ts.isStringLiteralLike(specifier)) return add("DEPENDENCY_BOUNDARY_NON_LITERAL_DYNAMIC_TARGET", sourcePath, `${kind} target must be a string literal.`);
@@ -78,8 +81,9 @@ function inspectSpecifier(packageInfo, sourcePath, specifier, declaredWorkspaceD
     if (packageInfo.name === "@yeeflow/app-builder-core-validators" && workspaceName === "@yeeflow/app-builder-core-builder") add("DEPENDENCY_BOUNDARY_VALIDATOR_BUILDER_IMPORT", sourcePath, "Validators cannot import builder implementation.", { specifier });
     if (packageInfo.name === "@yeeflow/app-builder-core-builder" && workspaceName === "@yeeflow/app-builder-core-materializer") add("DEPENDENCY_BOUNDARY_BUILDER_MATERIALIZER_IMPORT", sourcePath, "Builder cannot import materializer.", { specifier });
     if (packageInfo.name === "@yeeflow/app-builder-core-package-engine" && workspaceName === "@yeeflow/app-builder-core-runtime-client") add("DEPENDENCY_BOUNDARY_PACKAGE_ENGINE_TRANSPORT_IMPORT", sourcePath, "Package engine cannot import API transport implementation.", { specifier });
-    if (isCore(packageInfo) && (workspaceName === "@yeeflow/app-builder-core-local-runtime" || workspaceName === "@yeeflow/codex-plugin-adapter")) add("DEPENDENCY_BOUNDARY_CORE_FORBIDDEN_ZONE_IMPORT", sourcePath, "Core packages cannot import Local Runtime or Codex Plugin Adapter.", { specifier });
-    if (isLocalRuntime(packageInfo) && workspaceName === "@yeeflow/codex-plugin-adapter") add("DEPENDENCY_BOUNDARY_RUNTIME_ADAPTER_IMPORT", sourcePath, "Local Runtime cannot import Codex Plugin Adapter.", { specifier });
+    if (isCore(packageInfo) && (isRuntime(dependency) || isAdapter(dependency) || isExecutionContracts(dependency))) add("DEPENDENCY_BOUNDARY_CORE_FORBIDDEN_ZONE_IMPORT", sourcePath, "Core packages cannot import execution contracts, runtimes, or adapters.", { specifier });
+    if (isRuntime(packageInfo) && isAdapter(dependency)) add("DEPENDENCY_BOUNDARY_RUNTIME_ADAPTER_IMPORT", sourcePath, "Runtime packages cannot import adapters.", { specifier });
+    if (isAdapter(packageInfo) && (isCore(dependency) || (isRuntime(dependency) && !isExecutionService(dependency)))) add("DEPENDENCY_BOUNDARY_ADAPTER_CORE_BYPASS", sourcePath, "Adapters must use the execution contracts and execution service instead of importing Core or another runtime directly.", { specifier });
     edges.get(packageInfo.name).add(workspaceName);
     return;
   }
@@ -141,8 +145,11 @@ function workspacePackageName(specifier) {
   return name ? `${scope}/${name}` : null;
 }
 function scriptKind(path) { return /\.(?:ts|mts|cts)$/u.test(path) ? ts.ScriptKind.TS : ts.ScriptKind.JS; }
-function isCore(packageInfo) { return packageInfo.directory.startsWith("packages/"); }
-function isLocalRuntime(packageInfo) { return packageInfo.name === "@yeeflow/app-builder-core-local-runtime"; }
+function isCore(packageInfo) { return packageInfo.directory.startsWith("packages/") && packageInfo.name !== "@yeeflow/app-builder-execution-contracts"; }
+function isExecutionContracts(packageInfo) { return packageInfo.name === "@yeeflow/app-builder-execution-contracts"; }
+function isExecutionService(packageInfo) { return packageInfo.name === "@yeeflow/app-builder-execution-service"; }
+function isRuntime(packageInfo) { return packageInfo.directory.startsWith("runtimes/"); }
+function isAdapter(packageInfo) { return packageInfo.directory.startsWith("adapters/"); }
 function isWithin(path, root) { const value = relative(root, path); return value === "" || (!value.startsWith("..") && !value.startsWith("/")); }
 function add(code, path, message, detail = {}) { findings.push({ code, path: relative(workspaceRoot, path) || path, message, ...detail }); }
 function optionValue(option) { const index = process.argv.indexOf(option); if (index === -1) return null; const value = process.argv[index + 1]; if (!value || value.startsWith("--")) fail("DEPENDENCY_BOUNDARY_ARGUMENT_VALUE_MISSING", `${option} requires a value.`); return value; }

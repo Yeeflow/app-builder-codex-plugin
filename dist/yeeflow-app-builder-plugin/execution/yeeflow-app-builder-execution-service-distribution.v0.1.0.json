@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0.0",
+  "contractVersion": "0.1.0",
+  "protocolVersion": "app-builder.execution/1.0.0",
+  "packageGraphVersion": "0.2.0",
+  "sourceCommit": "514ba945bb4b987e15cdd48579f6ae9693c87fc2",
+  "sourceTreeState": "dirty",
+  "dependencyGraphSha256": "b99fafd3ed9d689ae58d3d578437198ed203a20c35efeb0089ffd5228bf9581a",
+  "coreDependencies": [
+    {
+      "path": "core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
+      "sha256": "b1040c4278065bdc8fbcb6807562272e2a4572d67907e91958f8c4e5616c9876"
+    },
+    {
+      "path": "core/yeeflow-app-builder-core-materializer.v0.1.0.mjs",
+      "sha256": "06e286915bb9e6529c2fba7db6bec1c00d07801c020ff6f37ce1d9822328d4e7"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "execution/app-builder-core-domain-contracts.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-core-contracts",
+      "packageVersion": "0.1.0",
+      "sourceInputSha256": "c60e7f4bf5e289e4134f55c7de8b17167c634e54431d0d747a4c144a0b63bb1d",
+      "compiledInputSha256": "93239fec04991fb3e0f4413398519281d48e60de28a5f4e525a8de80b50d5547",
+      "sha256": "508ba0a87590b1c889714cc3d50855bd5c99f494e29a3e5b27bc7a02899e2bd4",
+      "exports": [
+        "capabilityMetadata",
+        "CORE_APPLICATION_INTENT_VERSION"
+      ]
+    },
+    {
+      "path": "execution/app-builder-execution-contracts.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-execution-contracts",
+      "packageVersion": "0.1.0",
+      "sourceInputSha256": "378aa3617097fbba83aa8891b77c49df8be19f8c1750b9d76d7f61f421913e2a",
+      "compiledInputSha256": "deadb48f8a098aa54a71b8264d24bbe726aa547c76eacc84df415672e450e35e",
+      "sha256": "26238acbd82a3966fb3b587fc44e7ea118532a0d3621c6a6b940d343555e916c",
+      "exports": [
+        "capabilityMetadata",
+        "EXECUTION_PROTOCOL_VERSION",
+        "STRUCTURED_INTENT_VERSION"
+      ]
+    },
+    {
+      "path": "execution/app-builder-core-application-facade.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-core",
+      "packageVersion": "0.1.0",
+      "sourceInputSha256": "d07682b6e283bd5201baaab7bb5bbdb9bcdb44ddabdfef56bb4ef929e9e3eb2c",
+      "compiledInputSha256": "5aff35ced9053c02ad56d826259d7878e42b7ef4314454ea2eb982c17d7c5489",
+      "sha256": "d59b315fb8b012b420ac6a4d1733c11ee3c29b3e30f55c138dfdd290bdcf69fc",
+      "exports": [
+        "capabilityMetadata",
+        "buildApplicationFromCanonicalIntent"
+      ]
+    },
+    {
+      "path": "execution/app-builder-execution-service.v0.1.0.mjs",
+      "packageName": "@yeeflow/app-builder-execution-service",
+      "packageVersion": "0.1.0",
+      "sourceInputSha256": "25e516b44d71ce77ceb7ff24d8435898b410da400556cc9b724d57a7f7bf1f12",
+      "compiledInputSha256": "0f442e123888779e8cf9a484398d94ef2ba57da03f5af185b1c0ac6b186c0fe9",
+      "sha256": "dbaa220fa46b2e67a8d7f7876a19443ce6af239ad0ecec6f1975c2930c62ab58",
+      "exports": [
+        "capabilityMetadata",
+        "createInProcessExecutionKernel",
+        "executeInProcess",
+        "negotiateExecutionContext",
+        "supportedExecutionCapabilities"
+      ]
+    },
+    {
+      "path": "execution/codex-plugin-adapter.v0.1.0.mjs",
+      "packageName": "@yeeflow/codex-plugin-adapter",
+      "packageVersion": "0.1.0",
+      "sourceInputSha256": "72e50b7ecc42fae98b212405ee1d1e3b724e69623964e926eed920855dddd8ce",
+      "compiledInputSha256": "8e849d79763f77343d345571f3131a1dd96532e6ab2c4d2616e05fcf4ada3e8b",
+      "sha256": "adb73592fcc10732b601c74c74f9e1be3d06bfaa92e257f60b1a8aa6409271fe",
+      "exports": [
+        "capabilityMetadata",
+        "executeWithCodexHost"
+      ]
+    }
+  ]
+}

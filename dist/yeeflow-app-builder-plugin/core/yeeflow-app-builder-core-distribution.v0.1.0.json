@@ -1,13 +1,13 @@
 {
   "schemaVersion": "1.0.0",
   "coreVersion": "1.0.0",
-  "packageGraphVersion": "0.1.0",
-  "sourceCommit": "1aa88c0ff88cf940e58cdc265f5614238bbe3c8a",
-  "sourceTreeState": "release-scoped-dirty",
+  "packageGraphVersion": "0.2.0",
+  "sourceCommit": "514ba945bb4b987e15cdd48579f6ae9693c87fc2",
+  "sourceTreeState": "dirty",
   "primaryArtifactPath": "core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
   "sourceInputSha256": "2ca32dca26fee2ab58bf5e7ca7a0c156cf942b0e86091ce1b6967e5f9c4df599",
   "compiledInputSha256": "bf4a6ce17b8530f13b2803990006984327ed137d3defa72f7457a519b43eef87",
-  "dependencyGraphSha256": "fcbea65422a43cc2cf3cb814d63513393c6b1c91bb3fc11bf756c548fa06d8b9",
+  "dependencyGraphSha256": "b99fafd3ed9d689ae58d3d578437198ed203a20c35efeb0089ffd5228bf9581a",
   "artifactSha256": "b1040c4278065bdc8fbcb6807562272e2a4572d67907e91958f8c4e5616c9876",
   "artifacts": [
     {
@@ -41,9 +41,9 @@
       "path": "core/yeeflow-app-builder-core-materializer.v0.1.0.mjs",
       "packageName": "@yeeflow/app-builder-core-materializer",
       "packageVersion": "1.0.0",
-      "sourceInputSha256": "5c69f2ffb3adc669cc76a45ab68cba6dbe764e341cd218c8d1f9988cd253b21e",
-      "compiledInputSha256": "d715e923a073bebc8b5ca1efc94d4f854e3e197c68a6a53373e97d6eddb5967c",
-      "sha256": "92933dfe82a3da1a08e125622f3c68082ebd5c69afdd9714ffaa9267e3bb89d3",
+      "sourceInputSha256": "8f18181850228a7e935c52534f753809645ae0d406aae1cae5b1e4e88986b2e9",
+      "compiledInputSha256": "34173d63d790619248230bd8f2d0b3d216a886024d01fb0dd0a2dc1a63aebf9a",
+      "sha256": "06e286915bb9e6529c2fba7db6bec1c00d07801c020ff6f37ce1d9822328d4e7",
       "exports": [
         "capabilityMetadata",
         "normalizeHexColor",

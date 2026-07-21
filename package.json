@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
@@ -15,6 +15,13 @@
     "test:markdown-planning-differential": "node scripts/test-markdown-planning-differential.mjs",
     "validate:architecture-convergence": "node scripts/validate-architecture-convergence.mjs",
     "test:architecture-convergence": "node scripts/test-architecture-convergence.mjs",
+    "test:execution-service": "node scripts/test-app-builder-execution-service.mjs",
+    "validate:execution-architecture": "node scripts/validate-app-builder-execution-architecture.mjs",
+    "test:execution-architecture-gates": "node scripts/test-app-builder-execution-architecture-gates.mjs",
+    "build:execution-service-distribution": "node scripts/build-execution-service-distribution.mjs",
+    "validate:execution-service-distribution": "node scripts/validate-execution-service-distribution.mjs",
+    "test:execution-service-distribution-gates": "node scripts/test-execution-service-distribution-gates.mjs",
+    "test:execution-service-distribution-parity": "node scripts/test-app-builder-execution-service-distribution-parity.mjs",
     "build:core-distribution": "node scripts/build-core-distribution.mjs",
     "test:core-distribution-resolution": "node scripts/test-core-distribution-resolution.mjs",
     "validate:core-distribution": "node scripts/validate-core-distribution.mjs",

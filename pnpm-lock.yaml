@@ -14,9 +14,30 @@ importers:
 
   adapters/codex-plugin-adapter:
     dependencies:
-      '@yeeflow/app-builder-core-local-runtime':
+      '@yeeflow/app-builder-execution-contracts':
         specifier: workspace:*
-        version: link:../../runtimes/app-builder-core-local-runtime
+        version: link:../../packages/app-builder-execution-contracts
+      '@yeeflow/app-builder-execution-service':
+        specifier: workspace:*
+        version: link:../../runtimes/app-builder-execution-service
+
+  adapters/host-extension-fixture-adapter:
+    dependencies:
+      '@yeeflow/app-builder-execution-contracts':
+        specifier: workspace:*
+        version: link:../../packages/app-builder-execution-contracts
+      '@yeeflow/app-builder-execution-service':
+        specifier: workspace:*
+        version: link:../../runtimes/app-builder-execution-service
+
+  adapters/web-managed-provider-fake-adapter:
+    dependencies:
+      '@yeeflow/app-builder-execution-contracts':
+        specifier: workspace:*
+        version: link:../../packages/app-builder-execution-contracts
+      '@yeeflow/app-builder-execution-service':
+        specifier: workspace:*
+        version: link:../../runtimes/app-builder-execution-service
 
   packages/app-builder-core:
     dependencies:
@@ -257,6 +278,8 @@ importers:
         specifier: workspace:*
         version: link:../app-builder-core-templates
 
+  packages/app-builder-execution-contracts: {}
+
   runtimes/app-builder-core-local-runtime:
     dependencies:
       '@yeeflow/app-builder-core':
@@ -268,6 +291,18 @@ importers:
       '@yeeflow/app-builder-core-runtime-verification':
         specifier: workspace:*
         version: link:../../packages/app-builder-core-runtime-verification
+
+  runtimes/app-builder-execution-service:
+    dependencies:
+      '@yeeflow/app-builder-core':
+        specifier: workspace:*
+        version: link:../../packages/app-builder-core
+      '@yeeflow/app-builder-core-contracts':
+        specifier: workspace:*
+        version: link:../../packages/app-builder-core-contracts
+      '@yeeflow/app-builder-execution-contracts':
+        specifier: workspace:*
+        version: link:../../packages/app-builder-execution-contracts
 
 packages:
 

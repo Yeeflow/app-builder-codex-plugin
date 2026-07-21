@@ -13,6 +13,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@yeeflow/app-builder-core-local-runtime": "workspace:*"
+    "@yeeflow/app-builder-execution-contracts": "workspace:*",
+    "@yeeflow/app-builder-execution-service": "workspace:*"
   }
 }

@@ -15,10 +15,12 @@ const materializerPublicApiPath = resolve(root, "compatibility/capability-manife
 const localRuntimePublicApiPath = resolve(root, "compatibility/capability-manifests/app-builder-core-local-runtime-public-api.v0.1.0.json");
 const materializerCompiledPath = resolve(root, "packages/app-builder-core-materializer/lib/index.js");
 const localRuntimeCompiledPath = resolve(root, "runtimes/app-builder-core-local-runtime/lib/index.js");
+const graphPath = resolve(root, "compatibility/capability-manifests/app-builder-core-package-dependency-graph.v0.1.0.json");
 const expectedCoreVersion = process.env.YEEFLOW_CANDIDATE_CORE_VERSION || "0.1.0";
 const contract = readJsonOrFail(contractPath, "CORE_DISTRIBUTION_VERSION_MISMATCH", "Distribution contract is invalid");
 const materializerPublicApi = readJsonOrFail(materializerPublicApiPath, "CORE_DISTRIBUTION_VERSION_MISMATCH", "Materializer public API contract is invalid");
 const localRuntimePublicApi = readJsonOrFail(localRuntimePublicApiPath, "CORE_DISTRIBUTION_VERSION_MISMATCH", "Local Runtime public API contract is invalid");
+const packageGraph = readJsonOrFail(graphPath, "CORE_DISTRIBUTION_VERSION_MISMATCH", "Package graph is invalid");
 const approvedArtifacts = contract.approvedArtifacts;
 
 await validateMaterializerSourceContract();
@@ -26,7 +28,7 @@ await validateLocalRuntimeSourceContract();
 
 if (!existsSync(manifestPath)) fail("CORE_DISTRIBUTION_ARTIFACT_MISSING", "Distribution manifest is missing.");
 const manifest = readJsonOrFail(manifestPath, "CORE_DISTRIBUTION_VERSION_MISMATCH", "Distribution manifest is invalid");
-if (manifest.coreVersion !== expectedCoreVersion || manifest.packageGraphVersion !== "0.1.0") fail("CORE_DISTRIBUTION_VERSION_MISMATCH", "Distribution Core or package graph version does not match the approved contract.");
+if (manifest.coreVersion !== expectedCoreVersion || manifest.packageGraphVersion !== packageGraph.graphVersion) fail("CORE_DISTRIBUTION_VERSION_MISMATCH", "Distribution Core or package graph version does not match the approved contract.");
 if (!Array.isArray(approvedArtifacts) || !approvedArtifacts.length || !Array.isArray(manifest.artifacts) || manifest.artifacts.length !== approvedArtifacts.length) fail("CORE_DISTRIBUTION_EXPORT_UNRESOLVED", "Distribution manifest does not declare every approved artifact.");
 if (manifest.primaryArtifactPath !== approvedArtifacts[0].path || !isSha256(manifest.artifactSha256)) fail("CORE_DISTRIBUTION_CHECKSUM_MISMATCH", "Primary artifact checksum contract is invalid.");
 if (!isSha256(manifest.dependencyGraphSha256) || !isSha256(manifest.sourceInputSha256) || !isSha256(manifest.compiledInputSha256)) fail("CORE_DISTRIBUTION_VERSION_MISMATCH", "Distribution provenance hash contract is invalid.");

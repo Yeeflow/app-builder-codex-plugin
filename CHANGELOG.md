@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.0.7
+
+- Add a versioned, host-neutral execution-contract package and an in-process execution-service facade with fail-closed capability negotiation and explicit no-write authority enforcement.
+- Add Codex host-controlled wiring plus source-only deterministic Web and future-host fixtures, proving cross-host Core equivalence without provider SDKs, credentials, transport, persistence, or live integrations.
+- Distribute only the five Plugin-production execution artifacts required by the Codex Plugin, and reject Web/future-host adapter artifacts or package identities from the official Plugin archive.
+- Enforce Core-to-runtime dependency direction, model/context isolation, protocol compatibility, provider and secret leakage rejection, authority-escalation rejection, generated-app canonical materialization, and source/dist/archive/simulated-installed Codex parity.
+- Preserve the independently versioned Core distribution and execution protocol at `1.0.0`; the Plugin archive builder now makes that compatibility requirement explicit and fails on conflicting Core-version input.
+
 ## 0.9.71
 
 - Route Generation Readiness and its child planning validators through one shared Markdown table parser that preserves escaped pipes and pipes inside inline code while ignoring fenced examples.
