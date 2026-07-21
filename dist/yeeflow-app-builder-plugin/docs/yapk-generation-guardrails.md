@@ -56,10 +56,12 @@ A generated `.yapk` package must not be called upload-ready, install-ready, or h
 When API-key or OAuth access is available, the generation workflow must:
 
 1. Validate decoded `AppPackageInfo` content.
-2. Call `POST /utils/apppackage/setsign`.
-3. Confirm the returned signature has the expected 32-byte shape.
-4. Call `POST /utils/apppackage/verifysign`.
+2. Run `node scripts/yeeflow-yapk-sign.mjs --package <unsigned.yapk> --output <signed.yapk> --execute`; do not replace this entrypoint with task-local signing code.
+3. Let the helper call `POST /utils/apppackage/setsign`, accept the documented JSON-object, top-level JSON-string, or plain base64 response shapes, and require an exact 32-byte base64 signature.
+4. Let the helper call `POST /utils/apppackage/verifysign`; a successful empty response body is accepted when the HTTP status is successful.
 5. Report signing proof separately from schema validation and runtime proof.
+
+The helper preserves the unsigned source package and unchanged `Resource`, writes a separate signed output only after both operations succeed, and emits redacted diagnostics only. A helper failure leaves installation blocked. Never print or persist raw signing responses, signatures, `Resource`, decoded content, OAuth tokens, or tenant identifiers.
 
 Local schema validation alone is not upload/install readiness.
 

@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {

@@ -30,12 +30,22 @@ const mirrors = [
   "docs/reference/full-app-generation-entrypoints.json",
   "scripts/validate-pre-id-allocation-readiness.mjs",
   "scripts/test-pre-id-allocation-readiness-gates.mjs",
+  "scripts/lib/yeeflow-yapk-signing.mjs",
+  "scripts/yeeflow-yapk-sign.mjs",
+  "scripts/test-yeeflow-yapk-signing-distribution.mjs",
+  "docs/yapk-generation-guardrails.md",
 ].map((sourcePath) => [sourcePath, sourcePath]);
 
 mirrors.push(
   ["skills/installed/yeeflow-application-builder/SKILL.md", "skills/yeeflow-application-builder/SKILL.md"],
   ["skills/installed/yeeflow-application-generator/SKILL.md", "skills/yeeflow-application-generator/SKILL.md"],
   ["skills/installed/yeeflow-dashboard-generator/SKILL.md", "skills/yeeflow-dashboard-generator/SKILL.md"],
+  ["generated-skills/yeeflow-api-operator/SKILL.md", "skills/yeeflow-api-operator/SKILL.md"],
+  ["skills/installed/yeeflow-package-validator/SKILL.md", "skills/yeeflow-package-validator/SKILL.md"],
+  ["skills/installed/yeeflow-package-validator/SKILL.md", "skills/installed/yeeflow-package-validator/SKILL.md"],
+  ["skills/installed/yeeflow-yapk-package-generator/SKILL.md", "skills/yeeflow-yapk-package-generator/SKILL.md"],
+  ["skills/installed/yeeflow-application-builder/SKILL.md", "skills/installed/yeeflow-application-builder/SKILL.md"],
+  ["skills/installed/yeeflow-application-generator/SKILL.md", "skills/installed/yeeflow-application-generator/SKILL.md"],
 );
 
 for (const [sourcePath, destinationPath] of mirrors) {
