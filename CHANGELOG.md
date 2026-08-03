@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.1.0
+
+- Add a formal standalone Dashboard Page `.ydp` toolchain with canonical root, script, Dashboard Generator, and Application Generator entrypoints.
+- Wrap only the shared Core standalone Dashboard build-result contract, require externally issued resource identities and source-bound plan provenance, and reject copied or deterministic export IDs.
+- Validate the export-proven outer envelope, UTF-8 and `LayoutView` round trips, Dashboard layout and Collection gates, page-scope dependencies, actions, source resources, and temporary variables before and after writing.
+- Add positive, negative, transaction-rollback, source/dist parity, and skill-entrypoint regression coverage while keeping platform import and runtime behavior explicitly unproven until RC install smoke testing.
+
 ## 1.0.8
 
 - Publish the final zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` npm-compatible ESM tarball as a separate GitHub Release asset.

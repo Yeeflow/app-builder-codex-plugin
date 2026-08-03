@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.0.8`
+- Version: `1.1.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `1.0.8` publishes the final zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` ESM tarball as a separate GitHub Release asset while preserving the Plugin's Codex-only production adapter and exact Core/protocol compatibility boundaries.
+Current release candidate `1.1.0` adds the formal standalone Dashboard Page `.ydp` builder and validator toolchain while preserving the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset and independently versioned Core/protocol compatibility at `1.0.0`.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.0.8
+Version: 1.1.0
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.0.8
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.1.0
 ```
 
 ## What Is Included

@@ -96,7 +96,7 @@ if (isMainModule()) {
 
 export function validateDashboardGenerationHardGates(options = {}) {
   const findings = [];
-  let decoded = null;
+  let decoded = options.decoded || null;
   let packagePath = null;
 
   if (options.package) {
@@ -112,6 +112,8 @@ export function validateDashboardGenerationHardGates(options = {}) {
       }
     }
   }
+
+  if (options.decoded) validateDecodedDashboards(options.decoded, findings);
 
   if (options.report) validateReportIdentity(options.report, decoded, findings);
   if (options.plan && options.package) {

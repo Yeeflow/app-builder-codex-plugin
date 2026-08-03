@@ -134,6 +134,7 @@ export function validateDashboardPageLayoutTemplate(options = {}) {
 
   validateRegistry(registry, template, findings);
   if (options.package) validatePackage(path.resolve(options.package), template, findings, registry, options.appPlan ? path.resolve(options.appPlan) : null);
+  if (options.decoded) validateDecoded(options.decoded, template, findings, registry, options.appPlan ? path.resolve(options.appPlan) : null);
   if (options.runtimeProof) validateRuntimeProof(readJson(path.resolve(options.runtimeProof), findings, "DASH_LAYOUT_RUNTIME_PROOF_MISSING"), findings);
   if (options.upgradeScope) validateUpgradeScope(readJson(path.resolve(options.upgradeScope), findings, "DASH_LAYOUT_UPGRADE_SCOPE_MISSING"), findings);
 
@@ -201,6 +202,11 @@ function validatePackage(packagePath, template, findings, registry, appPlanPath 
     findings.push(error("DASH_LAYOUT_PACKAGE_DECODE_FAILED", `Could not decode package Resource: ${err.message}`, { package: packagePath }));
     return;
   }
+  validateDecoded(decoded, template, findings, registry, appPlanPath);
+}
+
+/** In-memory adapter used by standalone YDP validation; no synthetic YAPK is written. */
+function validateDecoded(decoded, template, findings, registry, appPlanPath = null) {
   const listIndex = buildListIndex(decoded);
   registry = registry || readJson(REGISTRY_PATH, findings, "DASH_LAYOUT_TEMPLATE_REGISTRY_MISSING") || {};
   const plannedLayouts = appPlanPath ? collectDashboardPageLayoutTemplateRecordsFromPlan(appPlanPath, findings) : [];

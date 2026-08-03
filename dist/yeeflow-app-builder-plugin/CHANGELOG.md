@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+## 1.1.0
+
+- Add a formal standalone Dashboard Page `.ydp` toolchain with canonical root, script, Dashboard Generator, and Application Generator entrypoints.
+- Wrap only the shared Core standalone Dashboard build-result contract, require externally issued resource identities and source-bound plan provenance, and reject copied or deterministic export IDs.
+- Validate the export-proven outer envelope, UTF-8 and `LayoutView` round trips, Dashboard layout and Collection gates, page-scope dependencies, actions, source resources, and temporary variables before and after writing.
+- Add positive, negative, transaction-rollback, source/dist parity, and skill-entrypoint regression coverage while keeping platform import and runtime behavior explicitly unproven until RC install smoke testing.
+
+## 1.0.8
+
+- Publish the final zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` npm-compatible ESM tarball as a separate GitHub Release asset.
+- Repackage only the approved host-neutral Core application facade, execution contracts, in-process execution service, declarations, and deterministic compatibility metadata; exclude every host adapter, provider, credential, transport, persistence, queue, retry, telemetry transport, and UI responsibility.
+- Enforce exact SDK, Plugin product, Core distribution, execution protocol, structured-intent, package-graph, file-inventory, checksum, dependency, and export-map contracts with seven negative package gates.
+- Prove source, expanded package, archive, and isolated npm-installed consumer parity with a declaration TypeScript consumer, injected fake model, empty write authority, zero external calls, and zero credential access.
+
+## 1.0.7
+
+- Add a versioned, host-neutral execution-contract package and an in-process execution-service facade with fail-closed capability negotiation and explicit no-write authority enforcement.
+- Add Codex host-controlled wiring plus source-only deterministic Web and future-host fixtures, proving cross-host Core equivalence without provider SDKs, credentials, transport, persistence, or live integrations.
+- Distribute only the five Plugin-production execution artifacts required by the Codex Plugin, and reject Web/future-host adapter artifacts or package identities from the official Plugin archive.
+- Enforce Core-to-runtime dependency direction, model/context isolation, protocol compatibility, provider and secret leakage rejection, authority-escalation rejection, generated-app canonical materialization, and source/dist/archive/simulated-installed Codex parity.
+- Preserve the independently versioned Core distribution and execution protocol at `1.0.0`; the Plugin archive builder now makes that compatibility requirement explicit and fails on conflicting Core-version input.
+
 ## 0.9.71
 
 - Route Generation Readiness and its child planning validators through one shared Markdown table parser that preserves escaped pipes and pipes inside inline code while ignoring fenced examples.

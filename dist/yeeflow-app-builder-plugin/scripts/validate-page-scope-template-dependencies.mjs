@@ -343,4 +343,4 @@ function main() {
   process.exit(result.ok ? 0 : 1);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

@@ -140,7 +140,15 @@ function gridTableWrapper() {
             type: "container",
             id: "grid_table_col_title_wrapper",
             name: "grid_table_col_title_wrapper",
-            children: [{ type: "heading", id: "grid_table_col_title", name: "grid_table_col_title", attrs: { headc: { title: { value: "Asset Loan Work Queue" } } } }],
+            children: [{
+              type: "heading",
+              id: "grid_table_col_title",
+              name: "grid_table_col_title",
+              attrs: {
+                headc: { title: { value: "Asset Loan Work Queue" } },
+                heads: { ty: [null, "l-medium"] },
+              },
+            }],
           },
           {
             type: "container",
@@ -236,7 +244,17 @@ function dynamicControl(type, name, field) {
       field,
     },
   };
-  if (type === "dynamic-user") control.attrs.user = { field };
+  if (type === "dynamic-user") {
+    control.attrs.user = { field };
+    control.attrs.item_style = {
+      pd: [null, {
+        top: "--sp--s0",
+        right: "--sp--s0",
+        bottom: "--sp--s0",
+        left: "--sp--s0",
+      }],
+    };
+  }
   return control;
 }
 

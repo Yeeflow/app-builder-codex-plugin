@@ -1,11 +1,12 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "typecheck": "tsc -b --pretty false",
     "test": "node scripts/test-workspace-skeleton.mjs",
+    "test:ydp-wrapper": "node scripts/test-ydp-wrapper-gates.mjs",
     "validate:package-boundaries": "node scripts/validate-workspace-package-boundaries.mjs",
     "validate:dependency-boundaries": "node scripts/validate-dependency-boundaries.mjs",
     "test:dependency-boundaries": "node scripts/test-dependency-boundaries.mjs",

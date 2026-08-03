@@ -17,6 +17,19 @@ pluginManifest.version = packageManifest.version;
 writeFileSync(resolve(root, pluginManifestPath), `${JSON.stringify(pluginManifest, null, 2)}\n`);
 
 const mirrors = [
+  "README.md",
+  "CHANGELOG.md",
+  "build-ydp-wrapper.js",
+  "validate-ydp.js",
+  "scripts/lib/standalone-ydp-codec.cjs",
+  "scripts/lib/standalone-dashboard-resource-gates.mjs",
+  "scripts/validate-dashboard-page-layout-template.mjs",
+  "scripts/validate-dashboard-grid-table-collections.mjs",
+  "scripts/validate-dashboard-generation-hard-gates.mjs",
+  "scripts/validate-page-scope-template-dependencies.mjs",
+  "scripts/test-ydp-wrapper-gates.mjs",
+  "scripts/test-dashboard-v11-validator-alignment-gates.mjs",
+  "scripts/test-fixtures/core-standalone-dashboard-body.br.base64",
   "scripts/validate-approval-workflow-publish-readiness.mjs",
   "scripts/test-approval-workflow-unicode-node-name-regressions.mjs",
   "scripts/test-approval-form-multi-field-immutable-projection.mjs",
@@ -27,6 +40,8 @@ const mirrors = [
   "scripts/test-full-app-materialization-entrypoint-gates.mjs",
   "docs/standards/app-plan-standard-template.md",
   "docs/app-plan-standard-template.md",
+  "docs/README.md",
+  "docs/releases/yeeflow-app-builder-v1.1.0.md",
   "docs/reference/full-app-generation-entrypoints.json",
   "scripts/validate-pre-id-allocation-readiness.mjs",
   "scripts/test-pre-id-allocation-readiness-gates.mjs",
@@ -37,15 +52,22 @@ const mirrors = [
 ].map((sourcePath) => [sourcePath, sourcePath]);
 
 mirrors.push(
+  ["scripts/build-ydp-wrapper.js", "scripts/build-ydp-wrapper.js"],
+  ["scripts/validate-ydp.js", "scripts/validate-ydp.js"],
+  ["skills/installed/yeeflow-dashboard-generator/scripts/build-ydp-wrapper.js", "skills/yeeflow-dashboard-generator/scripts/build-ydp-wrapper.js"],
+  ["skills/installed/yeeflow-dashboard-generator/scripts/validate-ydp.js", "skills/yeeflow-dashboard-generator/scripts/validate-ydp.js"],
+  ["skills/installed/yeeflow-dashboard-generator/scripts/build-ydp-wrapper.js", "skills/installed/yeeflow-dashboard-generator/scripts/build-ydp-wrapper.js"],
+  ["skills/installed/yeeflow-dashboard-generator/scripts/validate-ydp.js", "skills/installed/yeeflow-dashboard-generator/scripts/validate-ydp.js"],
+  ["skills/installed/yeeflow-application-generator/scripts/build-ydp-wrapper.js", "skills/yeeflow-application-generator/scripts/build-ydp-wrapper.js"],
+  ["skills/installed/yeeflow-application-generator/scripts/validate-ydp.js", "skills/yeeflow-application-generator/scripts/validate-ydp.js"],
+  ["skills/installed/yeeflow-application-generator/scripts/build-ydp-wrapper.js", "skills/installed/yeeflow-application-generator/scripts/build-ydp-wrapper.js"],
+  ["skills/installed/yeeflow-application-generator/scripts/validate-ydp.js", "skills/installed/yeeflow-application-generator/scripts/validate-ydp.js"],
   ["skills/installed/yeeflow-application-builder/SKILL.md", "skills/yeeflow-application-builder/SKILL.md"],
   ["skills/installed/yeeflow-application-generator/SKILL.md", "skills/yeeflow-application-generator/SKILL.md"],
   ["skills/installed/yeeflow-dashboard-generator/SKILL.md", "skills/yeeflow-dashboard-generator/SKILL.md"],
   ["generated-skills/yeeflow-api-operator/SKILL.md", "skills/yeeflow-api-operator/SKILL.md"],
   ["skills/installed/yeeflow-package-validator/SKILL.md", "skills/yeeflow-package-validator/SKILL.md"],
-  ["skills/installed/yeeflow-package-validator/SKILL.md", "skills/installed/yeeflow-package-validator/SKILL.md"],
   ["skills/installed/yeeflow-yapk-package-generator/SKILL.md", "skills/yeeflow-yapk-package-generator/SKILL.md"],
-  ["skills/installed/yeeflow-application-builder/SKILL.md", "skills/installed/yeeflow-application-builder/SKILL.md"],
-  ["skills/installed/yeeflow-application-generator/SKILL.md", "skills/installed/yeeflow-application-generator/SKILL.md"],
 );
 
 for (const [sourcePath, destinationPath] of mirrors) {

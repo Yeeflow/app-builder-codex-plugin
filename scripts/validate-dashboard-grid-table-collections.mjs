@@ -31,15 +31,17 @@ if (isMainModule()) {
 
 export function validateDashboardGridTableCollections(options) {
   const findings = [];
-  if (!options.package || !fs.existsSync(options.package)) {
+  if (!options.decoded && (!options.package || !fs.existsSync(options.package))) {
     return fail("YAPK_PACKAGE_MISSING", "Package file is missing.", { package: options.package || "" });
   }
 
-  let decoded;
-  try {
-    ({ decoded } = readDecodedYapk(options.package));
-  } catch (error) {
-    return fail("YAPK_RESOURCE_DECODE_FAILED", `Could not decode package Resource: ${error.message}`);
+  let decoded = options.decoded || null;
+  if (!decoded) {
+    try {
+      ({ decoded } = readDecodedYapk(options.package));
+    } catch (error) {
+      return fail("YAPK_RESOURCE_DECODE_FAILED", `Could not decode package Resource: ${error.message}`);
+    }
   }
 
   const detailLayouts = buildDetailLayoutIndex(decoded, findings);
@@ -66,7 +68,7 @@ export function validateDashboardGridTableCollections(options) {
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
-    package: path.resolve(options.package),
+    package: options.package ? path.resolve(options.package) : null,
     dashboardPages: dashboardPages.length,
     collections: collectionCount,
     dataListControls: dataListCount,

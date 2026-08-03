@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "Codex-only Plugin distribution with a separately published host-neutral Execution SDK 1.0.0 asset.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
