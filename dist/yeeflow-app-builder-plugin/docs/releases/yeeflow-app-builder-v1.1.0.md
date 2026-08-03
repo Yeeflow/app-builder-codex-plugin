@@ -45,8 +45,9 @@ the shared Core Dashboard builder as the only body-generation authority.
   round-trip validity only.
 - Yeeflow platform import, Designer rendering, runtime data binding, actions, and
   tenant execution remain unproven until separately exercised and documented.
-- The final `v1.1.0` tag remains blocked until the private Marketplace install
-  smoke test for the RC is accepted.
+- The private Marketplace install smoke test was explicitly deferred by the
+  release owner until after stable publication. Static release gates passed, but
+  installed Plugin discovery and runtime behavior remain pending verification.
 
 ## Rollback
 

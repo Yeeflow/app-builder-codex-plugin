@@ -13,7 +13,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Version: `1.1.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release candidate `1.1.0` adds the formal standalone Dashboard Page `.ydp` builder and validator toolchain while preserving the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset and independently versioned Core/protocol compatibility at `1.0.0`.
+Current release `1.1.0` adds the formal standalone Dashboard Page `.ydp` builder and validator toolchain while preserving the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset and independently versioned Core/protocol compatibility at `1.0.0`.
 
 ## Install In Codex App
 
