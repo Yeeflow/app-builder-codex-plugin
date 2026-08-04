@@ -2,7 +2,7 @@
 
 ## Summary
 
-This release candidate adds formal standalone resource tooling for Custom Service
+This release adds formal standalone resource tooling for Custom Service
 `.ycs` and Scheduled Workflow `.ywf`, and provenance-gated finalization for
 official AI Agent `.yaia` and Copilot `.yaic` payloads.
 
@@ -60,8 +60,27 @@ was not independently compared locally. See
   selection when ignored development fixtures are absent. RC2 is rejected.
 - RC3 selects the canonical dist surface in clean clones while retaining dual
   source/dist verification in development checkouts.
-- RC3 Marketplace install smoke: pending
-- Final tag: blocked until the RC install smoke is completed and documented
+- RC3 Marketplace install smoke: passed on 2026-08-04 after fully quitting and
+  restarting Codex, then opening a new task. The installed and enabled Plugin
+  reported version `1.2.0`; all four target routes resolved to the installed
+  `1.2.0` cache:
+  - Custom Service `.ycs` -> `yeeflow-custom-service-generator`
+  - Scheduled Workflow `.ywf` -> `yeeflow-scheduled-workflow-generator`
+  - AI Agent `.yaia` -> `yeeflow-agent-import-export-operator`
+  - Copilot `.yaic` -> `yeeflow-copilot-import-export-operator`
+- The Scheduled Workflow skill was discoverable, all five required Custom
+  Service document references resolved to readable files, and both referenced
+  JSON files parsed successfully.
+- Install source: `https://github.com/Yeeflow/app-builder-codex-plugin.git`
+- Git ref tested: `yeeflow-app-builder-plugin-v1.2.0-rc3`
+- Sparse paths: `.agents/plugins/marketplace.json` and
+  `dist/yeeflow-app-builder-plugin`
+- Marketplace: `Yeeflow`; Plugin: `Yeeflow App Builder`
+- Cache behavior: the earlier stale route required a full Codex process restart;
+  the post-restart new-task catalog loaded only the installed `1.2.0` routes.
+  Icon behavior was not part of this smoke test.
+- Final release status: accepted for the `yeeflow-app-builder-plugin-v1.2.0`
+  final tag.
 
 ## Rollback
 
