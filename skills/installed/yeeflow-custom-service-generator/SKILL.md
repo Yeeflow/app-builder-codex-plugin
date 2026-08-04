@@ -236,6 +236,15 @@ Use when the user asks for a complete service definition. Return:
 - DraftConfig JSON;
 - full DraftCode.
 
+For an independently importable file, write those values to a service-definition JSON and run the formal builder:
+
+```bash
+node scripts/build-ycs.js service-definition.json output.ycs
+node scripts/validate-ycs.js output.ycs
+```
+
+The builder converts `DraftConfig` to the required JSON string, validates before writing, writes a temporary file, rereads and byte-compares it, validates again, and commits the final `.ycs` only after success. Supply `--issued-ids issued-ids.json` when the service contains long Yeeflow resource IDs. Do not treat code-only output as a completed `.ycs` artifact.
+
 ### Guide-only
 
 Use when documenting an existing `.ycs`. Describe observed behavior, configuration, parameters, outputs, SDK calls, and proof boundaries.

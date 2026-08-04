@@ -1,0 +1,7 @@
+{
+  "Prompt": "Summarize the supplied text without calling external tools.",
+  "ModelId": "gpt-5",
+  "InputVariables": [],
+  "OutputVariables": [],
+  "Components": []
+}

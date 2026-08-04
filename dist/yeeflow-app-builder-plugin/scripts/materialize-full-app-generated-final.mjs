@@ -9761,7 +9761,7 @@ function buildPlannedWorkflowHostForms({ planDemand, rootListSetId, ids, approva
   return forms;
 }
 
-function buildWorkflowSetDataListDefResource({ name, formKey, defId, workflowType, rootListSetId, hostListId = "", actionRecords, loopRecords = [], listMetaByName, findings }) {
+export function buildWorkflowSetDataListDefResource({ name, formKey, defId, workflowType, rootListSetId, hostListId = "", actionRecords, loopRecords = [], listMetaByName, findings }) {
   const childshapes = buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSetId, hostListId, actionRecords, loopRecords, listMetaByName, findings });
   if (!childshapes) return null;
   return {

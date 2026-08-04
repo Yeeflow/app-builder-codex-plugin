@@ -1,0 +1,18 @@
+{
+  "endpointKind": "copilot-import-export",
+  "envelope": {
+    "Category": null,
+    "Description": "Sanitized standalone Copilot fixture.",
+    "IconUrl": "https://cdn.example.com/copilot.png",
+    "Name": "Safe Copilot",
+    "PackageJson": "c2FuaXRpemVkLW9wYXF1ZS1jb3BpbG90LXBheWxvYWQ=",
+    "Type": 1
+  },
+  "importRead": {
+    "Instructions": "Answer questions using only supplied context.",
+    "Components": []
+  },
+  "operation": "export-and-importRead",
+  "responseId": "fixture-copilot-response-1",
+  "source": "yeeflow-official-import-export-api"
+}

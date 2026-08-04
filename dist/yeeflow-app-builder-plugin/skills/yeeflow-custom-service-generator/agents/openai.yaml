@@ -1,8 +1,6 @@
 interface:
-  display_name: Yeeflow Custom Service Generator
-  short_description: Generate, inspect, validate, document, and debug Yeeflow Custom Service scripts
+  display_name: "Yeeflow Custom Service Generator"
+  short_description: "Generate and validate Yeeflow Custom Services"
+  default_prompt: "Use $yeeflow-custom-service-generator to generate and validate an independent Yeeflow Custom Service file."
 policy:
-  products:
-  - chatgpt
-  - codex
   allow_implicit_invocation: true

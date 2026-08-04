@@ -1,8 +1,6 @@
 interface:
-  display_name: Yeeflow Custom Code Generator
-  short_description: Generate, document, update, debug, and redesign Yeeflow custom code
+  display_name: "Yeeflow Custom Code Generator"
+  short_description: "Generate and validate Yeeflow custom code"
+  default_prompt: "Use $yeeflow-custom-code-generator to generate and validate custom code for this Yeeflow requirement."
 policy:
-  products:
-  - chatgpt
-  - codex
   allow_implicit_invocation: true

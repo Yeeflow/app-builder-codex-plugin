@@ -1,8 +1,6 @@
 interface:
-  display_name: Yeeflow Service Portal Generator
-  short_description: Plan, inspect, validate, and generate Yeeflow Service Portal payloads
+  display_name: "Yeeflow Service Portal Generator"
+  short_description: "Plan and validate Yeeflow Service Portal payloads"
+  default_prompt: "Use $yeeflow-service-portal-generator to plan and validate a Yeeflow Service Portal payload."
 policy:
-  products:
-  - chatgpt
-  - codex
   allow_implicit_invocation: true
