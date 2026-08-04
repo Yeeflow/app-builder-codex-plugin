@@ -56,7 +56,11 @@ was not independently compared locally. See
   invalid dist-relative required-document path. RC1 is rejected.
 - RC2 fixes canonical Plugin skill-reference paths and adds source, dist, and
   installed-cache relative-reference gates.
-- RC2 Marketplace install smoke: pending
+- RC2 remote-tag clean-clone verification exposed an invalid source-surface
+  selection when ignored development fixtures are absent. RC2 is rejected.
+- RC3 selects the canonical dist surface in clean clones while retaining dual
+  source/dist verification in development checkouts.
+- RC3 Marketplace install smoke: pending
 - Final tag: blocked until the RC install smoke is completed and documented
 
 ## Rollback

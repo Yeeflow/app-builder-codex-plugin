@@ -8,7 +8,10 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const nestedDist = resolve(root, "dist/yeeflow-app-builder-plugin");
-const surfaces = existsSync(nestedDist) ? [root, nestedDist] : [root];
+const sourceFixture = resolve(root, "fixtures/standalone-resource-tools/custom-service.valid.input.json");
+const surfaces = existsSync(nestedDist)
+  ? (existsSync(sourceFixture) ? [root, nestedDist] : [nestedDist])
+  : [root];
 
 const parityFiles = [
   "build-ycs.js",
@@ -35,7 +38,7 @@ const parityFiles = [
   "docs/releases/yeeflow-app-builder-v1.2.0.md"
 ];
 
-if (surfaces.length === 2) {
+if (existsSync(nestedDist)) {
   for (const relative of parityFiles) {
     assert.deepEqual(
       readFileSync(resolve(root, relative)),
