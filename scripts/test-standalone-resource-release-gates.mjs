@@ -29,6 +29,7 @@ const parityFiles = [
   "scripts/test-ycs-wrapper-gates.mjs",
   "scripts/test-scheduled-ywf-wrapper-gates.mjs",
   "scripts/test-ai-resource-wrapper-gates.mjs",
+  "scripts/test-skill-relative-reference-gates.mjs",
   "scripts/test-standalone-resource-release-gates.mjs",
   "docs/releases/yeeflow-app-builder-v1.2.0-standalone-resource-acceptance.json",
   "docs/releases/yeeflow-app-builder-v1.2.0.md"
@@ -46,6 +47,7 @@ if (surfaces.length === 2) {
 
 for (const surface of surfaces) {
   for (const script of [
+    "scripts/test-skill-relative-reference-gates.mjs",
     "scripts/test-ycs-wrapper-gates.mjs",
     "scripts/test-scheduled-ywf-wrapper-gates.mjs",
     "scripts/test-ai-resource-wrapper-gates.mjs",

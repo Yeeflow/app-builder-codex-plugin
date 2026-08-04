@@ -51,7 +51,12 @@ was not independently compared locally. See
 
 - Candidate version: `1.2.0`
 - Previous final version: `1.1.0`
-- RC Marketplace install smoke: pending
+- RC1 Marketplace install: package installed, but skill discovery failed because
+  the Codex process retained stale 1.1.0 routes; Custom Service also exposed an
+  invalid dist-relative required-document path. RC1 is rejected.
+- RC2 fixes canonical Plugin skill-reference paths and adds source, dist, and
+  installed-cache relative-reference gates.
+- RC2 Marketplace install smoke: pending
 - Final tag: blocked until the RC install smoke is completed and documented
 
 ## Rollback
