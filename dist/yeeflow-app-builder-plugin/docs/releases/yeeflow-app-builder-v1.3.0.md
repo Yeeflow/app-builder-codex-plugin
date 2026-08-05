@@ -37,7 +37,8 @@ The Plugin contains no OAuth token, authorization header, API key, password, coo
 - First new-task read-only smoke (`019fd0b3-82a1-7551-8a7e-1d11e24ed32e`): 28 MCP tools discovered; GUID, component types, OAuth workspace list, and App Builder application list passed, but a same-named standalone global MCP route made runtime provenance ambiguous
 - Standalone global Yeeflow MCP route removed after confirming the Plugin contains the same public endpoint
 - Second new-task provenance smoke (`019fd0b7-127b-73f3-9f5e-4134495b8011`): Plugin registry, cache, MCP declaration, credential absence, and no-global-duplicate checks passed; runtime MCP discovery remained blocked because the running Codex process still injected the stale `1.2.0` Skill catalog and reported the Plugin MCP server as not ready
-- Final fresh-process Marketplace smoke: pending a full Codex restart/refresh
+- Fresh-process Skill catalog check: passed with all Plugin Skill paths routed to the installed `1.3.0` cache
+- Final explicitly activated Plugin smoke (`019fd2cd-940f-75f1-a4d9-e12dff1b515c`): passed; 28/28 MCP tools carried `Yeeflow App Builder` Plugin provenance, GUID and 11 component-type calls passed, OAuth returned seven workspace titles, and the first accessible workspace returned nine application titles
 
 ## Known Limitations
 
@@ -47,4 +48,4 @@ The Plugin contains no OAuth token, authorization header, API key, password, coo
 
 ## Release Status
 
-RC1 is committed, pushed, and installed. Static installation checks pass, and the first new task proved the hosted MCP's read-only functions, OAuth workspace access, and App Builder application access. Final release remains blocked on one fresh-process verification after restarting Codex, because the current process retains the stale `1.2.0` Skill catalog and cannot yet load the bundled MCP after the duplicate global route was removed. The final `yeeflow-app-builder-plugin-v1.3.0` tag must not be created until that fresh-process discovery and read-only smoke passes.
+RC1 is committed, pushed, installed, and accepted by the private Marketplace smoke gate. After a full Codex restart, the Skill catalog routed to `1.3.0`; a new task explicitly activated `yeeflow-app-builder@yeeflow`, discovered all 28 Plugin-provided MCP tools, and passed the stateless, OAuth workspace, and App Builder application read-only calls. The release is eligible for the final `yeeflow-app-builder-plugin-v1.3.0` annotated tag. These results prove Plugin loading and the tested MCP read paths, not Designer, materialization, workflow execution, installed-application runtime, or visible UI behavior.
