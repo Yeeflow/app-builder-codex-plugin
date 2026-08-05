@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0.0",
+  "candidateVersion": "1.2.0",
+  "recordedAt": "2026-08-04",
+  "environment": "authorized-private-test-workspace",
+  "evidenceAuthority": "user-confirmed-manual-validation",
+  "resources": {
+    "customService": {
+      "extension": ".ycs",
+      "artifactOrigin": "plugin-generated",
+      "localBuildAndValidation": "automated-pass",
+      "manualImport": "user-confirmed-pass",
+      "materialization": "user-confirmed-pass",
+      "configurationOpen": "user-confirmed-pass",
+      "reExport": "user-confirmed-pass-no-local-diff",
+      "runtimeExecution": "not-tested"
+    },
+    "scheduledWorkflow": {
+      "extension": ".ywf",
+      "artifactOrigin": "plugin-generated-fixture-identity",
+      "localBuildAndValidation": "automated-pass",
+      "manualImport": "user-confirmed-pass",
+      "materialization": "user-confirmed-pass",
+      "configurationOpen": "user-confirmed-pass",
+      "reExport": "user-confirmed-pass-no-local-diff",
+      "runtimeExecution": "not-tested",
+      "identityBoundary": "import-accepted; platform identity remap not independently compared"
+    },
+    "aiAgent": {
+      "extension": ".yaia",
+      "artifactOrigin": "official-export-baseline",
+      "localBuildAndValidation": "structural-validator-pass",
+      "manualImport": "user-confirmed-pass",
+      "materialization": "user-confirmed-pass",
+      "configurationOpen": "user-confirmed-pass",
+      "reExport": "user-confirmed-pass-no-local-diff",
+      "runtimeExecution": "not-tested",
+      "independentGeneration": "not-supported-without-official-import-read-export-response"
+    },
+    "copilot": {
+      "extension": ".yaic",
+      "artifactOrigin": "official-export-baseline",
+      "localBuildAndValidation": "structural-validator-pass",
+      "manualImport": "user-confirmed-pass",
+      "materialization": "user-confirmed-pass",
+      "configurationOpen": "user-confirmed-pass",
+      "reExport": "user-confirmed-pass-no-local-diff",
+      "runtimeExecution": "not-tested",
+      "independentGeneration": "not-supported-without-official-import-read-export-response"
+    }
+  },
+  "releaseBoundary": {
+    "manualAcceptanceIsRuntimeExecutionProof": false,
+    "manualAcceptanceIsRcMarketplaceInstallProof": false,
+    "rawExportFilesIncluded": false
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Scheduled Workflow Generator"
+  short_description: "Build and validate standalone Scheduled Workflow files."
+  default_prompt: "Use $yeeflow-scheduled-workflow-generator to build and validate a safe standalone Scheduled Workflow .ywf file."

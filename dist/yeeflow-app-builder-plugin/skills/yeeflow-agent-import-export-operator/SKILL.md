@@ -15,7 +15,8 @@ description: Export, inspect, validate, and organize Yeeflow AI Agent .yaia temp
    - expected file count
    - non-empty files
    - readable outer JSON wrapper
-   - `Name`, `Description`, and `PackageJson` present
+   - exact outer keys `Category`, `Description`, `IconUrl`, `Name`, `PackageJson`, `TemplateId`, and `Type`
+   - `Type = 0`
    - no accidental duplicate or stale export
 
 ## Known Yeeflow Export Notes
@@ -34,6 +35,25 @@ description: Export, inspect, validate, and organize Yeeflow AI Agent .yaia temp
 ## Useful Script
 
 Run `scripts/validate_yaia_exports.js <folder> [expected-count]` to validate an export folder.
+
+## Independent File Finalization
+
+Do not synthesize `PackageJson`. Obtain a complete Agent wrapper and normalized `importRead` result from the official Yeeflow import/export path. Store them in one canonical evidence JSON with the exact keys `source`, `operation`, `endpointKind`, `responseId`, `envelope`, and `importRead`, then run:
+
+```bash
+node scripts/finalize-yaia-from-official-response.js \
+  official-agent-response-evidence.json output.yaia \
+  --receipt output.yaia.receipt.json \
+  --issued-ids issued-ids.json
+
+node scripts/validate-yaia.js output.yaia \
+  --stage final \
+  --provenance official-provenance.json \
+  --import-read normalized-import-read.json \
+  --issued-ids issued-ids.json
+```
+
+The finalizer calculates the integrity receipt automatically and is fixed to final mode. It must fail when response metadata or `importRead` evidence is missing, the envelope contains extra keys, or the generated hashes do not match. The receipt proves artifact/evidence consistency; it does not cryptographically authenticate that the caller actually used an official Yeeflow endpoint. Preserve the authenticated session/API response evidence separately. Structural mode may validate an existing wrapper without claiming it is generated-final or importable.
 
 <!-- agent-copilot-application-resource-learning:start -->
 ## Application Resource Export Learning

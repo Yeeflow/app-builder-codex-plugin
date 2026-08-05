@@ -1,0 +1,55 @@
+{
+  "Description": "Create a weekly audit entry using the shared full-app workflow builder.",
+  "FlowKey": "SAFE_WEEKLY_AUDIT",
+  "FlowName": "Safe weekly audit",
+  "Icon": "",
+  "Img": null,
+  "Settings": {
+    "TimeZone": "Asia/Shanghai",
+    "Times": [
+      "11:59PM"
+    ],
+    "StartDate": "2099-01-01",
+    "EndDate": "",
+    "Frequency": "1",
+    "Interval": 1,
+    "Values": [
+      "1"
+    ]
+  },
+  "actionRecords": [
+    {
+      "nodeName": "Create audit entry",
+      "targetMode": "select",
+      "targetResource": "Audit Log",
+      "targetResourceType": "Data List",
+      "operation": "add",
+      "mappings": [
+        {
+          "Columns": "Title",
+          "TargetType": "text",
+          "Per": "0",
+          "Data": [
+            {
+              "type": "str",
+              "value": "Weekly audit entry"
+            }
+          ]
+        }
+      ],
+      "filters": [],
+      "variableDeclarations": [],
+      "parentLoop": ""
+    }
+  ],
+  "defResourceId": "910000000000000020",
+  "loopRecords": [],
+  "resourceInventory": [
+    {
+      "name": "Audit Log",
+      "listId": "910000000000000030",
+      "resourceType": "data-list"
+    }
+  ],
+  "rootListSetId": "910000000000000001"
+}

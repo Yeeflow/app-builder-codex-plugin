@@ -1,0 +1,95 @@
+{
+  "FlowName": "Safe weekly summary",
+  "FlowKey": "SAFE_WEEKLY_SUMMARY",
+  "Description": "Sanitized Scheduled Workflow fixture.",
+  "Icon": "",
+  "Img": null,
+  "Settings": {
+    "TimeZone": "Asia/Shanghai",
+    "Times": [
+      "11:59PM"
+    ],
+    "StartDate": "2099-01-01",
+    "EndDate": "",
+    "Frequency": "1",
+    "Interval": 1,
+    "Values": [
+      "1",
+      "3"
+    ]
+  },
+  "Def": {
+    "AppListSetID": "910000000000000001",
+    "ProcModelAppID": 41,
+    "ProcModelListID": null,
+    "ProcModelListSetID": null,
+    "defkey": "SAFE_WEEKLY_SUMMARY",
+    "workflowType": 3,
+    "childshapes": [
+      {
+        "resourceid": "910000000000000010",
+        "id": "910000000000000010",
+        "stencil": {
+          "id": "StartNoneEvent"
+        },
+        "incoming": [],
+        "outgoing": [
+          {
+            "resourceid": "910000000000000012"
+          }
+        ],
+        "properties": {},
+        "position": {
+          "x": 100,
+          "y": 100
+        }
+      },
+      {
+        "resourceid": "910000000000000011",
+        "id": "910000000000000011",
+        "stencil": {
+          "id": "EndNoneEvent"
+        },
+        "incoming": [
+          {
+            "resourceid": "910000000000000012"
+          }
+        ],
+        "outgoing": [],
+        "properties": {},
+        "position": {
+          "x": 400,
+          "y": 100
+        }
+      },
+      {
+        "resourceid": "910000000000000012",
+        "id": "910000000000000012",
+        "stencil": {
+          "id": "SequenceFlow"
+        },
+        "source": {
+          "resourceid": "910000000000000010"
+        },
+        "target": {
+          "resourceid": "910000000000000011"
+        },
+        "properties": {}
+      }
+    ],
+    "variables": {
+      "basic": [],
+      "listref": [],
+      "filter": []
+    },
+    "pageurls": [],
+    "graphposition": {
+      "x": 0,
+      "y": 0
+    },
+    "graphzoom": 1,
+    "lineType": "rounded",
+    "flowPage": null,
+    "iconURL": ""
+  }
+}

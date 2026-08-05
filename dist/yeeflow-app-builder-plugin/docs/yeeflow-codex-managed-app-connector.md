@@ -2,20 +2,22 @@
 
 ## Purpose
 
-Yeeflow App Builder currently works as a Codex plugin with skills, local helper scripts, local browser OAuth, an OAuth/API authentication wrapper, and a documented Yeeflow REST API capability map. This is enough for local internal testing, but it does not create a Codex App connection row with `Connected`, `Reconnect`, and `Disconnect` controls.
+Yeeflow App Builder works as a Codex plugin with skills, a hosted MCP connection, local helper scripts, local browser OAuth, an OAuth/API authentication wrapper, and a documented Yeeflow REST API capability map. The hosted MCP is enough for Codex to negotiate OAuth and expose Yeeflow App Builder tools, but it does not by itself create a separately registered Codex App connection row with `Connected`, `Reconnect`, and `Disconnect` controls.
 
 This document describes the design path for adding a Codex-managed Yeeflow app connector while keeping the existing local OAuth helper flow intact.
 
 ## Current Limitation
 
-The current plugin is skills-first:
+The current plugin combines Skills with an active hosted MCP connection:
 
 - `dist/yeeflow-app-builder-plugin/.codex-plugin/plugin.json` declares `skills`.
+- The manifest declares `mcpServers: "./.mcp.json"`.
+- `.mcp.json` points only to `https://api.yeeflow.com/v1/mcp`; it embeds no token, header, client secret, or API key.
 - The plugin interface currently advertises skills behavior.
 - The repo has no active `.app.json`.
 - Local OAuth scripts store credentials in a local token file and are not managed by Codex App.
 
-Skills and local helper scripts do not create the Codex App connected-account UI. They can guide Codex and run local commands, but they do not register an external app connection with Codex.
+Skills, the hosted `.mcp.json` connection, and local helper scripts do not create a separately registered Codex App connected-account UI. They can guide Codex, expose hosted MCP tools, and run local commands, but they do not register an external App connection ID with Codex.
 
 Public connector-style plugins, such as Outlook Email, include an `apps` entry in `plugin.json` and a `.app.json` file. The `.app.json` file points to an existing platform-registered connector/app ID. It does not define OAuth URLs, scopes, tool schemas, or token storage by itself.
 

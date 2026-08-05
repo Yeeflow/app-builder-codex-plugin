@@ -1,9 +1,20 @@
 ---
 name: yeeflow-api-operator
-description: Safely use Yeeflow REST APIs from Codex when local credentials are available. Use for read-only Yeeflow organization and reference-data lookups, workspace application discovery, guarded application deletion, API connectivity checks, directory/master-data discovery, users, departments, locations, positions, groups, assignment-routing API coverage, or when app planning/runtime tests need authorized data without exposing secrets.
+description: Safely use the bundled Yeeflow App Builder MCP or local Yeeflow REST API fallback from Codex. Use for read-only workspace and application discovery, component/resource management, guarded writes, package operations, API connectivity checks, directory/master-data discovery, assignment-routing API coverage, or when app planning/runtime tests need authorized data without exposing secrets.
 ---
 
 # Yeeflow API Operator
+
+## Hosted MCP Routing
+
+- When the `yeeflow_app_builder_mcp` tools are available, use the bundled MCP route before local REST helper scripts for capabilities exposed by both surfaces.
+- Use MCP tool schemas as the authoritative request contract for MCP calls. Start with type/contract discovery and read-only listing/get operations. Do not guess tool names, component types, resource types, workspace IDs, application IDs, or payload fields.
+- The bundled MCP endpoint is declared by the Plugin at `https://api.yeeflow.com/v1/mcp`. Authentication is negotiated by Codex through the server OAuth flow; the Plugin must not embed or request bearer tokens, OAuth codes, API keys, cookies, Authorization headers, client secrets, or passwords.
+- Keep local Node REST helpers as a compatibility fallback only when the bundled MCP route is unavailable or lacks a required documented capability. Apply the existing local OAuth status, capability-map, redaction, and proof-boundary rules to that fallback.
+- Prefer MCP read operations such as workspace/application listing, application/component/resource get/list, portal get, and static contract/type discovery before any mutation.
+- Require explicit user authorization for MCP create/save/import/install/upgrade calls. Require strong, exact-target confirmation for destructive delete operations and package installation/import/upgrade. Never infer write approval from planning, generation, validation, inspection, or connectivity-test requests.
+- Do not register or call a duplicate standalone Yeeflow MCP route when the Plugin-bundled route is available. If duplicate tool namespaces are visible, use the Plugin-bundled `yeeflow_app_builder_mcp` route and report the configuration conflict before any write.
+- Keep proof levels separate: MCP tool acceptance is API acceptance only; it does not prove Designer editability, materialization, installed application runtime behavior, workflow execution, or visible UI correctness.
 
 ## Canonical Schema Files
 
@@ -12,8 +23,8 @@ Package validation helpers use stable packaged schema paths: YAPK validation use
 ## Public Tenant Safety
 
 - Never hardcode a tenant-specific Yeeflow URL. Use `https://<yourdomain>.yeeflow.com` in docs and examples.
-- Before Yeeflow API work, run `node scripts/yeeflow-oauth-status.mjs` or `node scripts/yeeflow-api-auth-smoke.mjs` to check local auth status.
-- Before choosing an endpoint, inspect the REST API capability map with `node scripts/yeeflow-api-list-capabilities.mjs` or `scripts/lib/yeeflow-api-capabilities.mjs`.
+- Before local REST fallback work, run `node scripts/yeeflow-oauth-status.mjs` or `node scripts/yeeflow-api-auth-smoke.mjs` to check local auth status. For MCP work, use the server-negotiated Codex OAuth flow instead.
+- Before choosing a local REST fallback endpoint, inspect the REST API capability map with `node scripts/yeeflow-api-list-capabilities.mjs` or `scripts/lib/yeeflow-api-capabilities.mjs`. For MCP calls, use the exposed MCP tool schema.
 - Use only documented capabilities from the map. Do not guess endpoint paths, do not expose arbitrary raw API calls, and report missing API coverage when no mapped capability exists.
 - Use Browser OAuth-backed API calls for normal user-facing usage. If OAuth is not authenticated, request the Yeeflow plugin login flow and preserve the original operation; never ask for a Yeeflow password. If the plugin login action is unavailable in this runtime, say: `I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`
 - Prefer read-only capabilities for inspection and verification. Require explicit user confirmation for write capabilities and stronger confirmation for package install/import/upgrade/delete operations.
@@ -45,7 +56,7 @@ Use this skill for prompts such as:
 - "Read locations and positions for approval routing setup."
 - "Check whether an Assignment Task user group or job position reference resolves to users."
 
-Use the API only when local credentials are available and the user has asked for API-backed lookup or when a Yeeflow workflow would otherwise require real org/reference data.
+Use the API only when the OAuth-backed MCP connection is authorized or local fallback credentials are available, and the user has asked for API-backed lookup or a Yeeflow workflow would otherwise require real org/reference data.
 
 ## When Not To Use
 

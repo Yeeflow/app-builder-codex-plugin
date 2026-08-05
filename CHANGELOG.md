@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.2.0
+
+- Add independent Custom Service `.ycs` build/validate tooling with canonical UTF-8 round trips, sandbox security checks, declared input/output enforcement, and positive/negative fixtures.
+- Add independent Scheduled Workflow `.ywf` build/validate tooling and a shared full-application workflow-builder path, with recurrence, graph, dependency, issued-ID provenance, and recipient-safety gates.
+- Add AI Agent `.yaia` and Copilot `.yaic` wrapper validators and official-response finalizers that require exact export envelopes, normalized `importRead` evidence, and hash-bound integrity receipts instead of synthesizing opaque `PackageJson` payloads.
+- Add source/dist parity and release-gate coverage for all four resource types, plus user-confirmed manual import, materialization, configuration-open, and re-export acceptance evidence. Runtime execution remains untested.
+
 ## 1.1.0
 
 - Add a formal standalone Dashboard Page `.ydp` toolchain with canonical root, script, Dashboard Generator, and Application Generator entrypoints.
