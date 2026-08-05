@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.2.0`
+- Version: `1.3.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release candidate `1.2.0` adds formal standalone Custom Service `.ycs` and Scheduled Workflow `.ywf` generation, plus provenance-gated AI Agent `.yaia` and Copilot `.yaic` official-payload finalization. It preserves the standalone Dashboard Page `.ydp` toolchain, the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset, and independently versioned Core/protocol compatibility at `1.0.0`.
+Version `1.3.0` adds the OAuth-backed hosted Yeeflow App Builder MCP connection to the existing Plugin package. It preserves the v1.2.0 standalone Custom Service `.ycs`, Scheduled Workflow `.ywf`, AI Agent `.yaia`, Copilot `.yaic`, and Dashboard Page `.ydp` toolchains, the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset, and independently versioned Core/protocol compatibility at `1.0.0`.
 
 ## Install In Codex App
 
@@ -30,19 +30,19 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.2.0
+Version: 1.3.0
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.2.0
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.3.0
 ```
 
 ## What Is Included
 
 - `.agents/plugins/marketplace.json` for Codex marketplace installation.
-- `dist/yeeflow-app-builder-plugin` with bundled skills and plugin metadata.
+- `dist/yeeflow-app-builder-plugin` with bundled skills, plugin metadata, and `.mcp.json` hosted MCP configuration.
 - `skills/` and `generated-skills/` source mirrors for ongoing development.
 - `scripts/` and root development helpers for YAP/YAPK/YDL/YWF generation, inspection, validation, and package automation dry-runs.
 - `schemas/yap-schema.json`, `schemas/yapk-schema.json`, and `schemas/yapk-schema-codex.json`.
@@ -54,6 +54,7 @@ node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1
 Use the plugin to plan, generate, inspect, validate, and harden Yeeflow application packages. The current package preserves support for:
 
 - Browser OAuth login, status, refresh, logout, and OAuth/API auth wrapper helpers.
+- Hosted Yeeflow App Builder MCP tools through `https://api.yeeflow.com/v1/mcp`, with OAuth negotiated by Codex and no credentials embedded in the Plugin.
 - Legacy API-key fallback for internal/package automation scenarios.
 - Documented REST API capability listing and guarded read-only capability calls.
 - Package API automation with dry-run defaults and explicit confirmation gates.

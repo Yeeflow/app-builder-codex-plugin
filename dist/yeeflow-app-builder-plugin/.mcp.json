@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "yeeflow_app_builder_mcp": {
+      "type": "http",
+      "url": "https://api.yeeflow.com/v1/mcp"
+    }
+  }
+}
