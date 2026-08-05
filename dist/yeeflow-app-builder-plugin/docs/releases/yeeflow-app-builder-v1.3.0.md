@@ -33,14 +33,18 @@ The Plugin contains no OAuth token, authorization header, API key, password, coo
 - Archive integrity and MCP-content inspection: passed
 - Packaged syntax and data parsing: passed for 487 JS/MJS files and 539 JSON files
 - Plugin structure: passed for 25 bundled Skills
-- Private Marketplace install smoke: pending RC installation
+- RC tag `yeeflow-app-builder-plugin-v1.3.0-rc1` pushed and installed from the private `yeeflow` Marketplace: registry/cache checks passed for version `1.3.0`
+- First new-task read-only smoke (`019fd0b3-82a1-7551-8a7e-1d11e24ed32e`): 28 MCP tools discovered; GUID, component types, OAuth workspace list, and App Builder application list passed, but a same-named standalone global MCP route made runtime provenance ambiguous
+- Standalone global Yeeflow MCP route removed after confirming the Plugin contains the same public endpoint
+- Second new-task provenance smoke (`019fd0b7-127b-73f3-9f5e-4134495b8011`): Plugin registry, cache, MCP declaration, credential absence, and no-global-duplicate checks passed; runtime MCP discovery remained blocked because the running Codex process still injected the stale `1.2.0` Skill catalog and reported the Plugin MCP server as not ready
+- Final fresh-process Marketplace smoke: pending a full Codex restart/refresh
 
 ## Known Limitations
 
 - MCP API acceptance does not prove Yeeflow Designer editability, package materialization, installed application runtime behavior, workflow execution, or visible UI correctness.
-- A separately configured standalone Yeeflow MCP may produce duplicate tool namespaces after the Plugin-bundled MCP is installed; do not use both routes for writes.
+- The previously configured standalone Yeeflow MCP route was removed to prevent duplicate namespaces; the Plugin-bundled route is now the intended connection.
 - `.app.json` managed-connector registration remains a future public/shared connection path and is not included in v1.3.0.
 
 ## Release Status
 
-Release candidate ready for private Marketplace install smoke. The final `yeeflow-app-builder-plugin-v1.3.0` tag must not be created until the RC installation, discovery, OAuth, and read-only MCP smoke tests pass and are recorded.
+RC1 is committed, pushed, and installed. Static installation checks pass, and the first new task proved the hosted MCP's read-only functions, OAuth workspace access, and App Builder application access. Final release remains blocked on one fresh-process verification after restarting Codex, because the current process retains the stale `1.2.0` Skill catalog and cannot yet load the bundled MCP after the duplicate global route was removed. The final `yeeflow-app-builder-plugin-v1.3.0` tag must not be created until that fresh-process discovery and read-only smoke passes.
