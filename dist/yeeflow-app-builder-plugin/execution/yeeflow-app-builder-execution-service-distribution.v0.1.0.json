@@ -3,7 +3,7 @@
   "contractVersion": "0.1.0",
   "protocolVersion": "app-builder.execution/1.0.0",
   "packageGraphVersion": "0.2.0",
-  "sourceCommit": "a17009a1a216c5b22a615b03b38c1f09f2bf4967",
+  "sourceCommit": "11db65434225ec195da49604b8530e14a6a819ba",
   "sourceTreeState": "dirty",
   "dependencyGraphSha256": "b99fafd3ed9d689ae58d3d578437198ed203a20c35efeb0089ffd5228bf9581a",
   "coreDependencies": [
