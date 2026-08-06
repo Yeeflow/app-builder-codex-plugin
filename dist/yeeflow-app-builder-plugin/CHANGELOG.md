@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.4.0
+
+- Add a shared WorkflowType 1 materializer and validator for Data List Workflow host envelopes, graph references, Designer conditions, actions, and new-record FlowMappings.
+- Add a complete live MCP bundle for Workflow, FlowMapping, flowstatus Field, and RemindRule resources using MCP-issued identities and the persisted Brotli/Base64 DefResource representation.
+- Add fail-closed create, update, and replace merge modes plus mandatory persisted readback validation, while keeping MCP save acceptance, Designer behavior, execution, and email delivery as separate proof levels.
+- Route full-application Data List Workflows through the same materializer and distribute the new implementation, tests, and Data List Generator guidance in the Plugin payload.
+
 ## 1.2.0
 
 - Add independent Custom Service `.ycs` build/validate tooling with canonical UTF-8 round trips, sandbox security checks, declared input/output enforcement, and positive/negative fixtures.

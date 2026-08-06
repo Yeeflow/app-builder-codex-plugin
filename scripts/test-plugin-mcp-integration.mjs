@@ -14,7 +14,7 @@ const sourceApiSkill = readFileSync(resolve(root, "generated-skills/yeeflow-api-
 const distributedApiSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-api-operator/SKILL.md"), "utf8");
 
 assert.equal(manifest.name, "yeeflow-app-builder");
-assert.equal(manifest.version, "1.3.1");
+assert.equal(manifest.version, "1.4.0");
 assert.equal(manifest.skills, "./skills/");
 assert.equal(manifest.mcpServers, "./.mcp.json");
 assert.deepEqual(manifest.interface?.capabilities, ["Skills", "Interactive", "Write"]);
