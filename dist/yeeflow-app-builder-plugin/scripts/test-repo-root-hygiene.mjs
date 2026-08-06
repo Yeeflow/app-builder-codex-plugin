@@ -60,6 +60,7 @@ const ROOT_ALLOWLIST = new Set([
 
 const DIST_ROOT_ALLOWLIST = new Set([
   ".env.example",
+  ".mcp.json",
   "CHANGELOG.md",
   "README.md",
   "build-ai-resource-wrapper.js",

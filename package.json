@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.3.1",
+  "version": "1.4.1",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
@@ -9,6 +9,7 @@
     "test:ydp-wrapper": "node scripts/test-ydp-wrapper-gates.mjs",
     "test:standalone-resource-release": "node scripts/test-standalone-resource-release-gates.mjs",
     "test:plugin-mcp-integration": "node scripts/test-plugin-mcp-integration.mjs",
+    "test:document-library-live": "node scripts/test-document-library-live-materializer.mjs",
     "validate:package-boundaries": "node scripts/validate-workspace-package-boundaries.mjs",
     "validate:dependency-boundaries": "node scripts/validate-dependency-boundaries.mjs",
     "test:dependency-boundaries": "node scripts/test-dependency-boundaries.mjs",

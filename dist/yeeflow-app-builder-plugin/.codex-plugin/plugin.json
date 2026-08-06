@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "1.3.1",
+  "version": "1.4.1",
   "description": "Yeeflow App Builder skills with an OAuth-backed hosted MCP connection and a separately published host-neutral Execution SDK 1.0.0 asset.",
   "keywords": [
     "yeeflow",
@@ -221,7 +221,12 @@
     "escaped-pipe-parsing",
     "fenced-markdown-exclusion",
     "workflow-listref-projection",
-    "contentlist-child-expression-parity"
+    "contentlist-child-expression-parity",
+    "data-list-workflow",
+    "workflowtype-1",
+    "live-workflow-materialization",
+    "workflow-readback",
+    "workflow-create-update-replace"
   ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",

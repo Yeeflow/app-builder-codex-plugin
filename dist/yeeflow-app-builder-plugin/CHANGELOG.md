@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 1.4.1
+
+- Add a shared Document Library Type `16` native-field materializer used by full-app YAPK generation and live MCP creation.
+- Add fail-closed global ListID, FieldID, and LayoutID uniqueness validation so storage `FieldIndex` can never be mistaken for an ID-array position.
+- Add two-phase live Document Library creation: native baseline save, persisted readback, custom-field/form merge, final save, and persisted readback validation.
+- Add focused regressions for duplicate FieldID rejection, native identity continuity, custom Text/identity-picker/radio fields, choice parity, New/Edit/View form bindings, and MCP tool-result envelope readback.
+- Preserve the proof boundary between MCP persistence, Designer behavior, document upload, and security enforcement.
+
+## 1.4.0
+
+- Add a shared WorkflowType 1 materializer and validator for Data List Workflow host envelopes, graph references, Designer conditions, actions, and new-record FlowMappings.
+- Add a complete live MCP bundle for Workflow, FlowMapping, flowstatus Field, and RemindRule resources using MCP-issued identities and the persisted Brotli/Base64 DefResource representation.
+- Add fail-closed create, update, and replace merge modes plus mandatory persisted readback validation, while keeping MCP save acceptance, Designer behavior, execution, and email delivery as separate proof levels.
+- Accept decoded, API-envelope, and MCP tool-result component readback shapes at the merge/readback CLI boundary, and remove stale full-app WorkflowType 1 blocker guidance from the Application Generator Skill.
+- Route full-application Data List Workflows through the same materializer and distribute the new implementation, tests, and Data List Generator guidance in the Plugin payload.
+
 ## 1.2.0
 
 - Add independent Custom Service `.ycs` build/validate tooling with canonical UTF-8 round trips, sandbox security checks, declared input/output enforcement, and positive/negative fixtures.

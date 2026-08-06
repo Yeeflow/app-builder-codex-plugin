@@ -19,7 +19,7 @@ Use `docs/standards/set-variable-golden-reference-standard.md`. A custom Data Li
 
 Data List Workflow is different: `SetVariableTask` targets declared workflow variables only. Current-list fields are export-proven on the RHS, but field mutation must use Set Data List / `ContentList`. For the current item, serialize `listtype = "current"` and validate every `listdatas[]` target against the host list. Never materialize a planned Data List field write as a Set Variable target.
 
-Custom Data List Form Set Variable actions must materialize from `Form Action Set Variable Planning` through the shared page-action helper. Data List Workflow node shapes are export-proven and validator-backed, but full-app WorkflowType 1 generation remains an explicit blocker until the host workflow envelope and FlowMappings registration are implemented.
+Custom Data List Form Set Variable actions must materialize from `Form Action Set Variable Planning` through the shared page-action helper. Data List Workflow node shapes, the WorkflowType 1 host envelope, FlowMapping registration, flowstatus field, and new-item RemindRule are shared-materializer and validator backed. Full-app and live MCP generation must use those shared paths; never assemble the workflow graph or related host resources ad hoc.
 
 ## Generated-Final YAPK ID And Navigation Hard Gates
 
@@ -213,6 +213,16 @@ Use bundled scripts from `scripts/`:
 - `validate-ydl-list.js`: validate decoded data-list JSON or `.ydl` wrapper.
 - `validate-ydl-against-yap.js`: validate list dependencies against `.yap` metadata or compatible metadata.
 - `build-ydl-wrapper.js`: build `.ydl` wrapper only after final validation passes.
+- `lib/data-list-workflow-type1-materializer.mjs`: shared WorkflowType 1 host-envelope, graph-reference, condition, action-property, and FlowMapping materializer/validator. Import this module for Data List Workflow generation; do not assemble workflow JSON directly in an MCP call.
+- `lib/data-list-workflow-live-bundle.mjs`: materialize the complete live Workflow, FlowMapping, flowstatus Field, and RemindRule bundle from MCP-issued resource and graph IDs, using the online Brotli/Base64 DefResource encoding.
+- `lib/data-list-workflow-live-merge.mjs`: fail-closed create/update/replace merge and persisted readback validation for a complete Data List component definition.
+- `materialize-live-data-list-workflow-type1.mjs`: read a live workflow specification from stdin and emit the validated bundle without writing to Yeeflow.
+- `merge-live-data-list-workflow-type1.mjs`: merge a generated bundle into a complete component definition or validate persisted MCP readback, using an explicit stdin `operation` of `merge` or `validate-readback`.
+- `lib/document-library-materializer.mjs`: shared Type `16` native-field contract and global List/Field/Layout ID uniqueness validator used by both full-app YAPK generation and live MCP Document Library creation.
+- `lib/document-library-live-materializer.mjs`: materialize a validated two-phase live Document Library bundle from MCP-issued numeric IDs and GUIDs.
+- `lib/document-library-live-merge.mjs`: prepare the native baseline, merge custom fields after persisted baseline readback, and validate the final MCP readback.
+- `materialize-live-document-library.mjs`: read a live Document Library specification from stdin and emit baseline/final component definitions without writing to Yeeflow.
+- `merge-live-document-library.mjs`: run `prepare-baseline`, `merge-customizations`, or `validate-readback` for the two-phase live creation path.
 
 Common commands:
 
@@ -222,7 +232,38 @@ node scripts/validate-ydl-list.js ./final.json --mode generator --stage final --
 node scripts/build-ydl-wrapper.js ./final.json ./output.ydl --title "List Name" --description "Sandbox generated list" --dependency-map ./dependencies.json
 ```
 
-When a generated data list includes workflow actions, run workflow-aware validators and stop on missing required action properties, invalid enum/type values, invalid `QueryData` filters, invalid `SequenceFlow` conditions, invalid `Loop`/`Delay` condition shapes, or unsafe external/credential-related actions. Never bundle credentials, API keys, tokens, connection secrets, or tenant-specific sensitive values.
+When a generated data list includes workflow actions, route WorkflowType 1 host materialization through `scripts/lib/data-list-workflow-type1-materializer.mjs`, run workflow-aware validators, and stop on missing required action properties, invalid enum/type values, invalid `QueryData` filters, invalid `SequenceFlow` conditions, invalid `Loop`/`Delay` condition shapes, unresolved graph references, or unsafe external/credential-related actions. Never bundle credentials, API keys, tokens, connection secrets, or tenant-specific sensitive values.
+
+## Live MCP Data List Workflow Create, Update, And Replace
+
+For a standalone live Data List Workflow request, first read the complete Data List component definition. Plan one stable workflow `Key`, trigger, conditions, graph, actions, and all related resources. Request every new numeric resource ID and every graph ID from the MCP/API ID generators; the live path must not use local, random, timestamp, copied, or deterministic fallback IDs.
+
+Pass the plan and issued IDs through `materialize-live-data-list-workflow-type1.mjs`. Then invoke `merge-live-data-list-workflow-type1.mjs` with `operation = "merge"`, the returned bundle, the current component definition, and an explicit mode:
+
+- `create`: the Key and related resources must not already exist.
+- `update`: exactly one existing Workflow, FlowMapping, flowstatus Field, and RemindRule must exist, and their persisted IDs must be preserved.
+- `replace`: exactly one existing related resource set must exist, and replacement IDs must all be MCP-issued.
+
+Save the complete merged Data List component through the hosted MCP with non-destructive missing-resource semantics. Immediately read the component again and invoke `merge-live-data-list-workflow-type1.mjs` with `operation = "validate-readback"` and the exact workflow Key. Its `detail` input accepts the decoded component detail, the `{ Data: detail }` API envelope, or the MCP tool-result `{ content: [{ type: "text", text: "..." }] }` envelope. A save response alone is not persistence proof. The readback gate must resolve exactly one Workflow, FlowMapping, flowstatus Field, and RemindRule; decode the persisted DefResource; and rerun the shared WorkflowType 1 graph, condition, action, and relationship validator. Duplicate or unresolved resources, changed IDs in update mode, missing `NewTrigger`, invalid graph references, malformed conditions, or missing MailTask properties fail closed.
+
+The online component currently persists `DefResource` as a Brotli-prefixed Base64 string, although some MCP contract metadata describes it as a byte array. Treat that as a transport-metadata inconsistency: use the live bundle codec and validate the actual save/readback representation instead of rewriting the hosted MCP CRUD contract. YAPK generation keeps its package-specific encoding and `Settings` representation while sharing the same graph/envelope validator.
+
+Report proof boundaries separately: local materialization, MCP save acceptance, persisted MCP readback, Designer open/edit, workflow execution, and email delivery. Never claim Designer or runtime success from materialization or readback alone, and never put raw tenant IDs, full tenant definitions, tokens, or recipient data in release evidence.
+
+## Live MCP Document Library Creation
+
+For a standalone live Document Library request, do not assemble Type `16` List, native fields, custom fields, views, or forms ad hoc inside an MCP call. Request one ListID, seven native FieldIDs, one FieldID per custom field, three LayoutIDs, form-control GUIDs, and one GUID per choice option from the hosted MCP generators. Pass them with the business field plan to `materialize-live-document-library.mjs`.
+
+The numeric resource ID list is one globally unique allocation set. Field storage index and ID allocation position are independent: `Text5` / `FieldIndex = 5` does not select `nativeFieldIds[5]` or `allIds[5]`. Any repeated ListID, FieldID, or LayoutID must fail locally with `DOCUMENT_LIBRARY_LIVE_DUPLICATE_RESOURCE_ID` before `appbuilder_component_save` is called.
+
+When custom fields are planned, use the two-phase create path because the online Document create endpoint can collapse custom-field identity failures into a generic system error:
+
+1. Invoke `merge-live-document-library.mjs` with `operation = "prepare-baseline"` and save the returned native Type `16` detail through `appbuilder_component_save` with `deleteMissing = false`.
+2. Read the created Document component back. A save response alone is not baseline persistence proof.
+3. Invoke `merge-live-document-library.mjs` with `operation = "merge-customizations"`, the persisted baseline readback, and the original bundle. This gate preserves all seven native FieldIDs and rejects any custom identity already present.
+4. Save the complete merged detail with `deleteMissing = false`, read it back again, and invoke `operation = "validate-readback"`.
+
+The readback gate must prove exactly one Type `16` component, the seven native runtime fields including `Text4` Upload File, globally unique numeric resource IDs, every planned custom field with its allocated FieldID, resolved add/edit/view LayoutIDs, and custom-field bindings on both New/Edit and View forms. Preserve existing RemindRules, FlowMappings, and Workflows during any later update. Never treat a Security Level choice field as access enforcement; item/library permissions and runtime access tests are separate. Report local materialization, baseline save, customization save, persisted readback, Designer open, document upload, and security enforcement as separate proof levels.
 
 Scheduled Workflow export learning: `AI Agent and Copilot Local Resource Baseline8.yap` proves `QueryData` can be used from an app-level Scheduled Workflow (`WorkflowType = 3`) to query a local data list and write multiple results into a text workflow variable with `result.listParent = "__variables_"`, `result.listName`, `result.vartype = "text"`, and `result.fields[]`. Validate that the queried list and selected fields resolve before generating or runtime-testing.
 
@@ -230,7 +271,7 @@ The V1.6/V1.7 Workflow Query Data exports prove shared QueryData result contract
 
 V1.10 proves Data List Workflow QueryData against Document Library (`listtype = 16`) and Form Report (`32`), including current-record lookup filters, List/ListRef result mappings, counts, non-default Page Number/Page Size, and two sorts. The same export also proves single-result Form Action queries from a Data List custom form. Form Report is a source only; Data Report remains deferred.
 
-Data-list workflow export learning: `Spark & AI (1).yap` proves list workflows are registered on the host list through `FlowMappings[]`, with new-item trigger shape `Setting.NewTrigger = true`, and the workflow definition itself remains a `Data.Forms[]` entry with `WorkflowType = 1` and nonzero `ListID`. `FlowMappings.FieldName` may be null, or may resolve to a real host-list `flowstatus` field as V1.7 proves; never bind an ordinary business field as a substitute trigger field. Keep `Data.Forms[].Settings = null`. The same export proves a workflow `AI` node can call an app-contained Agent, map an `icon-upload` list field into an Agent input `type = "img"`, and pass native `ListDataID` into a text input for same-row update behavior. Treat any generated list workflow that can call live AI or update rows through an Agent tool as runtime-sensitive until proven safe in an isolated sandbox package.
+Data-list workflow export learning: `Spark & AI (1).yap` proves list workflows are registered on the host list through `FlowMappings[]`, with new-item trigger shape `Setting.NewTrigger = true`, and the workflow definition itself remains a `Data.Forms[]` entry with `WorkflowType = 1` and nonzero `ListID`. `FlowMappings.FieldName` may be null, or may resolve to a real host-list `flowstatus` field as V1.7 proves; never bind an ordinary business field as a substitute trigger field. Online objects may return `Data.Forms[].Settings = null`; the current YAPK schema requires the equivalent empty string in generated packages, while trigger settings remain in `FlowMappings[].Setting`. The same export proves a workflow `AI` node can call an app-contained Agent, map an `icon-upload` list field into an Agent input `type = "img"`, and pass native `ListDataID` into a text input for same-row update behavior. Treat any generated list workflow that can call live AI or update rows through an Agent tool as runtime-sensitive until proven safe in an isolated sandbox package.
 
 Data-list workflow Assignment Task learning: `Purchase Requests.ydl` proves a data-list workflow can use the same `MultiAssignmentTask` action family as approval workflows, while adding list-item context to assignee expressions. The studied export uses `FlowMappings[].Setting.NewTrigger = true`, `WorkflowType = 1`, a Start action with email notification fields but no terminate/recall fields, and an Assignment Task with a Created By list-field expression resolving `LineManager`. Its task form mixes normal task-form controls with list-bound controls using `isListControl = true`, `identifier`, `InternalName`, `fieldID`, and `____customListFields_` binding. Preserve custom list fields as read-only when the task should not update source list data; default/native fields such as Created By appear read-only in the studied export, but broader native-field behavior remains runtime-pending. Use `docs/studies/workflow-approval-vs-data-list-actions.md` and normalized refs under `docs/studies/normalized/workflow-task-forms/` before generating data-list workflow Assignment Tasks.
 

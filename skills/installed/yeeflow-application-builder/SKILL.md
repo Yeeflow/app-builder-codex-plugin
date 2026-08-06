@@ -29,6 +29,8 @@ Before a plugin-only clean-room run claims that no full-app generation path exis
 
 When using `scripts/materialize-full-app-generated-final.mjs`, pass the approved Markdown `functional-specification.md`, approved Markdown `yeeflow-app-plan.md`, output directory, and an API-issued ID manifest. The materializer emits package artifacts only when it can honestly materialize the declared resource graph. It never signs, installs/imports, upgrades, seeds data, runs Version Management proof, or runs browser/runtime proof. Fixture-ID mode is regression-only and is not signing/install eligible. If it returns `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED`, treat that as the correct hard stop for the standalone materializer, not as a missing-generator finding and not as permission to sign or install a placeholder package. The blocker report must include exact resource counts, parsed resource names, and `missingResourceGraph[]`; field rows, dashboard section rows, metrics, filters, item-template rows, validator commands, and prose must not inflate resource counts.
 
+For standalone live MCP creation of a Document Library inside an existing application, route to the Data List Generator's `materialize-live-document-library.mjs` and `merge-live-document-library.mjs` path. It shares the Type `16` native-field contract with full-app generation, requires globally unique MCP-issued List/Field/Layout IDs, and uses persisted baseline -> customization -> final readback phases. Do not construct the Document component inline or derive a FieldID array position from `FieldIndex`.
+
 The App Plan must follow this Yeeflow resource generation order:
 
 1. Data lists and Document libraries

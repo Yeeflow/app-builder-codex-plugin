@@ -82,6 +82,8 @@ import {
 } from "./lib/workflow-set-data-list-projection-utils.mjs";
 import { projectWorkflowStaticPlan as coreProjectWorkflowStaticPlan } from "./lib/workflow-static-plan-core-adapter.mjs";
 import { projectApplicationPlanStaticFoundation as coreProjectApplicationPlanStaticFoundation } from "./lib/application-plan-static-foundation-core-adapter.mjs";
+import { materializeDataListWorkflowType1 } from "./lib/data-list-workflow-type1-materializer.mjs";
+import { DOCUMENT_LIBRARY_NATIVE_FIELD_SPECS as DOCUMENT_LIBRARY_DEFAULT_FIELDS } from "./lib/document-library-materializer.mjs";
 
 const {
   buildWorkflowExpressionButton,
@@ -211,15 +213,6 @@ const MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
 ]);
 const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const DOCUMENT_LIBRARY_DEFAULT_FIELDS = Object.freeze([
-  { FieldName: "Title", FieldType: "Text", FieldIndex: 0, DisplayName: "Name", Type: "input", Status: 1, IsSystem: true, IsIndex: true, Rules: { displayLabel: true, isLibrary: true } },
-  { FieldName: "Bigint1", FieldType: "Bigint", FieldIndex: 1, DisplayName: "ParentID", Type: "input_number", Status: 127, IsSystem: false, Rules: { displayLabel: true, isNotInListFiles: true } },
-  { FieldName: "Text1", FieldType: "Text", FieldIndex: 1, DisplayName: "Type", Type: "input", Status: 119, IsSystem: false, Rules: { displayLabel: true } },
-  { FieldName: "Bigint2", FieldType: "Bigint", FieldIndex: 2, DisplayName: "FileSize", Type: "input_number", Status: 99, IsSystem: false, Rules: { displayLabel: true, readonly: true } },
-  { FieldName: "Text2", FieldType: "Text", FieldIndex: 2, DisplayName: "Extension", Type: "input", Status: 99, IsSystem: false, Rules: { displayLabel: true, readonly: true } },
-  { FieldName: "Text3", FieldType: "Text", FieldIndex: 3, DisplayName: "UniqueName", Type: "input", Status: 319, IsSystem: false, Rules: { displayLabel: true, isNotInListFiles: true } },
-  { FieldName: "Text4", FieldType: "Text", FieldIndex: 4, DisplayName: "Upload File", Type: "file-upload", Status: 57, IsSystem: false, Rules: { displayLabel: true, required: true, isLabrary: true, PROP_MAXSIZE: 2147483648 } },
-]);
 const DEFAULT_APPLICATION_COLOR_PATTERN = {
   primary: { value: "#0065FF", lightmodel: "Luminance" },
   secondary: { value: "#00D1FF", lightmodel: "Luminance" },
@@ -9717,13 +9710,45 @@ function buildPlannedWorkflowHostForms({ planDemand, rootListSetId, ids, approva
       findings,
     });
     if (!def) continue;
+    if (host.workflowType === 1) {
+      const mappingIndex = workflowFlowMappingIndex(planDemand, host);
+      const mappingId = stringId(ids[`decoded.Childs[${hostChildIndex}].FlowMappings[${mappingIndex}].ID`]);
+      if (!mappingId) {
+        findings.push(error("FULL_APP_DATA_LIST_WORKFLOW_MAPPING_ID_MISSING", "A Data List Workflow FlowMappings ID was not allocated.", { workflow: host.name, hostResource: host.hostResource }));
+        continue;
+      }
+      try {
+        const materialized = materializeDataListWorkflowType1({
+          name: host.name,
+          key,
+          appId: 41,
+          listId: hostMeta.listId,
+          defResourceId: defId,
+          flowMappingId: mappingId,
+          triggerFieldName: cleanResourceName(host.trigger),
+          triggerSettings: host.settings,
+          defResource: def,
+          encodeDefResource: exportResource,
+        });
+        forms.push(materialized.workflow);
+        childs[hostChildIndex].FlowMappings.push(materialized.flowMapping);
+      } catch (workflowError) {
+        findings.push(error("FULL_APP_DATA_LIST_WORKFLOW_TYPE1_VALIDATION_FAILED", "Data List Workflow failed the shared WorkflowType 1 materializer/validator and was not emitted.", {
+          workflow: host.name,
+          hostResource: host.hostResource,
+          cause: workflowError.message,
+          validationFindings: workflowError.findings || [],
+        }));
+      }
+      continue;
+    }
     forms.push({
       Category: "",
       Name: host.name,
       Key: key,
       IsItemPerm: false,
       AppID: 41,
-      ListID: hostMeta?.listId || 0,
+      ListID: 0,
       ProcModelID: defId,
       Description: "",
       Ext: "",
@@ -9732,31 +9757,11 @@ function buildPlannedWorkflowHostForms({ planDemand, rootListSetId, ids, approva
       Status: 1,
       DeployedDefID: defId,
       WorkflowType: host.workflowType,
-      Settings: host.workflowType === 3 ? JSON.stringify(host.settings) : "",
+      Settings: JSON.stringify(host.settings),
       Deployed: true,
       NoRule: { Prefix: "WF-{index}", StartIndex: 1, CustomLength: 4, AutoIncrement: 1 },
       Perms: [],
     });
-    if (host.workflowType === 1) {
-      const mappingIndex = workflowFlowMappingIndex(planDemand, host);
-      const mappingId = stringId(ids[`decoded.Childs[${hostChildIndex}].FlowMappings[${mappingIndex}].ID`]);
-      if (!mappingId) {
-        findings.push(error("FULL_APP_DATA_LIST_WORKFLOW_MAPPING_ID_MISSING", "A Data List Workflow FlowMappings ID was not allocated.", { workflow: host.name, hostResource: host.hostResource }));
-        continue;
-      }
-      childs[hostChildIndex].FlowMappings.push({
-        ID: mappingId,
-        ListID: stringId(hostMeta.listId),
-        Method: 0,
-        Setting: JSON.stringify(host.settings),
-        Title: host.name,
-        DefKey: key,
-        FieldName: cleanResourceName(host.trigger),
-        Ext1: "",
-        Ext2: "",
-        Ext3: "",
-      });
-    }
   }
   return forms;
 }
