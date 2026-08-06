@@ -7,6 +7,7 @@
 - Add a shared WorkflowType 1 materializer and validator for Data List Workflow host envelopes, graph references, Designer conditions, actions, and new-record FlowMappings.
 - Add a complete live MCP bundle for Workflow, FlowMapping, flowstatus Field, and RemindRule resources using MCP-issued identities and the persisted Brotli/Base64 DefResource representation.
 - Add fail-closed create, update, and replace merge modes plus mandatory persisted readback validation, while keeping MCP save acceptance, Designer behavior, execution, and email delivery as separate proof levels.
+- Accept decoded, API-envelope, and MCP tool-result component readback shapes at the merge/readback CLI boundary, and remove stale full-app WorkflowType 1 blocker guidance from the Application Generator Skill.
 - Route full-application Data List Workflows through the same materializer and distribute the new implementation, tests, and Data List Generator guidance in the Plugin payload.
 
 ## 1.2.0

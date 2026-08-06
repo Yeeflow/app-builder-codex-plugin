@@ -1,3 +1,6 @@
+import { decodeDataListWorkflowLiveDefResource } from "./data-list-workflow-live-bundle.mjs";
+import { validateDataListWorkflowType1 } from "./data-list-workflow-type1-materializer.mjs";
+
 function text(value) {
   return String(value ?? "").trim();
 }
@@ -24,6 +27,31 @@ function indexesOf(entries, predicate) {
 function exactlyOne(indexes, code, message, detail = {}) {
   if (indexes.length !== 1) fail(code, message, { ...detail, matches: indexes.length });
   return indexes[0];
+}
+
+export function normalizeDataListWorkflowComponentDetail(value) {
+  let current = value;
+  for (let depth = 0; depth < 5; depth += 1) {
+    if (typeof current === "string") {
+      try { current = JSON.parse(current); } catch { fail("DATA_LIST_WORKFLOW_LIVE_COMPONENT_RESPONSE_INVALID", "Component response string must contain JSON."); }
+      continue;
+    }
+    if (Array.isArray(current?.content)) {
+      const textEntry = current.content.find((entry) => entry?.type === "text" && text(entry?.text));
+      if (!textEntry) fail("DATA_LIST_WORKFLOW_LIVE_COMPONENT_RESPONSE_INVALID", "MCP tool result must contain one JSON text content entry.");
+      current = textEntry.text;
+      continue;
+    }
+    if (current?.Data && typeof current.Data === "object" && !Array.isArray(current.Data)) {
+      current = current.Data;
+      continue;
+    }
+    break;
+  }
+  if (!current || typeof current !== "object" || Array.isArray(current) || !current.List) {
+    fail("DATA_LIST_WORKFLOW_LIVE_COMPONENT_DETAIL_INVALID", "A decoded Data List component detail with List metadata is required.");
+  }
+  return current;
 }
 
 function validateBundle(detail, bundle) {
@@ -70,9 +98,10 @@ function assertNoDuplicates(detail) {
 
 export function mergeDataListWorkflowLiveComponent({ detail, mode, bundle } = {}) {
   if (!["create", "update", "replace"].includes(mode)) fail("DATA_LIST_WORKFLOW_LIVE_MODE_INVALID", "Mode must be create, update, or replace.", { mode });
-  for (const property of ["Fields", "RemindRules", "FlowMappings", "Workflows"]) ensureArray(detail, property);
-  const normalized = validateBundle(detail, bundle);
-  const result = structuredClone(detail);
+  const componentDetail = normalizeDataListWorkflowComponentDetail(detail);
+  for (const property of ["Fields", "RemindRules", "FlowMappings", "Workflows"]) ensureArray(componentDetail, property);
+  const normalized = validateBundle(componentDetail, bundle);
+  const result = structuredClone(componentDetail);
   const workflowIndexes = indexesOf(result.Workflows, (entry) => text(entry?.Key) === normalized.key);
   const mappingIndexes = indexesOf(result.FlowMappings, (entry) => text(entry?.DefKey) === normalized.key);
   const fieldIndexes = indexesOf(result.Fields, (entry) => text(entry?.InternalName) === normalized.key || text(entry?.Ext1) === normalized.key);
@@ -130,34 +159,35 @@ export function mergeDataListWorkflowLiveComponent({ detail, mode, bundle } = {}
 }
 
 export function validateDataListWorkflowLiveReadback({ detail, key } = {}) {
-  for (const property of ["Fields", "RemindRules", "FlowMappings", "Workflows"]) ensureArray(detail, property);
+  const componentDetail = normalizeDataListWorkflowComponentDetail(detail);
+  for (const property of ["Fields", "RemindRules", "FlowMappings", "Workflows"]) ensureArray(componentDetail, property);
   const normalizedKey = text(key);
   if (!normalizedKey) fail("DATA_LIST_WORKFLOW_LIVE_KEY_REQUIRED", "Expected workflow Key is required for readback validation.");
-  const workflow = detail.Workflows[exactlyOne(
-    indexesOf(detail.Workflows, (entry) => text(entry?.Key) === normalizedKey),
+  const workflow = componentDetail.Workflows[exactlyOne(
+    indexesOf(componentDetail.Workflows, (entry) => text(entry?.Key) === normalizedKey),
     "DATA_LIST_WORKFLOW_LIVE_READBACK_WORKFLOW_AMBIGUOUS",
     "Readback must contain exactly one workflow with the expected Key.",
     { key: normalizedKey },
   )];
-  const flowMapping = detail.FlowMappings[exactlyOne(
-    indexesOf(detail.FlowMappings, (entry) => text(entry?.DefKey) === normalizedKey),
+  const flowMapping = componentDetail.FlowMappings[exactlyOne(
+    indexesOf(componentDetail.FlowMappings, (entry) => text(entry?.DefKey) === normalizedKey),
     "DATA_LIST_WORKFLOW_LIVE_READBACK_MAPPING_AMBIGUOUS",
     "Readback must contain exactly one FlowMapping for the expected Key.",
     { key: normalizedKey },
   )];
-  const flowStatusField = detail.Fields[exactlyOne(
-    indexesOf(detail.Fields, (entry) => text(entry?.FieldName) === text(flowMapping.FieldName) && text(entry?.Type) === "flowstatus"),
+  const flowStatusField = componentDetail.Fields[exactlyOne(
+    indexesOf(componentDetail.Fields, (entry) => text(entry?.FieldName) === text(flowMapping.FieldName) && text(entry?.Type) === "flowstatus"),
     "DATA_LIST_WORKFLOW_LIVE_READBACK_FIELD_AMBIGUOUS",
     "Readback must contain exactly one mapped flowstatus field.",
     { key: normalizedKey },
   )];
-  const remindRule = detail.RemindRules[exactlyOne(
-    indexesOf(detail.RemindRules, (entry) => text(entry?.CategoryID) === text(flowMapping.ID)),
+  const remindRule = componentDetail.RemindRules[exactlyOne(
+    indexesOf(componentDetail.RemindRules, (entry) => text(entry?.CategoryID) === text(flowMapping.ID)),
     "DATA_LIST_WORKFLOW_LIVE_READBACK_REMINDER_AMBIGUOUS",
     "Readback must contain exactly one trigger RemindRule for the FlowMapping.",
     { key: normalizedKey },
   )];
-  const normalized = validateBundle(detail, { workflow, flowMapping, flowStatusField, remindRule });
+  const normalized = validateBundle(componentDetail, { workflow, flowMapping, flowStatusField, remindRule });
   const defResource = decodeDataListWorkflowLiveDefResource(workflow.DefResource);
   const validation = validateDataListWorkflowType1({ workflow, flowMapping, defResource });
   if (!validation.ok) fail("DATA_LIST_WORKFLOW_LIVE_READBACK_VALIDATION_FAILED", "Readback workflow failed the shared WorkflowType 1 validator.", { findings: validation.findings });
@@ -175,5 +205,3 @@ export function validateDataListWorkflowLiveReadback({ detail, key } = {}) {
     },
   };
 }
-import { decodeDataListWorkflowLiveDefResource } from "./data-list-workflow-live-bundle.mjs";
-import { validateDataListWorkflowType1 } from "./data-list-workflow-type1-materializer.mjs";

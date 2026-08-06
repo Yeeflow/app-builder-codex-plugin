@@ -11,7 +11,7 @@ For Dashboard/Data List/Approval Form Actions and Approval/Data List/Scheduled w
 
 In Approval Form actions, preserve `otheraction` and `control_event_rule` chains. In Data List Workflow, Set Variable may read a current-list field on the RHS but may not write it; use current-list `ContentList` mappings for field updates. Validate Dynamic Display rule host IDs instead of cloning sibling `controlId` values.
 
-Plan-driven Form Action Set Variable generation must use the shared `Form Action Set Variable Planning` contract and shared materializer for Approval pages, custom Data List forms, and Dashboards. Do not hand-build a separate host-specific action shape. Full-app Data List/Scheduled Workflow envelopes remain blocked until their WorkflowType 1/3 materializers and registrations are implemented; never silently omit them or claim the export-backed node schema equals full resource generation.
+Plan-driven Form Action Set Variable generation must use the shared `Form Action Set Variable Planning` contract and shared materializer for Approval pages, custom Data List forms, and Dashboards. Do not hand-build a separate host-specific action shape. Full-app Data List Workflow envelopes and FlowMappings registration must route through the shared WorkflowType 1 materializer/validator; Scheduled Workflows keep their separate WorkflowType 3 plan-first path. Never silently omit a planned workflow or treat node-schema validation alone as complete resource generation.
 
 ## Full-App Generation Entrypoint Boundary
 

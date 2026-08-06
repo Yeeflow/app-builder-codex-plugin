@@ -55,6 +55,17 @@ const cliReadback = JSON.parse(execFileSync(process.execPath, [cli], {
 }));
 assert.equal(cliReadback.status, "pass");
 
+const wrappedReadback = { Data: cliCreated.detail, Status: 0, TotalCount: 0 };
+assert.equal(JSON.parse(execFileSync(process.execPath, [cli], {
+  input: JSON.stringify({ operation: "validate-readback", detail: wrappedReadback, key: "HIGH_HOURS" }),
+  encoding: "utf8",
+})).status, "pass");
+const mcpToolResult = { content: [{ type: "text", text: JSON.stringify(wrappedReadback) }] };
+assert.equal(JSON.parse(execFileSync(process.execPath, [cli], {
+  input: JSON.stringify({ operation: "validate-readback", detail: mcpToolResult, key: "HIGH_HOURS" }),
+  encoding: "utf8",
+})).status, "pass");
+
 assert.throws(() => mergeDataListWorkflowLiveComponent({ detail: created.detail, mode: "create", bundle: bundle() }), (error) => error.code === "DATA_LIST_WORKFLOW_LIVE_ALREADY_EXISTS");
 
 const updatedBundle = structuredClone(bundle());
