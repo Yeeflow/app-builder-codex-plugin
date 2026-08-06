@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.4.1
+
+- Add a shared Document Library Type `16` native-field materializer used by full-app YAPK generation and live MCP creation.
+- Add fail-closed global ListID, FieldID, and LayoutID uniqueness validation so storage `FieldIndex` can never be mistaken for an ID-array position.
+- Add two-phase live Document Library creation: native baseline save, persisted readback, custom-field/form merge, final save, and persisted readback validation.
+- Add focused regressions for duplicate FieldID rejection, native identity continuity, custom Text/identity-picker/radio fields, choice parity, New/Edit/View form bindings, and MCP tool-result envelope readback.
+- Preserve the proof boundary between MCP persistence, Designer behavior, document upload, and security enforcement.
+
 ## 1.4.0
 
 - Add a shared WorkflowType 1 materializer and validator for Data List Workflow host envelopes, graph references, Designer conditions, actions, and new-record FlowMappings.

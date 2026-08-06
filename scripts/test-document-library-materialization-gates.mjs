@@ -63,6 +63,7 @@ Build an internal audit management app with a document register data list and a 
 
 ## 1. Plan Status
 Business defaults approval status: user-default-approved-for-generation.
+Application icon selection: fa-solid fa-laptop
 
 ## 4. Data Lists and Document Libraries Plan
 
