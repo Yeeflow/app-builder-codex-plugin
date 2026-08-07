@@ -8,6 +8,7 @@
 - Add fail-closed bootstrap-contract validation for the identity strategy, FontAwesome application icon, and theme strategy, plus operation-plan instructions for exact Application readback and update-contract gaps.
 - Prevent guessed empty `Themes` payloads and unproven corrective writes; dependent resources remain blocked when returned workspace, title, icon, or theme state cannot be verified.
 - Add regression coverage for MCP-issued Application IDs, server-allocated exception handling, invalid ID provenance, invalid icons, and distributed skill guidance.
+- Add the observed workspace Application upsert contract: an existing ID performs a non-destructive update through the same endpoint, with exact target binding, stable-field preservation, explicit confirmation, and `appbuilder_application_get` persisted readback.
 
 ## 1.5.1
 

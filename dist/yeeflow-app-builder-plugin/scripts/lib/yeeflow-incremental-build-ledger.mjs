@@ -24,6 +24,7 @@ const STATUS_TRANSITIONS = Object.freeze({
 });
 const BOOTSTRAP_IDENTITY_STRATEGIES = new Set(["mcp-generated-before-create", "server-allocated-on-create"]);
 const BOOTSTRAP_THEME_STRATEGIES = new Set(["omit-until-live-contract-verified", "create-with-live-contract-validated"]);
+const APPLICATION_UPSERT_FIELDS = new Set(["IconUrl", "Title", "Description", "LayoutView", "Perms", "Themes"]);
 
 export const SUPPORTED_COMPONENT_TYPES = Object.freeze([...COMPONENT_TYPES]);
 export const SUPPORTED_SHARED_RESOURCE_TYPES = Object.freeze([...SHARED_RESOURCE_TYPES]);
@@ -87,13 +88,13 @@ function validateApplication(application) {
   assertExactString(application.name, "LEDGER_APPLICATION_NAME_MISSING", "application.name");
   if (application.status === "bootstrap") {
     if ("applicationId" in application || "identityProvenance" in application) fail("LEDGER_BOOTSTRAP_APPLICATION_ID_UNEXPECTED", "Bootstrap application must not declare applicationId or identityProvenance before MCP readback.");
-    return { bootstrap: true, bootstrapContract: validateBootstrapContract(application) };
+    return { bootstrap: true, application, bootstrapContract: validateBootstrapContract(application) };
   }
   if ("status" in application && application.status !== "readback-verified") fail("LEDGER_APPLICATION_STATUS_INVALID", "application.status may only be bootstrap or readback-verified.");
   assertExactString(application.applicationId, "LEDGER_APPLICATION_ID_MISSING", "application.applicationId");
   validateProvenance(application.identityProvenance, "application identity");
   if (application.identityProvenance.value !== application.applicationId) fail("LEDGER_APPLICATION_PROVENANCE_MISMATCH", "application identity provenance value must match applicationId.");
-  return { bootstrap: false };
+  return { bootstrap: false, application };
 }
 
 function validateBootstrapContract(application) {
@@ -135,11 +136,47 @@ function validateOperationShape(operation, applicationState) {
   if (!Array.isArray(operation.dependsOn)) fail("LEDGER_DEPENDENCIES_INVALID", "dependsOn must be an array.");
   if (!OPERATION_STATUSES.includes(operation.status)) fail("LEDGER_STATUS_UNSUPPORTED", `Unsupported status: ${operation.status}`);
   const bootstrapApplicationCreate = applicationState.bootstrap && isApplicationCreate(operation) && operation.status === "planned";
-  if ((!Array.isArray(operation.issuedIds) || !operation.issuedIds.length) && !bootstrapApplicationCreate) fail("LEDGER_ISSUED_IDS_MISSING", "issuedIds must be a non-empty array from MCP issuance.");
+  const applicationUpsert = !applicationState.bootstrap && isApplicationUpdate(operation);
+  if ((!Array.isArray(operation.issuedIds) || !operation.issuedIds.length) && !bootstrapApplicationCreate && !applicationUpsert) fail("LEDGER_ISSUED_IDS_MISSING", "issuedIds must be a non-empty array from MCP issuance.");
   if (bootstrapApplicationCreate) validateBootstrapIssuedIds(operation, applicationState.bootstrapContract.identityStrategy);
+  if (applicationUpsert) validateApplicationUpsert(operation, applicationState.application);
   validateStatusHistory(operation);
   if (operation.action === "delete") validateDeleteReceipt(operation);
   else if ("confirmationReceipt" in operation) fail("LEDGER_CONFIRMATION_RECEIPT_UNEXPECTED", "confirmationReceipt is only allowed for delete operations.");
+}
+
+function validateApplicationUpsert(operation, application) {
+  if (operation.issuedIds !== undefined && (!Array.isArray(operation.issuedIds) || operation.issuedIds.length)) {
+    fail("LEDGER_APPLICATION_UPSERT_ISSUED_IDS_INVALID", "Application update must reuse the existing application ID and must not allocate a new issued ID.");
+  }
+  assertPlainObject(operation.applicationUpsert, "LEDGER_APPLICATION_UPSERT_MISSING", "Application update requires an applicationUpsert contract.");
+  const upsert = operation.applicationUpsert;
+  if (upsert.mode !== "non-destructive-upsert") fail("LEDGER_APPLICATION_UPSERT_MODE_INVALID", "Application updates must use non-destructive-upsert mode.");
+  if (upsert.targetApplicationId !== application.applicationId || upsert.targetWorkspaceId !== application.workspaceId) {
+    fail("LEDGER_APPLICATION_UPSERT_TARGET_MISMATCH", "Application upsert must bind to the ledger's exact existing application and workspace.");
+  }
+  validateDistinctStrings(upsert.intendedFields, "LEDGER_APPLICATION_UPSERT_FIELDS_INVALID", "applicationUpsert.intendedFields");
+  for (const field of upsert.intendedFields) {
+    if (!APPLICATION_UPSERT_FIELDS.has(field)) fail("LEDGER_APPLICATION_UPSERT_FIELDS_INVALID", `Application upsert field is not an observed safe field: ${field}`);
+  }
+  validateDistinctStrings(upsert.preserveStableFields, "LEDGER_APPLICATION_UPSERT_PRESERVE_INVALID", "applicationUpsert.preserveStableFields");
+  for (const requiredField of ["ID", "WorkspaceID"]) {
+    if (!upsert.preserveStableFields.includes(requiredField)) fail("LEDGER_APPLICATION_UPSERT_PRESERVE_INVALID", `Application upsert must preserve ${requiredField}.`);
+  }
+  if (!upsert.intendedFields.includes("Title") && !upsert.preserveStableFields.includes("Title")) {
+    fail("LEDGER_APPLICATION_UPSERT_PRESERVE_INVALID", "Application upsert must preserve Title unless Title is the intended field.");
+  }
+  if (upsert.replaceMissing !== false) fail("LEDGER_APPLICATION_UPSERT_REPLACE_FORBIDDEN", "Application upsert must set replaceMissing to false.");
+  if (upsert.intendedFields.includes("IconUrl")) {
+    const iconResult = validateApplicationIconUrl(upsert.iconUrl, { title: application.name, description: application.description });
+    if (!iconResult.ok) {
+      const codes = iconResult.findings.map((finding) => finding.code).join(", ");
+      fail("LEDGER_APPLICATION_UPSERT_ICON_INVALID", `Application upsert IconUrl must be valid FontAwesome JSON (${codes}).`);
+    }
+  } else if ("iconUrl" in upsert) {
+    fail("LEDGER_APPLICATION_UPSERT_FIELDS_INVALID", "applicationUpsert.iconUrl is allowed only when IconUrl is an intended field.");
+  }
+  if (upsert.intendedFields.includes("Themes")) assertExactString(upsert.liveThemeContractReference, "LEDGER_APPLICATION_UPSERT_THEME_CONTRACT_MISSING", "applicationUpsert.liveThemeContractReference");
 }
 
 function validateBootstrapIssuedIds(operation, identityStrategy) {
@@ -174,6 +211,10 @@ function validateBootstrapState(operations, bootstrapContract) {
 
 function isApplicationCreate(operation) {
   return operation.category === "application" && operation.resourceType === "Application" && operation.action === "create";
+}
+
+function isApplicationUpdate(operation) {
+  return operation.category === "application" && operation.resourceType === "Application" && operation.action === "update";
 }
 
 function validateStatusHistory(operation) {
@@ -246,6 +287,16 @@ function assertPlainObject(value, code, message) {
 
 function assertExactString(value, code, label) {
   if (typeof value !== "string" || !value.trim()) fail(code, `${label} must be a non-empty string.`);
+}
+
+function validateDistinctStrings(values, code, label) {
+  if (!Array.isArray(values) || !values.length) fail(code, `${label} must be a non-empty array.`);
+  const found = new Set();
+  for (const value of values) {
+    assertExactString(value, code, label);
+    if (found.has(value)) fail(code, `${label} must not repeat ${value}.`);
+    found.add(value);
+  }
 }
 
 function fail(code, message) { throw new IncrementalBuildLedgerValidationError(code, message); }

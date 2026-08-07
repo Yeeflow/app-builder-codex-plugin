@@ -73,6 +73,14 @@ export function planIncrementalMcpOperation({ ledger, registry, operationId }) {
         updateCorrectionPolicy: "require-live-update-contract-before-correction",
       },
     } : {}),
+    ...(isApplicationUpsert(operation, ledger.application) ? {
+      applicationUpsert: {
+        mode: operation.applicationUpsert.mode,
+        intendedFields: [...operation.applicationUpsert.intendedFields],
+        preserveStableFields: [...operation.applicationUpsert.preserveStableFields],
+        readbackOperation: "appbuilder_application_get",
+      },
+    } : {}),
     safety: {
       doesNotCallMcp: true,
       doesNotAccessNetwork: true,
@@ -86,6 +94,7 @@ export function planIncrementalMcpOperation({ ledger, registry, operationId }) {
 function lifecycleFor(operation, capability, confirmation, application) {
   const persistenceVerb = operation.action === "delete" ? "delete" : "save";
   const bootstrapApplicationCreate = isBootstrapApplicationCreate(operation, application);
+  const applicationUpsert = isApplicationUpsert(operation, application);
   const bootstrapContract = bootstrapApplicationCreate ? application.bootstrap : null;
   return [
     step("runtime-contract-discovery", "Read the current MCP runtime contract and compare it with the pinned capability snapshot before materialization.", { required: true, source: "live MCP at execution time" }),
@@ -94,14 +103,20 @@ function lifecycleFor(operation, capability, confirmation, application) {
       ? "Use the exactly one numeric ID issued by live mcp.utils_generate_ids immediately before Application/create. Never generate, guess, or substitute an Application ID locally."
       : bootstrapApplicationCreate
         ? "Use no caller-supplied Application ID only after live contract discovery explicitly proves the server allocates one on create."
+        : applicationUpsert
+          ? "Reuse the exact existing Application ID from persisted readback; do not allocate, generate, copy, or substitute a new ID for an upsert."
         : "Use only MCP-issued IDs already bound in the ledger; never generate resource identities locally.", { required: true, issuedIdCount: operation.issuedIds.length, ...(bootstrapApplicationCreate ? { applicationIdentityStrategy: bootstrapContract.identityStrategy, applicationIdentityExpectedFrom: bootstrapContract.identityStrategy === "mcp-generated-before-create" ? "mcp-issued-before-create" : "save-and-readback" } : {}) }),
     step("local-validation", bootstrapApplicationCreate
       ? "Validate the exact workspace/title, the required FontAwesome IconUrl JSON, and theme handling. Omit Themes unless the live Application contract and a non-destructive correction path are verified."
+      : applicationUpsert
+        ? "Read the exact current Application, preserve its stable fields, and materialize only the declared application-level change. Reject replace/delete-missing semantics and validate IconUrl when it is the intended field."
       : "Materialize only the declared resource shape and run the type-specific local validator before persistence.", { required: true, materialization: capability.materialization, ...(bootstrapApplicationCreate ? { themeStrategy: bootstrapContract.themeStrategy } : {}) }),
     step("explicit-confirmation", "Obtain a confirmation receipt bound to this exact operation immediately before the mutating MCP call.", confirmation),
-    step(persistenceVerb, operation.action === "delete" ? "Perform the explicitly confirmed delete through the mapped MCP operation." : "Persist the validated resource through the mapped MCP save operation.", { required: true, action: operation.action }),
+    step(persistenceVerb, operation.action === "delete" ? "Perform the explicitly confirmed delete through the mapped MCP operation." : applicationUpsert ? "Use the discovered workspace Application upsert endpoint with the existing ID, required identity fields, and only the declared application-level change." : "Persist the validated resource through the mapped MCP save operation.", { required: true, action: operation.action }),
     step("get-readback", bootstrapApplicationCreate
       ? "Get the exact saved Application and verify returned ID, workspace, title, IconUrl, and theme state. If any required field differs, block dependent writes; do not attempt correction until a live update contract is discovered and explicitly confirmed."
+      : applicationUpsert
+        ? "Call appbuilder_application_get for the exact existing Application. Verify the intended field changed while ID, workspace, title when not intended, and other declared stable fields remain preserved. Report API acceptance separately from persisted readback verification."
       : "Get the persisted resource, validate its returned identity and type-specific fields, and record API acceptance separately from Designer/runtime proof.", { required: true }),
     step("ledger-update", "Only after persisted readback passes, append the safe status transition and evidence to the ledger in a separate authorized operation.", { required: true, allowedAfter: "readback-verified" }),
   ];
@@ -109,6 +124,10 @@ function lifecycleFor(operation, capability, confirmation, application) {
 
 function isBootstrapApplicationCreate(operation, application) {
   return application?.status === "bootstrap" && operation.category === "application" && operation.resourceType === "Application" && operation.action === "create";
+}
+
+function isApplicationUpsert(operation, application) {
+  return application?.status !== "bootstrap" && operation.category === "application" && operation.resourceType === "Application" && operation.action === "update";
 }
 
 function step(name, purpose, details) { return { name, purpose, ...details }; }

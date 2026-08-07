@@ -20,6 +20,7 @@ try {
   testDefaultRegistryPlansEveryCapability(ledgerPath);
   testBootstrapApplicationPlan(ledgerPath);
   testServerAllocatedBootstrapApplicationPlan(ledgerPath);
+  testExistingApplicationUpsertPlan(ledgerPath);
   testHappyPath(ledgerPath, registryPath);
   testElevatedCredentialConfirmation(ledgerPath, registryPath);
   testElevatedDeleteAndPortalPublishConfirmation(ledgerPath, registryPath);
@@ -91,6 +92,22 @@ function testServerAllocatedBootstrapApplicationPlan(ledgerPath) {
   const plan = JSON.parse(result.stdout);
   assert.equal(plan.lifecycle[2].applicationIdentityExpectedFrom, "save-and-readback");
   assert.match(plan.lifecycle[2].purpose, /explicitly proves the server allocates/);
+  writeJson(ledgerPath, ledger());
+}
+
+function testExistingApplicationUpsertPlan(ledgerPath) {
+  const value = ledger();
+  value.operations = [applicationIconUpsert()];
+  writeJson(ledgerPath, value);
+  const result = spawnSync(process.execPath, [SCRIPT, "--ledger", ledgerPath, "--operation", "application-icon-upsert"], { cwd: ROOT, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  const plan = JSON.parse(result.stdout);
+  assert.equal(plan.applicationUpsert.mode, "non-destructive-upsert");
+  assert.deepEqual(plan.applicationUpsert.intendedFields, ["IconUrl"]);
+  assert.equal(plan.applicationUpsert.readbackOperation, "appbuilder_application_get");
+  assert.match(plan.lifecycle[2].purpose, /Reuse the exact existing Application ID/);
+  assert.match(plan.lifecycle[5].purpose, /Application upsert endpoint/);
+  assert.match(plan.lifecycle[6].purpose, /appbuilder_application_get/);
   writeJson(ledgerPath, ledger());
 }
 
@@ -234,6 +251,29 @@ function bootstrapApplication(identityStrategy) {
     bootstrap: {
       identityStrategy,
       themeStrategy: "omit-until-live-contract-verified",
+      iconUrl: '{"b":"#0F766E","i":"fa-solid fa-cart-shopping","c":"#FFFFFF"}',
+    },
+  };
+}
+
+function applicationIconUpsert() {
+  return {
+    operationId: "application-icon-upsert",
+    category: "application",
+    resourceType: "Application",
+    action: "update",
+    resourceName: "Procurement",
+    dependsOn: [],
+    issuedIds: [],
+    status: "planned",
+    statusHistory: ["planned"],
+    applicationUpsert: {
+      mode: "non-destructive-upsert",
+      targetApplicationId: "app-1",
+      targetWorkspaceId: "workspace-redacted",
+      intendedFields: ["IconUrl"],
+      preserveStableFields: ["ID", "WorkspaceID", "Title"],
+      replaceMissing: false,
       iconUrl: '{"b":"#0F766E","i":"fa-solid fa-cart-shopping","c":"#FFFFFF"}',
     },
   };
