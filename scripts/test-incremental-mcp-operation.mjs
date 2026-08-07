@@ -19,6 +19,8 @@ try {
   testDefaultRegistryIntegration(ledgerPath);
   testDefaultRegistryPlansEveryCapability(ledgerPath);
   testBootstrapApplicationPlan(ledgerPath);
+  testServerAllocatedBootstrapApplicationPlan(ledgerPath);
+  testExistingApplicationUpsertPlan(ledgerPath);
   testHappyPath(ledgerPath, registryPath);
   testElevatedCredentialConfirmation(ledgerPath, registryPath);
   testElevatedDeleteAndPortalPublishConfirmation(ledgerPath, registryPath);
@@ -65,15 +67,47 @@ function testDefaultRegistryPlansEveryCapability(ledgerPath) {
 
 function testBootstrapApplicationPlan(ledgerPath) {
   const value = ledger();
-  value.application = { workspaceId: "workspace-redacted", name: "Procurement", status: "bootstrap" };
+  value.application = bootstrapApplication("mcp-generated-before-create");
   value.operations = [operation({ operationId: "application-bootstrap", category: "application", resourceType: "Application", issuedValue: undefined })];
+  value.operations[0].issuedIds = [{ kind: "id", value: "9001", issuedBy: "mcp.utils_generate_ids", issuedAt: "2026-08-07T00:00:00.000Z" }];
+  writeJson(ledgerPath, value);
+  const result = spawnSync(process.execPath, [SCRIPT, "--ledger", ledgerPath, "--operation", "application-bootstrap"], { cwd: ROOT, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  const plan = JSON.parse(result.stdout);
+  assert.equal(plan.lifecycle[2].applicationIdentityExpectedFrom, "mcp-issued-before-create");
+  assert.equal(plan.lifecycle[2].issuedIdCount, 1);
+  assert.equal(plan.applicationBootstrap.identityStrategy, "mcp-generated-before-create");
+  assert.equal(plan.lifecycle[3].themeStrategy, "omit-until-live-contract-verified");
+  writeJson(ledgerPath, ledger());
+}
+
+function testServerAllocatedBootstrapApplicationPlan(ledgerPath) {
+  const value = ledger();
+  value.application = bootstrapApplication("server-allocated-on-create");
+  value.operations = [operation({ operationId: "application-bootstrap", category: "application", resourceType: "Application" })];
   value.operations[0].issuedIds = [];
   writeJson(ledgerPath, value);
   const result = spawnSync(process.execPath, [SCRIPT, "--ledger", ledgerPath, "--operation", "application-bootstrap"], { cwd: ROOT, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
   const plan = JSON.parse(result.stdout);
   assert.equal(plan.lifecycle[2].applicationIdentityExpectedFrom, "save-and-readback");
-  assert.equal(plan.lifecycle[2].issuedIdCount, 0);
+  assert.match(plan.lifecycle[2].purpose, /explicitly proves the server allocates/);
+  writeJson(ledgerPath, ledger());
+}
+
+function testExistingApplicationUpsertPlan(ledgerPath) {
+  const value = ledger();
+  value.operations = [applicationIconUpsert()];
+  writeJson(ledgerPath, value);
+  const result = spawnSync(process.execPath, [SCRIPT, "--ledger", ledgerPath, "--operation", "application-icon-upsert"], { cwd: ROOT, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  const plan = JSON.parse(result.stdout);
+  assert.equal(plan.applicationUpsert.mode, "non-destructive-upsert");
+  assert.deepEqual(plan.applicationUpsert.intendedFields, ["IconUrl"]);
+  assert.equal(plan.applicationUpsert.readbackOperation, "appbuilder_application_get");
+  assert.match(plan.lifecycle[2].purpose, /Reuse the exact existing Application ID/);
+  assert.match(plan.lifecycle[5].purpose, /Application upsert endpoint/);
+  assert.match(plan.lifecycle[6].purpose, /appbuilder_application_get/);
   writeJson(ledgerPath, ledger());
 }
 
@@ -208,6 +242,42 @@ function operation({ operationId, category, resourceType, action = "create", sta
 }
 
 function provenance(value, issuedBy) { return { value, issuedBy, issuedAt: "2026-08-07T00:00:00.000Z" }; }
+
+function bootstrapApplication(identityStrategy) {
+  return {
+    workspaceId: "workspace-redacted",
+    name: "Procurement",
+    status: "bootstrap",
+    bootstrap: {
+      identityStrategy,
+      themeStrategy: "omit-until-live-contract-verified",
+      iconUrl: '{"b":"#0F766E","i":"fa-solid fa-cart-shopping","c":"#FFFFFF"}',
+    },
+  };
+}
+
+function applicationIconUpsert() {
+  return {
+    operationId: "application-icon-upsert",
+    category: "application",
+    resourceType: "Application",
+    action: "update",
+    resourceName: "Procurement",
+    dependsOn: [],
+    issuedIds: [],
+    status: "planned",
+    statusHistory: ["planned"],
+    applicationUpsert: {
+      mode: "non-destructive-upsert",
+      targetApplicationId: "app-1",
+      targetWorkspaceId: "workspace-redacted",
+      intendedFields: ["IconUrl"],
+      preserveStableFields: ["ID", "WorkspaceID", "Title"],
+      replaceMissing: false,
+      iconUrl: '{"b":"#0F766E","i":"fa-solid fa-cart-shopping","c":"#FFFFFF"}',
+    },
+  };
+}
 
 function registry() {
   const resource = (kind) => ({ kind, semanticOperations: ["create", "update", "delete"], requiredLifecycle: ["contract", "list-get", "ids", "validate", "confirm", "save", "readback", "ledger"], dependencies: [], risk: {}, materialization: { strategy: "type-specific" } });

@@ -57,6 +57,12 @@ if (sourceCheckout) {
   assert.equal(distributedIncrementalSkill, sourceIncrementalSkill, "source and distributed incremental MCP Builder skills must remain byte-identical");
 }
 assert.match(distributedIncrementalSkill, /\| MCP component type \| Existing skill mapping \| Incremental rule \|/);
+assert.match(distributedIncrementalSkill, /mcp-generated-before-create/);
+assert.match(distributedIncrementalSkill, /utils_generate_ids/);
+assert.match(distributedIncrementalSkill, /FontAwesome JSON/);
+assert.match(distributedIncrementalSkill, /Omit `Themes` from bootstrap/);
+assert.match(distributedIncrementalSkill, /Creates or non-destructively updates an App Builder application/);
+assert.match(distributedIncrementalSkill, /appbuilder_application_get/);
 for (const componentType of ["ApprovalForm", "ScheduleForm", "Dashboard", "DataList", "Document", "DataReport", "FormNewReport", "Knowledge", "AIAgent", "Copilot", "CustomService"]) {
   assert.match(distributedIncrementalSkill, new RegExp(`\\\`${componentType}\\\``));
 }
@@ -70,6 +76,8 @@ if (sourceCheckout) {
 const incrementalRegistry = JSON.parse(distributedIncrementalRegistry);
 assert.equal(incrementalRegistry.contractSource, "runtime_discovered");
 assert.equal(incrementalRegistry.capabilities.length, 22);
+assert.equal(incrementalRegistry.resources.Application.upsert.readbackOperation, "appbuilder_application_get");
+assert.match(incrementalRegistry.resources.Application.upsert.description, /non-destructively updates/);
 assert.deepEqual(Object.keys(incrementalRegistry.resources).sort(), [
   "AIAgent", "Application", "ApprovalForm", "Component", "Connection", "Copilot", "Credential", "CustomService", "Dashboard", "DataList", "DataReport", "Document", "FormNewReport", "Group", "Knowledge", "Metadata", "Navigation", "Permissions", "Portal", "ScheduleForm", "Tag", "Theme",
 ]);
