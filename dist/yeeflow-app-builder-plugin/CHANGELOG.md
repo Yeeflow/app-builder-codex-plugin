@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.5.1
+
+- Make the confirmed, OAuth-backed MCP incremental lifecycle the default for normal business-requirements-to-live-application requests; users no longer need to explicitly name the incremental mode.
+- Keep YAPK/YAP workflows available only for explicitly selected package delivery, import/install, upgrade, migration, export, fallback/debug, or offline handoff.
+- Add source/distribution and installed-cache regression coverage for the Application Builder default-delivery policy.
+
 ## 1.5.0
 
 - Add a contract-driven, resumable MCP incremental-build mode for Application, all 11 App Builder component types, seven shared-resource types, Portal, Navigation, and Permissions.

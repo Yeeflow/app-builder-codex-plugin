@@ -13,6 +13,7 @@ const manifest = readJson(resolve(pluginRoot, ".codex-plugin/plugin.json"));
 const packageManifest = sourceCheckout ? readJson(resolve(root, "package.json")) : null;
 const mcpManifest = readJson(resolve(pluginRoot, ".mcp.json"));
 const distributedApiSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-api-operator/SKILL.md"), "utf8");
+const distributedApplicationBuilderSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-application-builder/SKILL.md"), "utf8");
 const distributedIncrementalSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-mcp-incremental-application-builder/SKILL.md"), "utf8");
 const distributedIncrementalRegistry = readFileSync(resolve(pluginRoot, "schemas/mcp-incremental-capability-registry.v1.json"), "utf8");
 
@@ -39,12 +40,18 @@ assert.equal(endpoint.hash, "");
 
 if (sourceCheckout) {
   const sourceApiSkill = readFileSync(resolve(root, "generated-skills/yeeflow-api-operator/SKILL.md"), "utf8");
+  const sourceApplicationBuilderSkill = readFileSync(resolve(root, "skills/installed/yeeflow-application-builder/SKILL.md"), "utf8");
   assert.equal(distributedApiSkill, sourceApiSkill, "source and distributed API Operator skills must remain byte-identical");
+  assert.equal(distributedApplicationBuilderSkill, sourceApplicationBuilderSkill, "source and distributed Application Builder skills must remain byte-identical");
 }
 assert.match(distributedApiSkill, /use the bundled MCP route before local REST helper scripts/);
 assert.match(distributedApiSkill, /Require explicit user authorization for MCP create\/save\/import\/install\/upgrade calls/);
 assert.match(distributedApiSkill, /MCP tool acceptance is API acceptance only/);
 assert.match(distributedApiSkill, /two-phase merge\/readback workflow/);
+assert.match(distributedApplicationBuilderSkill, /DEFAULT_DELIVERY_MODE: MCP_INCREMENTAL/);
+assert.match(distributedApplicationBuilderSkill, /Do not require the user to say “use MCP incremental construction”; this is the default/);
+assert.match(distributedApplicationBuilderSkill, /Use the explicit YAPK package path only when the user asks for a complete versioned package/);
+assert.doesNotMatch(distributedApplicationBuilderSkill, /New Yeeflow application delivery defaults to `\.yapk`/);
 if (sourceCheckout) {
   const sourceIncrementalSkill = readFileSync(resolve(root, "skills/installed/yeeflow-mcp-incremental-application-builder/SKILL.md"), "utf8");
   assert.equal(distributedIncrementalSkill, sourceIncrementalSkill, "source and distributed incremental MCP Builder skills must remain byte-identical");
