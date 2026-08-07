@@ -25,6 +25,19 @@ The observed workspace Application endpoint creates with a new ID and non-destru
 
 The release adds local ledger and operation-planner regressions for both permitted identity strategies, invalid provenance, invalid icon values, and source/distribution skill parity. These checks prove only static validation and planning behavior. They do not prove a tenant create, persisted application state, Designer rendering, or runtime behavior.
 
+## Private Marketplace Install Smoke
+
+- Accepted RC tag: `yeeflow-app-builder-plugin-v1.6.0-rc1`
+- RC commit: `e6329ca7f9ca832c57a366a53cc2aa5607a0a166`
+- RC archive SHA-256: `31e8c5ece521a510f12d29330f555863af149563761add5a388dbaf040c9fc6a`
+- Source: `https://github.com/Yeeflow/app-builder-codex-plugin.git`
+- Sparse paths: `.agents/plugins/marketplace.json` and `dist/yeeflow-app-builder-plugin`
+- Install result: version `1.6.0` installed and enabled in an isolated temporary `CODEX_HOME`.
+- Provenance result: the Marketplace checkout resolved to the RC commit and the installed versioned cache was byte-identical to the exact RC Plugin payload.
+- Installed tests: MCP integration, incremental build ledger, incremental operation planner, capability registry, and Skill relative-reference gates passed from the installed cache.
+- Hosted MCP configuration: the installed Plugin exposes `yeeflow_app_builder_mcp` at `https://api.yeeflow.com/v1/mcp`, uses server-negotiated OAuth, and contains no embedded credentials.
+- Tenant behavior: no authenticated tenant read or write was performed by this smoke.
+
 ## Release Status
 
-Not yet release-candidate accepted. Final packaging, Marketplace install smoke, fresh-task MCP discovery/readback, tag, and stable promotion must run only after the repository hygiene gate passes.
+RC1 passed the local release gates, tracked-payload archive integrity, exact-tag Marketplace installation, installed-cache byte parity, and installed-cache regressions. It is accepted for the final `yeeflow-app-builder-plugin-v1.6.0` tag and stable promotion. This acceptance proves packaging and the tested static bootstrap/upsert contract; it does not prove application creation, resource persistence, Designer behavior, or runtime behavior in a tenant.
