@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Yeeflow App Builder skills with an OAuth-backed hosted MCP connection and a separately published host-neutral Execution SDK 1.0.0 asset.",
   "keywords": [
     "yeeflow",

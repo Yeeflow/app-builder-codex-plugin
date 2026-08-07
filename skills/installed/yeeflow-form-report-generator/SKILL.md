@@ -37,6 +37,19 @@ Current YAPK generated-app rule: `FormReports` is legacy workflow report storage
 - Inherited permission shape is `ListModel.IsBreakInherit = false`; custom permission audience shapes remain unproven.
 - Form Reports can appear in root navigation as `Data.Item.ListModel.LayoutView.sort[]` entries with `Type = 32`.
 
+## MCP Type 32 Physical Field Gate
+
+For incremental MCP creation, `Model.Settings.Fields[]` is the variable-to-report mapping layer only. It is necessary but not sufficient: the matching Type `32` child resource must contain a non-empty physical `Fields[]` layer with one MCP-issued field for every mapping. Do not submit an empty `Fields[]` array.
+
+- Read back the owning Approval Form and bind `DefKey` before materialization.
+- Allocate every physical field identity through the discovered MCP identity capability. Do not derive field IDs from variable keys.
+- Use the live-contract-valid native storage slot for each physical field. The incident-proven accepted examples are `Text1` through `TextN`, `Decimal1`, and `Datetime1`, with a positive index; `Text0` is rejected. A mapping key such as `v_requestTitle` is never a valid physical `FieldName`.
+- Keep `Settings.Fields[]` mapping IDs/keys separate from the physical Type `32` field identity and storage name.
+- Build the default Type `0` view only after the physical fields exist. Every view column, sort, or query reference must use the physical field's issued `FieldID` and native `FieldName`, not an Approval variable key.
+- Before navigation, exact persisted readback must prove `DefKey`, the Type `32` child resource, every intended physical field, and the default-view bindings. A successful save without these readback checks is API acceptance only.
+
+This is a fail-closed MCP materialization contract, not a claim that a dedicated local FormNewReport materializer exists. Runtime report rows, filters, submitted-form details, and exports require separate authorized proof.
+
 Shared data-view update: Form Reports use the same `Layouts[]` family as data lists for list-like views. `Data Lists (1).yap` export-proves data-list view metadata on `Title`, `Type`, `Ext1.Url`, `IsDefault`, and `IsItemPerm`, and view settings in `LayoutView`. For Form Reports, only Type `0` views and `Attr_IsViewDetail` are export-proven in this repository; Help Center documents Form Report data views across additional product view types, but generate gallery/calendar/kanban Form Report views only as product-documented or after a Type `32` export proves the exact settings.
 
 Negative rule: Data List / Document Library manage-permission settings and custom notification `RemindRules` do not apply to Form Report. Do not generate Form Report custom notifications or Data List / Document Library administrator/basic/advanced permission matrices; keep Form Report permissions limited to report access, export permission, and view/detail access patterns proven in Form Report studies.

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.6.0`
+- Version: `1.6.1`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.6.0` hardens MCP Application bootstrap and upsert behavior against the verified live contract: it defaults to one ID issued by `mcp.utils_generate_ids` before `Application/create`, uses the same workspace endpoint for a non-destructive update with an existing ID, validates a FontAwesome `IconUrl`, and blocks guessed `Themes` or replacement writes. Every application write requires explicit confirmation and exact `appbuilder_application_get` readback. It covers the Application lifecycle, all 11 hosted App Builder component types, seven shared-resource types, Portal, Navigation, and Permissions through a confirmed materialize/save/readback lifecycle and a non-secret build ledger. YAPK remains available only when the user explicitly requests package delivery, import/install, upgrade, migration, export, or offline handoff. It retains the OAuth-backed hosted MCP introduced in v1.3.0, v1.4.0 live Data List Workflow support, v1.4.1 Document Library hardening, the v1.2.0 standalone resource toolchains, the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset, and independently versioned Core/protocol compatibility at `1.0.0`.
+Version `1.6.1` adds a fail-closed FormNewReport physical-field contract to the v1.6.0 Application bootstrap and upsert behavior. An incremental FormNewReport must bind an Approval Form `DefKey`, map `Settings.Fields[]`, materialize one MCP-issued physical Type `32` field per mapping using native positive-index storage slots, and bind its default view to those physical fields before save/readback. It blocks empty `Fields[]`, `Text0`, and Approval mapping keys used as physical column names. Every application/resource write still requires explicit confirmation and persisted readback. YAPK remains available only when the user explicitly requests package delivery, import/install, upgrade, migration, export, or offline handoff.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.6.0
+Version: 1.6.1
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.6.0
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.6.1
 ```
 
 ## What Is Included

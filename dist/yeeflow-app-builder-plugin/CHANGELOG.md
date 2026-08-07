@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.6.1
+
+- Add a fail-closed incremental MCP FormNewReport contract requiring an Approval Form `DefKey`, non-empty `Settings.Fields[]`, one MCP-issued physical Type `32` field per mapping, native positive-index storage names, and physical-field default-view bindings.
+- Block the incident pattern of empty Type `32` `Fields[]`, `Text0`, Approval mapping keys used as physical field names, and views bound to mapping keys instead of physical `FieldID`/`FieldName` values.
+- Surface the constraints in the incremental operation planner and require persisted readback of the source `DefKey`, Type `32` child, physical fields, and default view before navigation.
+- Add source/distribution contract regression coverage and keep the live MCP payload shape runtime-authoritative.
+
 ## 1.6.0
 
 - Correct Application bootstrap to use exactly one live MCP `utils_generate_ids` numeric ID before create by default; permit server-side allocation only when the freshly discovered create contract explicitly proves it.
