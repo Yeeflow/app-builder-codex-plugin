@@ -40,3 +40,19 @@ Other component and shared-resource types use the generic fail-closed lifecycle 
 ## Proof Boundaries
 
 These gates prove local contract/lifecycle correctness. They do not by themselves create resources in a tenant, prove MCP write acceptance, demonstrate persisted tenant state, prove Designer editability, or prove runtime behavior. An authorized isolated-workspace smoke is required before final promotion.
+
+## Private Marketplace Install Smoke
+
+- Accepted RC tag: `yeeflow-app-builder-plugin-v1.5.0-rc2`
+- RC commit: `ed05a7d34918ac31169b2ab77a053fcf1276d336`
+- Source: `https://github.com/Yeeflow/app-builder-codex-plugin.git`
+- Sparse paths: `.agents/plugins/marketplace.json` and `dist/yeeflow-app-builder-plugin`
+- Install result: version `1.5.0` installed and enabled in an isolated temporary Codex home.
+- Provenance result: the Marketplace checkout matched the peeled RC2 commit and the installed versioned cache was byte-identical to the RC2 Plugin payload.
+- Installed tests: registry coverage, bootstrap ledger, operation planning, and MCP integration gates passed from the installed cache.
+- Hosted MCP configuration: the installed manifest referenced only `./.mcp.json`; the bundled server was `yeeflow_app_builder_mcp` at `https://api.yeeflow.com/v1/mcp` with no embedded credentials.
+- Tenant behavior: no authenticated tenant read or write was performed by this smoke.
+
+## Release Status
+
+RC2 passed the full local release gates and the isolated exact-tag Marketplace installation, cache parity, and installed-cache tests. It is accepted for the final `yeeflow-app-builder-plugin-v1.5.0` tag and stable promotion. This acceptance proves packaging and the tested static MCP contract, not application creation, resource persistence, Designer behavior, permissions enforcement, Portal publication, or runtime behavior in a tenant.
