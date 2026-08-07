@@ -62,6 +62,7 @@ export function planIncrementalMcpOperation({ ledger, registry, operationId }) {
       supportedActions: capability.supportedActions,
       requiredLifecycle: capability.requiredLifecycle,
       materialization: capability.materialization,
+      ...(capability.constraints ? { constraints: capability.constraints } : {}),
     },
     confirmation,
     lifecycle,
@@ -95,6 +96,7 @@ function lifecycleFor(operation, capability, confirmation, application) {
   const persistenceVerb = operation.action === "delete" ? "delete" : "save";
   const bootstrapApplicationCreate = isBootstrapApplicationCreate(operation, application);
   const applicationUpsert = isApplicationUpsert(operation, application);
+  const formNewReport = isFormNewReport(operation);
   const bootstrapContract = bootstrapApplicationCreate ? application.bootstrap : null;
   return [
     step("runtime-contract-discovery", "Read the current MCP runtime contract and compare it with the pinned capability snapshot before materialization.", { required: true, source: "live MCP at execution time" }),
@@ -110,14 +112,18 @@ function lifecycleFor(operation, capability, confirmation, application) {
       ? "Validate the exact workspace/title, the required FontAwesome IconUrl JSON, and theme handling. Omit Themes unless the live Application contract and a non-destructive correction path are verified."
       : applicationUpsert
         ? "Read the exact current Application, preserve its stable fields, and materialize only the declared application-level change. Reject replace/delete-missing semantics and validate IconUrl when it is the intended field."
-      : "Materialize only the declared resource shape and run the type-specific local validator before persistence.", { required: true, materialization: capability.materialization, ...(bootstrapApplicationCreate ? { themeStrategy: bootstrapContract.themeStrategy } : {}) }),
+        : formNewReport
+          ? "Require the readback-verified source Approval Form, non-empty Model.Settings.Fields, and one MCP-issued physical Type 32 Fields[] entry for every mapping. Use live-contract-valid native storage names with positive indexes (observed TextN, DecimalN, and DatetimeN); never use a v_<variable> mapping key as a physical FieldName. Bind the default view only to each physical FieldID and native FieldName."
+        : "Materialize only the declared resource shape and run the type-specific local validator before persistence.", { required: true, materialization: capability.materialization, ...(bootstrapApplicationCreate ? { themeStrategy: bootstrapContract.themeStrategy } : {}) }),
     step("explicit-confirmation", "Obtain a confirmation receipt bound to this exact operation immediately before the mutating MCP call.", confirmation),
     step(persistenceVerb, operation.action === "delete" ? "Perform the explicitly confirmed delete through the mapped MCP operation." : applicationUpsert ? "Use the discovered workspace Application upsert endpoint with the existing ID, required identity fields, and only the declared application-level change." : "Persist the validated resource through the mapped MCP save operation.", { required: true, action: operation.action }),
     step("get-readback", bootstrapApplicationCreate
       ? "Get the exact saved Application and verify returned ID, workspace, title, IconUrl, and theme state. If any required field differs, block dependent writes; do not attempt correction until a live update contract is discovered and explicitly confirmed."
       : applicationUpsert
         ? "Call appbuilder_application_get for the exact existing Application. Verify the intended field changed while ID, workspace, title when not intended, and other declared stable fields remain preserved. Report API acceptance separately from persisted readback verification."
-      : "Get the persisted resource, validate its returned identity and type-specific fields, and record API acceptance separately from Designer/runtime proof.", { required: true }),
+        : formNewReport
+          ? "Get the exact saved FormNewReport and verify its DefKey, matching Type 32 child, every persisted physical field, and the default view bindings. API acceptance without all four readback checks is not persisted report proof."
+        : "Get the persisted resource, validate its returned identity and type-specific fields, and record API acceptance separately from Designer/runtime proof.", { required: true }),
     step("ledger-update", "Only after persisted readback passes, append the safe status transition and evidence to the ledger in a separate authorized operation.", { required: true, allowedAfter: "readback-verified" }),
   ];
 }
@@ -128,6 +134,10 @@ function isBootstrapApplicationCreate(operation, application) {
 
 function isApplicationUpsert(operation, application) {
   return application?.status !== "bootstrap" && operation.category === "application" && operation.resourceType === "Application" && operation.action === "update";
+}
+
+function isFormNewReport(operation) {
+  return operation.category === "component" && operation.resourceType === "FormNewReport" && operation.action !== "delete";
 }
 
 function step(name, purpose, details) { return { name, purpose, ...details }; }

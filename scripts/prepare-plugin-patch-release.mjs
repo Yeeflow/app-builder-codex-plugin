@@ -59,6 +59,7 @@ const mirrors = [
   "scripts/test-incremental-mcp-build-ledger.mjs",
   "scripts/test-incremental-mcp-operation.mjs",
   "scripts/test-mcp-incremental-capability-registry.mjs",
+  "scripts/test-formnewreport-physical-field-contract.mjs",
   "schemas/mcp-incremental-capability-registry.v1.json",
   "fixtures/standalone-resource-tools/custom-service.valid.input.json",
   "fixtures/standalone-resource-tools/custom-service.invalid-secret.input.json",
@@ -105,6 +106,7 @@ const mirrors = [
   "docs/releases/yeeflow-app-builder-v1.5.0.md",
   "docs/releases/yeeflow-app-builder-v1.5.1.md",
   "docs/releases/yeeflow-app-builder-v1.6.0.md",
+  "docs/releases/yeeflow-app-builder-v1.6.1.md",
   "docs/releases/yeeflow-app-builder-v1.2.0-standalone-resource-acceptance.json",
   "docs/reference/full-app-generation-entrypoints.json",
   "scripts/validate-pre-id-allocation-readiness.mjs",
@@ -113,6 +115,7 @@ const mirrors = [
   "scripts/yeeflow-yapk-sign.mjs",
   "scripts/test-yeeflow-yapk-signing-distribution.mjs",
   "docs/yapk-generation-guardrails.md",
+  "docs/studies/form-report-resource.md",
 ].map((sourcePath) => [sourcePath, sourcePath]);
 
 mirrors.push(
@@ -152,6 +155,7 @@ mirrors.push(
   ["skills/installed/yeeflow-application-generator/scripts/validate-ydp.js", "skills/yeeflow-application-generator/scripts/validate-ydp.js"],
   ["skills/installed/yeeflow-application-builder/SKILL.md", "skills/yeeflow-application-builder/SKILL.md"],
   ["skills/installed/yeeflow-mcp-incremental-application-builder/SKILL.md", "skills/yeeflow-mcp-incremental-application-builder/SKILL.md"],
+  ["skills/installed/yeeflow-form-report-generator/SKILL.md", "skills/yeeflow-form-report-generator/SKILL.md"],
   ["skills/installed/yeeflow-application-generator/SKILL.md", "skills/yeeflow-application-generator/SKILL.md"],
   ["skills/installed/yeeflow-data-list-generator/SKILL.md", "skills/yeeflow-data-list-generator/SKILL.md"],
   ["skills/installed/yeeflow-data-list-generator/agents/openai.yaml", "skills/yeeflow-data-list-generator/agents/openai.yaml"],

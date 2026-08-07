@@ -76,13 +76,24 @@ Create or select the Application first, then build dependencies before their con
 | `DataList` | `yeeflow-data-list-generator` | Validate list, fields, layouts, views, forms, workflows, and relationship bindings; retain stable list/field/layout identities. |
 | `Document` | `yeeflow-data-list-generator` | Use its two-phase live Document Library materializer and merge/readback path; never hand-author a Type 16 component. |
 | `DataReport` | `yeeflow-form-report-generator` | Validate report data-source and consumer bindings before save and persisted readback. |
-| `FormNewReport` | `yeeflow-form-report-generator` | Validate form report controls, target bindings, and owning form before save and persisted readback. |
+| `FormNewReport` | `yeeflow-form-report-generator` | Require the source Approval Form, `Model.Settings.Fields[]`, and one MCP-issued physical Type `32` `Fields[]` entry per mapping; validate native storage slots and view bindings before save and persisted readback. |
 | `Knowledge` | `yeeflow-ai-agent-template-builder` when available | Discover the live Knowledge contract first; do not claim a dedicated local materializer where one is absent. |
 | `AIAgent` | `yeeflow-ai-agent-template-builder`, `yeeflow-ai-agent-ui-operator` when available | Validate model-independent configuration and Knowledge/Connection references; never record provider secrets. |
 | `Copilot` | `yeeflow-copilot-template-builder`, `yeeflow-copilot-instruction-designer`, `yeeflow-copilot-import-export-operator` when available | Validate instructions, tool/Knowledge references, and permissions without exposing secrets. |
 | `CustomService` | `yeeflow-custom-service-generator` | Validate endpoint/configuration references and permissions; require elevated confirmation for a Connection or Credential dependency. |
 
 Use the source Skill only if it is present in the current installation. If a listed specialist is absent, use MCP contract discovery plus the generic lifecycle, label the specialized local validation gap, and do not claim full type-specific proof.
+
+## FormNewReport Physical Field Gate
+
+For a `FormNewReport`, `Model.Settings.Fields[]` maps Approval Form variables into report columns, but it is not a physical list-field definition. Before the first save, require all of the following:
+
+- The source Approval Form readback resolves the exact `DefKey`.
+- The matching Type `32` child resource has a non-empty `Fields[]` array with one MCP-issued physical field for every `Settings.Fields[]` mapping.
+- Each physical field uses the live-contract-valid native storage slot and a positive storage index. The observed accepted families are `Text1`..., `Decimal1`..., and `Datetime1`...; never use `Text0`, a mapping key such as `v_requestTitle`, or a locally invented field identity as a physical `FieldName`.
+- The Type `0` default view binds every displayed/query field through that physical field's issued `FieldID` and native `FieldName`, not the Approval variable key or `Settings.Fields[].Key`.
+
+Block the save with a reported materialization gap when any of these layers is missing. After save, read back the report and prove `DefKey`, the matching Type `32` child, every intended physical field, and the default-view bindings before adding its Type `32` navigation item. API acceptance alone is not persisted FormNewReport proof; row population, filtering, detail opening, and export remain separate runtime proof.
 
 ## Shared Resources and Application Configuration
 

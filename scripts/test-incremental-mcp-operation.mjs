@@ -21,6 +21,7 @@ try {
   testBootstrapApplicationPlan(ledgerPath);
   testServerAllocatedBootstrapApplicationPlan(ledgerPath);
   testExistingApplicationUpsertPlan(ledgerPath);
+  testFormNewReportPhysicalFieldPlan(ledgerPath);
   testHappyPath(ledgerPath, registryPath);
   testElevatedCredentialConfirmation(ledgerPath, registryPath);
   testElevatedDeleteAndPortalPublishConfirmation(ledgerPath, registryPath);
@@ -108,6 +109,22 @@ function testExistingApplicationUpsertPlan(ledgerPath) {
   assert.match(plan.lifecycle[2].purpose, /Reuse the exact existing Application ID/);
   assert.match(plan.lifecycle[5].purpose, /Application upsert endpoint/);
   assert.match(plan.lifecycle[6].purpose, /appbuilder_application_get/);
+  writeJson(ledgerPath, ledger());
+}
+
+function testFormNewReportPhysicalFieldPlan(ledgerPath) {
+  const defaultRegistry = JSON.parse(readFileSync(resolve(ROOT, "schemas/mcp-incremental-capability-registry.v1.json"), "utf8"));
+  const value = fullCoverageLedger(defaultRegistry, "FormNewReport");
+  writeJson(ledgerPath, value);
+  const result = spawnSync(process.execPath, [SCRIPT, "--ledger", ledgerPath, "--operation", "op-FormNewReport"], { cwd: ROOT, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  const plan = JSON.parse(result.stdout);
+  assert.equal(plan.capability.constraints.physicalType32FieldsRequired, true);
+  assert.equal(plan.capability.constraints.nativeStorageNames.indexStartsAt, 1);
+  assert.equal(plan.capability.constraints.viewBinding, "physical_field_id_and_native_field_name_only");
+  assert.match(plan.lifecycle[3].purpose, /one MCP-issued physical Type 32 Fields\[\] entry for every mapping/);
+  assert.match(plan.lifecycle[3].purpose, /never use a v_<variable> mapping key as a physical FieldName/);
+  assert.match(plan.lifecycle[6].purpose, /matching Type 32 child/);
   writeJson(ledgerPath, ledger());
 }
 

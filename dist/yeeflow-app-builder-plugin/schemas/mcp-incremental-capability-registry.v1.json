@@ -169,7 +169,22 @@
       "optionalDependencies": ["ApprovalForm", "DataList", "Metadata"],
       "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
       "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
-      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" },
+      "constraints": {
+        "sourceApprovalFormReadbackRequired": true,
+        "settingsFieldsRequired": true,
+        "physicalType32FieldsRequired": true,
+        "physicalFieldCount": "one_per_settings_field",
+        "physicalFieldIdentity": "mcp_issued",
+        "nativeStorageNames": {
+          "required": true,
+          "indexStartsAt": 1,
+          "observedPrefixes": ["Text", "Decimal", "Datetime"],
+          "forbidMappingKeyAsFieldName": true
+        },
+        "viewBinding": "physical_field_id_and_native_field_name_only",
+        "persistedReadback": ["defKey", "type32_child", "physical_fields", "default_view"]
+      }
     },
     {
       "id": "Knowledge",
@@ -350,7 +365,29 @@
     "DataList": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_generic_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_generic_specialist_live_validator", "specializedSubcapabilities": ["DataListWorkflow"] } },
     "Document": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "available_specialist_live_document_library", "validatorStatus": "available_specialist_persisted_readback_document_library" } },
     "DataReport": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
-    "FormNewReport": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "FormNewReport": {
+      "kind": "component",
+      "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"],
+      "requiredLifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "risk": { "writeClass": "standard" },
+      "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" },
+      "constraints": {
+        "sourceApprovalFormReadbackRequired": true,
+        "settingsFieldsRequired": true,
+        "physicalType32FieldsRequired": true,
+        "physicalFieldCount": "one_per_settings_field",
+        "physicalFieldIdentity": "mcp_issued",
+        "nativeStorageNames": {
+          "required": true,
+          "indexStartsAt": 1,
+          "observedPrefixes": ["Text", "Decimal", "Datetime"],
+          "forbidMappingKeyAsFieldName": true
+        },
+        "viewBinding": "physical_field_id_and_native_field_name_only",
+        "persistedReadback": ["defKey", "type32_child", "physical_fields", "default_view"]
+      }
+    },
     "Knowledge": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
     "AIAgent": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
     "Copilot": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
