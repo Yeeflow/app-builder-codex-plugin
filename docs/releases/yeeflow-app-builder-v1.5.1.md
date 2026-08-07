@@ -28,8 +28,15 @@ The hosted MCP remains contract-authoritative. The Plugin never guesses server o
 
 ## Private Marketplace Install Smoke
 
-Pending RC installation and isolated-cache verification for `yeeflow-app-builder-plugin-v1.5.1-rc1`.
+- Accepted RC tag: `yeeflow-app-builder-plugin-v1.5.1-rc1`
+- RC commit: `b2d3b664781171a86e6a817e34441d74587300a5`
+- Source: `https://github.com/Yeeflow/app-builder-codex-plugin.git`
+- Sparse paths: `.agents/plugins/marketplace.json` and `dist/yeeflow-app-builder-plugin`
+- Install result: version `1.5.1` installed and enabled in an isolated temporary Codex home.
+- Provenance result: the Marketplace checkout matched the RC commit and the installed versioned cache was byte-identical to the RC Plugin payload.
+- Installed tests: plugin MCP integration (including the Application Builder default-delivery policy), capability registry, bootstrap ledger, and operation planner passed from the installed cache.
+- Tenant behavior: no authenticated tenant read or write was performed by this smoke.
 
 ## Release Status
 
-Candidate. No final release tag or stable promotion is authorized until the RC private Marketplace installation and installed-cache smoke pass.
+RC1 passed the full local release gates and the isolated exact-tag Marketplace installation, cache parity, and installed-cache tests. It is accepted for the final `yeeflow-app-builder-plugin-v1.5.1` tag and stable promotion. This acceptance proves packaging and the tested static MCP default-delivery contract, not application creation, resource persistence, Designer behavior, permissions enforcement, Portal publication, or runtime behavior in a tenant.
