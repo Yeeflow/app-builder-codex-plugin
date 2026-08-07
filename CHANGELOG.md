@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.6.0
+
+- Correct Application bootstrap to use exactly one live MCP `utils_generate_ids` numeric ID before create by default; permit server-side allocation only when the freshly discovered create contract explicitly proves it.
+- Add fail-closed bootstrap-contract validation for the identity strategy, FontAwesome application icon, and theme strategy, plus operation-plan instructions for exact Application readback and update-contract gaps.
+- Prevent guessed empty `Themes` payloads and unproven corrective writes; dependent resources remain blocked when returned workspace, title, icon, or theme state cannot be verified.
+- Add regression coverage for MCP-issued Application IDs, server-allocated exception handling, invalid ID provenance, invalid icons, and distributed skill guidance.
+
 ## 1.5.1
 
 - Make the confirmed, OAuth-backed MCP incremental lifecycle the default for normal business-requirements-to-live-application requests; users no longer need to explicitly name the incremental mode.

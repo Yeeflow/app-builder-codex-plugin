@@ -30,7 +30,14 @@ Maintain a local, non-secret application build ledger for the current task. Befo
 
 Never regenerate or substitute an existing live identity on resume. If the ledger and live readback disagree, stop, report the conflict, and ask the user whether to reconcile or abandon the planned change.
 
-For a new application, initialize the ledger in `bootstrap` status with exactly one planned `Application/create` operation and no application ID. Do not materialize another resource while bootstrap is active. After the MCP create and exact application readback, record the MCP-returned ID/provenance and move the application to `readback-verified`; only then may dependent resources advance.
+For a new application, initialize the ledger in `bootstrap` status with exactly one planned `Application/create` operation. Do not materialize another resource while bootstrap is active. The bootstrap contract must record the identity, icon, and theme strategy before the write:
+
+- Default to `mcp-generated-before-create`: immediately before `Application/create`, call the live MCP `utils_generate_ids` capability and bind exactly one returned numeric ID to this operation. Never generate, guess, randomize, or substitute an application ID locally.
+- Use `server-allocated-on-create` only when the freshly discovered live create contract explicitly proves that the server allocates the ID and accepts no caller ID. This is an exception, not a fallback after a failed create.
+- Require `IconUrl` to be FontAwesome JSON with non-empty `b`, `i`, and `c` values. It must not be an image URL, SVG, or emoji. Choose an icon that matches the business domain; for procurement, a valid example is `{"b":"#0F766E","i":"fa-solid fa-cart-shopping","c":"#FFFFFF"}`.
+- Omit `Themes` from bootstrap until the live Application contract, accepted theme shape, and a non-destructive correction/update operation have all been discovered. Do not send guessed empty arrays or inferred theme payloads.
+
+After the MCP create and exact application readback, record the returned ID/provenance and verify the workspace, title, IconUrl, and theme state. Move the application to `readback-verified` only when that comparison passes; only then may dependent resources advance. If a correction is needed but no verified live Application update contract exists, block dependent writes and report the gap instead of attempting an unproven write.
 
 ## Required Lifecycle
 
@@ -38,10 +45,10 @@ Apply this lifecycle to Application, every component, every shared resource, Por
 
 1. Read the reviewed Functional Specification and App Plan. Do not create omitted placeholders or resources outside the plan.
 2. Discover the applicable live MCP contract and supported operations. List/get the target application and existing resources before mutation.
-3. Resolve prerequisites and allocate IDs/GUIDs only through the MCP capability exposed for that purpose. Preserve the returned identities in the ledger.
-4. Materialize only the planned change through the type-specific generator or a contract-shaped generic materializer. Validate locally before saving.
+3. Resolve prerequisites and allocate IDs/GUIDs only through the MCP capability exposed for that purpose. For a new Application, use the bootstrap identity strategy above and preserve the returned identity in the ledger before create when caller ID is required.
+4. Materialize only the planned change through the type-specific generator or a contract-shaped generic materializer. Validate locally before saving. Application bootstrap validation includes workspace/title, FontAwesome `IconUrl`, identity strategy, and theme/update-contract gates.
 5. After explicit confirmation, save through the contract's create/update operation, preserving unspecified existing resources.
-6. Immediately get the exact saved resource. Validate the persisted representation, IDs, references, and type-specific invariants against the materialized intent.
+6. Immediately get the exact saved resource. Validate the persisted representation, IDs, references, and type-specific invariants against the materialized intent. For Application bootstrap, compare returned workspace, title, IconUrl, and theme state exactly; API acceptance alone is not success.
 7. Update the ledger only after readback succeeds. If it fails, do not continue dependent writes; report API acceptance separately from failed persistence proof.
 8. Re-list and verify application-level navigation, permissions, Portal links, and dependency edges after the affected batch. Perform Designer or runtime proof only when separately requested and authorized.
 
@@ -95,4 +102,4 @@ Do not save a consumer with guessed IDs, unresolved references, or missing prere
 
 ## Completion Report
 
-Report the ledger as a concise matrix: planned resource, live ID (redacted), operation, dependencies, API result, persisted-readback result, and remaining Designer/runtime proof. State every deferred or blocked item and why. Never claim application completion merely because the API accepted a save.
+Report the ledger as a concise matrix: planned resource, live ID (redacted), operation, dependencies, bootstrap identity/icon/theme strategy where applicable, API result, persisted-readback result, and remaining Designer/runtime proof. State every deferred or blocked item and why. Never claim application completion merely because the API accepted a save.

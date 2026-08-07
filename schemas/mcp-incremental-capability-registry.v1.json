@@ -67,6 +67,13 @@
       "validator": {
         "mode": "contract_and_persisted_readback",
         "liveStatus": "no_specialist_live_validator_claimed"
+      },
+      "bootstrap": {
+        "defaultIdentityStrategy": "mcp-generated-before-create",
+        "serverAllocationException": "allowed_only_when_fresh_live_create_contract_explicitly_proves_server_allocation",
+        "icon": "required_fontawesome_json_b_i_c",
+        "themes": "omit_until_live_create_and_non_destructive_update_contracts_are_verified",
+        "readback": ["id", "workspace", "title", "iconUrl", "theme_state"]
       }
     },
     {

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.5.1`
+- Version: `1.6.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.5.1` makes the contract-driven, resumable MCP incremental-build mode the default for a normal “build an application from these requirements” request. It covers the Application lifecycle, all 11 hosted App Builder component types, seven shared-resource types, Portal, Navigation, and Permissions through a confirmed materialize/save/readback lifecycle and a non-secret build ledger. YAPK remains available only when the user explicitly requests package delivery, import/install, upgrade, migration, export, or offline handoff. It retains the OAuth-backed hosted MCP introduced in v1.3.0, v1.4.0 live Data List Workflow support, v1.4.1 Document Library hardening, the v1.2.0 standalone resource toolchains, the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset, and independently versioned Core/protocol compatibility at `1.0.0`.
+Version `1.6.0` hardens MCP Application bootstrap against the verified live create contract: it defaults to one ID issued by `mcp.utils_generate_ids` before `Application/create`, validates a FontAwesome `IconUrl`, and blocks guessed `Themes` or correction writes until their live contract is discovered. It covers the Application lifecycle, all 11 hosted App Builder component types, seven shared-resource types, Portal, Navigation, and Permissions through a confirmed materialize/save/readback lifecycle and a non-secret build ledger. YAPK remains available only when the user explicitly requests package delivery, import/install, upgrade, migration, export, or offline handoff. It retains the OAuth-backed hosted MCP introduced in v1.3.0, v1.4.0 live Data List Workflow support, v1.4.1 Document Library hardening, the v1.2.0 standalone resource toolchains, the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset, and independently versioned Core/protocol compatibility at `1.0.0`.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.5.1
+Version: 1.6.0
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.5.1
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.6.0
 ```
 
 ## What Is Included
