@@ -1,9 +1,21 @@
 ---
 name: yeeflow-application-builder
-description: build real Yeeflow business applications from requirements, process documents, forms, screenshots, SOPs, sample exports, and app ideas by acting as a business solution architect, designing the safest Yeeflow-native app structure, generating and validating .yap new-app packages or .yapk upgrade packages, runtime-testing when requested, documenting baselines, and coordinating Yeeflow generator skills.
+description: build real Yeeflow business applications from requirements, process documents, forms, screenshots, SOPs, sample exports, and app ideas by acting as a business solution architect. Default to a confirmed, OAuth-backed MCP incremental build for live applications; use .yap/.yapk packages only when the user explicitly requests package delivery, install, upgrade, migration, export, or offline handoff. Document proof boundaries and coordinate Yeeflow generator skills.
 ---
 
 # Yeeflow Application Builder
+
+## Default Delivery Mode: Incremental MCP
+
+`DEFAULT_DELIVERY_MODE: MCP_INCREMENTAL`
+
+For a normal request such as “build an application from these business requirements”, create the Functional Specification and Yeeflow App Plan first, then route the implementation to `yeeflow-mcp-incremental-application-builder`. Do not require the user to say “use MCP incremental construction”; this is the default for a live application build.
+
+The default path is plan-first and confirmation-gated: review the Functional Specification and App Plan, select the target workspace/application, present the dependency-ordered write batch, obtain explicit confirmation, create only the Application bootstrap, read it back, and then create the planned resources in stages. Maintain the non-secret MCP build ledger and stop dependent writes on a failed or mismatched readback. Planning-only requests produce no MCP writes.
+
+Use the incremental builder’s live MCP contract discovery rather than guessing tool names or payloads. It covers Application plus every currently supported component and shared-resource type, Portal, Navigation, and Permissions. It must retain its elevated confirmation rules for Credential, Connection, permission broadening, group membership, Portal publication, and deletes.
+
+Use the explicit YAPK package path only when the user asks for a complete versioned package, package import/install, an existing-app upgrade, migration, export, or offline handoff. A package task retains its package-specific planning, validation, signing, and explicit install/upgrade confirmation gates. Do not silently fall back to package generation merely because the requirements describe a complete application.
 
 Planning placeholders are absence decisions, never resource names. Before allocating IDs or materializing any optional resource, normalize labels using the planning-placeholder contract. Values such as `Not applicable.`, `Not planned`, `N/A`, `None`, `No Dashboard required`, and `Dashboard not required` must produce no Page, Dashboard, report, workflow, navigation item, provenance entry, or visible resource label. Do not create a shell resource to represent an omitted optional feature. Generated-final YAPK work must pass `scripts/validate-planning-placeholder-materialization.mjs`; `PLANNING_PLACEHOLDER_MATERIALIZED_AS_RESOURCE` blocks signing and install.
 
@@ -25,7 +37,7 @@ The Yeeflow App Plan must be generated only from the reviewed Functional Specifi
 
 The primary planning contracts are the human-readable Markdown files `functional-specification.md` and `yeeflow-app-plan.md`. JSON files are companion projections only and must be derived from the Markdown source for validation, traceability, or tests. Resource generation must consume the reviewed Markdown Functional Specification and Markdown App Plan first; companion JSON must not become the source of truth.
 
-Before a plugin-only clean-room run claims that no full-app generation path exists, inspect `docs/reference/full-app-generation-entrypoints.json` with `scripts/inspect-full-app-generation-entrypoints.mjs`. Full application generation is a first-class callable Codex skill entrypoint through `yeeflow-application-builder` and `yeeflow-application-generator`, and generated-final package artifact materialization is exposed through `scripts/materialize-full-app-generated-final.mjs`. If the registry passes, planning gates pass, and business defaults are `user-default-approved-for-generation`, continue into generated-final `.yapk` package materialization instead of stopping at planning. Do not stop solely because no standalone CLI exists, and do not stop after planning when the materializer is present. Do not classify `scripts/yeeflow-application-delivery-workflow.mjs`, `scripts/yeeflow-package-api-automation.mjs`, focused `generate-*-runtime-proof.mjs` scripts, or sample-specific generators as generic full-app generators. If API-issued IDs are unavailable, hard-stop with an ID-source finding, not with a missing-generator finding.
+Before a plugin-only clean-room run claims that no full-app generation path exists, inspect `docs/reference/full-app-generation-entrypoints.json` with `scripts/inspect-full-app-generation-entrypoints.mjs`. Full application generation is a first-class callable Codex skill entrypoint through `yeeflow-application-builder` and `yeeflow-application-generator`, and generated-final package artifact materialization is exposed through `scripts/materialize-full-app-generated-final.mjs`. When the user explicitly selects the package path and the registry and planning gates pass with business defaults `user-default-approved-for-generation`, continue into generated-final `.yapk` package materialization instead of stopping at planning. Do not stop solely because no standalone CLI exists, and do not stop after planning when the selected materializer is present. Do not classify `scripts/yeeflow-application-delivery-workflow.mjs`, `scripts/yeeflow-package-api-automation.mjs`, focused `generate-*-runtime-proof.mjs` scripts, or sample-specific generators as generic full-app generators. If API-issued IDs are unavailable, hard-stop with an ID-source finding, not with a missing-generator finding.
 
 When using `scripts/materialize-full-app-generated-final.mjs`, pass the approved Markdown `functional-specification.md`, approved Markdown `yeeflow-app-plan.md`, output directory, and an API-issued ID manifest. The materializer emits package artifacts only when it can honestly materialize the declared resource graph. It never signs, installs/imports, upgrades, seeds data, runs Version Management proof, or runs browser/runtime proof. Fixture-ID mode is regression-only and is not signing/install eligible. If it returns `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED`, treat that as the correct hard stop for the standalone materializer, not as a missing-generator finding and not as permission to sign or install a placeholder package. The blocker report must include exact resource counts, parsed resource names, and `missingResourceGraph[]`; field rows, dashboard section rows, metrics, filters, item-template rows, validator commands, and prose must not inflate resource counts.
 
@@ -215,7 +227,7 @@ For any generated YAP package, rebuild `Resource.ReplaceIds` from the final deco
 
 ## Plan-First Full-Scope Generation
 
-For application-generation requests, create `functional-specification.md` as the primary human-readable Functional Specification Markdown file and then `yeeflow-app-plan.md` as the primary human-readable Yeeflow App Plan Markdown file before building a `.yap` or `.yapk` package unless the user explicitly asks only for study/review. JSON files may exist only as companion/projection artifacts for validators, traceability, or tests, such as `functional-specification.trace.json`, `app-plan.trace.json`, or `page-function-plan.trace.json`; JSON must not replace the primary Markdown documents. Save safe Functional Specifications and App Plans under `docs/generated-app-plans/` when suitable for git. If an artifact contains tenant-specific, private, or runtime-generated details that should not be committed, save it outside git and clearly report the path. Run `scripts/validate-planning-artifact-formats.mjs --dir <artifact-dir>` when a planning artifact directory is produced.
+For application-generation requests, create `functional-specification.md` as the primary human-readable Functional Specification Markdown file and then `yeeflow-app-plan.md` as the primary human-readable Yeeflow App Plan Markdown file before any live MCP implementation or package work unless the user explicitly asks only for study/review. JSON files may exist only as companion/projection artifacts for validators, traceability, or tests, such as `functional-specification.trace.json`, `app-plan.trace.json`, or `page-function-plan.trace.json`; JSON must not replace the primary Markdown documents. Save safe Functional Specifications and App Plans under `docs/generated-app-plans/` when suitable for git. If an artifact contains tenant-specific, private, or runtime-generated details that should not be committed, save it outside git and clearly report the path. Run `scripts/validate-planning-artifact-formats.mjs --dir <artifact-dir>` when a planning artifact directory is produced.
 
 Generation must be based on the reviewed Markdown planning contracts first. Companion JSON projections may accelerate validators or traceability checks, but they must be consistent with and derived from `functional-specification.md` and `yeeflow-app-plan.md`; they must not replace, override, or silently narrow those Markdown documents.
 
@@ -227,7 +239,7 @@ The app plan must cover the canonical resource-order template sections in order:
 
 The Application Navigation Plan must include `Application Color Pattern Selection`. Select Primary, Secondary, and Neutral base colors for the Type `0` application style theme and use `Light Model` exactly `Luminance`. If the user provides approved brand colors, use them when they pass readability ranges. If the user does not provide brand colors, infer a business-appropriate palette from the application domain and explain the rationale; do not keep the generic defaults only because the user was silent. For example, Business Travel / approval / reimbursement apps should prefer Primary `#1E40AF`, Secondary `#0F766E`, Neutral `#94A3B8`; vendor/procurement apps can use Primary `#0F766E`, Secondary `#1D4ED8`, Neutral `#94A3B8`; asset/operations apps can use Primary `#1D4ED8`, Secondary `#0F766E`, Neutral `#94A3B8`. The generic fallback `#0065FF`, `#00D1FF`, and `#B3B7C0` is allowed only when the business domain cannot be inferred or when the user explicitly requests/approves the Yeeflow default palette. Do not plan success, warning, or danger as brand colors; they remain Yeeflow semantic green/yellow/red. Base colors must stay in the application-control-style readability ranges so generated apps remain legible.
 
-`Generation Contract and Hard Gates` is mandatory for every future app plan. Use `docs/app-plan-generation-contract.md` when present. The section must state the output package decision (`.yapk` by default, `.yap` only when explicitly requested), whether this task should generate a package or only plan, whether API signing is required before handoff, the YAPK signing gate (`POST /utils/apppackage/setsign` and `POST /utils/apppackage/verifysign` when credentials are available), approval-form contract, navigation runtime contract, advanced capability contract, plan-to-package conformance contract, proof-boundary contract, and runtime inspection checklist. A placeholder `Sign` package is not upload-ready; local schema validation alone is not upload readiness.
+`Generation Contract and Hard Gates` is mandatory for every future app plan. Use `docs/app-plan-generation-contract.md` when present. The section must state the delivery decision: `MCP incremental` by default for a live application, `package` only when explicitly selected, or `planning only`; the selected workspace/application and confirmation boundary for MCP writes; and, if package is selected, whether API signing is required before handoff and the YAPK signing gate (`POST /utils/apppackage/setsign` and `POST /utils/apppackage/verifysign` when credentials are available). It must also cover the approval-form contract, navigation runtime contract, advanced capability contract, plan-to-delivery conformance contract, proof-boundary contract, and runtime inspection checklist. A placeholder `Sign` package is not upload-ready; local schema validation alone is not upload readiness.
 
 If the business process includes approval, the app plan must explicitly list the approval form name, request page, task pages, approval statuses, workflow steps, Assignment Task assignee plan, workflow control panel, workflow history, and DefResource requirement. If approval form generation is deferred, mark the app staged/incomplete and get user approval before generation. A generated approval app must not silently ship with `Forms: []`.
 
@@ -323,9 +335,9 @@ After every signing-readiness gate passes, use only `node scripts/yeeflow-yapk-s
 
 YAPK schema v2 rule from Vendor Onboarding v1.13-v1.15, updated for v0.6.18 canonical schema: generated `.yapk` output must be `AppExportPackageInfo` with `Resource = base64(Brotli(AppPackageInfo JSON))`. Do not put YAP `ListExportResult` in YAPK `Resource`. Use `Childs[].Fields`, not `Defs`; preserve `LongAsString` fields as strings; omit optional no-portal structures unless a proven portal module is generated; keep `AppID = 41` where the import rules require it; use API-issued IDs for new generated package/object IDs; validate remap/ID coverage for the final decoded `AppPackageInfo` instead of carrying stale IDs from a prior version; and validate current-dashboard Data table `Field` bindings before signing.
 
-## YAPK-First Application Delivery Workflow
+## Explicit YAPK Application Delivery Workflow
 
-New Yeeflow application delivery defaults to `.yapk`, not `.yap`. Generate `.yap` only when the user explicitly asks for YAP, when a product-team/debug task is specifically about YAP import, or when a documented fallback requires it. For new apps, build and validate the inner `AppPackageInfo`, then produce a YAPK package for manual install or package-API install.
+Enter this workflow only when the user explicitly requests a package, import/install, upgrade, migration, export, or offline handoff. Within this package path, default to `.yapk`, not `.yap`. Generate `.yap` only when the user explicitly asks for YAP, when a product-team/debug task is specifically about YAP import, or when a documented fallback requires it. For new apps, build and validate the inner `AppPackageInfo`, then produce a YAPK package for manual install or package-API install.
 
 Before delivery, inspect local environment presence without printing values. If package automation is requested, use OAuth `flowcraft` workspace discovery and ignore local `YEEFLOW_WORKSPACE_ID` for package write target selection; never auto-install without explicit confirmation and an explicit user-selected workspace passed with `--selected-workspace-id` or documented user-selected `--workspace-id`. For existing app changes, generate a versioned YAPK and use upgrade automation only after the target app/package is clearly identified, safe, and confirmed. Classify package API results as `success`, `already_installed`, `api_rejected`, or `http_rejected`; handle `already_installed` by recommending upgrade flow, cleanup, or a renamed/new-version package rather than retrying blindly.
 
@@ -460,12 +472,12 @@ Think like an experienced business consultant and Yeeflow solution architect:
 - do not mark dashboard runtime proof as passed only because a page renders; verify source-list bindings, dashboard layout-resource `exts`, `ReportIds`, and at least one value/list/empty-state coming from the expected data source
 - runtime-unproven features must be marked as required focused proof items or deferred with fallback behavior before final package claims
 - workflow routing variables must be required, auto-derived, or protected by fallback branches so no approval path can dead-end on empty/unexpected values
-- decide package type before generation: output `.yapk` for a new/cloned application by default, output `.yap` only when explicitly requested or needed for a documented fallback/debug task, and output versioned `.yapk` for an existing-app upgrade from a Yeeflow Version management baseline package
+- decide the delivery mode before implementation: default to confirmed MCP incremental construction for a live application; enter the package path only when the user explicitly requests it; within that package path, use `.yapk` for new/cloned delivery or existing-app upgrades and `.yap` only when explicitly requested or needed for a documented fallback/debug task
 - for `.yapk` upgrades, preserve app identity and stable object IDs; do not apply fresh-ID `.yap` import-generation rules unless adding newly proven resources
 
 ## Default Lifecycle
 
-For requirement-to-application requests, load `references/requirement-to-yap-generation-lifecycle.md` and follow it end to end:
+For requirement-to-application requests, default to the `yeeflow-mcp-incremental-application-builder` lifecycle after the Functional Specification and App Plan gates. Load `references/requirement-to-yap-generation-lifecycle.md` only when the user explicitly selects the package path. The shared planning stages are:
 
 1. Requirement intake
 2. Functional Specification generation
@@ -474,23 +486,23 @@ For requirement-to-application requests, load `references/requirement-to-yap-gen
 5. App Plan review/validation gate
 6. Business clarification gate
 7. Generation-readiness review
-8. Resource/package generation
-9. Local validation
-10. Runtime import/testing only when requested or authorized
-11. Runtime issue fixing
-12. Documentation
-13. Skill updates only if new reusable knowledge is learned
-14. Git commit/push
-15. Final package output
+8. MCP contract discovery and dependency-ordered implementation plan
+9. Explicit confirmation, Application bootstrap, save/readback, and ledger update
+10. Incremental resource batches with persisted readback validation
+11. Runtime/Designer testing only when requested or authorized
+12. Runtime issue fixing
+13. Documentation
+14. Skill updates only if new reusable knowledge is learned
+15. Final completion report
 
 ## Package Type Gate
 
-Before generation, clarify whether the user wants:
+Before implementation, use MCP incremental construction unless the user clearly asks for a package. If a package is requested, clarify whether the user wants:
 
-- a new application package (`.yapk` by default, or `.yap` only when explicitly requested) for import/install as a separate app, or
+- a new application package (`.yapk` unless `.yap` is explicitly requested) for import/install as a separate app, or
 - an existing application upgrade package (`.yapk`) for Application Settings -> Version management -> Upgrade application.
 
-For new applications, default to the YAPK delivery workflow: fresh generated identity, safe FlowKey/form key, full local app/form/list validation, decoded `AppPackageInfo` validation, and YAPK install as a new app. Use normal `.yap` rules only when the user explicitly requests a `.yap` or the task is a YAP fallback/debug proof.
+For a package-selected new application, use the YAPK delivery workflow: fresh generated identity, safe FlowKey/form key, full local app/form/list validation, decoded `AppPackageInfo` validation, and YAPK install only after explicit confirmation. Use normal `.yap` rules only when the user explicitly requests a `.yap` or the task is a YAP fallback/debug proof.
 
 Materialization hard rules for new `.yap` packages:
 

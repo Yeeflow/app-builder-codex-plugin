@@ -102,6 +102,7 @@ const mirrors = [
   "docs/releases/yeeflow-app-builder-v1.4.0.md",
   "docs/releases/yeeflow-app-builder-v1.4.1.md",
   "docs/releases/yeeflow-app-builder-v1.5.0.md",
+  "docs/releases/yeeflow-app-builder-v1.5.1.md",
   "docs/releases/yeeflow-app-builder-v1.2.0-standalone-resource-acceptance.json",
   "docs/reference/full-app-generation-entrypoints.json",
   "scripts/validate-pre-id-allocation-readiness.mjs",
