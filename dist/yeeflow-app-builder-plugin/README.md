@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.3.0`
+- Version: `1.5.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.3.0` adds the OAuth-backed hosted Yeeflow App Builder MCP connection to the existing Plugin package. It preserves the v1.2.0 standalone Custom Service `.ycs`, Scheduled Workflow `.ywf`, AI Agent `.yaia`, Copilot `.yaic`, and Dashboard Page `.ydp` toolchains, the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset, and independently versioned Core/protocol compatibility at `1.0.0`.
+Version `1.5.0` adds a contract-driven, resumable MCP incremental-build mode. It covers the Application lifecycle, all 11 hosted App Builder component types, seven shared-resource types, Portal, Navigation, and Permissions through a confirmed materialize/save/readback lifecycle and a non-secret build ledger. It retains the OAuth-backed hosted MCP introduced in v1.3.0, v1.4.0 live Data List Workflow support, v1.4.1 Document Library hardening, the v1.2.0 standalone resource toolchains, the separately published zero-dependency `@yeeflow/app-builder-execution-sdk@1.0.0` asset, and independently versioned Core/protocol compatibility at `1.0.0`.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.3.0
+Version: 1.5.0
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.3.0
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.5.0
 ```
 
 ## What Is Included

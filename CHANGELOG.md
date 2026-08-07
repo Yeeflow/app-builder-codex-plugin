@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.5.0
+
+- Add a contract-driven, resumable MCP incremental-build mode for Application, all 11 App Builder component types, seven shared-resource types, Portal, Navigation, and Permissions.
+- Add a non-secret build ledger that records MCP-issued identities, reviewed plan revision/hash, dependency edges, confirmation-gated state transitions, persisted readback verification, and exact-target deletion receipts.
+- Add a semantic capability registry and operation planner so hosted MCP tool schemas remain runtime-authoritative and Plugin guidance never guesses server operation names or payloads.
+- Preserve specialized Document Library and Data List Workflow live materializers while routing all other resources through the same fail-closed contract, local-validation, save, and readback lifecycle.
+
 ## 1.4.1
 
 - Add a shared Document Library Type `16` native-field materializer used by full-app YAPK generation and live MCP creation.
