@@ -34,7 +34,19 @@ Yeeflow App Builder v1.4.1 hardens standalone live Document Library creation thr
 
 ## Private Marketplace Install Smoke
 
-- Pending RC installation and fresh-process verification.
+- Accepted RC tag: `yeeflow-app-builder-plugin-v1.4.1-rc1`
+- RC commit: `3b929cd9206e0e809d398c4b912475f83e384ec4`
+- RC archive SHA-256: `8ab2cc839fd2aaee7d38ffaf7867ad93a84e42437c7d459a28c4ea78a638943d`
+- Source: `https://github.com/Yeeflow/app-builder-codex-plugin.git`
+- Sparse paths: `.agents/plugins/marketplace.json` and `dist/yeeflow-app-builder-plugin`
+- Install result: version `1.4.1` installed and enabled in an isolated temporary `CODEX_HOME`.
+- Provenance result: the Marketplace checkout matched the peeled RC1 commit, and both the Marketplace payload and installed versioned cache were byte-identical to the RC1 distributed Plugin payload.
+- Installed tests: the new live Document Library regression suite and the existing Type `16` package-materialization suite passed from the installed cache.
+- Fresh-process task: `019fd678-de50-75b0-bd9a-09248fcb50e9`
+- Fresh-process Skill result: the installed manifest reported `1.4.1`, and the Data List Generator required the shared baseline/readback/customization/final-readback flow plus globally unique MCP/API-issued ListID, FieldIDs, and LayoutIDs.
+- Stateless MCP result: one GUID generation and all 11 supported App Builder component types passed with Plugin MCP provenance; the raw GUID was excluded from evidence.
+- Tenant behavior: no authenticated tenant read or write was performed.
+- Git behavior: a background Marketplace auto-upgrade logged a 30-second checkout timeout after the exact-tag installation had completed; the peeled commit and byte-parity checks proved that no stale checkout or payload drift remained.
 
 ## Proof Boundaries
 
@@ -50,4 +62,4 @@ Yeeflow App Builder v1.4.1 hardens standalone live Document Library creation thr
 
 ## Release Status
 
-Release candidate preparation is in progress. The final tag and stable promotion remain blocked until exact-RC Marketplace installation, payload provenance, installed tests, and fresh-process Skill/MCP smoke pass and are recorded here.
+RC1 passed the full local release gates, exact-tag Marketplace installation, installed-cache byte parity, installed Document Library tests, fresh-process Skill routing, and stateless MCP checks. The Plugin payload is accepted for the final `yeeflow-app-builder-plugin-v1.4.1` tag and stable promotion. This acceptance does not prove Designer rendering, document upload/file persistence, or Security Level enforcement.

@@ -1,0 +1,355 @@
+{
+  "registry": "mcp-incremental-capability-registry",
+  "schemaVersion": "1.0.0",
+  "contractSource": "runtime_discovered",
+  "purpose": "A non-secret semantic registry for resumable, incremental application construction. Runtime contracts remain authoritative for concrete tool bindings and payload shapes.",
+  "semanticRuntimeAliases": {
+    "contract.discover": {
+      "placeholder": "runtime.discovered.contract.discover",
+      "resolution": "required_before_use"
+    },
+    "resource.read": {
+      "placeholder": "runtime.discovered.resource.read",
+      "resolution": "required_before_use"
+    },
+    "identity.allocate": {
+      "placeholder": "runtime.discovered.identity.allocate",
+      "resolution": "required_before_use"
+    },
+    "resource.save": {
+      "placeholder": "runtime.discovered.resource.save",
+      "resolution": "required_before_use"
+    },
+    "resource.delete": {
+      "placeholder": "runtime.discovered.resource.delete",
+      "resolution": "required_before_use"
+    }
+  },
+  "lifecycle": {
+    "incremental-write-v1": [
+      "discover_contract",
+      "list_or_get_existing",
+      "resolve_dependencies",
+      "allocate_ids",
+      "materialize",
+      "validate_local",
+      "confirm_write",
+      "save",
+      "get_readback",
+      "validate_persisted",
+      "update_ledger"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "Application",
+      "category": "application",
+      "operations": {
+        "discoverContract": "contract.discover",
+        "listOrGetExisting": "resource.read",
+        "allocateIds": "identity.allocate",
+        "save": "resource.save",
+        "getReadback": "resource.read",
+        "delete": "resource.delete"
+      },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": [],
+      "optionalDependencies": [],
+      "risk": {
+        "writeClass": "standard",
+        "confirmation": "explicit",
+        "deleteConfirmation": "separate_exact_target"
+      },
+      "materializer": {
+        "mode": "contract_driven_generic",
+        "liveStatus": "no_specialist_live_materializer_claimed"
+      },
+      "validator": {
+        "mode": "contract_and_persisted_readback",
+        "liveStatus": "no_specialist_live_validator_claimed"
+      }
+    },
+    {
+      "id": "ApprovalForm",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["DataList", "Metadata", "Group"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "ScheduleForm",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["DataList", "ApprovalForm", "CustomService"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Dashboard",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["DataList", "Document", "DataReport", "FormNewReport", "Theme", "Component"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "DataList",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Metadata", "Tag", "Connection"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": {
+        "mode": "contract_driven_generic",
+        "liveStatus": "no_generic_specialist_live_materializer_claimed",
+        "specializedSubcapabilities": [
+          {
+            "id": "DataListWorkflow",
+            "scope": "WorkflowType1 only; not a generic DataList materializer",
+            "materializerStatus": "available_specialist_live",
+            "validatorStatus": "available_specialist_persisted_readback"
+          }
+        ]
+      },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_generic_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Document",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Metadata", "Tag", "Group"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "specialist_two_phase_live", "liveStatus": "available_document_library_only" },
+      "validator": { "mode": "specialist_persisted_readback", "liveStatus": "available_document_library_only" }
+    },
+    {
+      "id": "DataReport",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["DataList", "ApprovalForm", "FormNewReport"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "FormNewReport",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["ApprovalForm", "DataList", "Metadata"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Knowledge",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Document", "Connection"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "AIAgent",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Knowledge", "Connection", "Credential", "DataList", "Document"],
+      "risk": { "writeClass": "elevated", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Copilot",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Knowledge", "AIAgent", "Connection", "Credential", "Group"],
+      "risk": { "writeClass": "elevated", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "CustomService",
+      "category": "component",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Connection", "Credential", "Group"],
+      "risk": { "writeClass": "elevated", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Theme",
+      "category": "shared_resource",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": [],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Component",
+      "category": "shared_resource",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Theme", "Metadata"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Group",
+      "category": "shared_resource",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": [],
+      "risk": { "writeClass": "elevated", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target", "membershipRemovalConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Credential",
+      "category": "shared_resource",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": [],
+      "risk": { "writeClass": "elevated", "confirmation": "separate_exact_target", "deleteConfirmation": "separate_exact_target", "sensitiveValueHandling": "excluded_from_registry_and_ledger" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "non_sensitive_identity_and_status_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Tag",
+      "category": "shared_resource",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": [],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Metadata",
+      "category": "shared_resource",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": [],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Connection",
+      "category": "shared_resource",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Credential"],
+      "risk": { "writeClass": "elevated", "confirmation": "separate_exact_target", "deleteConfirmation": "separate_exact_target", "sensitiveValueHandling": "excluded_from_registry_and_ledger" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "non_sensitive_identity_and_status_readback", "liveStatus": "no_specialist_live_validator_claimed" }
+    },
+    {
+      "id": "Portal",
+      "category": "application_configuration",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["Group", "Theme", "DataList", "Document", "Dashboard"],
+      "risk": { "writeClass": "elevated", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target", "publicationConfirmation": "separate_exact_target", "portalPublish": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" },
+      "constraints": {
+        "planRequired": true,
+        "targetReadbackRequired": true,
+        "allowedExposedTargetTypes": ["DataList", "Document", "Dashboard"],
+        "forbiddenExposedTargetTypes": ["ApprovalForm", "FormNewReport"]
+      }
+    },
+    {
+      "id": "Navigation",
+      "category": "application_configuration",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application"],
+      "optionalDependencies": ["ApprovalForm", "ScheduleForm", "Dashboard", "DataList", "Document", "DataReport", "FormNewReport", "Knowledge", "AIAgent", "Copilot", "CustomService", "Group"],
+      "risk": { "writeClass": "standard", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" },
+      "constraints": {
+        "targetReadbackRequired": true,
+        "preventDanglingTargets": true,
+        "allowedTargetTypes": ["ApprovalForm", "ScheduleForm", "Dashboard", "DataList", "Document", "DataReport", "FormNewReport", "Knowledge", "AIAgent", "Copilot", "CustomService"]
+      }
+    },
+    {
+      "id": "Permissions",
+      "category": "application_configuration",
+      "operations": { "discoverContract": "contract.discover", "listOrGetExisting": "resource.read", "allocateIds": "identity.allocate", "save": "resource.save", "getReadback": "resource.read", "delete": "resource.delete" },
+      "lifecycle": "incremental-write-v1",
+      "dependencies": ["Application", "Group"],
+      "optionalDependencies": ["ApprovalForm", "ScheduleForm", "Dashboard", "DataList", "Document", "DataReport", "FormNewReport", "Knowledge", "AIAgent", "Copilot", "CustomService", "Portal"],
+      "risk": { "writeClass": "elevated", "confirmation": "explicit", "deleteConfirmation": "separate_exact_target", "broadeningConfirmation": "separate_exact_target", "permissionBroadening": "separate_exact_target", "accessRemovalConfirmation": "stronger_separate_exact_target" },
+      "materializer": { "mode": "contract_driven_generic", "liveStatus": "no_specialist_live_materializer_claimed" },
+      "validator": { "mode": "contract_and_persisted_readback", "liveStatus": "no_specialist_live_validator_claimed" },
+      "constraints": {
+        "targetReadbackRequired": true,
+        "groupReadbackRequired": true,
+        "publicExposureConfirmation": "separate_exact_target"
+      }
+    }
+  ],
+  "resources": {
+    "Application": { "kind": "application", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": [], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "ApprovalForm": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "ScheduleForm": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Dashboard": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "DataList": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_generic_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_generic_specialist_live_validator", "specializedSubcapabilities": ["DataListWorkflow"] } },
+    "Document": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "available_specialist_live_document_library", "validatorStatus": "available_specialist_persisted_readback_document_library" } },
+    "DataReport": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "FormNewReport": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Knowledge": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "AIAgent": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Copilot": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "CustomService": { "kind": "component", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Theme": { "kind": "shared-resource", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Component": { "kind": "shared-resource", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Group": { "kind": "shared-resource", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Credential": { "kind": "shared-resource", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated", "sensitiveValueHandling": "excluded_from_registry_and_ledger" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "non_sensitive_identity_and_status_readback" } },
+    "Tag": { "kind": "shared-resource", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Metadata": { "kind": "shared-resource", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Connection": { "kind": "shared-resource", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated", "sensitiveValueHandling": "excluded_from_registry_and_ledger" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "non_sensitive_identity_and_status_readback" } },
+    "Portal": { "kind": "portal", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "elevated", "portalPublish": "separate_exact_target" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Navigation": { "kind": "navigation", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application"], "risk": { "writeClass": "standard" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } },
+    "Permissions": { "kind": "permissions", "semanticOperations": ["contract.discover", "resource.read", "identity.allocate", "resource.save", "resource.delete"], "requiredLifecycle": "incremental-write-v1", "dependencies": ["Application", "Group"], "risk": { "writeClass": "elevated", "permissionBroadening": "separate_exact_target" }, "materialization": { "status": "contract_driven_no_specialist_live_materializer", "validatorStatus": "contract_and_persisted_readback_no_specialist_live_validator" } }
+  }
+}

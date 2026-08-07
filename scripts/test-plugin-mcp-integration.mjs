@@ -13,6 +13,10 @@ const packageManifest = readJson(resolve(root, "package.json"));
 const mcpManifest = readJson(resolve(pluginRoot, ".mcp.json"));
 const sourceApiSkill = readFileSync(resolve(root, "generated-skills/yeeflow-api-operator/SKILL.md"), "utf8");
 const distributedApiSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-api-operator/SKILL.md"), "utf8");
+const sourceIncrementalSkill = readFileSync(resolve(root, "skills/installed/yeeflow-mcp-incremental-application-builder/SKILL.md"), "utf8");
+const distributedIncrementalSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-mcp-incremental-application-builder/SKILL.md"), "utf8");
+const sourceIncrementalRegistry = readFileSync(resolve(root, "schemas/mcp-incremental-capability-registry.v1.json"), "utf8");
+const distributedIncrementalRegistry = readFileSync(resolve(pluginRoot, "schemas/mcp-incremental-capability-registry.v1.json"), "utf8");
 
 assert.equal(manifest.name, "yeeflow-app-builder");
 assert.equal(manifest.version, packageManifest.version);
@@ -40,6 +44,21 @@ assert.match(distributedApiSkill, /use the bundled MCP route before local REST h
 assert.match(distributedApiSkill, /Require explicit user authorization for MCP create\/save\/import\/install\/upgrade calls/);
 assert.match(distributedApiSkill, /MCP tool acceptance is API acceptance only/);
 assert.match(distributedApiSkill, /two-phase merge\/readback workflow/);
+assert.equal(distributedIncrementalSkill, sourceIncrementalSkill, "source and distributed incremental MCP Builder skills must remain byte-identical");
+assert.match(distributedIncrementalSkill, /\| MCP component type \| Existing skill mapping \| Incremental rule \|/);
+for (const componentType of ["ApprovalForm", "ScheduleForm", "Dashboard", "DataList", "Document", "DataReport", "FormNewReport", "Knowledge", "AIAgent", "Copilot", "CustomService"]) {
+  assert.match(distributedIncrementalSkill, new RegExp(`\\\`${componentType}\\\``));
+}
+for (const sharedResourceType of ["Theme", "Component", "Group", "Credential", "Tag", "Metadata", "Connection"]) {
+  assert.match(distributedIncrementalSkill, new RegExp(`\\\`${sharedResourceType}\\\``));
+}
+assert.equal(distributedIncrementalRegistry, sourceIncrementalRegistry, "source and distributed incremental MCP capability registries must remain byte-identical");
+const incrementalRegistry = JSON.parse(distributedIncrementalRegistry);
+assert.equal(incrementalRegistry.contractSource, "runtime_discovered");
+assert.equal(incrementalRegistry.capabilities.length, 22);
+assert.deepEqual(Object.keys(incrementalRegistry.resources).sort(), [
+  "AIAgent", "Application", "ApprovalForm", "Component", "Connection", "Copilot", "Credential", "CustomService", "Dashboard", "DataList", "DataReport", "Document", "FormNewReport", "Group", "Knowledge", "Metadata", "Navigation", "Permissions", "Portal", "ScheduleForm", "Tag", "Theme",
+]);
 
 const serialized = JSON.stringify(mcpManifest).toLowerCase();
 for (const forbidden of ["authorization", "bearer", "token", "secret", "password", "api_key", "apikey", "http_headers"]) {
