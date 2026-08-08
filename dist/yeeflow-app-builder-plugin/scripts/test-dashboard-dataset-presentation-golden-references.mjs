@@ -21,6 +21,28 @@ const results = [];
 try {
   expectPass("registry validates", ["--registry"]);
   const responsiveTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json"), "utf8"));
+  const responsiveCollectionTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-responsive.template.json"), "utf8"));
+  const badResponsiveCollectionTemplate = structuredClone(responsiveCollectionTemplate);
+  badResponsiveCollectionTemplate.templateResource.rootContainer.children[1].children[0].attrs.tablecols = [];
+  expectCode("responsive table/card template native table columns are enforced", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-template.json", badResponsiveCollectionTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_TABLE_COLUMNS_MISSING");
+  const badResponsiveOperationsZIndexTemplate = structuredClone(responsiveCollectionTemplate);
+  delete findByIdentity(badResponsiveOperationsZIndexTemplate.templateResource.rootContainer, "grid_table_col_item_operations").attrs.common.zidx;
+  expectCode("responsive table/card template keeps item operations above whole-row clicks", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-operation-zindex-template.json", badResponsiveOperationsZIndexTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_OPERATION_ZINDEX_INVALID");
+  const badResponsiveOpMenuPositionTemplate = structuredClone(responsiveCollectionTemplate);
+  findByIdentity(badResponsiveOpMenuPositionTemplate.templateResource.rootContainer, "grid_table_col_item_op_menu").attrs.settings.position = [null, null, null, "topRight"];
+  expectCode("responsive table/card template keeps the mobile item menu at Button right", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-operation-menu-position-template.json", badResponsiveOpMenuPositionTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_OP_MENU_POSITION_INVALID");
+  const badResponsiveCardViewTemplate = structuredClone(responsiveCollectionTemplate);
+  findByIdentity(badResponsiveCardViewTemplate.templateResource.rootContainer, "grid_table_col_body").children = [];
+  expectCode("responsive table/card template requires a mobile Card view item tree", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-card-view-template.json", badResponsiveCardViewTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_CARD_VIEW_MISSING");
+  const badResponsiveCardChildTemplate = structuredClone(responsiveCollectionTemplate);
+  findByIdentity(badResponsiveCardChildTemplate.templateResource.rootContainer, "grid_table_col_body").children[0].children.push(null);
+  expectCode("responsive table/card template rejects null Card item children", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-null-child-template.json", badResponsiveCardChildTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_CARD_VIEW_INVALID_CHILD");
+  const badResponsiveCardDisplayRuleTemplate = structuredClone(responsiveCollectionTemplate);
+  findByType(findByIdentity(badResponsiveCardDisplayRuleTemplate.templateResource.rootContainer, "grid_table_col_body").children[0], "heading").attrs.control_display = [{ controlId: "foreign-card-control" }];
+  expectCode("responsive table/card template rejects foreign Card display-rule control references", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-foreign-display-rule-template.json", badResponsiveCardDisplayRuleTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_CARD_DISPLAY_RULE_FOREIGN_CONTROL");
+  const badResponsiveMobileOperationsTemplate = structuredClone(responsiveCollectionTemplate);
+  findByIdentity(badResponsiveMobileOperationsTemplate.templateResource.rootContainer, "grid_table_col_operations").attrs.style.widthtype = [null, "2", "1"];
+  expectCode("responsive table/card template keeps operation controls full width on mobile", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-mobile-operation-template.json", badResponsiveMobileOperationsTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_MOBILE_OPERATION_WIDTH_INVALID");
   const badResponsiveTemplate = structuredClone(responsiveTemplate);
   delete badResponsiveTemplate.extractionIndex.slotPointers.card_col_item;
   expectCode("responsive card grid source template slots are enforced", ["--registry", REGISTRY, "--responsive-card-template", writeJson("bad-responsive-card-template.json", badResponsiveTemplate)], "DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_SLOT_MISSING");
@@ -94,6 +116,16 @@ try {
 | Operations | Document register | Audit Document Register | Dense audit document tracker | collection_control_grid_table | Customer needs tabulated tracker |
 `);
   expectPass("App Plan with approved dataset presentation references passes", ["--app-plan", validPlan]);
+
+  const responsiveTableCardPlan = write("responsive-table-card-plan.md", `# Yeeflow App Plan
+
+## Dashboard Pages Plan
+
+| Dashboard Page | Dataset Region | Source Resource | Business Purpose | Selected Collection Presentation Reference | Selection Rationale |
+| --- | --- | --- | --- | --- | --- |
+| Task Operations | Active tasks | Tasks Data List | Track operational tasks across devices | collection_control_responsive | Native table columns and sorting on desktop/tablet, with readable mobile card view |
+`);
+  expectPass("App Plan responsive table/card Collection selection passes", ["--app-plan", responsiveTableCardPlan]);
 
   const mixedLegacyAndCanonicalPlan = write("mixed-legacy-canonical-plan.md", `# Yeeflow App Plan
 

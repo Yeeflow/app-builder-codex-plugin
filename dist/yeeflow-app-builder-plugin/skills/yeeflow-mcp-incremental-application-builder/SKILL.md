@@ -30,7 +30,26 @@ Maintain a local, non-secret application build ledger for the current task. Befo
 
 Never regenerate or substitute an existing live identity on resume. If the ledger and live readback disagree, stop, report the conflict, and ask the user whether to reconcile or abandon the planned change.
 
-For a new application, initialize the ledger in `bootstrap` status with exactly one planned `Application/create` operation and no application ID. Do not materialize another resource while bootstrap is active. After the MCP create and exact application readback, record the MCP-returned ID/provenance and move the application to `readback-verified`; only then may dependent resources advance.
+For a new application, initialize the ledger in `bootstrap` status with exactly one planned `Application/create` operation. Do not materialize another resource while bootstrap is active. The bootstrap contract must record the identity, icon, and theme strategy before the write:
+
+- Default to `mcp-generated-before-create`: immediately before `Application/create`, call the live MCP `utils_generate_ids` capability and bind exactly one returned numeric ID to this operation. Never generate, guess, randomize, or substitute an application ID locally.
+- Use `server-allocated-on-create` only when the freshly discovered live create contract explicitly proves that the server allocates the ID and accepts no caller ID. This is an exception, not a fallback after a failed create.
+- Require `IconUrl` to be FontAwesome JSON with non-empty `b`, `i`, and `c` values. It must not be an image URL, SVG, or emoji. Choose an icon that matches the business domain; for procurement, a valid example is `{"b":"#0F766E","i":"fa-solid fa-cart-shopping","c":"#FFFFFF"}`.
+- Omit `Themes` from bootstrap until the live Application contract, accepted theme shape, and a non-destructive correction/update operation have all been discovered. Do not send guessed empty arrays or inferred theme payloads.
+
+After the MCP create and exact application readback, record the returned ID/provenance and verify the workspace, title, IconUrl, and theme state. Move the application to `readback-verified` only when that comparison passes; only then may dependent resources advance. If a correction is needed but no verified live Application update contract exists, block dependent writes and report the gap instead of attempting an unproven write.
+
+## Application Create Or Non-Destructive Update
+
+The observed workspace Application endpoint is an upsert contract: it creates with a new MCP-issued ID and non-destructively updates the existing Application when given its existing `ID`. Treat the user-facing operation as: “Creates or non-destructively updates an App Builder application. An existing `ID` updates that application.” The hosted MCP server owns its runtime tool metadata; this Plugin trains and validates the behavior but does not alter a server-published tool description.
+
+For an Application update:
+
+1. Read the exact target Application first and bind its existing `ID` and workspace to the ledger. Do not allocate a new ID.
+2. Declare only the intended application-level fields. Preserve `ID`, `WorkspaceID`, and `Title` unless Title itself is intentionally changed. Set replace/missing-resource behavior to non-destructive; an update never authorizes delete or replacement.
+3. Validate an `IconUrl` change as FontAwesome JSON before the write. A Theme change additionally requires a current live theme-contract reference.
+4. Obtain explicit confirmation for the exact target Application/workspace and change batch.
+5. Use the same discovered workspace Application endpoint with the existing `ID`, then immediately call `appbuilder_application_get`. Report `API accepted` and `persisted readback verified` separately. If stable fields drift or the intended change is absent, block later work rather than retrying with replacement semantics.
 
 ## Required Lifecycle
 
@@ -38,10 +57,10 @@ Apply this lifecycle to Application, every component, every shared resource, Por
 
 1. Read the reviewed Functional Specification and App Plan. Do not create omitted placeholders or resources outside the plan.
 2. Discover the applicable live MCP contract and supported operations. List/get the target application and existing resources before mutation.
-3. Resolve prerequisites and allocate IDs/GUIDs only through the MCP capability exposed for that purpose. Preserve the returned identities in the ledger.
-4. Materialize only the planned change through the type-specific generator or a contract-shaped generic materializer. Validate locally before saving.
-5. After explicit confirmation, save through the contract's create/update operation, preserving unspecified existing resources.
-6. Immediately get the exact saved resource. Validate the persisted representation, IDs, references, and type-specific invariants against the materialized intent.
+3. Resolve prerequisites and allocate IDs/GUIDs only through the MCP capability exposed for that purpose. For a new Application, use the bootstrap identity strategy above and preserve the returned identity in the ledger before create when caller ID is required.
+4. Materialize only the planned change through the type-specific generator or a contract-shaped generic materializer. Validate locally before saving. Application bootstrap validation includes workspace/title, FontAwesome `IconUrl`, identity strategy, and theme/update-contract gates.
+5. After explicit confirmation, save through the contract's create/update operation, preserving unspecified existing resources. Application create and update use the discovered workspace Application upsert endpoint; an existing ID means non-destructive update, never delete/replace.
+6. Immediately get the exact saved resource. Validate the persisted representation, IDs, references, and type-specific invariants against the materialized intent. For Application bootstrap, compare returned workspace, title, IconUrl, and theme state exactly; API acceptance alone is not success.
 7. Update the ledger only after readback succeeds. If it fails, do not continue dependent writes; report API acceptance separately from failed persistence proof.
 8. Re-list and verify application-level navigation, permissions, Portal links, and dependency edges after the affected batch. Perform Designer or runtime proof only when separately requested and authorized.
 
@@ -57,13 +76,24 @@ Create or select the Application first, then build dependencies before their con
 | `DataList` | `yeeflow-data-list-generator` | Validate list, fields, layouts, views, forms, workflows, and relationship bindings; retain stable list/field/layout identities. |
 | `Document` | `yeeflow-data-list-generator` | Use its two-phase live Document Library materializer and merge/readback path; never hand-author a Type 16 component. |
 | `DataReport` | `yeeflow-form-report-generator` | Validate report data-source and consumer bindings before save and persisted readback. |
-| `FormNewReport` | `yeeflow-form-report-generator` | Validate form report controls, target bindings, and owning form before save and persisted readback. |
+| `FormNewReport` | `yeeflow-form-report-generator` | Require the source Approval Form, `Model.Settings.Fields[]`, and one MCP-issued physical Type `32` `Fields[]` entry per mapping; validate native storage slots and view bindings before save and persisted readback. |
 | `Knowledge` | `yeeflow-ai-agent-template-builder` when available | Discover the live Knowledge contract first; do not claim a dedicated local materializer where one is absent. |
 | `AIAgent` | `yeeflow-ai-agent-template-builder`, `yeeflow-ai-agent-ui-operator` when available | Validate model-independent configuration and Knowledge/Connection references; never record provider secrets. |
 | `Copilot` | `yeeflow-copilot-template-builder`, `yeeflow-copilot-instruction-designer`, `yeeflow-copilot-import-export-operator` when available | Validate instructions, tool/Knowledge references, and permissions without exposing secrets. |
 | `CustomService` | `yeeflow-custom-service-generator` | Validate endpoint/configuration references and permissions; require elevated confirmation for a Connection or Credential dependency. |
 
 Use the source Skill only if it is present in the current installation. If a listed specialist is absent, use MCP contract discovery plus the generic lifecycle, label the specialized local validation gap, and do not claim full type-specific proof.
+
+## FormNewReport Physical Field Gate
+
+For a `FormNewReport`, `Model.Settings.Fields[]` maps Approval Form variables into report columns, but it is not a physical list-field definition. Before the first save, require all of the following:
+
+- The source Approval Form readback resolves the exact `DefKey`.
+- The matching Type `32` child resource has a non-empty `Fields[]` array with one MCP-issued physical field for every `Settings.Fields[]` mapping.
+- Each physical field uses the live-contract-valid native storage slot and a positive storage index. The observed accepted families are `Text1`..., `Decimal1`..., and `Datetime1`...; never use `Text0`, a mapping key such as `v_requestTitle`, or a locally invented field identity as a physical `FieldName`.
+- The Type `0` default view binds every displayed/query field through that physical field's issued `FieldID` and native `FieldName`, not the Approval variable key or `Settings.Fields[].Key`.
+
+Block the save with a reported materialization gap when any of these layers is missing. After save, read back the report and prove `DefKey`, the matching Type `32` child, every intended physical field, and the default-view bindings before adding its Type `32` navigation item. API acceptance alone is not persisted FormNewReport proof; row population, filtering, detail opening, and export remain separate runtime proof.
 
 ## Shared Resources and Application Configuration
 
@@ -95,4 +125,4 @@ Do not save a consumer with guessed IDs, unresolved references, or missing prere
 
 ## Completion Report
 
-Report the ledger as a concise matrix: planned resource, live ID (redacted), operation, dependencies, API result, persisted-readback result, and remaining Designer/runtime proof. State every deferred or blocked item and why. Never claim application completion merely because the API accepted a save.
+Report the ledger as a concise matrix: planned resource, live ID (redacted), operation, dependencies, bootstrap identity/icon/theme strategy where applicable, API result, persisted-readback result, and remaining Designer/runtime proof. State every deferred or blocked item and why. Never claim application completion merely because the API accepted a save.

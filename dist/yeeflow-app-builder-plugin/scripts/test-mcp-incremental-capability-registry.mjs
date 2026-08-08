@@ -110,6 +110,28 @@ assert.deepEqual(dataListCapability.materializer.specializedSubcapabilities, [{
   materializerStatus: "available_specialist_live",
   validatorStatus: "available_specialist_persisted_readback"
 }], "DataList Workflow is the only approved DataList specialist subcapability.");
+const formNewReportCapability = byId.get("FormNewReport");
+const formNewReportConstraints = {
+  sourceApprovalFormReadbackRequired: true,
+  settingsFieldsRequired: true,
+  physicalType32FieldsRequired: true,
+  physicalFieldCount: "one_per_settings_field",
+  physicalFieldIdentity: "mcp_issued",
+  nativeStorageNames: {
+    required: true,
+    indexStartsAt: 1,
+    observedPrefixes: ["Text", "Decimal", "Datetime"],
+    forbidMappingKeyAsFieldName: true,
+  },
+  viewBinding: "physical_field_id_and_native_field_name_only",
+  persistedReadback: ["defKey", "type32_child", "physical_fields", "default_view"],
+};
+assert.deepEqual(formNewReportCapability.constraints, formNewReportConstraints, "FormNewReport must enforce the physical Type 32 field contract.");
+assert.deepEqual(registry.resources.FormNewReport.constraints, formNewReportConstraints, "Planner FormNewReport constraints diverged from the capability contract.");
+const applicationCapability = byId.get("Application");
+assert.equal(applicationCapability.upsert.readbackOperation, "appbuilder_application_get", "Application upsert must require exact persisted readback.");
+assert.match(applicationCapability.upsert.description, /non-destructively updates/u, "Application endpoint must be described as an upsert.");
+assert.equal(registry.resources.Application.upsert.replaceMissing, false, "Application upsert must reject replacement semantics.");
 for (const capability of registry.capabilities.filter((entry) => !["Document", "DataList"].includes(entry.id))) {
   assert.match(capability.materializer.liveStatus, /^no_specialist_live_materializer_claimed$/u, `${capability.id} must not claim an unavailable specialist live materializer.`);
   assert.match(capability.validator.liveStatus, /^no_specialist_live_validator_claimed$/u, `${capability.id} must not claim an unavailable specialist live validator.`);

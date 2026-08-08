@@ -1,9 +1,10 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "registryId": "dashboard-dataset-presentation-golden-references",
   "description": "Approved Dashboard Collection-based dataset presentation references. Generated Dashboard Collection controls must select one of these references and preserve the selected template structure; unknown or simplified Collection layouts are not generated-final eligible.",
   "approvedTemplateIds": [
     "collection_control_responsive_card_grid",
+    "collection_control_responsive",
     "collection_control_card_with_multiselect_toolbar",
     "collection_control_grid_table",
     "collection_control_grid_table_with_multiselect",
@@ -52,6 +53,69 @@
       ],
       "proofBoundary": "Export-proven responsive card grid component only; not proof for grid-table, card multiselect toolbar, grouped, nested, gallery, timeline, or Kanban layouts. Form Report/Data Report uses are view-only and must not include edit/delete item actions.",
       "fullTemplateReference": "docs/reference/collection-control-responsive-card-grid.template.json"
+    },
+    {
+      "templateId": "collection_control_responsive",
+      "displayName": "Responsive Table/Card Collection",
+      "sourceReference": "Projects Center_1 / Collection_control_grid_table (new) / Responsive Collection export-shaped template",
+      "category": "collection-responsive-table-card",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report view-only dataset",
+        "Data Report view-only dataset"
+      ],
+      "whenToUse": [
+        "Users need dense table scanning on computer, laptop, and tablet while retaining readable cards on mobile.",
+        "The dataset has operational columns such as title, owner, dates, progress, status, or priority and benefits from native table-column sorting.",
+        "One responsive Collection must serve both desktop/tablet operations and mobile record browsing without separate page implementations."
+      ],
+      "whenNotToUse": [
+        "The desktop experience must use the legacy hand-built Flex Grid column contract; use collection_control_grid_table.",
+        "Multi-record selection and batch actions are required; use collection_control_grid_table_with_multiselect or collection_control_card_with_multiselect_toolbar.",
+        "The experience is primarily a visual card gallery, Kanban board, timeline, grouped list, or nested collection."
+      ],
+      "requiredBusinessSignals": [
+        "responsive collection",
+        "desktop table mobile cards",
+        "responsive table",
+        "mobile card view",
+        "native table columns",
+        "operational table",
+        "task list"
+      ],
+      "requiredAppPlanDeclaration": "Select collection_control_responsive for the Dashboard dataset region and state why desktop/tablet table scanning plus mobile card presentation is required, whether native column sorting is needed, and whether item operations are allowed by the source type.",
+      "generationProof": [
+        "full grid_table_col_wrapper subtree cloned from docs/reference/collection-control-responsive.template.json",
+        "Collection root preserves native tablecols, header, body, table, pagination, and list-display-preference contracts",
+        "each native table column has a mapped title, item-template control, and sortable source field when sorting is enabled",
+        "grid_table_col_item_operations preserves attrs.common.zidx = [null, 2] so row-operation clicks stay above whole-row click handling",
+        "same Collection renders as the configured table presentation on computer/laptop/tablet and card presentation on mobile",
+        "optional item operations bind to matching Collection actions and delete retains confirmation plus bounded target-list removal"
+      ],
+      "proofBoundary": "Export-proven and configuration-visible responsive Collection component. Generated-package responsive behavior must still be verified on desktop/tablet/mobile before claiming runtime proof.",
+      "fullTemplateReference": "docs/reference/collection-control-responsive.template.json",
+      "exportShapeContract": {
+        "sourceTemplate": "docs/reference/collection-control-responsive.template.json",
+        "rootContainer": "grid_table_col_wrapper",
+        "requiredCollectionAttrs": [
+          "data",
+          "layout",
+          "pagination",
+          "tablecols",
+          "header",
+          "body",
+          "table",
+          "list-display-preference"
+        ],
+        "editableRegions": [
+          "responsive_collection_title_wrapper",
+          "responsive_collection_operation_row",
+          "responsive_collection_body.attrs.tablecols",
+          "responsive_collection_item_operations"
+        ],
+        "lockedRule": "Preserve the export-shaped native table/card responsive Collection mechanism; do not replace it with the legacy Flex Grid table or a static card lookalike."
+      }
     },
     {
       "templateId": "collection_control_card_with_multiselect_toolbar",

@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+## 1.6.2
+
+- Add the export-shaped `collection_control_responsive` golden reference for native Table view on computer/laptop/tablet and a complete Card view on mobile.
+- Preserve schema-bound Card field mapping, dynamic-user rendering, edit/delete action contracts, delete confirmation, native table sort metadata, and mobile Full width operation controls.
+- Fail closed on empty or sparse Card item trees, foreign Card `control_display` references, incorrect mobile Card item-operation `z-index`, and incorrect mobile Drop bar `bottomRight` placement.
+- Add source/distribution materialization, validation, and negative regression coverage for the responsive Collection reference.
+
+## 1.6.1
+
+- Add a fail-closed incremental MCP FormNewReport contract requiring an Approval Form `DefKey`, non-empty `Settings.Fields[]`, one MCP-issued physical Type `32` field per mapping, native positive-index storage names, and physical-field default-view bindings.
+- Block the incident pattern of empty Type `32` `Fields[]`, `Text0`, Approval mapping keys used as physical field names, and views bound to mapping keys instead of physical `FieldID`/`FieldName` values.
+- Surface the constraints in the incremental operation planner and require persisted readback of the source `DefKey`, Type `32` child, physical fields, and default view before navigation.
+- Add source/distribution contract regression coverage and keep the live MCP payload shape runtime-authoritative.
+
+## 1.6.0
+
+- Correct Application bootstrap to use exactly one live MCP `utils_generate_ids` numeric ID before create by default; permit server-side allocation only when the freshly discovered create contract explicitly proves it.
+- Add fail-closed bootstrap-contract validation for the identity strategy, FontAwesome application icon, and theme strategy, plus operation-plan instructions for exact Application readback and update-contract gaps.
+- Prevent guessed empty `Themes` payloads and unproven corrective writes; dependent resources remain blocked when returned workspace, title, icon, or theme state cannot be verified.
+- Add regression coverage for MCP-issued Application IDs, server-allocated exception handling, invalid ID provenance, invalid icons, and distributed skill guidance.
+- Add the observed workspace Application upsert contract: an existing ID performs a non-destructive update through the same endpoint, with exact target binding, stable-field preservation, explicit confirmation, and `appbuilder_application_get` persisted readback.
+
 ## 1.5.1
 
 - Make the confirmed, OAuth-backed MCP incremental lifecycle the default for normal business-requirements-to-live-application requests; users no longer need to explicitly name the incremental mode.

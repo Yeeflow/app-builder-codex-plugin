@@ -616,6 +616,21 @@ const noSearchPage = { ...validGridTablePage(), children: validGridTablePage().c
 assert.ok(run(null, { page: noSearchPage, requireCollection: true, requestedCollectionPattern: "grid-table" }).includes("COLLECTION_GRID_TABLE_SEARCH_FILTER_MISSING"));
 const noProgressPage = validGridTablePage({ collectionOverrides: { children: [flexGrid("task_item_grid", [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]], [rowDynamicCell("row_title", "dynamic-field", "Title"), rowDynamicCell("row_assignee", "dynamic-user", "Text2"), rowDynamicCell("row_start", "dynamic-field", "Datetime1"), rowDynamicCell("row_end", "dynamic-field", "Datetime2"), rowDynamicCell("row_completion_text", "dynamic-field", "Decimal2"), rowStatusCell("row_status")], { mobileColumns: [[1, "fr"]] })] } });
 assert.ok(run(null, { page: noProgressPage, requireCollection: true, requestedCollectionPattern: "grid-table" }).includes("COLLECTION_GRID_TABLE_PROGRESS_VALUE_BINDING_INVALID"));
+const responsiveTableCardCollection = validCollection();
+responsiveTableCardCollection.attrs = {
+  ...responsiveTableCardCollection.attrs,
+  ...{
+    tablecols: [
+      { attrs: { title: { value: "Title" }, sortingEnabled: true, sortingField: "Title" }, children: [dynamicControl("responsive_title", "dynamic-field", "Title")] },
+      { attrs: { title: { value: "Assignee" }, sortingEnabled: false }, children: [dynamicControl("responsive_assignee", "dynamic-user", "Text2")] },
+      { attrs: { title: { value: "Status" }, sortingEnabled: true, sortingField: "Text1" }, children: [dynamicControl("responsive_status", "dynamic-field", "Text1")] },
+    ],
+    header: {}, body: {}, table: {}, "list-display-preference": "default",
+  },
+};
+const responsiveTableCardFindings = run(responsiveTableCardCollection, { requireCollection: true, requestedCollectionPattern: "collection_control_responsive", page: { id: "page", type: "page", surfaceType: "dashboard", children: [responsiveTableCardCollection] } });
+assert.ok(!responsiveTableCardFindings.includes("COLLECTION_PATTERN_UNPROVEN"));
+assert.ok(!responsiveTableCardFindings.includes("COLLECTION_RESPONSIVE_TABLE_CARD_SHAPE_INVALID"));
 const badMultiselectPage = validGridTablePage({ multiselect: true, collectionOverrides: { attrs: { actions: [] } } });
 assert.ok(run(null, { page: badMultiselectPage, requireCollection: true, requestedCollectionPattern: "grid-table", requireGridTableMultiselect: true }).includes("COLLECTION_GRID_TABLE_MULTISELECT_ACTION_INVALID"));
 assert.ok(decodeYapkResource("not-base64-resource").errorCode === "COLLECTION_YAPK_DECODE_FAILED");

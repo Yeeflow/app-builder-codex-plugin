@@ -131,6 +131,7 @@ packages/**/lib/
 !docs/reference/form-action-set-data-list-*.template.json
 !docs/reference/form-action-print-barcode-golden-references.json
 !docs/reference/dashboard-query-data-*.template.json
+!docs/reference/collection-control-responsive.template.json
 !docs/reference/workflow-query-data-golden-references.json
 !yeeflow-expression-operators.normalized.json
 !dashboard-dataset-presentation-golden-references.json

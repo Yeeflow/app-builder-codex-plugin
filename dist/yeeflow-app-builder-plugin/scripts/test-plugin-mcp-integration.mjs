@@ -15,6 +15,7 @@ const mcpManifest = readJson(resolve(pluginRoot, ".mcp.json"));
 const distributedApiSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-api-operator/SKILL.md"), "utf8");
 const distributedApplicationBuilderSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-application-builder/SKILL.md"), "utf8");
 const distributedIncrementalSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-mcp-incremental-application-builder/SKILL.md"), "utf8");
+const distributedFormReportSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-form-report-generator/SKILL.md"), "utf8");
 const distributedIncrementalRegistry = readFileSync(resolve(pluginRoot, "schemas/mcp-incremental-capability-registry.v1.json"), "utf8");
 
 assert.equal(manifest.name, "yeeflow-app-builder");
@@ -54,9 +55,22 @@ assert.match(distributedApplicationBuilderSkill, /Use the explicit YAPK package 
 assert.doesNotMatch(distributedApplicationBuilderSkill, /New Yeeflow application delivery defaults to `\.yapk`/);
 if (sourceCheckout) {
   const sourceIncrementalSkill = readFileSync(resolve(root, "skills/installed/yeeflow-mcp-incremental-application-builder/SKILL.md"), "utf8");
+  const sourceFormReportSkill = readFileSync(resolve(root, "skills/installed/yeeflow-form-report-generator/SKILL.md"), "utf8");
   assert.equal(distributedIncrementalSkill, sourceIncrementalSkill, "source and distributed incremental MCP Builder skills must remain byte-identical");
+  assert.equal(distributedFormReportSkill, sourceFormReportSkill, "source and distributed Form Report skills must remain byte-identical");
 }
 assert.match(distributedIncrementalSkill, /\| MCP component type \| Existing skill mapping \| Incremental rule \|/);
+assert.match(distributedIncrementalSkill, /mcp-generated-before-create/);
+assert.match(distributedIncrementalSkill, /utils_generate_ids/);
+assert.match(distributedIncrementalSkill, /FontAwesome JSON/);
+assert.match(distributedIncrementalSkill, /Omit `Themes` from bootstrap/);
+assert.match(distributedIncrementalSkill, /Creates or non-destructively updates an App Builder application/);
+assert.match(distributedIncrementalSkill, /appbuilder_application_get/);
+assert.match(distributedIncrementalSkill, /FormNewReport Physical Field Gate/);
+assert.match(distributedIncrementalSkill, /one MCP-issued physical Type `32` `Fields\[\]` entry per mapping/);
+assert.match(distributedFormReportSkill, /MCP Type 32 Physical Field Gate/);
+assert.match(distributedFormReportSkill, /Do not submit an empty `Fields\[\]` array/);
+assert.match(distributedFormReportSkill, /`Text0` is rejected/);
 for (const componentType of ["ApprovalForm", "ScheduleForm", "Dashboard", "DataList", "Document", "DataReport", "FormNewReport", "Knowledge", "AIAgent", "Copilot", "CustomService"]) {
   assert.match(distributedIncrementalSkill, new RegExp(`\\\`${componentType}\\\``));
 }
@@ -70,6 +84,13 @@ if (sourceCheckout) {
 const incrementalRegistry = JSON.parse(distributedIncrementalRegistry);
 assert.equal(incrementalRegistry.contractSource, "runtime_discovered");
 assert.equal(incrementalRegistry.capabilities.length, 22);
+assert.equal(incrementalRegistry.resources.Application.upsert.readbackOperation, "appbuilder_application_get");
+assert.match(incrementalRegistry.resources.Application.upsert.description, /non-destructively updates/);
+assert.equal(incrementalRegistry.resources.FormNewReport.constraints.physicalType32FieldsRequired, true);
+assert.equal(incrementalRegistry.resources.FormNewReport.constraints.physicalFieldCount, "one_per_settings_field");
+assert.equal(incrementalRegistry.resources.FormNewReport.constraints.nativeStorageNames.indexStartsAt, 1);
+assert.equal(incrementalRegistry.resources.FormNewReport.constraints.nativeStorageNames.forbidMappingKeyAsFieldName, true);
+assert.equal(incrementalRegistry.resources.FormNewReport.constraints.viewBinding, "physical_field_id_and_native_field_name_only");
 assert.deepEqual(Object.keys(incrementalRegistry.resources).sort(), [
   "AIAgent", "Application", "ApprovalForm", "Component", "Connection", "Copilot", "Credential", "CustomService", "Dashboard", "DataList", "DataReport", "Document", "FormNewReport", "Group", "Knowledge", "Metadata", "Navigation", "Permissions", "Portal", "ScheduleForm", "Tag", "Theme",
 ]);

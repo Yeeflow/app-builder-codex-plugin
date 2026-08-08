@@ -43,6 +43,16 @@ Names, labels, tenant IDs, user IDs, org data, report titles, list titles, form 
 | Views | `Data.Childs[].Layouts[]` | Type `0` list views are used. Some LayoutView payloads include `layout`, `sort`, `query`, `rowColor`, and `filter`. | export-proven |
 | Permissions | `Data.Childs[].ListModel.IsBreakInherit`, `Perm` | This export only proves inherited permission shape (`IsBreakInherit = false`). Custom permission group shape was not found. | export-proven gap |
 
+## Incremental MCP Type 32 Physical Field Contract
+
+A live FormNewReport incident established an additional persistence requirement for incremental MCP creation. `Data.FormNewReports[].Settings.Fields[]` describes the mapping from Approval Form variables to report columns, but it does not replace the matching Type `32` child resource's physical `Fields[]` collection.
+
+Before save, the Type `32` child must contain one MCP-issued physical field for every `Settings.Fields[]` mapping. The observed accepted physical storage names use native slots such as `Text1` through `TextN`, `Decimal1`, and `Datetime1`, with a positive index. `Text0` and an Approval mapping key such as `v_requestTitle` used as a physical `FieldName` were rejected by the platform.
+
+The Type `0` default view must bind its columns and query entries to the physical field's issued `FieldID` and native `FieldName`, rather than the Approval variable key. Exact persisted readback must then prove the `DefKey`, matching Type `32` child, physical fields, and default-view bindings before the report receives Type `32` navigation.
+
+This is persisted-readback evidence for the resource structure only. It does not prove runtime report row population, filtering, submitted-form detail opening, or export behavior.
+
 ## Field Mapping Findings
 
 Export-proven mappings found:

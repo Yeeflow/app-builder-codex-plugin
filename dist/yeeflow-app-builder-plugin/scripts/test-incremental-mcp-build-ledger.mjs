@@ -17,7 +17,14 @@ const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 
 testFullCapabilityLedger();
 testBootstrapLedger();
+testServerAllocatedBootstrapLedger();
 testBootstrapRejectsApplicationTransition();
+testBootstrapRejectsUnissuedApplicationId();
+testBootstrapRejectsInvalidApplicationIcon();
+testBootstrapRejectsUnprovenThemeContract();
+testExistingApplicationUpsertLedger();
+testUpsertRejectsReplacementOrWrongTarget();
+testUpsertRejectsNewIdOrInvalidIcon();
 testBootstrapRejectsAdvancedResource();
 testRejectsUnsafeStatusTransition();
 testRejectsUnverifiedDependency();
@@ -40,13 +47,64 @@ function testBootstrapLedger() {
   assert.equal(summary.operationsByStatus.planned, 22);
 }
 
+function testServerAllocatedBootstrapLedger() {
+  const ledger = bootstrapLedger({ identityStrategy: "server-allocated-on-create" });
+  const applicationOperation = ledger.operations.find((operation) => operation.category === "application");
+  applicationOperation.issuedIds = [];
+  assert.equal(validateIncrementalBuildLedger(ledger).operationsByStatus.planned, 22);
+}
+
 function testBootstrapRejectsApplicationTransition() {
   const ledger = bootstrapLedger();
   const applicationOperation = ledger.operations.find((operation) => operation.category === "application");
-  applicationOperation.issuedIds = [{ kind: "id", value: "issued-application", issuedBy: "mcp.allocate_resource_id", issuedAt: "2026-08-07T00:00:00.000Z" }];
   applicationOperation.status = "materialized";
   applicationOperation.statusHistory = ["planned", "materialized"];
   assertValidationCode(() => validateIncrementalBuildLedger(ledger), "LEDGER_BOOTSTRAP_APPLICATION_OPERATION_INVALID");
+}
+
+function testBootstrapRejectsUnissuedApplicationId() {
+  const ledger = bootstrapLedger();
+  const applicationOperation = ledger.operations.find((operation) => operation.category === "application");
+  applicationOperation.issuedIds[0].issuedBy = "mcp.allocate_resource_id";
+  assertValidationCode(() => validateIncrementalBuildLedger(ledger), "LEDGER_BOOTSTRAP_APPLICATION_ISSUED_IDS_INVALID");
+}
+
+function testBootstrapRejectsInvalidApplicationIcon() {
+  const ledger = bootstrapLedger();
+  ledger.application.bootstrap.iconUrl = "https://example.invalid/icon.png";
+  assertValidationCode(() => validateIncrementalBuildLedger(ledger), "LEDGER_BOOTSTRAP_ICON_INVALID");
+}
+
+function testBootstrapRejectsUnprovenThemeContract() {
+  const ledger = bootstrapLedger();
+  ledger.application.bootstrap.themeStrategy = "create-with-live-contract-validated";
+  assertValidationCode(() => validateIncrementalBuildLedger(ledger), "LEDGER_BOOTSTRAP_THEME_CONTRACT_MISSING");
+}
+
+function testExistingApplicationUpsertLedger() {
+  const ledger = validLedger();
+  ledger.operations = [applicationIconUpsert()];
+  assert.equal(validateIncrementalBuildLedger(ledger).operationCount, 1);
+}
+
+function testUpsertRejectsReplacementOrWrongTarget() {
+  const ledger = validLedger();
+  ledger.operations = [applicationIconUpsert()];
+  ledger.operations[0].applicationUpsert.replaceMissing = true;
+  assertValidationCode(() => validateIncrementalBuildLedger(ledger), "LEDGER_APPLICATION_UPSERT_REPLACE_FORBIDDEN");
+  ledger.operations[0].applicationUpsert.replaceMissing = false;
+  ledger.operations[0].applicationUpsert.targetApplicationId = "other-application";
+  assertValidationCode(() => validateIncrementalBuildLedger(ledger), "LEDGER_APPLICATION_UPSERT_TARGET_MISMATCH");
+}
+
+function testUpsertRejectsNewIdOrInvalidIcon() {
+  const ledger = validLedger();
+  ledger.operations = [applicationIconUpsert()];
+  ledger.operations[0].issuedIds = [{ kind: "id", value: "9002", issuedBy: "mcp.utils_generate_ids", issuedAt: "2026-08-07T00:00:00.000Z" }];
+  assertValidationCode(() => validateIncrementalBuildLedger(ledger), "LEDGER_APPLICATION_UPSERT_ISSUED_IDS_INVALID");
+  ledger.operations[0].issuedIds = [];
+  ledger.operations[0].applicationUpsert.iconUrl = "🛒";
+  assertValidationCode(() => validateIncrementalBuildLedger(ledger), "LEDGER_APPLICATION_UPSERT_ICON_INVALID");
 }
 
 function testBootstrapRejectsAdvancedResource() {
@@ -127,16 +185,50 @@ function validLedger() {
   };
 }
 
-function bootstrapLedger() {
+function bootstrapLedger({ identityStrategy = "mcp-generated-before-create" } = {}) {
   const ledger = validLedger();
-  ledger.application = { workspaceId: ledger.application.workspaceId, name: ledger.application.name, status: "bootstrap" };
+  ledger.application = {
+    workspaceId: ledger.application.workspaceId,
+    name: ledger.application.name,
+    status: "bootstrap",
+    bootstrap: {
+      identityStrategy,
+      themeStrategy: "omit-until-live-contract-verified",
+      iconUrl: '{"b":"#0F766E","i":"fa-solid fa-cart-shopping","c":"#FFFFFF"}',
+    },
+  };
   for (const operation of ledger.operations) {
     operation.status = "planned";
     operation.statusHistory = ["planned"];
   }
   const applicationOperation = ledger.operations.find((operation) => operation.category === "application");
-  applicationOperation.issuedIds = [];
+  applicationOperation.issuedIds = identityStrategy === "mcp-generated-before-create"
+    ? [{ kind: "id", value: "9001", issuedBy: "mcp.utils_generate_ids", issuedAt: "2026-08-07T00:00:00.000Z" }]
+    : [];
   return ledger;
+}
+
+function applicationIconUpsert() {
+  return {
+    operationId: "application-icon-upsert",
+    category: "application",
+    resourceType: "Application",
+    action: "update",
+    resourceName: "Procurement",
+    dependsOn: [],
+    issuedIds: [],
+    status: "planned",
+    statusHistory: ["planned"],
+    applicationUpsert: {
+      mode: "non-destructive-upsert",
+      targetApplicationId: "application-001",
+      targetWorkspaceId: "workspace-redacted-reference",
+      intendedFields: ["IconUrl"],
+      preserveStableFields: ["ID", "WorkspaceID", "Title"],
+      replaceMissing: false,
+      iconUrl: '{"b":"#0F766E","i":"fa-solid fa-cart-shopping","c":"#FFFFFF"}',
+    },
+  };
 }
 
 function assertValidationCode(fn, code) {
