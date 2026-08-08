@@ -5,6 +5,7 @@ const PLACEHOLDER_TEXT_RE = /\bHere is the (title|description)\b|placeholder tex
 const CURRENT_ITEM_SOURCE_TYPES = new Set(["dynamic-field", "dynamic-image", "dynamic-user", "dynamic-file"]);
 const SYSTEM_COLLECTION_FIELDS = new Set(["ListDataID", "Created", "Modified", "CreatedBy", "ModifiedBy"]);
 const CARD_PATTERN_ALIASES = new Set(["", "card", "cards", "card-style", "card_style", "responsive-card-grid", "responsive_card_grid", "collection_control_responsive_card_grid"]);
+const RESPONSIVE_TABLE_CARD_PATTERN_ALIASES = new Set(["responsive", "responsive-table-card", "responsive_table_card", "desktop-table-mobile-card", "desktop_table_mobile_card", "collection_control_responsive"]);
 const GRID_TABLE_PATTERN_ALIASES = new Set(["grid", "grid-table", "grid_table", "table", "table-style", "table_style", "spreadsheet", "collection-grid", "collection_grid", "collection-control-grid-table", "collection_control_grid_table"]);
 const NON_CARD_PATTERN_ALIASES = new Set([
   "row-list",
@@ -304,6 +305,25 @@ function isGridTableCollectionControl(control) {
   );
 }
 
+function isResponsiveTableCardCollectionControl(control) {
+  const attrs = control && control.attrs;
+  const data = attrs && attrs.data;
+  const columns = attrs && attrs.tablecols;
+  return Boolean(
+    isObject(control) &&
+      control.type === "collection" &&
+      safeString(control.label || "Collection") === "Collection" &&
+      isObject(data) &&
+      isObject(data.list) &&
+      Array.isArray(columns) &&
+      columns.length >= 3 &&
+      attrs["list-display-preference"] === "default" &&
+      isObject(attrs.header) &&
+      isObject(attrs.body) &&
+      isObject(attrs.table)
+  );
+}
+
 function normalizePatternName(value) {
   return safeString(value).trim().toLowerCase().replace(/\s+/g, "-");
 }
@@ -311,12 +331,14 @@ function normalizePatternName(value) {
 function requestedPatternKind(options) {
   const normalized = normalizePatternName(options.requestedCollectionPattern || options.collectionPattern || options.templatePattern || "");
   if (CARD_PATTERN_ALIASES.has(normalized)) return "card";
+  if (RESPONSIVE_TABLE_CARD_PATTERN_ALIASES.has(normalized)) return "responsive-table-card";
   if (GRID_TABLE_PATTERN_ALIASES.has(normalized)) return "grid-table";
   if (NON_CARD_PATTERN_ALIASES.has(normalized)) return "non-card";
   return normalized ? "unknown" : "card";
 }
 
 function collectionPatternKind(control) {
+  if (isResponsiveTableCardCollectionControl(control)) return "responsive-table-card";
   if (isCardCollectionControl(control)) return "card";
   if (isGridTableCollectionControl(control)) return "grid-table";
   const text = JSON.stringify(control || {}).toLowerCase();
@@ -457,15 +479,16 @@ function validateCollectionControls(options) {
   const enforcePatternScope = Boolean(options.requireCollection || options.generatedFinal || options.importQualified);
   const requestKind = requestedPatternKind(options);
   const validateGridTable = Boolean((requireGridTablePattern || requestKind === "grid-table" || options.templatePattern === "collection_control_grid_table") && !options.explicitCardFallbackAccepted);
-  if (enforcePatternScope && requestKind !== "card" && requestKind !== "grid-table" && !options.explicitCardFallbackAccepted) {
+  const validateResponsiveTableCard = requestKind === "responsive-table-card" || options.templatePattern === "collection_control_responsive";
+  if (enforcePatternScope && requestKind !== "card" && requestKind !== "grid-table" && requestKind !== "responsive-table-card" && !options.explicitCardFallbackAccepted) {
     const code = requestKind === "grid-table" ? "COLLECTION_GRID_TABLE_PATTERN_UNPROVEN" : "COLLECTION_PATTERN_UNPROVEN";
-    emit(code, "The completed Collection golden reference supports only responsive card-style Collections; requested non-card Collection patterns need a separate export-backed study or an explicit card fallback.", { pointer: rootPointer, requestedPattern: options.requestedCollectionPattern || options.collectionPattern || options.templatePattern || "" });
+    emit(code, "The approved Collection references cover responsive card grids, native responsive table/card Collections, and legacy grid tables only; requested patterns need a separate export-backed study or an explicit fallback.", { pointer: rootPointer, requestedPattern: options.requestedCollectionPattern || options.collectionPattern || options.templatePattern || "" });
     if (requestKind !== "grid-table") {
       emit("COLLECTION_NON_CARD_PATTERN_UNPROVEN", "Non-card Collection patterns remain unproven for generated-final packages.", { pointer: rootPointer, requestedPattern: options.requestedCollectionPattern || options.collectionPattern || options.templatePattern || "" });
     }
   }
 
-  if (safeString(format).toUpperCase() === "YAPK" && options.requireCollection && !validateGridTable && !hasYapkShapeProof(options) && !hasProvenCardCollectionShape(page)) {
+  if (safeString(format).toUpperCase() === "YAPK" && options.requireCollection && !validateGridTable && !validateResponsiveTableCard && !hasYapkShapeProof(options) && !hasProvenCardCollectionShape(page)) {
     emit("COLLECTION_YAPK_SHAPE_UNPROVEN", "YAPK Collection generation remains blocked for unknown, undecoded, or non-card Collection patterns.", { pointer: rootPointer });
   } else if (safeString(format).toUpperCase() === "YAPK" && options.requireCollection && options.requireResponsiveCardGrid && !hasProvenCardCollectionShape(page)) {
     emit("COLLECTION_YAPK_CARD_SHAPE_INVALID", "YAPK Collection must match the decoded Company Overview card pattern before it is treated as proven.", { pointer: rootPointer });
@@ -513,7 +536,10 @@ function validateCollectionControls(options) {
       if (validateGridTable && patternKind !== "grid-table") {
         emit("COLLECTION_GRID_TABLE_SHAPE_INVALID", "Collection grid/table generation must use a Collection body with one repeated flex_grid item row.", { pointer, patternKind });
         emit("COLLECTION_PATTERN_UNPROVEN", "This Collection shape does not match the proven grid/table or card Collection patterns.", { pointer, patternKind });
-      } else if (!validateGridTable && patternKind !== "card") {
+      } else if (validateResponsiveTableCard && patternKind !== "responsive-table-card") {
+        emit("COLLECTION_RESPONSIVE_TABLE_CARD_SHAPE_INVALID", "Responsive table/card Collection generation must preserve the native tablecols and list-display-preference contract.", { pointer, patternKind });
+        emit("COLLECTION_PATTERN_UNPROVEN", "This Collection shape does not match the approved responsive table/card Collection pattern.", { pointer, patternKind });
+      } else if (!validateGridTable && !validateResponsiveTableCard && patternKind !== "card") {
         if (patternKind === "grid-table") {
           emit("COLLECTION_GRID_TABLE_PATTERN_UNPROVEN", "Collection + Grid/table-style patterns are not proven by the card Collection golden reference.", { pointer, patternKind });
         } else {

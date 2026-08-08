@@ -8,12 +8,14 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk } from "./lib/yapk-d
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-dataset-presentation-golden-references.json");
 const RESPONSIVE_CARD_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json");
+const RESPONSIVE_COLLECTION_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive.template.json");
 const CARD_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json");
 const GRID_TABLE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table.template.json");
 const GRID_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json");
 
 const APPROVED_IDS = new Set([
   "collection_control_responsive_card_grid",
+  "collection_control_responsive",
   "collection_control_card_with_multiselect_toolbar",
   "collection_control_grid_table",
   "collection_control_grid_table_with_multiselect",
@@ -148,10 +150,128 @@ function validateRegistry(registry, findings, options = {}) {
     }
   }
   validateResponsiveCardGridTemplateArtifact(registry, findings, options);
+  validateResponsiveCollectionTemplateArtifact(registry, findings, options);
   validateCardMultiselectTemplateArtifact(registry, findings, options);
   validateGridTableTemplateArtifact(registry, findings, options);
   validateGridMultiselectTemplateArtifact(registry, findings, options);
   return { approvedIds: ids.size ? ids : APPROVED_IDS, references };
+}
+
+function validateResponsiveCollectionTemplateArtifact(registry, findings, options = {}) {
+  const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_responsive");
+  const referencePath = String(entry?.fullTemplateReference || "").trim();
+  if (referencePath !== "docs/reference/collection-control-responsive.template.json") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_REFERENCE_MISSING", "collection_control_responsive must point to the full export-shaped responsive Collection template artifact.", {
+      expected: "docs/reference/collection-control-responsive.template.json",
+      actual: referencePath || null,
+    }));
+    return;
+  }
+  const templatePath = path.resolve(options.responsiveTemplate || RESPONSIVE_COLLECTION_TEMPLATE_PATH);
+  const template = readJson(templatePath, findings, "DASH_DATASET_RESPONSIVE_TEMPLATE_FILE_MISSING");
+  if (!template) return;
+  if (template.templateId !== "collection_control_responsive") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_ID_INVALID", "Responsive Collection template artifact has an unexpected templateId.", { actual: template.templateId }));
+  }
+  const root = template.templateResource?.rootContainer;
+  if (root?.nv_label !== "grid_table_col_wrapper") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_ROOT_INVALID", "Responsive Collection source template must preserve its export-shaped grid_table_col_wrapper root.", {
+      actual: root?.nv_label || null,
+    }));
+  }
+  for (const slot of ["responsive_collection_wrapper", "responsive_collection_title_wrapper", "responsive_collection_operation_row", "responsive_collection_body", "responsive_collection_item"]) {
+    if (!template.extractionIndex?.slotPointers?.[slot]) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_SLOT_MISSING", "Responsive Collection template artifact is missing a required slot pointer.", { slot }));
+    }
+  }
+  for (const key of ["filterVars", "tempVars", "filter", "actions", "exts"]) {
+    if (template.pageLevelDependencies?.[key] === undefined) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_DEPENDENCY_MISSING", "Responsive Collection template artifact is missing required page-level dependency data.", { dependency: key }));
+    }
+  }
+  const collection = findDescendants(root, (node) => String(node?.type || "") === "collection")[0];
+  const requiredAttrs = ["data", "layout", "pagination", "tablecols", "header", "body", "table", "list-display-preference"];
+  for (const key of requiredAttrs) {
+    if (collection?.attrs?.[key] === undefined) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_COLLECTION_ATTR_MISSING", "Responsive Collection source template is missing a required native Collection property.", { property: key }));
+    }
+  }
+  if (collection?.attrs?.["list-display-preference"] !== "default") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_LAYOUT_INVALID", "Responsive Collection source template must preserve the export-proven native responsive display preference.", {
+      actual: collection?.attrs?.["list-display-preference"] ?? null,
+    }));
+  }
+  const columns = asArray(collection?.attrs?.tablecols);
+  if (columns.length < 3) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_TABLE_COLUMNS_MISSING", "Responsive Collection source template must preserve at least three native table columns.", { count: columns.length }));
+  }
+  for (const [index, column] of columns.entries()) {
+    if (!String(column?.attrs?.title?.value || "").trim() || typeof column?.attrs?.sortingEnabled !== "boolean" || !asArray(column?.children).length) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_TABLE_COLUMN_INVALID", "Each responsive native table column requires a title, boolean sorting setting, and card item-template content.", {
+        index,
+        title: column?.attrs?.title?.value ?? null,
+        sortingEnabled: column?.attrs?.sortingEnabled ?? null,
+        childCount: asArray(column?.children).length,
+      }));
+    }
+    if (column?.attrs?.sortingEnabled === true && !String(column?.attrs?.sortingField || "").trim()) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_SORT_FIELD_MISSING", "Sortable responsive native table columns require a source sortingField.", { index, title: column?.attrs?.title?.value ?? null }));
+    }
+  }
+  if (!asArray(collection?.children).length || !asArray(collection?.children).flatMap((child) => findDescendants(child, (node) => String(node?.type || "").startsWith("dynamic-"))).length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_CARD_VIEW_MISSING", "Responsive Collection source template must preserve a non-empty mobile Card view item tree under grid_table_col_body.children.", {
+      childCount: asArray(collection?.children).length,
+    }));
+  }
+  const invalidCardChildren = asArray(collection?.children).flatMap((cardItem) => asArray(cardItem?.children).filter((child) => !child || typeof child !== "object"));
+  if (invalidCardChildren.length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_CARD_VIEW_INVALID_CHILD", "Responsive Collection Card view must not contain null, sparse, or non-object item children.", {
+      count: invalidCardChildren.length,
+    }));
+  }
+  const cardNodes = asArray(collection?.children).flatMap((child) => [child, ...findDescendants(child, () => true)]);
+  const cardControlIds = new Set(cardNodes.map((node) => node?.id).filter((id) => typeof id === "string" && id));
+  for (const node of cardNodes) {
+    for (const rule of asArray(node?.attrs?.control_display)) {
+      const controlId = String(rule?.controlId || "").trim();
+      if (controlId && !cardControlIds.has(controlId)) {
+        findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_CARD_DISPLAY_RULE_FOREIGN_CONTROL", "Responsive Collection Card view must not carry a display rule that references a control outside its own Card subtree.", {
+          control: node?.nv_label || node?.type || null,
+        }));
+      }
+    }
+  }
+  for (const identity of ["grid_table_col_operations", "op_normal"]) {
+    const node = findDescendantByIdentity(root, identity);
+    if (!deepEqual(node?.attrs?.style?.widthtype, [null, "2", "2"])) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_MOBILE_OPERATION_WIDTH_INVALID", "Responsive Collection operation containers must be Full width on mobile.", {
+        control: identity,
+        actual: node?.attrs?.style?.widthtype ?? null,
+      }));
+    }
+  }
+  const collectionActions = asArray(template.templateResource?.collectionActions);
+  if (!collectionActions.some((action) => /edit/i.test(String(action?.name || ""))) || !collectionActions.some((action) => /delete/i.test(String(action?.name || "")))) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_COLLECTION_ACTIONS_MISSING", "Responsive Collection template must preserve source edit/delete Collection action contracts for optional item operation menus.", {
+      actionNames: collectionActions.map((action) => action?.name).filter(Boolean),
+    }));
+  }
+  const itemOperations = findDescendantByIdentity(root, "grid_table_col_item_operations");
+  if (!deepEqual(itemOperations?.attrs?.common?.zidx, [null, null, null, 2])) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_OPERATION_ZINDEX_INVALID", "Responsive Collection Card item operations must preserve attrs.common.zidx = [null, null, null, 2] so mobile operation clicks stay above whole-row click handling.", {
+      actual: itemOperations?.attrs?.common?.zidx ?? null,
+    }));
+  }
+  const itemOpMenu = findDescendantByIdentity(root, "grid_table_col_item_op_menu");
+  if (!deepEqual(itemOpMenu?.attrs?.settings?.position, [null, null, null, "bottomRight"])) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_OP_MENU_POSITION_INVALID", "Responsive Collection Card item menu must preserve attrs.settings.position = [null, null, null, \"bottomRight\"] for the mobile Button right popup placement.", {
+      actual: itemOpMenu?.attrs?.settings?.position ?? null,
+    }));
+  }
+  validateDynamicUserItemPadding(root, findings, {
+    code: "DASH_DATASET_TEMPLATE_DYNAMIC_USER_ITEM_PADDING_NOT_S0",
+    templateId: "collection_control_responsive",
+  });
 }
 
 function validateResponsiveCardGridTemplateArtifact(registry, findings, options = {}) {
@@ -834,12 +954,98 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   }
   validateCollectionStyleContracts(entry, page, findings, { templateId: provenance.templateId });
   if (GRID_TABLE_IDS.has(provenance.templateId)) validateGridTable(entry, page, provenance.templateId, findings);
+  if (provenance.templateId === "collection_control_responsive") validateResponsiveCollection(entry, page, findings);
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid") validateResponsiveCardGrid(entry, page, findings, context);
   if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
   if (provenance.templateId === "collection_control_grid_table_with_multiselect") validateGridMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
+}
+
+function validateResponsiveCollection(entry, page, findings) {
+  const wrapper = findNearestAncestorByIdentity(entry, "grid_table_col_wrapper");
+  if (!wrapper) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_WRAPPER_MISSING", "collection_control_responsive must preserve the export-shaped responsive Collection wrapper.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+  const requiredSlots = ["grid_table_col_title_wrapper", "op_normal", "grid_table_col_body"];
+  for (const slot of requiredSlots) {
+    if (!findDescendantByIdentity(wrapper, slot)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_SLOT_MISSING", "collection_control_responsive is missing a required export-shaped wrapper slot.", { page: page.title, path: entry.pointer, slot }));
+    }
+  }
+  const attrs = entry.control?.attrs || {};
+  for (const property of ["data", "layout", "pagination", "tablecols", "header", "body", "table", "list-display-preference"]) {
+    if (attrs[property] === undefined) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_COLLECTION_ATTR_MISSING", "Responsive Collection is missing a required native Collection property.", { page: page.title, path: entry.pointer, property }));
+    }
+  }
+  if (attrs["list-display-preference"] !== "default") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_LAYOUT_INVALID", "Responsive Collection must preserve the export-proven responsive table/card display preference.", { page: page.title, path: entry.pointer, actual: attrs["list-display-preference"] ?? null }));
+  }
+  const columns = asArray(attrs.tablecols);
+  if (columns.length < 3) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TABLE_COLUMNS_MISSING", "Responsive Collection requires at least three native table columns.", { page: page.title, path: `${entry.pointer}.attrs.tablecols`, count: columns.length }));
+  }
+  const labels = new Set();
+  const dynamicControls = [];
+  for (const [index, column] of columns.entries()) {
+    const title = String(column?.attrs?.title?.value || "").trim();
+    if (!title || typeof column?.attrs?.sortingEnabled !== "boolean" || !asArray(column?.children).length) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TABLE_COLUMN_INVALID", "Each responsive native table column requires a title, boolean sorting setting, and card item-template content.", { page: page.title, path: `${entry.pointer}.attrs.tablecols[${index}]`, title: title || null }));
+    }
+    if (title) {
+      const normalized = normalizeIdentity(title);
+      if (labels.has(normalized)) findings.push(error("DASH_DATASET_COLLECTION_DUPLICATE_COLUMN_LABEL", "Responsive Collection native table columns must not duplicate visible labels.", { page: page.title, path: `${entry.pointer}.attrs.tablecols[${index}]`, label: title }));
+      labels.add(normalized);
+    }
+    if (column?.attrs?.sortingEnabled === true && !String(column?.attrs?.sortingField || "").trim()) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_SORT_FIELD_MISSING", "Sortable responsive native table columns require a source sortingField.", { page: page.title, path: `${entry.pointer}.attrs.tablecols[${index}]`, title: title || null }));
+    }
+    dynamicControls.push(...findDescendants(column, (node) => String(node?.type || "").startsWith("dynamic-") || String(node?.type || "") === "progress"));
+  }
+  if (!dynamicControls.length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_DYNAMIC_CONTROLS_MISSING", "Responsive Collection native table columns require Dynamic or Progress item-template controls.", { page: page.title, path: `${entry.pointer}.attrs.tablecols` }));
+  }
+  if (!asArray(entry.control?.children).length || !asArray(entry.control?.children).flatMap((child) => findDescendants(child, (node) => String(node?.type || "").startsWith("dynamic-"))).length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_VIEW_MISSING", "Responsive Collection must materialize a non-empty Card view item tree for mobile.", { page: page.title, path: `${entry.pointer}.children` }));
+  }
+  const operations = findDescendantByIdentity(wrapper, "grid_table_col_item_operations");
+  const operationButtons = operations ? findDescendants(operations, (node) => String(node?.type || "") === "action_button") : [];
+  for (const identity of ["grid_table_col_operations", "op_normal"]) {
+    const node = findDescendantByIdentity(wrapper, identity);
+    if (!deepEqual(node?.attrs?.style?.widthtype, [null, "2", "2"])) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MOBILE_OPERATION_WIDTH_INVALID", "Responsive Collection operation containers must be Full width on mobile.", { page: page.title, path: entry.pointer, control: identity, actual: node?.attrs?.style?.widthtype ?? null }));
+    }
+  }
+  if (operationButtons.length && !deepEqual(operations?.attrs?.common?.zidx, [null, null, null, 2])) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_OPERATION_ZINDEX_INVALID", "Responsive Collection Card item operations must preserve attrs.common.zidx = [null, null, null, 2] so mobile operation clicks stay above whole-row click handling.", {
+      page: page.title,
+      path: entry.pointer,
+      actual: operations?.attrs?.common?.zidx ?? null,
+    }));
+  }
+  const itemOpMenu = findDescendantByIdentity(wrapper, "grid_table_col_item_op_menu");
+  if (operationButtons.length && !deepEqual(itemOpMenu?.attrs?.settings?.position, [null, null, null, "bottomRight"])) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_OP_MENU_POSITION_INVALID", "Responsive Collection Card item menu must preserve the mobile Button right popup placement.", {
+      page: page.title,
+      path: entry.pointer,
+      actual: itemOpMenu?.attrs?.settings?.position ?? null,
+    }));
+  }
+  for (const button of operationButtons) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_OPERATION_ACTION_MISSING", "Every responsive Collection item operation button must bind to a matching Collection action.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+  if (operationButtons.length && !asArray(attrs.actions).length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_COLLECTION_ACTIONS_MISSING", "Responsive Collection item operations require matching Collection root attrs.actions[] contracts.", { page: page.title, path: `${entry.pointer}.attrs.actions` }));
+  }
+  const hasDeleteButton = operationButtons.some((button) => /delete/i.test(`${identityCandidates(button).join(" ")} ${button?.label || ""}`));
+  if (hasDeleteButton && !/var_isDeleteConfirmed|isDeleteConfirmed|confirm/i.test(JSON.stringify(page.resource || {}))) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_DELETE_CONFIRMATION_TEMPVAR_MISSING", "Responsive Collection Delete item requires a confirmation temp variable and conditional delete flow.", { page: page.title, path: entry.pointer }));
+  }
 }
 
 function validatePrintCollection(entry, page, findings) {
@@ -2064,12 +2270,14 @@ function validateCollectionStyleContracts(entry, page, findings, { templateId } 
     path: entry.pointer,
     templateId,
   });
-  validateGridTableCaptionTitleTypography(root, findings, {
-    code: "DASH_DATASET_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID",
-    page: page.title,
-    path: entry.pointer,
-    templateId,
-  });
+  if (templateId !== "collection_control_responsive") {
+    validateGridTableCaptionTitleTypography(root, findings, {
+      code: "DASH_DATASET_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID",
+      page: page.title,
+      path: entry.pointer,
+      templateId,
+    });
+  }
 }
 
 function validateDynamicUserItemPadding(root, findings, context = {}) {
@@ -2475,6 +2683,9 @@ function parseArgs(argv) {
     } else if (token === "--responsive-card-template") {
       args.responsiveCardTemplate = argv[i + 1];
       i += 1;
+    } else if (token === "--responsive-template") {
+      args.responsiveTemplate = argv[i + 1];
+      i += 1;
     } else if (token === "--card-template") {
       args.cardTemplate = argv[i + 1];
       i += 1;
@@ -2494,7 +2705,7 @@ function parseArgs(argv) {
 function printUsage() {
   console.log(`Usage:
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry
-  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --responsive-card-template <template.json> --card-template <template.json> --grid-table-template <template.json> --grid-template <template.json>
+  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --responsive-card-template <template.json> --responsive-template <template.json> --card-template <template.json> --grid-table-template <template.json> --grid-template <template.json>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --app-plan <yeeflow-app-plan.md>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --package <app.yapk>`);
 }

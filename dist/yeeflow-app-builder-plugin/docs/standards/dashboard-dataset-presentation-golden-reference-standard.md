@@ -15,6 +15,7 @@ This standard keeps business planning separate from low-level Yeeflow payload ge
 | Reference ID | Use For |
 | --- | --- |
 | `collection_control_responsive_card_grid` | Card-style record browsing. |
+| `collection_control_responsive` | Native responsive Collection: table on computer/laptop/tablet and cards on mobile. |
 | `collection_control_card_with_multiselect_toolbar` | Card-style records with selected state and bulk toolbar. |
 | `collection_control_grid_table` | Dense table-like Collection records. |
 | `collection_control_grid_table_with_multiselect` | Dense table-like Collection records with checkbox selection and bulk operations. |
@@ -45,6 +46,7 @@ Validator scope rule: this gate parses canonical Dashboard record-display / data
 ## Selection Rules
 
 - Choose `collection_control_responsive_card_grid` for browsing records as cards.
+- Choose `collection_control_responsive` when the same operational dataset needs native sortable table columns on computer/laptop/tablet and card presentation on mobile. It is not the legacy Flex Grid table pattern.
 - Choose `collection_control_card_with_multiselect_toolbar` when card records need multi-select bulk actions.
 - Choose `collection_control_grid_table` for dense operational records without bulk selection.
 - Choose `collection_control_grid_table_with_multiselect` for dense operational records with multi-row selection and batch operations. Projects Center / Project Tasks is the export-proven source reference only, not a business-domain restriction.
@@ -53,6 +55,14 @@ Validator scope rule: this gate parses canonical Dashboard record-display / data
 - Do not choose a template just because it is visually attractive. The selected template must match the business signals: card browsing, dense row/column scanning, free-text search, multiselect/bulk operation, or high-fidelity primary operations table.
 - If more than one reference seems possible, the App Plan must pick exactly one for that dataset region and state why the other options were not chosen at business level. Do not defer the choice to resource generation.
 - Template IDs must be parsed as exact tokens. `collection_control_grid_table_with_multiselect` must not be counted as also selecting `collection_control_grid_table`, and retired IDs such as `collection_control_grid_table_with_search` must fail as unknown.
+
+## Responsive Card Grid Template
+
+## Responsive Table/Card Collection Template
+
+`collection_control_responsive` is backed by `docs/reference/collection-control-responsive.template.json`, captured from Projects Center_1 Dashboard page `Collection_control_grid_table (new)`. Clone the complete `grid_table_col_wrapper` subtree and preserve the Collection's native `tablecols`, `header`, `body`, `table`, `pagination`, and `list-display-preference: "default"` settings. This native setting is the export/configuration-proven responsive mechanism: computer, laptop, and tablet use Table view; mobile uses Card view.
+
+Only the title/operation regions, native table-column labels/sorting fields, and both table and Card view item controls may be mapped to the target schema. Keep every table column's title, boolean `sortingEnabled`, and item-template content aligned. `grid_table_col_body.children` is mandatory Card view content, not optional spacer markup: map it to the same target list fields, retain user fields as `dynamic-user`, and remove a source progress region only when the target has no numeric progress field. Preserve mobile Full width for `grid_table_col_operations` and `op_normal` through `attrs.style.widthtype = [null, "2", "2"]`. Map user fields with `dynamic-user`, map progress only to real numeric progress fields, and retain edit/delete actions only when the source is writable; Delete requires the confirmation flow. Do not transplant a Card `control_display` rule whose `controlId` is outside the Card item subtree: it is source-page state, and a target-specific rule may be regenerated only after its controls and choice values are verified. When the Card item-operation container is retained, preserve `grid_table_col_item_operations.attrs.common.zidx = [null, null, null, 2]` so its mobile clicks take precedence over whole-row clicks, and preserve `grid_table_col_item_op_menu.attrs.settings.position = [null, null, null, "bottomRight"]` for the mobile Button right popup placement. Do not add a Flex Grid header or `grid_col_item` row—the legacy `collection_control_grid_table` template owns that separate pattern. Generated-package behavior still requires desktop/tablet/mobile runtime verification before it is claimed as runtime proof.
 
 ## Responsive Card Grid Template
 
@@ -114,7 +124,7 @@ Recommended editable behavior:
 - Do not keep source-template progress bindings such as `Decimal2`, `Completion percentage`, or `Collection item:Completion percentage` unless the target Collection source schema actually contains that internal field and the field is numeric. A visible column named `Status` must not contain a progress control unless the corresponding source field is a real numeric progress field.
 - Header Text controls inside `grid_table_col_header_title_column` and `grid_table_col_header_column` must describe the corresponding field/content rendered in the matching `grid_col_item` column.
 - `grid_table_col_header` must not contain duplicate visible column labels after business mapping. When a source template has both a progress-status column and a text-status column, remove the progress column unless it is backed by a real progress metric; otherwise rename the remaining columns to the real business fields such as `Employment Status` and `Onboarding Status`.
-- `grid_table_col_item_operations` is optional and may contain per-item actions such as Edit or Delete through `grid_table_col_item_op_menu`, but every action control must bind to a valid action. Edit/Delete buttons require matching Collection actions. Delete requires the template delete-confirmation temp variable and conditional delete continuation before `setdatalist remove`.
+- `grid_table_col_item_operations` is optional and may contain per-item actions such as Edit or Delete through `grid_table_col_item_op_menu`, but every action control must bind to a valid action. If retained, it must preserve `attrs.common.zidx = [null, 2]` so its buttons stay above a whole-row click target. Edit/Delete buttons require matching Collection actions. Delete requires the template delete-confirmation temp variable and conditional delete continuation before `setdatalist remove`.
 - Every Button/action_button inside `grid_table_col_item_op_menu` must keep `attrs.button.normal.bg = "rgba(255, 255, 255, 0)"`, including newly generated business operation buttons.
 - If the region is display-only, `grid_table_col_caption` and its descendants may be omitted when no title/toolbar/actions are needed.
 - If the source is a Form Report or Data Report, `grid_table_col_caption`, `grid_table_col_item_operations`, and operation controls should not be emitted because report datasets are view-only.

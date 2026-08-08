@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.6.1`
+- Version: `1.6.2`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.6.1` adds a fail-closed FormNewReport physical-field contract to the v1.6.0 Application bootstrap and upsert behavior. An incremental FormNewReport must bind an Approval Form `DefKey`, map `Settings.Fields[]`, materialize one MCP-issued physical Type `32` field per mapping using native positive-index storage slots, and bind its default view to those physical fields before save/readback. It blocks empty `Fields[]`, `Text0`, and Approval mapping keys used as physical column names. Every application/resource write still requires explicit confirmation and persisted readback. YAPK remains available only when the user explicitly requests package delivery, import/install, upgrade, migration, export, or offline handoff.
+Version `1.6.2` adds the export-shaped `collection_control_responsive` golden reference for Dashboard Collections. It preserves the native Table view on computer, laptop, and tablet plus the complete Card view on mobile, maps only target-schema fields, and fails closed on missing Card content, sparse Card children, foreign display-rule references, incorrect mobile operation widths, incorrect Card action layering, or incorrect mobile operation-menu placement. Every application/resource write still requires explicit confirmation and persisted readback. YAPK remains available only when the user explicitly requests package delivery, import/install, upgrade, migration, export, or offline handoff.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.6.1
+Version: 1.6.2
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.6.1
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.6.2
 ```
 
 ## What Is Included

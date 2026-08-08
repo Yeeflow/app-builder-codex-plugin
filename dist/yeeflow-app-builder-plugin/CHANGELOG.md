@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.6.2
+
+- Add the export-shaped `collection_control_responsive` golden reference for native Table view on computer/laptop/tablet and a complete Card view on mobile.
+- Preserve schema-bound Card field mapping, dynamic-user rendering, edit/delete action contracts, delete confirmation, native table sort metadata, and mobile Full width operation controls.
+- Fail closed on empty or sparse Card item trees, foreign Card `control_display` references, incorrect mobile Card item-operation `z-index`, and incorrect mobile Drop bar `bottomRight` placement.
+- Add source/distribution materialization, validation, and negative regression coverage for the responsive Collection reference.
+
 ## 1.6.1
 
 - Add a fail-closed incremental MCP FormNewReport contract requiring an Approval Form `DefKey`, non-empty `Settings.Fields[]`, one MCP-issued physical Type `32` field per mapping, native positive-index storage names, and physical-field default-view bindings.

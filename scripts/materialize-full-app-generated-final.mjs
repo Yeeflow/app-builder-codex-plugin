@@ -171,6 +171,7 @@ const DATA_TABLE_TEMPLATE_PATHS = {
 };
 const APPROVED_DATA_TABLE_TEMPLATE_IDS = Object.freeze(Object.keys(DATA_TABLE_TEMPLATE_PATHS));
 const COLLECTION_TEMPLATE_PATHS = {
+  collection_control_responsive: path.join(ROOT, "docs/reference/collection-control-responsive.template.json"),
   collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   "Event Pipeline Grid-Table": path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   collection_control_grid_table_with_multiselect: path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json"),
@@ -191,6 +192,8 @@ const COLLECTION_DYNAMIC_USER_ZERO_ITEM_PADDING = Object.freeze({
 });
 const COLLECTION_OP_MENU_BUTTON_TRANSPARENT_BG = "rgba(255, 255, 255, 0)";
 const COLLECTION_GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY = Object.freeze([null, "l-medium"]);
+const RESPONSIVE_COLLECTION_ITEM_OPERATIONS_Z_INDEX = Object.freeze([null, null, null, 2]);
+const RESPONSIVE_COLLECTION_ITEM_OP_MENU_POSITION = Object.freeze([null, null, null, "bottomRight"]);
 const SOURCE_COLLECTION_TEMPLATE_IDS = {
   listSetIds: new Set(["2058726109535285249", "2058571956842409984", "2054077087595905025"]),
   listIds: new Set(["2058726119586017281", "2058571966637289476", "2054077096447066112"]),
@@ -2665,6 +2668,10 @@ function inferApprovedCollectionTemplateId(text) {
     {
       templateId: "collection_control_responsive_card_grid",
       patterns: [/responsive\s+cards?/, /visual\s+asset\s+brows/, /asset\s+card\s+browser/, /cards?\s+match\s+asset/],
+    },
+    {
+      templateId: "collection_control_responsive",
+      patterns: [/desktop\s+table.*mobile\s+card/, /responsive\s+table.*mobile\s+card/, /table.*tablet.*card.*mobile/, /native\s+table\s+columns/],
     },
     {
       templateId: "Event Pipeline Grid-Table",
@@ -7613,6 +7620,11 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     control.label = field.displayName;
     if (control.type !== "dynamic-user") replaceUserLikeDynamicFieldText(control, field.displayName);
   }
+  if (templateId === "collection_control_responsive" && collection) {
+    mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName });
+    mapResponsiveCollectionCardView(collection, { listMeta, listId, listName });
+    enforceResponsiveCollectionMobileOperationWidth(root);
+  }
   for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
     search.attrs = {
       ...(search.attrs || {}),
@@ -7643,6 +7655,202 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   root.pageLevelDependencies = scopedPageDependencies.dependencies;
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
   return root;
+}
+
+function mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName }) {
+  const fields = fieldsForDynamicControls(listMeta);
+  const columns = Array.isArray(collection?.attrs?.tablecols) ? collection.attrs.tablecols : [];
+  let fallbackIndex = 0;
+  for (const column of columns) {
+    const field = selectResponsiveTableColumnField(column, fields, fallbackIndex);
+    fallbackIndex += 1;
+    if (!field) continue;
+    column.attrs = {
+      ...(column.attrs || {}),
+      title: { ...(column.attrs?.title || {}), value: field.displayName, variable: null },
+    };
+    if (column.attrs.sortingEnabled === true) column.attrs.sortingField = field.fieldName;
+    else delete column.attrs.sortingField;
+
+    for (const control of findDescendants(column, (node) => String(node?.type || "").startsWith("dynamic-"))) {
+      control.type = dynamicControlTypeForField(field);
+      control.attrs = {
+        ...(control.attrs || {}),
+        source: "3",
+        "obj-f": field.fieldName,
+        field: field.fieldName,
+        fieldName: field.fieldName,
+        data: {
+          ...(control.attrs?.data || {}),
+          ListID: stringId(listId),
+          list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+          field: field.fieldName,
+          fieldName: field.fieldName,
+        },
+      };
+      control.field = field.fieldName;
+      control.FieldName = field.fieldName;
+      control.name = field.displayName;
+      control.title = field.displayName;
+      control.label = field.displayName;
+      if (control.type === "dynamic-user") {
+        control.attrs.user = { ...(control.attrs.user || {}), field: field.fieldName, fieldName: field.fieldName };
+        applyCollectionDynamicUserItemPadding(control);
+      }
+      if (control.type !== "dynamic-user") replaceUserLikeDynamicFieldText(control, field.displayName);
+    }
+    for (const progress of findDescendants(column, (node) => String(node?.type || "") === "progress")) {
+      progress.attrs = {
+        ...(progress.attrs || {}),
+        bar: {
+          ...(progress.attrs?.bar || {}),
+          per: {
+            ...(progress.attrs?.bar?.per || {}),
+            value: null,
+            variable: [{ exprType: "variable_ctx", valueType: "percent", id: field.fieldName, ctx: "__ctx_coll", type: "expr", name: `Collection item:${field.displayName}` }],
+          },
+        },
+      };
+    }
+    for (const heading of findDescendants(column, (node) => String(node?.type || "") === "heading")) {
+      rewriteResponsiveColumnHeadingBindings(heading, field);
+    }
+  }
+}
+
+function mapResponsiveCollectionCardView(collection, { listMeta, listId, listName }) {
+  const cardItem = asArray(collection?.children)[0];
+  if (!cardItem) return;
+  const fields = fieldsForDynamicControls(listMeta);
+  const titleField = findFieldBySemanticTokens(fields, ["title", "subject", "name", "number"]) || fields.find((field) => field.fieldName === "Title") || fields[0];
+  const ownerField = findFieldBySemanticTokens(fields, ["owner", "assignee", "assigned", "requester", "manager"]);
+  const startField = findFieldBySemanticTokens(fields, ["start date", "start", "created"]);
+  const endField = findFieldBySemanticTokens(fields, ["end date", "due date", "end", "due"]);
+  const statusField = findFieldBySemanticTokens(fields, ["status", "state", "stage"]);
+  const bind = (control, field) => {
+    if (!control || !field) return;
+    control.type = dynamicControlTypeForField(field);
+    control.attrs = {
+      ...(control.attrs || {}),
+      source: "3",
+      "obj-f": field.fieldName,
+      field: field.fieldName,
+      fieldName: field.fieldName,
+      data: {
+        ...(control.attrs?.data || {}),
+        ListID: stringId(listId),
+        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        field: field.fieldName,
+        fieldName: field.fieldName,
+      },
+    };
+    control.field = field.fieldName;
+    control.FieldName = field.fieldName;
+    control.name = field.displayName;
+    control.title = field.displayName;
+    control.label = field.displayName;
+    if (control.type === "dynamic-user") {
+      control.attrs.user = { ...(control.attrs.user || {}), field: field.fieldName, fieldName: field.fieldName };
+      applyCollectionDynamicUserItemPadding(control);
+    }
+  };
+  const children = asArray(cardItem.children);
+  bind(findDescendants(children[0], (node) => String(node?.type || "") === "dynamic-field")[0], titleField);
+  bind(findDescendants(children[1], (node) => String(node?.type || "") === "dynamic-user")[0], ownerField);
+  const dateControls = findDescendants(children[2], (node) => String(node?.type || "") === "dynamic-field");
+  bind(dateControls[0], startField);
+  bind(dateControls[1], endField);
+  const progressIndex = children.findIndex((child) => findDescendants(child, (node) => String(node?.type || "") === "progress").length > 0);
+  const progressField = fields.find((field) => /progress|completion|percent|percentage/i.test(`${field.displayName} ${field.fieldName}`));
+  if (progressIndex >= 0 && !progressField) cardItem.children.splice(progressIndex, 1);
+  const statusRegion = asArray(cardItem.children).find((child) => findDescendants(child, (node) => String(node?.type || "") === "heading").some((heading) => JSON.stringify(heading).includes("Text1")));
+  const rewriteStatus = (value) => {
+    if (Array.isArray(value)) return value.map(rewriteStatus);
+    if (!value || typeof value !== "object") return value;
+    const out = { ...value };
+    if (out.exprType === "variable_ctx" && out.ctx === "__ctx_coll" && out.id !== "ListDataID" && statusField) {
+      out.id = statusField.fieldName;
+      out.name = `Collection item:${statusField.displayName}`;
+    }
+    for (const [key, child] of Object.entries(out)) out[key] = rewriteStatus(child);
+    return out;
+  };
+  if (statusRegion && statusField) {
+    const index = cardItem.children.indexOf(statusRegion);
+    cardItem.children[index] = rewriteStatus(statusRegion);
+  }
+  cardItem.children = asArray(cardItem.children).filter((child) => child && typeof child === "object");
+  removeNonLocalResponsiveCardDisplayRules(cardItem);
+}
+
+function removeNonLocalResponsiveCardDisplayRules(cardItem) {
+  const cardNodes = [cardItem, ...findDescendants(cardItem, () => true)];
+  const cardControlIds = new Set(cardNodes.map((node) => node?.id).filter((id) => typeof id === "string" && id));
+  for (const node of cardNodes) {
+    const rules = asArray(node?.attrs?.control_display);
+    if (!rules.length) continue;
+    const retained = rules.filter((rule) => !String(rule?.controlId || "").trim() || cardControlIds.has(String(rule.controlId)));
+    if (retained.length === rules.length) continue;
+    if (retained.length) node.attrs.control_display = retained;
+    else delete node.attrs.control_display;
+  }
+}
+
+function enforceResponsiveCollectionMobileOperationWidth(root) {
+  for (const identity of ["grid_table_col_operations", "op_normal"]) {
+    const node = findFirstByIdentity(root, identity);
+    if (!node) continue;
+    node.attrs = node.attrs || {};
+    node.attrs.style = { ...(node.attrs.style || {}), widthtype: [null, "2", "2"] };
+  }
+  const itemOperations = findFirstByIdentity(root, "grid_table_col_item_operations");
+  if (itemOperations) {
+    itemOperations.attrs = itemOperations.attrs || {};
+    itemOperations.attrs.common = {
+      ...(itemOperations.attrs.common || {}),
+      zidx: [...RESPONSIVE_COLLECTION_ITEM_OPERATIONS_Z_INDEX],
+    };
+  }
+  const itemOpMenu = findFirstByIdentity(root, "grid_table_col_item_op_menu");
+  if (itemOpMenu) {
+    itemOpMenu.attrs = itemOpMenu.attrs || {};
+    itemOpMenu.attrs.settings = {
+      ...(itemOpMenu.attrs.settings || {}),
+      position: [...RESPONSIVE_COLLECTION_ITEM_OP_MENU_POSITION],
+    };
+  }
+}
+
+function selectResponsiveTableColumnField(column, fields, index) {
+  const title = String(column?.attrs?.title?.value || "").toLowerCase();
+  const typeHints = {
+    title: ["title", "subject", "name", "number"],
+    assignee: ["assignee", "assigned", "owner", "requester", "manager"],
+    owner: ["owner", "assignee", "assigned", "requester", "manager"],
+    start: ["start date", "start", "created"],
+    end: ["due date", "end date", "due", "end"],
+    due: ["due date", "due", "end date", "end"],
+    completion: ["completion", "progress", "percent", "percentage"],
+    progress: ["progress", "completion", "percent", "percentage"],
+    status: ["status", "state", "stage"],
+  };
+  const tokens = Object.entries(typeHints).find(([hint]) => title.includes(hint))?.[1] || [];
+  return findFieldBySemanticTokens(fields, tokens) || fields[index % fields.length] || fields[0] || null;
+}
+
+function rewriteResponsiveColumnHeadingBindings(heading, field) {
+  const rewrite = (value) => {
+    if (Array.isArray(value)) return value.map(rewrite);
+    if (!value || typeof value !== "object") return value;
+    const out = { ...value };
+    if (out.exprType === "variable_ctx" && out.ctx === "__ctx_coll" && out.id !== "ListDataID") {
+      out.id = field.fieldName;
+      out.name = `Collection item:${field.displayName}`;
+    }
+    for (const [key, child] of Object.entries(out)) out[key] = rewrite(child);
+    return out;
+  };
+  heading.attrs = rewrite(heading.attrs || {});
 }
 
 function wireTemplateSearchFiltersToCollection(root, { listMeta }) {
