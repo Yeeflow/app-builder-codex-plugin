@@ -1,0 +1,31 @@
+name: Yeeflow App Builder v1.7.2 RC verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-plugin-archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify repository hygiene
+        run: node scripts/test-repo-root-hygiene.mjs
+      - name: Verify Collection reference registry
+        run: node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry docs/reference/dashboard-dataset-presentation-golden-references.json
+      - name: Run Collection routing and migration regressions
+        run: |
+          node scripts/test-dashboard-dataset-presentation-golden-references.mjs
+          node scripts/test-responsive-collection-default-routing.mjs
+          node scripts/test-retired-collection-template-migrations.mjs
+      - name: Build tracked payload archive
+        run: node scripts/build-plugin-archive.mjs --tracked-only --output /tmp/yeeflow-app-builder-plugin-1.7.2-rc.zip
+      - name: Verify archive and plugin metadata
+        run: |
+          unzip -t /tmp/yeeflow-app-builder-plugin-1.7.2-rc.zip
+          node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.7.2
