@@ -1,4 +1,6 @@
-# Collection Grid Table Generation Standard
+# Historical Collection Grid Table Compatibility Standard
+
+`collection_control_grid_table` and `collection_control_grid_table_with_multiselect` are retired migration-only IDs. New App Plans and materialization must use `collection_control_responsive` or `collection_control_responsive_multiple_select`; this document remains only to interpret historical exports and compatibility fixtures.
 
 This standard applies only to the `collection_control_grid_table` pattern: a table-like Collection body paired with a header `flex_grid` and a repeated item `flex_grid`.
 

@@ -2,12 +2,13 @@
 
 ## Unreleased
 
-## 1.7.1
+## 1.7.2
 
-- Make `collection_control_responsive_multiple_select` the default materialization route for generic multi-select, selected-count, and batch-action Dashboard requirements.
-- Keep `collection_control_grid_table_with_multiselect` only for explicit legacy Flex Grid compatibility, while retaining its existing regression coverage.
-- Synchronize the responsive multiselect mobile operation width contract with the live reference and preserve complete native Table/Card, page-dependency, z-index, and Button-right menu behavior.
-- Fix responsive multiselect Card-view materialization and add default-routing, template-fidelity, and legacy-compatibility regression coverage.
+- Retire `collection_control_grid_table` and `collection_control_grid_table_with_multiselect` from new Dashboard Collection golden-reference selection.
+- Migrate those exact legacy App Plan IDs to `collection_control_responsive` and `collection_control_responsive_multiple_select`, retaining explicit migration provenance and warnings for existing packages.
+- Route reverse-related and generic Collection materialization to native responsive Table/Card structures, preserving mobile Card content and template-native attributes during runtime binding.
+- Reconcile the v1.7.1 responsive multiselect routing and Card-mapper fixes, including broad generic batch-selection detection.
+- Keep legacy exported JSON artifacts only for historical inspection and compatibility tests; they are no longer generated-final choices.
 
 ## 1.7.0
 

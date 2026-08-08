@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.7.1`
+- Version: `1.7.2`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.6.2` adds the export-shaped `collection_control_responsive` golden reference for Dashboard Collections. It preserves the native Table view on computer, laptop, and tablet plus the complete Card view on mobile, maps only target-schema fields, and fails closed on missing Card content, sparse Card children, foreign display-rule references, incorrect mobile operation widths, incorrect Card action layering, or incorrect mobile operation-menu placement. Every application/resource write still requires explicit confirmation and persisted readback. YAPK remains available only when the user explicitly requests package delivery, import/install, upgrade, migration, export, or offline handoff.
+Version `1.7.2` makes the native responsive Table/Card Collection references the only generated-final defaults. Legacy Flex Grid template IDs are migration-only: existing plans map safely to the matching responsive template with visible provenance, while new plans cannot select them. The Plugin preserves native table columns, mobile Card content, selected-state dependencies, item-operation layering, and explicit write/readback safety boundaries.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.7.1
+Version: 1.7.2
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.6.2
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.7.2
 ```
 
 ## What Is Included

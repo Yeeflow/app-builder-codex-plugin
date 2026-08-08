@@ -173,16 +173,16 @@ const APPROVED_DATA_TABLE_TEMPLATE_IDS = Object.freeze(Object.keys(DATA_TABLE_TE
 const COLLECTION_TEMPLATE_PATHS = {
   collection_control_responsive: path.join(ROOT, "docs/reference/collection-control-responsive.template.json"),
   collection_control_responsive_multiple_select: path.join(ROOT, "docs/reference/collection-control-responsive-multiple-select.template.json"),
-  collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   "Event Pipeline Grid-Table": path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
-  collection_control_grid_table_with_multiselect: path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json"),
   collection_control_card_with_multiselect_toolbar: path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json"),
   collection_control_responsive_card_grid: path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json"),
 };
 const APPROVED_COLLECTION_TEMPLATE_IDS = Object.freeze(Object.keys(COLLECTION_TEMPLATE_PATHS));
+const RETIRED_COLLECTION_TEMPLATE_MIGRATIONS = Object.freeze({
+  collection_control_grid_table: "collection_control_responsive",
+  collection_control_grid_table_with_multiselect: "collection_control_responsive_multiple_select",
+});
 const GRID_TABLE_TEMPLATE_IDS = new Set([
-  "collection_control_grid_table",
-  "collection_control_grid_table_with_multiselect",
   "Event Pipeline Grid-Table",
 ]);
 const COLLECTION_DYNAMIC_USER_ZERO_ITEM_PADDING = Object.freeze({
@@ -1822,11 +1822,13 @@ function collectDashboardDatasetRecords(planText) {
       const raw = lines[rowIndex];
       const selectedTemplateId = extractApprovedCollectionTemplateId(raw);
       if (selectedTemplateId) {
+        const retiredTemplateId = extractRetiredCollectionTemplateId(raw);
         records.push({
           dashboardPage: cleanResourceName(cells[pageColumn]) || currentDashboardPage,
           datasetRegion: cleanResourceName(cells[regionColumn]),
           sourceResource: cleanResourceName(cells[sourceColumn]),
           selectedTemplateId,
+          retiredTemplateId,
           raw: raw.trim(),
         });
       }
@@ -2648,6 +2650,8 @@ function uniqueDashboardAnalyticsRecords(records) {
 }
 
 function extractApprovedCollectionTemplateId(text) {
+  const retiredTemplateId = extractRetiredCollectionTemplateId(text);
+  if (retiredTemplateId) return RETIRED_COLLECTION_TEMPLATE_MIGRATIONS[retiredTemplateId];
   for (const templateId of APPROVED_COLLECTION_TEMPLATE_IDS) {
     const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
@@ -2655,13 +2659,16 @@ function extractApprovedCollectionTemplateId(text) {
   return inferApprovedCollectionTemplateId(text);
 }
 
+function extractRetiredCollectionTemplateId(text) {
+  return Object.keys(RETIRED_COLLECTION_TEMPLATE_MIGRATIONS).find((templateId) => {
+    const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""));
+  }) || "";
+}
+
 function inferApprovedCollectionTemplateId(text) {
   const value = String(text || "").toLowerCase();
   const candidates = [
-    {
-      templateId: "collection_control_grid_table_with_multiselect",
-      patterns: [/legacy.*grid[-\s]*table.*multi\s*select/, /flex\s*grid.*multi\s*select/, /multi\s*select.*(?:legacy|flex\s*grid)/],
-    },
     {
       templateId: "collection_control_card_with_multiselect_toolbar",
       patterns: [/card.*multi\s*select/, /multi\s*select.*card/, /selected\s+follow[-\s]*up/, /personal\s+loan\s+cards/],
@@ -2669,10 +2676,13 @@ function inferApprovedCollectionTemplateId(text) {
     {
       templateId: "collection_control_responsive_multiple_select",
       patterns: [
+        /grid[-\s]*table.*multi\s*select/,
+        /multi\s*select.*grid[-\s]*table/,
         /multi[-\s]*select/,
         /multi[-\s]*row/,
         /checkbox.*(selection|select)/,
         /(?:bulk|batch).*(?:operation|action|update|delete|selected|complete)/,
+        /batch.*selected/,
         /selected\s+records?/,
       ],
     },
@@ -2689,7 +2699,7 @@ function inferApprovedCollectionTemplateId(text) {
       patterns: [/event\s+pipeline\s+grid[-\s]*table/, /rich\s+operations\s+pipeline/, /primary\s+operations\s+layout/],
     },
     {
-      templateId: "collection_control_grid_table",
+      templateId: "collection_control_responsive",
       patterns: [/dense\s+grid[-\s]*table/, /dense\s+escalation/, /grid[-\s]*table\s+suits/, /dense\s+queue/],
     },
   ];
@@ -2996,7 +3006,7 @@ function collectReverseRelatedPlanRows(planText) {
           childList,
           childLookupField,
           sectionTitle: cleanResourceName(cells[titleColumn]) || `${childList} Related Records`,
-          collectionTemplate: cleanResourceName(cells[templateColumn]) || "collection_control_grid_table",
+          collectionTemplate: cleanResourceName(cells[templateColumn]) || "collection_control_responsive",
           search: cleanResourceName(cells[searchColumn]),
           addRecord: cleanResourceName(cells[addColumn]),
           defaultValue: cleanResourceName(cells[defaultColumn]),
@@ -4384,13 +4394,14 @@ function standardDataListViewContentCardAttrs() {
 }
 
 function buildOfficialReverseRelatedCollectionWrapper({ sectionId, record, childMeta, rootListSetId, lookupField, currentIdExpr, binding, searchFields, displayFields, sectionTitle, operationsChildren }) {
-  const template = loadCollectionTemplate("collection_control_grid_table");
+  const template = loadCollectionTemplate("collection_control_responsive");
   const wrapper = clone(template.templateResource?.rootContainer || template.rootContainer || template);
   reinstantiateTemplateUuidValues(wrapper);
   wrapper.name = sectionTitle;
   wrapper.title = sectionTitle;
-  wrapper.collectionTemplateId = "collection_control_grid_table";
-  wrapper.derivedFromCollectionTemplate = "collection_control_grid_table";
+  wrapper.collectionTemplateId = "collection_control_responsive";
+  wrapper.derivedFromCollectionTemplate = "collection_control_responsive";
+  wrapper.migratedFromCollectionTemplate = "collection_control_grid_table";
   wrapper.reverseRelatedCollectionWrapper = true;
   wrapper.attrs = {
     ...(wrapper.attrs || {}),
@@ -4409,7 +4420,7 @@ function buildOfficialReverseRelatedCollectionWrapper({ sectionId, record, child
     binding,
     searchFields,
   });
-  configureReverseRelatedGridColumns(wrapper, displayFields);
+  configureReverseRelatedResponsiveColumns(wrapper, { childMeta, displayFields, rootListSetId });
   rewriteCollectionTemplateRuntimeRefs(wrapper, {
     rootListSetId,
     listId: childMeta.listId,
@@ -4429,12 +4440,15 @@ function configureReverseRelatedOperations(wrapper, operationsChildren) {
 function configureReverseRelatedCollectionRuntime(wrapper, { record, childMeta, rootListSetId, lookupField, currentIdExpr, binding, searchFields }) {
   const collection = findFirstByType(wrapper, "collection");
   if (!collection) return;
-  collection.collectionTemplateId = "collection_control_grid_table";
-  collection.derivedFromCollectionTemplate = "collection_control_grid_table";
+  collection.collectionTemplateId = "collection_control_responsive";
+  collection.derivedFromCollectionTemplate = "collection_control_responsive";
+  collection.migratedFromCollectionTemplate = "collection_control_grid_table";
   collection.reverseRelatedCollection = true;
   collection.attrs = {
+    ...(collection.attrs || {}),
     data: {
-      list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList, ListSetID: stringId(rootListSetId) },
+      ...(collection.attrs?.data || {}),
+      list: { ...(collection.attrs?.data?.list || {}), AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList, ListSetID: stringId(rootListSetId) },
       filter: [{
         key: crypto.randomUUID(),
         pre: "and",
@@ -4452,6 +4466,32 @@ function configureReverseRelatedCollectionRuntime(wrapper, { record, childMeta, 
     layout: clone(collection.attrs?.layout || {}),
     actions: [],
     pagination: clone(collection.attrs?.pagination || {}),
+  };
+}
+
+function configureReverseRelatedResponsiveColumns(wrapper, { childMeta, displayFields, rootListSetId }) {
+  const collection = findFirstByType(wrapper, "collection");
+  if (!collection) return;
+  const fields = displayFields.length ? displayFields : fieldsForDynamicControls(childMeta);
+  const displayMeta = { ...childMeta, fields };
+  mapResponsiveCollectionTableColumns(collection, {
+    listMeta: displayMeta,
+    listId: childMeta.listId,
+    listName: childMeta.listName,
+  });
+  mapResponsiveCollectionCardView(collection, {
+    listMeta: displayMeta,
+    listId: childMeta.listId,
+    listName: childMeta.listName,
+  });
+  enforceResponsiveCollectionMobileOperationWidth(wrapper);
+  collection.attrs = {
+    ...(collection.attrs || {}),
+    data: {
+      ...(collection.attrs?.data || {}),
+      list: { ...(collection.attrs?.data?.list || {}), ListSetID: stringId(rootListSetId) },
+      datasetPresentationTemplateId: "collection_control_responsive",
+    },
   };
 }
 
@@ -5953,7 +5993,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   const isWorkbenchDashboard = pageLayoutTemplateId === "dashboard-page-layouts-workbench";
   const primaryDatasetRecord = (datasetRecords || [])[0] || null;
   const sourceResource = primaryDatasetRecord?.sourceResource || listName;
-  const selectedTemplateId = primaryDatasetRecord?.selectedTemplateId || "collection_control_grid_table";
+  const selectedTemplateId = primaryDatasetRecord?.selectedTemplateId || "collection_control_responsive";
   const datasetRegion = primaryDatasetRecord?.datasetRegion || `${sourceResource} records`;
   const sourceListMeta = listMeta || { listName: sourceResource, listId, fields: [{ fieldName: "Title", displayName: "Title", fieldType: "Text", controlType: "input" }], detailLayoutId: "" };
   const normalizedFilters = normalizeDashboardFilters({ filters: dashboardFilters, listMeta: sourceListMeta, dashboardName: name });
@@ -5981,7 +6021,8 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     const recordListId = recordListMeta.listId || listId;
     const recordRegion = record.datasetRegion || `${recordListName} records`;
     collectionRoots.push(buildCollectionTemplateInstance({
-      templateId: record.selectedTemplateId || "collection_control_grid_table",
+      templateId: record.selectedTemplateId || "collection_control_responsive",
+      migratedFromTemplateId: record.retiredTemplateId || "",
       dashboardName: name,
       datasetRegion: recordRegion,
       listName: recordListName,
@@ -6131,6 +6172,11 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     datasetRegion,
     selectedCollectionTemplateId: selectedTemplateId,
     selectedCollectionTemplateIds: collectionRoots.map((root) => root.datasetPresentationTemplateId).filter(Boolean),
+    retiredCollectionTemplateMigrations: (datasetRecords || []).filter((record) => record.retiredTemplateId).map((record) => ({
+      from: record.retiredTemplateId,
+      to: record.selectedTemplateId,
+      datasetRegion: record.datasetRegion,
+    })),
     selectedDataAnalyticsTemplateIds: (dashboardAnalytics || []).map((record) => record.selectedTemplateId),
     selectedDataTableTemplateIds: (dashboardDataTables || []).map((record) => record.selectedTemplateId),
     sourceResource,
@@ -6217,7 +6263,7 @@ function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, 
       datasetRegion,
       listMeta,
       rootListSetId,
-      selectedTemplateId: leftTemplateId || "collection_control_grid_table",
+      selectedTemplateId: leftTemplateId || "collection_control_responsive",
       id: `${collectionId}_left_panel`,
     });
     leftCollection.attrs.data.limit = false;
@@ -6234,7 +6280,7 @@ function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, 
       datasetRegion: `${datasetRegion} selected detail`,
       listMeta,
       rootListSetId,
-      selectedTemplateId: currentTemplateId || leftTemplateId || "collection_control_grid_table",
+      selectedTemplateId: currentTemplateId || leftTemplateId || "collection_control_responsive",
       id: `${collectionId}_current_item`,
     });
     currentCollection.attrs.data.limit = true;
@@ -6262,7 +6308,7 @@ function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, 
 
 function configureMasterDetailCollection(collection, { role, dashboardName, datasetRegion, listMeta, rootListSetId, selectedTemplateId, id }) {
   const listName = listMeta.listName || datasetRegion || "Records";
-  const templateId = selectedTemplateId || "collection_control_grid_table";
+  const templateId = selectedTemplateId || "collection_control_responsive";
   collection.id = id;
   collection.name = role === "left-panel-list" ? `${listName} list` : `${listName} selected item`;
   collection.title = collection.name;
@@ -6292,7 +6338,7 @@ function configureMasterDetailCollection(collection, { role, dashboardName, data
       sourceResourceType: "Data list",
       datasetRegion,
       ...(role === "left-panel-list" ? {
-        datasetPresentationTemplateId: "collection_control_grid_table",
+        datasetPresentationTemplateId: "collection_control_responsive",
       } : {}),
       field: primaryFieldName(listMeta),
       sort: [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }],
@@ -7526,7 +7572,7 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId, rootListSet
   };
 }
 
-function buildCollectionTemplateInstance({ templateId, dashboardName, datasetRegion, listName, rootListSetId, listId, listMeta, detailLayoutId, filterBindings, collectionId }) {
+function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = "", dashboardName, datasetRegion, listName, rootListSetId, listId, listMeta, detailLayoutId, filterBindings, collectionId }) {
   const template = loadCollectionTemplate(templateId);
   const root = clone(template?.templateResource?.rootContainer || {});
   reinstantiateTemplateUuidValues(root);
@@ -7546,6 +7592,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   root.appPlanDatasetRegion = datasetRegion;
   root.datasetPresentationTemplateId = templateId;
   root.derivedFromDatasetPresentationTemplate = templateId;
+  if (migratedFromTemplateId) root.migratedFromDatasetPresentationTemplate = migratedFromTemplateId;
   root.attrs = {
     ...(root.attrs || {}),
     datasetRegion,
@@ -7553,6 +7600,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     appPlanDatasetRegion: datasetRegion,
     datasetPresentationTemplateId: templateId,
     derivedFromDatasetPresentationTemplate: templateId,
+    ...(migratedFromTemplateId ? { migratedFromDatasetPresentationTemplate: migratedFromTemplateId } : {}),
   };
   if (GRID_TABLE_TEMPLATE_IDS.has(templateId)) enforceGridWrapperGap(root);
   const collection = findFirstByType(root, "collection");
@@ -7567,10 +7615,12 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     collection.datasetRegion = datasetRegion;
     collection.datasetPresentationTemplateId = templateId;
     collection.derivedFromDatasetPresentationTemplate = templateId;
+    if (migratedFromTemplateId) collection.migratedFromDatasetPresentationTemplate = migratedFromTemplateId;
     collection.attrs = {
       ...(collection.attrs || {}),
       datasetPresentationTemplateId: templateId,
       derivedFromDatasetPresentationTemplate: templateId,
+      ...(migratedFromTemplateId ? { migratedFromDatasetPresentationTemplate: migratedFromTemplateId } : {}),
       templateId,
       sourceResourceType: "Data list",
       data: {
@@ -7642,7 +7692,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   if ((templateId === "collection_control_responsive" || templateId === "collection_control_responsive_multiple_select") && collection) {
     mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName, skipLeadingSelectionColumn: templateId === "collection_control_responsive_multiple_select" });
     mapResponsiveCollectionCardView(collection, { listMeta, listId, listName });
-    enforceResponsiveCollectionMobileOperationWidth(root);
+    enforceResponsiveCollectionMobileOperationWidth(root, { templateId });
   }
   for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
     search.attrs = {
@@ -7656,9 +7706,6 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     };
   }
   wireTemplateSearchFiltersToCollection(root, { listMeta });
-  if (templateId === "collection_control_grid_table_with_multiselect") {
-    enforceFullWidth(root, ["grid_table_col_multiselect_wrapper", "grid_table_col_caption", "grid_table_col_content"]);
-  }
   if (templateId === "collection_control_responsive_card_grid") {
     removeUnavailableImageControls(root);
   }
@@ -7672,7 +7719,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   });
   enforceCollectionTemplateStyleContracts(root);
   root.pageLevelDependencies = scopedPageDependencies.dependencies;
-  root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
+  root.generatedFrom = { dashboardName, templateId, sourceResource: listName, ...(migratedFromTemplateId ? { migratedFromTemplateId } : {}) };
   return root;
 }
 
@@ -7743,7 +7790,7 @@ function asArray(value) {
 }
 
 function mapResponsiveCollectionCardView(collection, { listMeta, listId, listName }) {
-  const cardItem = Array.isArray(collection?.children) ? collection.children[0] : null;
+  const cardItem = asArray(collection?.children)[0];
   if (!cardItem) return;
   const fields = fieldsForDynamicControls(listMeta);
   const titleField = findFieldBySemanticTokens(fields, ["title", "subject", "name", "number"]) || fields.find((field) => field.fieldName === "Title") || fields[0];
@@ -7820,14 +7867,13 @@ function removeNonLocalResponsiveCardDisplayRules(cardItem) {
   }
 }
 
-function enforceResponsiveCollectionMobileOperationWidth(root) {
+function enforceResponsiveCollectionMobileOperationWidth(root, { templateId = "" } = {}) {
+  const mobileWidth = templateId === "collection_control_responsive_multiple_select" ? "1" : "2";
   for (const identity of ["grid_table_col_operations", "op_normal"]) {
     const node = findFirstByIdentity(root, identity);
     if (!node) continue;
     node.attrs = node.attrs || {};
-    // The live responsive reference uses the mobile Full-width contract ("1").
-    // Keep the desktop/tablet value intact while preserving that mobile behavior.
-    node.attrs.style = { ...(node.attrs.style || {}), widthtype: [null, "2", "1"] };
+    node.attrs.style = { ...(node.attrs.style || {}), widthtype: [null, "2", mobileWidth] };
   }
   const itemOperations = findFirstByIdentity(root, "grid_table_col_item_operations");
   if (itemOperations) {
@@ -8382,7 +8428,7 @@ function inferDashboardTempVarType(id) {
 }
 
 function loadCollectionTemplate(templateId) {
-  const templatePath = COLLECTION_TEMPLATE_PATHS[templateId] || COLLECTION_TEMPLATE_PATHS.collection_control_grid_table;
+  const templatePath = COLLECTION_TEMPLATE_PATHS[templateId] || COLLECTION_TEMPLATE_PATHS.collection_control_responsive;
   const template = JSON.parse(fs.readFileSync(templatePath, "utf8"));
   if (templateId === "Event Pipeline Grid-Table") {
     return { ...template, templateId };
@@ -9270,7 +9316,7 @@ function buildLegacyMaterialDashboardResource({ name, layoutId, listName, listId
                 id: collectionId,
                 name: `${listName} collection`,
                 title: `${listName} collection`,
-                attrs: { data: { list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName }, source: listName, field: "Title" }, collection: { template: "collection_control_grid_table" } },
+                attrs: { data: { list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName }, source: listName, field: "Title" }, collection: { template: "collection_control_responsive" } },
                 children: [
                   { type: "dynamic-field", id: `${collectionId}_title`, name: "Title", title: "Title", attrs: { data: { field: "Title", ListID: stringId(listId) } } },
                 ],

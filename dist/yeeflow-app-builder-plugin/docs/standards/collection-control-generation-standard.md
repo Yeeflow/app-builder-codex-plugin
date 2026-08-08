@@ -1,10 +1,10 @@
 # Collection Control Generation Standard
 
-This standard applies to the export-proven Collection card grid, native responsive table/card, and separately documented legacy Flex Grid table patterns. It does not authorize arbitrary Collection generation.
+This standard applies to the export-proven Collection card grid and native responsive table/card patterns. It does not authorize arbitrary Collection generation.
 
 It does not cover row-list Collection, kanban-style Collection, grouped Collection, nested Collection, timeline-style Collection, gallery/media variants, or unknown non-card patterns. Any non-card Collection usage must remain guarded until a separate export-backed golden-reference study proves the exact pattern.
 
-Collection + Grid/table-style support is covered separately by `docs/standards/collection-grid-table-generation-standard.md` and the `collection_control_grid_table` template. The native responsive Table/Card references are `collection_control_responsive` and `collection_control_responsive_multiple_select`; they use Collection `tablecols` rather than the legacy Flex Grid header/item rows. Do not mix these patterns.
+Collection table-style support uses the native responsive Table/Card references `collection_control_responsive` and `collection_control_responsive_multiple_select`; they use Collection `tablecols` rather than hand-built Flex Grid header/item rows. Do not mix these patterns.
 
 ## Card Collection Golden-Reference Rule
 
@@ -23,7 +23,7 @@ Required root shape:
 
 Use this pattern when the user asks for Collection cards, card grids, activity cards, record cards, ticket cards, task cards, project cards, company cards, contact cards, or similar visual card UI.
 
-Do not reuse this card pattern for table-style, grid-table, spreadsheet-style, row-list, kanban, grouped, nested, timeline, gallery, or unknown Collection requests unless the user explicitly accepts a card fallback and the proof boundary is recorded. For table-like Collection requests, use `collection_control_responsive` when native table-on-desktop/card-on-mobile behavior is required, or use the separate `collection_control_grid_table` standard only when that exact legacy Flex Grid table pattern is requested and valid.
+Do not reuse this card pattern for table-style, grid-table, spreadsheet-style, row-list, kanban, grouped, nested, timeline, gallery, or unknown Collection requests unless the user explicitly accepts a card fallback and the proof boundary is recorded. For table-like Collection requests, use `collection_control_responsive`; it supplies native table-on-desktop/card-on-mobile behavior.
 
 ## Format Rules
 
@@ -46,7 +46,7 @@ Do not reuse this card pattern for table-style, grid-table, spreadsheet-style, r
 
 For `collection_control_responsive`, preserve the full native Collection contract: `attrs.tablecols`, `attrs.header`, `attrs.body`, `attrs.table`, `attrs.pagination`, and `attrs["list-display-preference"] = "default"`. This is configuration-visible proof of Table view on computer/laptop/tablet and Card view on mobile. The mobile Card view is the non-empty `grid_table_col_body.children` item tree; table columns alone are incomplete. Each native table column needs a non-empty title, boolean `sortingEnabled`, `sortingField` if sortable, and a repeated item-template control. Keep `grid_table_col_operations` and `op_normal` at `attrs.style.widthtype = [null, "2", "2"]` so their mobile layout is Full width. When item operations are present, preserve `grid_table_col_item_operations.attrs.common.zidx = [null, 2]` so their controls receive clicks ahead of a whole-row click handler. It is a different template from both the responsive card grid and the Flex Grid table; never add a hand-built header/item `flex_grid` pair.
 
-For `collection_control_responsive_multiple_select`, preserve the same native responsive Table/Card contract plus the complete multiselect page dependency graph from `docs/reference/collection-control-responsive-multiple-select.template.json`: page `filterVars`, `tempVars`, `filter`, `actions`, `formAction`, Collection `attrs.actions`, selected IDs/count bindings, checked/unchecked selection controls, selected-count display, and confirmation-gated batch actions. The leading native table column is the selection column and may have an empty header title; all other native columns still require a title and repeated item-template content. This is the default template whenever a Dashboard requirement asks for multiple selection, selected count, or batch actions; `collection_control_grid_table_with_multiselect` is compatibility-only and requires an explicit legacy Flex Grid request or exact template ID. Keep `grid_table_col_operations` and `op_normal` at the live mobile Full-width contract `widthtype: [null, "2", "1"]`. Do not omit page-level dependencies when cloning the Collection subtree, and do not substitute a legacy Flex Grid header/item pair.
+For `collection_control_responsive_multiple_select`, preserve the same native responsive Table/Card contract plus the complete multiselect page dependency graph from `docs/reference/collection-control-responsive-multiple-select.template.json`: page `filterVars`, `tempVars`, `filter`, `actions`, `formAction`, Collection `attrs.actions`, selected IDs/count bindings, checked/unchecked selection controls, selected-count display, and confirmation-gated batch actions. The leading native table column is the selection column and may have an empty header title; all other native columns still require a title and repeated item-template content. Do not omit page-level dependencies when cloning the Collection subtree, and do not substitute a hand-built Flex Grid header/item pair.
 
 The card grid golden reference defaults to:
 

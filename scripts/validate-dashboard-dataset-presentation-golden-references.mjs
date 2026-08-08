@@ -11,18 +11,18 @@ const RESPONSIVE_CARD_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/colle
 const RESPONSIVE_COLLECTION_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive.template.json");
 const RESPONSIVE_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive-multiple-select.template.json");
 const CARD_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json");
-const GRID_TABLE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table.template.json");
-const GRID_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json");
 
 const APPROVED_IDS = new Set([
   "collection_control_responsive_card_grid",
   "collection_control_responsive",
   "collection_control_responsive_multiple_select",
   "collection_control_card_with_multiselect_toolbar",
-  "collection_control_grid_table",
-  "collection_control_grid_table_with_multiselect",
   "Event Pipeline Grid-Table",
 ]);
+const RETIRED_TEMPLATE_MIGRATIONS = Object.freeze({
+  collection_control_grid_table: "collection_control_responsive",
+  collection_control_grid_table_with_multiselect: "collection_control_responsive_multiple_select",
+});
 const PRINT_TEMPLATE_ID = "dashboard-print-multi-record-table-v1";
 
 const INTERNAL_TEMPLATE_STRUCTURE_IDS = new Set([
@@ -42,14 +42,11 @@ const INTERNAL_TEMPLATE_STRUCTURE_IDS = new Set([
 ]);
 
 const GRID_TABLE_IDS = new Set([
-  "collection_control_grid_table",
-  "collection_control_grid_table_with_multiselect",
   "Event Pipeline Grid-Table",
 ]);
 
 const MULTISELECT_IDS = new Set([
   "collection_control_card_with_multiselect_toolbar",
-  "collection_control_grid_table_with_multiselect",
   "collection_control_responsive_multiple_select",
 ]);
 
@@ -131,7 +128,7 @@ export function validateDashboardDatasetPresentationGoldenReferences(options = {
 }
 
 function validateRegistry(registry, findings, options = {}) {
-  if (!registry) return { approvedIds: APPROVED_IDS, references: new Map() };
+  if (!registry) return { approvedIds: APPROVED_IDS, references: new Map(), retiredTemplateMigrations: RETIRED_TEMPLATE_MIGRATIONS };
   const ids = new Set(asArray(registry.references).map((item) => String(item?.templateId || item?.referenceId || "")).filter(Boolean));
   const references = new Map();
   for (const requiredId of APPROVED_IDS) {
@@ -156,9 +153,10 @@ function validateRegistry(registry, findings, options = {}) {
   validateResponsiveCollectionTemplateArtifact(registry, findings, options);
   validateResponsiveMultiselectTemplateArtifact(registry, findings, options);
   validateCardMultiselectTemplateArtifact(registry, findings, options);
-  validateGridTableTemplateArtifact(registry, findings, options);
-  validateGridMultiselectTemplateArtifact(registry, findings, options);
-  return { approvedIds: ids.size ? ids : APPROVED_IDS, references };
+  const retiredTemplateMigrations = new Map(Object.entries(registry.retiredTemplateMigrations || RETIRED_TEMPLATE_MIGRATIONS)
+    .map(([from, migration]) => [from, typeof migration === "string" ? migration : migration?.replacementTemplateId])
+    .filter(([, to]) => APPROVED_IDS.has(to)));
+  return { approvedIds: ids.size ? ids : APPROVED_IDS, references, retiredTemplateMigrations };
 }
 
 function validateResponsiveCollectionTemplateArtifact(registry, findings, options = {}) {
@@ -664,7 +662,7 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
   const approvedIds = registryInfo.approvedIds;
   const invented = [...dashboardDatasetLines.join("\n").matchAll(/\b(collection_control_[A-Za-z0-9_-]+|Event\s+Pipeline\s+Grid-Table)\b/g)]
     .map((match) => match[1])
-    .filter((id) => !approvedIds.has(id) && !INTERNAL_TEMPLATE_STRUCTURE_IDS.has(id));
+    .filter((id) => !approvedIds.has(id) && !registryInfo.retiredTemplateMigrations.has(id) && !INTERNAL_TEMPLATE_STRUCTURE_IDS.has(id));
   for (const id of invented) {
     findings.push(error("DASH_DATASET_APP_PLAN_REFERENCE_UNKNOWN", "App Plan selected an unknown Dashboard dataset presentation reference.", { referenceId: id }));
   }
@@ -672,7 +670,14 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
   for (const line of dashboardDatasetLines) {
     if (isMarkdownTableHeaderOrSeparator(line)) continue;
     if (/not applicable|n\/a|deferred|no dashboard dataset/i.test(line)) continue;
-    const selected = extractApprovedTemplateIds(line, approvedIds);
+    const selected = extractApprovedTemplateIds(line, approvedIds)
+      .concat(extractRetiredTemplateIds(line, registryInfo.retiredTemplateMigrations).map((id) => registryInfo.retiredTemplateMigrations.get(id)));
+    for (const retiredTemplateId of extractRetiredTemplateIds(line, registryInfo.retiredTemplateMigrations)) {
+      findings.push(warning("DASH_DATASET_APP_PLAN_TEMPLATE_RETIRED_MIGRATED", "App Plan selected a retired Collection template; it will be migrated to its responsive replacement.", {
+        retiredTemplateId,
+        replacementTemplateId: registryInfo.retiredTemplateMigrations.get(retiredTemplateId),
+      }));
+    }
     if (!selected.length) {
       findings.push(error("DASH_DATASET_APP_PLAN_REFERENCE_MISSING", "Dashboard Collection dataset regions in App Plan must select one approved dataset presentation reference.", { line: line.trim().slice(0, 500), approvedTemplateIds: [...approvedIds] }));
       continue;
@@ -720,13 +725,15 @@ function collectDashboardDatasetPlanRecords(text, approvedIds) {
       const selectedControl = row.cells[selectedControlIndex] || row.cells[genericControlIndex] || "";
       if ((selectedControlIndex !== -1 || genericControlIndex !== -1) && !/\bcollection\b/i.test(selectedControl)) continue;
       if (selectedReferenceIndex === -1) continue;
-      const selected = extractApprovedTemplateIds(row.raw, approvedIds);
+      const selected = extractApprovedTemplateIds(row.raw, approvedIds)
+        .concat(extractRetiredTemplateIds(row.raw, RETIRED_TEMPLATE_MIGRATIONS).map((id) => RETIRED_TEMPLATE_MIGRATIONS[id]));
       if (selected.length !== 1) continue;
       records.push({
         dashboardPage: row.cells[dashboardPageIndex] || table.dashboardPage || "",
         datasetRegion: row.cells[datasetRegionIndex] || "",
         sourceResource: row.cells[sourceIndex] || "",
         selectedTemplateId: selected[0],
+        retiredTemplateId: extractRetiredTemplateIds(row.raw, RETIRED_TEMPLATE_MIGRATIONS)[0] || "",
         raw: row.raw,
       });
     }
@@ -919,6 +926,13 @@ function extractApprovedTemplateIds(line, approvedIds) {
   return [...approvedIds].filter((id) => containsExactTemplateId(line, id));
 }
 
+function extractRetiredTemplateIds(line, retiredTemplateMigrations) {
+  const ids = retiredTemplateMigrations instanceof Map
+    ? [...retiredTemplateMigrations.keys()]
+    : Object.keys(retiredTemplateMigrations || {});
+  return ids.filter((id) => containsExactTemplateId(line, id));
+}
+
 function containsExactTemplateId(line, templateId) {
   const text = String(line || "");
   if (!text || !templateId) return false;
@@ -944,7 +958,6 @@ function lineMatchesReferenceGuidance(line, templateId, reference) {
   const fallbackSignals = {
     collection_control_responsive_card_grid: ["card", "browse", "overview", "portfolio", "asset cards", "ticket cards", "request cards", "visual", "display first"],
     collection_control_card_with_multiselect_toolbar: ["card", "multi-select", "multiselect", "bulk", "batch", "selected"],
-    collection_control_grid_table: ["dense", "row", "column", "work queue", "task list", "record list", "operational table", "scan", "tabulated", "tabular", "table tracker", "tabulated tracker", "tracker table", "spreadsheet-like"],
     collection_control_responsive_multiple_select: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection", "responsive", "desktop table", "mobile card"],
     collection_control_grid_table_with_multiselect: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection", "legacy", "flex grid", "legacy grid table"],
     "Event Pipeline Grid-Table": ["primary", "high-fidelity", "pipeline", "portfolio", "work queue", "health", "status", "progress"],
@@ -1027,6 +1040,16 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
     findings.push(error("DASH_DATASET_COLLECTION_TEMPLATE_PROVENANCE_MISSING", "Every generated Dashboard Collection must carry or inherit approved dataset presentation template provenance.", { page: page.title, path: entry.pointer, approvedTemplateIds: [...approvedIds] }));
     return;
   }
+  const retiredReplacement = RETIRED_TEMPLATE_MIGRATIONS[provenance.templateId];
+  if (retiredReplacement) {
+    findings.push(warning("DASH_DATASET_PACKAGE_TEMPLATE_RETIRED", "Package retains a retired legacy Collection template. Existing packages remain readable, but future materialization migrates to the responsive replacement.", {
+      page: page.title,
+      path: entry.pointer,
+      retiredTemplateId: provenance.templateId,
+      replacementTemplateId: retiredReplacement,
+    }));
+    return;
+  }
   if (!approvedIds.has(provenance.templateId) && provenance.templateId !== PRINT_TEMPLATE_ID) {
     findings.push(error("DASH_DATASET_COLLECTION_TEMPLATE_UNKNOWN", "Generated Dashboard Collection uses an unknown dataset presentation template.", { page: page.title, path: entry.pointer, templateId: provenance.templateId, approvedTemplateIds: [...approvedIds] }));
     return;
@@ -1048,7 +1071,6 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid") validateResponsiveCardGrid(entry, page, findings, context);
   if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
-  if (provenance.templateId === "collection_control_grid_table_with_multiselect") validateGridMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
 }
 
@@ -1521,7 +1543,7 @@ function masterDetailWorkspaceConformanceTemplateId(entry, page) {
   const explicitTemplateId = resolveExplicitCollectionTemplateId(entry, APPROVED_IDS);
   if (explicitTemplateId) return explicitTemplateId;
   const identities = identityCandidates(entry.control).map(normalizeIdentity);
-  if (identities.includes("left panel data items wrapper")) return "collection_control_grid_table";
+  if (identities.includes("left panel data items wrapper")) return "collection_control_responsive";
   return "";
 }
 
@@ -2804,6 +2826,10 @@ function readJson(file, findings, missingCode) {
 
 function error(code, message, details = {}) {
   return { level: "error", code, message, ...details };
+}
+
+function warning(code, message, details = {}) {
+  return { level: "warning", code, message, ...details };
 }
 
 function parseArgs(argv) {

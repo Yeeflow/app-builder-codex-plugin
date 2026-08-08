@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
@@ -12,6 +12,8 @@
     "test:mcp-incremental-registry": "node scripts/test-mcp-incremental-capability-registry.mjs",
     "test:mcp-incremental-ledger": "node scripts/test-incremental-mcp-build-ledger.mjs",
     "test:mcp-incremental-operation": "node scripts/test-incremental-mcp-operation.mjs",
+    "test:responsive-collection-default-routing": "node scripts/test-responsive-collection-default-routing.mjs",
+    "test:retired-collection-template-migrations": "node scripts/test-retired-collection-template-migrations.mjs",
     "test:formnewreport-physical-field-contract": "node scripts/test-formnewreport-physical-field-contract.mjs",
     "test:document-library-live": "node scripts/test-document-library-live-materializer.mjs",
     "validate:package-boundaries": "node scripts/validate-workspace-package-boundaries.mjs",

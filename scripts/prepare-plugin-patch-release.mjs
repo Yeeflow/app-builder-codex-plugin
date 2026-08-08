@@ -105,6 +105,7 @@ const mirrors = [
   "docs/reference/collection-control-responsive-multiple-select.template.json",
   "docs/standards/dashboard-dataset-presentation-golden-reference-standard.md",
   "docs/standards/collection-control-generation-standard.md",
+  "docs/standards/collection-template-retirement-migration.md",
   "docs/standards/app-plan-standard-template.md",
   "docs/app-plan-standard-template.md",
   "docs/README.md",

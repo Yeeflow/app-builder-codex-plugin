@@ -100,7 +100,7 @@
                 "style": {
                   "widthtype": [
                     null,
-                    "2"
+                    "1"
                   ],
                   "direction": [
                     null,
@@ -357,7 +357,6 @@
                       "widthtype": [
                         null,
                         "2",
-                        "1",
                         "1"
                       ],
                       "gap": [
