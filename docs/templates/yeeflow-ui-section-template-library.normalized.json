@@ -1612,7 +1612,13 @@
     {
       "templateId": "collection_control_responsive_multiple_select",
       "category": "collection-responsive-table-card-multiselect",
-      "purpose": "Responsive Table/Card Collection with complete multi-select state and batch actions.",
+      "purpose": "Default responsive Table/Card Collection for multi-select state, selected count, and batch actions.",
+      "defaultFor": [
+        "multi-row selection",
+        "checkbox selection",
+        "selected count",
+        "bulk or batch actions"
+      ],
       "pattern_scope": "responsive_table_card_multiselect",
       "proven_formats": [
         "YAP",
@@ -2087,7 +2093,7 @@
     },
     {
       "templateId": "collection_control_grid_table_with_multiselect",
-      "purpose": "Render grid/table Collection rows with checkbox selection and bulk operations.",
+      "purpose": "Render legacy Flex Grid Collection rows with checkbox selection and bulk operations when explicit compatibility is required.",
       "pattern_scope": "grid_table_only",
       "proven_formats": [
         "YAP",
@@ -2127,7 +2133,7 @@
         "COLLECTION_GRID_TABLE_BULK_ACTION_REFERENCE_INVALID absent"
       ],
       "proofBoundaries": [
-        "generate when a Dashboard dataset needs dense table scanning, multi-row selection, selected count/state, and batch operations; Projects Center / Project Tasks is the export-proven source reference, not a business-domain restriction",
+        "generate only when the App Plan explicitly requests legacy Flex Grid compatibility or this exact template ID; generic multiselect requirements use collection_control_responsive_multiple_select",
         "do not infer card-style top-right selection behavior"
       ],
       "fullTemplateReference": "docs/reference/collection-control-grid-table-with-multiselect.template.json",

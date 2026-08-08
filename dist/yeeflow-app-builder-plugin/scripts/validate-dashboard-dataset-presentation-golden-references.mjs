@@ -336,6 +336,15 @@ function validateResponsiveMultiselectTemplateArtifact(registry, findings, optio
   if (findDescendants(root, (node) => String(node?.type || "") === "flex_grid").length) {
     findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_LEGACY_GRID_PRESENT", "Responsive multiselect template must not fall back to a legacy Flex Grid header/item pair."));
   }
+  for (const identity of ["grid_table_col_operations", "op_normal"]) {
+    const node = findDescendantByIdentity(root, identity);
+    if (!deepEqual(node?.attrs?.style?.widthtype, [null, "2", "1"])) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_MOBILE_OPERATION_WIDTH_INVALID", "Responsive multiselect operation containers must preserve the live mobile Full-width contract.", {
+        control: identity,
+        actual: node?.attrs?.style?.widthtype ?? null,
+      }));
+    }
+  }
   const collectionActions = asArray(template.templateResource?.collectionActions);
   for (const token of ["Select Items", "Edit item", "Delete item", "Mark current item as Completed"]) {
     if (!collectionActions.some((action) => String(action?.name || "") === token)) {
@@ -936,7 +945,8 @@ function lineMatchesReferenceGuidance(line, templateId, reference) {
     collection_control_responsive_card_grid: ["card", "browse", "overview", "portfolio", "asset cards", "ticket cards", "request cards", "visual", "display first"],
     collection_control_card_with_multiselect_toolbar: ["card", "multi-select", "multiselect", "bulk", "batch", "selected"],
     collection_control_grid_table: ["dense", "row", "column", "work queue", "task list", "record list", "operational table", "scan", "tabulated", "tabular", "table tracker", "tabulated tracker", "tracker table", "spreadsheet-like"],
-    collection_control_grid_table_with_multiselect: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection"],
+    collection_control_responsive_multiple_select: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection", "responsive", "desktop table", "mobile card"],
+    collection_control_grid_table_with_multiselect: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection", "legacy", "flex grid", "legacy grid table"],
     "Event Pipeline Grid-Table": ["primary", "high-fidelity", "pipeline", "portfolio", "work queue", "health", "status", "progress"],
   };
   return asArray(fallbackSignals[templateId]).some((signal) => normalized.includes(normalizeForMatch(signal)));
@@ -1031,7 +1041,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   if (GRID_TABLE_IDS.has(provenance.templateId)) validateGridTable(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive") validateResponsiveCollection(entry, page, findings);
   if (provenance.templateId === "collection_control_responsive_multiple_select") {
-    validateResponsiveCollection(entry, page, findings, { wrapperIdentity: "grid_table_col_multiselect_wrapper", allowLeadingSelectionColumn: true });
+    validateResponsiveCollection(entry, page, findings, { wrapperIdentity: "grid_table_col_multiselect_wrapper", allowLeadingSelectionColumn: true, expectedMobileOperationWidth: [null, "2", "1"] });
     validateResponsiveMultiselect(entry, page, findings);
   }
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
@@ -1045,6 +1055,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
 function validateResponsiveCollection(entry, page, findings, options = {}) {
   const wrapperIdentity = options.wrapperIdentity || "grid_table_col_wrapper";
   const allowLeadingSelectionColumn = options.allowLeadingSelectionColumn === true;
+  const expectedMobileOperationWidth = options.expectedMobileOperationWidth || [null, "2", "2"];
   const wrapper = findNearestAncestorByIdentity(entry, wrapperIdentity);
   if (!wrapper) {
     findings.push(error("DASH_DATASET_RESPONSIVE_WRAPPER_MISSING", "collection_control_responsive must preserve the export-shaped responsive Collection wrapper.", { page: page.title, path: entry.pointer }));
@@ -1097,7 +1108,7 @@ function validateResponsiveCollection(entry, page, findings, options = {}) {
   const operationButtons = operations ? findDescendants(operations, (node) => String(node?.type || "") === "action_button") : [];
   for (const identity of ["grid_table_col_operations", "op_normal"]) {
     const node = findDescendantByIdentity(wrapper, identity);
-    if (!deepEqual(node?.attrs?.style?.widthtype, [null, "2", "2"])) {
+    if (!deepEqual(node?.attrs?.style?.widthtype, expectedMobileOperationWidth)) {
       findings.push(error("DASH_DATASET_RESPONSIVE_MOBILE_OPERATION_WIDTH_INVALID", "Responsive Collection operation containers must be Full width on mobile.", { page: page.title, path: entry.pointer, control: identity, actual: node?.attrs?.style?.widthtype ?? null }));
     }
   }

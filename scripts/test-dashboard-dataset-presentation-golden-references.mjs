@@ -32,6 +32,9 @@ try {
   const badResponsiveMultiselectCardTemplate = structuredClone(responsiveMultiselectTemplate);
   findByIdentity(badResponsiveMultiselectCardTemplate.templateResource.rootContainer, "grid_table_col_body").children = [];
   expectCode("responsive multiselect template requires mobile Card content", ["--registry", REGISTRY, "--responsive-multiselect-template", writeJson("bad-responsive-multiselect-card-template.json", badResponsiveMultiselectCardTemplate)], "DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_CARD_VIEW_MISSING");
+  const badResponsiveMultiselectOperationWidthTemplate = structuredClone(responsiveMultiselectTemplate);
+  findByIdentity(badResponsiveMultiselectOperationWidthTemplate.templateResource.rootContainer, "grid_table_col_operations").attrs.style.widthtype = [null, "2", "2"];
+  expectCode("responsive multiselect template preserves the live mobile Full-width operation contract", ["--registry", REGISTRY, "--responsive-multiselect-template", writeJson("bad-responsive-multiselect-operation-width-template.json", badResponsiveMultiselectOperationWidthTemplate)], "DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_MOBILE_OPERATION_WIDTH_INVALID");
   const badResponsiveCollectionTemplate = structuredClone(responsiveCollectionTemplate);
   badResponsiveCollectionTemplate.templateResource.rootContainer.children[1].children[0].attrs.tablecols = [];
   expectCode("responsive table/card template native table columns are enforced", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-template.json", badResponsiveCollectionTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_TABLE_COLUMNS_MISSING");

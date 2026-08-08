@@ -10,7 +10,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.6.2`
+- Version: `1.7.1`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
 Version `1.6.2` adds the export-shaped `collection_control_responsive` golden reference for Dashboard Collections. It preserves the native Table view on computer, laptop, and tablet plus the complete Card view on mobile, maps only target-schema fields, and fails closed on missing Card content, sparse Card children, foreign display-rule references, incorrect mobile operation widths, incorrect Card action layering, or incorrect mobile operation-menu placement. Every application/resource write still requires explicit confirmation and persisted readback. YAPK remains available only when the user explicitly requests package delivery, import/install, upgrade, migration, export, or offline handoff.
@@ -30,7 +30,7 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.6.2
+Version: 1.7.1
 ```
 
 Verify metadata from a checkout:

@@ -797,7 +797,7 @@ Full template reference:
 Not for:
 
 - card-style Collection
-- multi-select Collection; use `collection_control_grid_table_with_multiselect`
+- multi-select Collection; default to `collection_control_responsive_multiple_select` for native desktop/tablet Table plus mobile Card behavior, and use `collection_control_grid_table_with_multiselect` only for an explicitly requested legacy Flex Grid contract
 - kanban Collection
 - gallery/media Collection
 - timeline Collection

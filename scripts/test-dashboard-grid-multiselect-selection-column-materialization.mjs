@@ -48,6 +48,7 @@ Legal intake triage queue with dense multi-row selection and a future bulk assig
 
 ## 1. Plan Status
 Business defaults approval status: user-default-approved-for-generation.
+Application icon: fa-solid fa-scale-balanced
 
 ## 4. Data Lists and Document Libraries Plan
 

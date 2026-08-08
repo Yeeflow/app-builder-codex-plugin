@@ -146,11 +146,12 @@
         "batch operation",
         "checkbox column"
       ],
-      "requiredAppPlanDeclaration": "Select collection_control_responsive_multiple_select for the Dashboard dataset region and name the required batch operation, selected-count behavior, and the need for native desktop/tablet Table view with mobile Card view.",
+      "requiredAppPlanDeclaration": "This is the default for a Dashboard dataset requirement that asks for multiple selection, selected count, or batch operations. Select collection_control_responsive_multiple_select explicitly when documenting the region, and name the required batch operation, selected-count behavior, and the need for native desktop/tablet Table view with mobile Card view.",
       "generationProof": [
         "full grid_table_col_multiselect_wrapper subtree cloned from docs/reference/collection-control-responsive-multiple-select.template.json",
         "native Collection tablecols, header, body, table, pagination, and list-display-preference preserved",
         "non-empty mobile Card item tree preserved under grid_table_col_body.children",
+        "grid_table_col_operations and op_normal preserve the live mobile Full-width widthtype [null, 2, 1]",
         "leading selection control with checked/unchecked states and Collection Select Items action",
         "selected ids/count temp variables preserved and scoped",
         "page-level Change multiple items to completed, Delete multiple items, Set default values, and onLoad formAction dependencies preserved and scoped",
@@ -306,8 +307,8 @@
         "Document Library metadata list"
       ],
       "whenToUse": [
-        "Users need dense table scanning plus multi-row selection.",
-        "The business process needs batch assign, batch close, batch approve, batch status update, batch reminder, batch archive, batch export, or batch delete."
+        "The App Plan explicitly requests the legacy hand-built Flex Grid multiselect contract.",
+        "A compatibility-only Dashboard must retain the legacy grid header/item behavior rather than the native responsive Table/Card contract."
       ],
       "whenNotToUse": [
         "The list is read-only.",
@@ -321,7 +322,7 @@
         "selected count",
         "checkbox column"
       ],
-      "requiredAppPlanDeclaration": "Select collection_control_grid_table_with_multiselect and name the concrete batch operation. Projects Center / Project Tasks is the source proof only, not a business-domain restriction.",
+      "requiredAppPlanDeclaration": "Select collection_control_grid_table_with_multiselect only when the App Plan explicitly requests legacy Flex Grid compatibility, and name the concrete batch operation. Generic multiple-selection or bulk-operation requirements default to collection_control_responsive_multiple_select. Projects Center / Project Tasks is the source proof only, not a business-domain restriction.",
       "generationProof": [
         "leading 46px checkbox column",
         "checked and unchecked icon controls",

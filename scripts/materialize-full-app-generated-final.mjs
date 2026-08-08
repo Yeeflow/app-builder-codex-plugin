@@ -2660,11 +2660,21 @@ function inferApprovedCollectionTemplateId(text) {
   const candidates = [
     {
       templateId: "collection_control_grid_table_with_multiselect",
-      patterns: [/grid[-\s]*table.*multi\s*select/, /multi\s*select.*grid[-\s]*table/, /batch.*selected/, /selected\s+records/],
+      patterns: [/legacy.*grid[-\s]*table.*multi\s*select/, /flex\s*grid.*multi\s*select/, /multi\s*select.*(?:legacy|flex\s*grid)/],
     },
     {
       templateId: "collection_control_card_with_multiselect_toolbar",
       patterns: [/card.*multi\s*select/, /multi\s*select.*card/, /selected\s+follow[-\s]*up/, /personal\s+loan\s+cards/],
+    },
+    {
+      templateId: "collection_control_responsive_multiple_select",
+      patterns: [
+        /multi[-\s]*select/,
+        /multi[-\s]*row/,
+        /checkbox.*(selection|select)/,
+        /(?:bulk|batch).*(?:operation|action|update|delete|selected|complete)/,
+        /selected\s+records?/,
+      ],
     },
     {
       templateId: "collection_control_responsive_card_grid",
@@ -2683,8 +2693,7 @@ function inferApprovedCollectionTemplateId(text) {
       patterns: [/dense\s+grid[-\s]*table/, /dense\s+escalation/, /grid[-\s]*table\s+suits/, /dense\s+queue/],
     },
   ];
-  const matched = candidates.filter((candidate) => candidate.patterns.some((pattern) => pattern.test(value)));
-  return matched.length === 1 ? matched[0].templateId : "";
+  return candidates.find((candidate) => candidate.patterns.some((pattern) => pattern.test(value)))?.templateId || "";
 }
 
 function extractApprovedDataAnalyticsTemplateId(text) {
@@ -7729,8 +7738,12 @@ function mapResponsiveCollectionTableColumns(collection, { listMeta, listId, lis
   }
 }
 
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
 function mapResponsiveCollectionCardView(collection, { listMeta, listId, listName }) {
-  const cardItem = asArray(collection?.children)[0];
+  const cardItem = Array.isArray(collection?.children) ? collection.children[0] : null;
   if (!cardItem) return;
   const fields = fieldsForDynamicControls(listMeta);
   const titleField = findFieldBySemanticTokens(fields, ["title", "subject", "name", "number"]) || fields.find((field) => field.fieldName === "Title") || fields[0];
@@ -7812,7 +7825,9 @@ function enforceResponsiveCollectionMobileOperationWidth(root) {
     const node = findFirstByIdentity(root, identity);
     if (!node) continue;
     node.attrs = node.attrs || {};
-    node.attrs.style = { ...(node.attrs.style || {}), widthtype: [null, "2", "2"] };
+    // The live responsive reference uses the mobile Full-width contract ("1").
+    // Keep the desktop/tablet value intact while preserving that mobile behavior.
+    node.attrs.style = { ...(node.attrs.style || {}), widthtype: [null, "2", "1"] };
   }
   const itemOperations = findFirstByIdentity(root, "grid_table_col_item_operations");
   if (itemOperations) {
