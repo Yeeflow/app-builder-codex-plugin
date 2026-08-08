@@ -1610,6 +1610,99 @@
       ]
     },
     {
+      "templateId": "collection_control_responsive_multiple_select",
+      "category": "collection-responsive-table-card-multiselect",
+      "purpose": "Responsive Table/Card Collection with complete multi-select state and batch actions.",
+      "pattern_scope": "responsive_table_card_multiselect",
+      "proven_formats": [
+        "YAP",
+        "YAPK"
+      ],
+      "proven_surfaces": [
+        "dashboard"
+      ],
+      "not_for": [
+        "legacy_flex_grid",
+        "read_only_report",
+        "card_style_only",
+        "unknown_collection_pattern"
+      ],
+      "requiredDataSource": {
+        "kind": "data-list-or-document-library",
+        "mustResolveInPackage": true
+      },
+      "requiredPageDependencies": [
+        "filterVars",
+        "tempVars",
+        "filter",
+        "actions",
+        "formAction",
+        "exts"
+      ],
+      "requiredTempVars": [
+        "var_SelectedItems",
+        "var_SelectedItemsAmount",
+        "var_isDeleteConfirmed",
+        "var_isDeleteMultipleConfirmed",
+        "var_UpdatedItemsAmount",
+        "var_DeletedItemsAmount"
+      ],
+      "requiredCollectionActions": [
+        "Select Items",
+        "Edit item",
+        "Delete item",
+        "Mark current item as Completed"
+      ],
+      "responsiveSettings": {
+        "desktop": "table",
+        "tablet": "table",
+        "mobile": "card",
+        "leadingSelectionColumn": true
+      },
+      "requiredControls": [
+        "grid_table_col_multiselect_wrapper",
+        "grid_table_col_operations",
+        "op_normal",
+        "op_multipleselected",
+        "grid_table_col_body",
+        "item-selection-control",
+        "selected_count",
+        "batch-action-buttons"
+      ],
+      "validationRules": [
+        "page_dependency_graph_complete",
+        "responsive_table_columns_present",
+        "card_view_content_present",
+        "leading_selection_column_preserved",
+        "collection_action_bindings_present",
+        "no_flex_grid_controls"
+      ],
+      "proofBoundaries": [
+        "Source export and local structural validation are training proof only",
+        "Generated IDs, permissions, persistence, API acceptance, and browser/runtime behavior require package-specific verification"
+      ],
+      "fullTemplateReference": "docs/reference/collection-control-responsive-multiple-select.template.json",
+      "sourceReference": {
+        "packageFile": "live MCP export",
+        "application": "Projects Center_1",
+        "pageTitle": "All Tasks - multiple select (new)",
+        "root": "grid_table_col_multiselect_wrapper"
+      },
+      "editableRegions": [
+        "source list and field bindings",
+        "title/search/add controls",
+        "Table columns and Card item field bindings",
+        "normal and multi-selected action labels"
+      ],
+      "lockedRegions": [
+        "page-level dependency graph",
+        "responsive Collection shape and leading selection column",
+        "selected-item/count variable names",
+        "batch action and formAction wiring",
+        "item-operation overlay safety settings when present in the source revision"
+      ]
+    },
+    {
       "templateId": "collection_control_responsive_card_grid",
       "purpose": "Render source-list records as responsive Collection cards.",
       "pattern_scope": "card_style_only",

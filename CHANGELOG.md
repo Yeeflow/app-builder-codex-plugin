@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.7.0
+
+- Add `collection_control_responsive_multiple_select` as the complete responsive Table/Card multi-select golden reference, replacing the legacy grid-table reference when native mobile Card behavior is required.
+- Preserve the full page dependency graph, including filter variables, temporary variables, page filters, batch actions, Collection actions, `formAction.onLoad`, and extension metadata.
+- Materialize the native leading selection column, responsive Card content, scoped page dependencies, and mobile Full width operation regions without falling back to legacy Flex Grid.
+- Add source/dist template artifacts, registry guidance, training documentation, and positive/negative structural regression coverage.
+- Cleaned all untracked Finder/copy-style `* 2.*` artifacts required by the release hygiene gate.
+
 ## 1.6.2
 
 - Add the export-shaped `collection_control_responsive` golden reference for native Table view on computer/laptop/tablet and a complete Card view on mobile.

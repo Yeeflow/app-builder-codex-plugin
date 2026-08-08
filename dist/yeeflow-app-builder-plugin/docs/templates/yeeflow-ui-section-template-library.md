@@ -474,6 +474,47 @@ QR generation rule: place QR controls inside the print page or inside the print 
 
 ## Collection Golden Reference Templates
 
+## collection_control_responsive_multiple_select
+
+Purpose: replace the legacy grid-table multi-select reference with a native responsive Collection that renders a Table view on PC/laptop and tablet, and a Card view on mobile.
+
+Full template artifact:
+
+- `docs/reference/collection-control-responsive-multiple-select.template.json`
+- Source export: Projects Center_1, Dashboard page `All Tasks - multiple select (new)`, root component `grid_table_col_multiselect_wrapper`.
+- The artifact is the complete page slice: copy the root wrapper and descendants together with its page-level dependencies; do not reconstruct only the Collection control.
+
+Required page-level dependencies:
+
+- `filterVars.filter_Tasks` and the page filter bound to that variable.
+- All source `tempVars`, including selected-item state, selected-item count, confirmation flags, and affected/deleted item counts.
+- Root page actions for setting defaults, deleting multiple items, and changing multiple items to completed.
+- The page `formAction.onLoad` binding and any source `exts` metadata.
+
+Required Collection structure:
+
+- Native responsive Collection `grid_table_col_body` with the source list, pagination, filtering, Table/Card layout, seven source columns including the leading selection column, and the complete Collection action set.
+- Card view descendants must remain populated and bound; an empty Card tree is invalid even when the Table view is complete.
+- Preserve the selection control, selected-count display, normal/batch operation containers, and their action bindings. Mobile operation controls use Full width; any item-operation overlays present in a source revision retain that revision's z-index/menu-placement safety settings.
+- Do not introduce legacy `flex_grid` controls into this native responsive template.
+
+Editable regions:
+
+- source list and field bindings
+- title/search/add controls
+- Table column labels and Card item field bindings
+- normal and multi-selected operation labels/action targets
+- business-facing copy and safe style tokens
+
+Locked regions:
+
+- root wrapper and page-dependency graph
+- responsive Table/Card Collection shape, leading selection column, and Collection actions
+- selected-item/count variable names and batch-action/formAction wiring
+- item-operation overlay safety settings when present in the source revision
+
+Proof boundary: this is an export-proven training reference and local structural validation asset. Generated list IDs, action targets, permissions, API acceptance, persistence, and browser/runtime behavior still require package-specific and tenant/runtime verification.
+
 ## collection_control_responsive_card_grid
 
 Purpose: render source-list records as responsive Collection cards with a section header and optional operation toolbar.

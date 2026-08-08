@@ -4,7 +4,7 @@ This standard applies to the export-proven Collection card grid, native responsi
 
 It does not cover row-list Collection, kanban-style Collection, grouped Collection, nested Collection, timeline-style Collection, gallery/media variants, or unknown non-card patterns. Any non-card Collection usage must remain guarded until a separate export-backed golden-reference study proves the exact pattern.
 
-Collection + Grid/table-style support is covered separately by `docs/standards/collection-grid-table-generation-standard.md` and the `collection_control_grid_table` template. The native responsive Table/Card reference is `collection_control_responsive`; it uses Collection `tablecols` rather than the legacy Flex Grid header/item rows. Do not mix these patterns.
+Collection + Grid/table-style support is covered separately by `docs/standards/collection-grid-table-generation-standard.md` and the `collection_control_grid_table` template. The native responsive Table/Card references are `collection_control_responsive` and `collection_control_responsive_multiple_select`; they use Collection `tablecols` rather than the legacy Flex Grid header/item rows. Do not mix these patterns.
 
 ## Card Collection Golden-Reference Rule
 
@@ -45,6 +45,8 @@ Do not reuse this card pattern for table-style, grid-table, spreadsheet-style, r
 ## Responsive Rules
 
 For `collection_control_responsive`, preserve the full native Collection contract: `attrs.tablecols`, `attrs.header`, `attrs.body`, `attrs.table`, `attrs.pagination`, and `attrs["list-display-preference"] = "default"`. This is configuration-visible proof of Table view on computer/laptop/tablet and Card view on mobile. The mobile Card view is the non-empty `grid_table_col_body.children` item tree; table columns alone are incomplete. Each native table column needs a non-empty title, boolean `sortingEnabled`, `sortingField` if sortable, and a repeated item-template control. Keep `grid_table_col_operations` and `op_normal` at `attrs.style.widthtype = [null, "2", "2"]` so their mobile layout is Full width. When item operations are present, preserve `grid_table_col_item_operations.attrs.common.zidx = [null, 2]` so their controls receive clicks ahead of a whole-row click handler. It is a different template from both the responsive card grid and the Flex Grid table; never add a hand-built header/item `flex_grid` pair.
+
+For `collection_control_responsive_multiple_select`, preserve the same native responsive Table/Card contract plus the complete multiselect page dependency graph from `docs/reference/collection-control-responsive-multiple-select.template.json`: page `filterVars`, `tempVars`, `filter`, `actions`, `formAction`, Collection `attrs.actions`, selected IDs/count bindings, checked/unchecked selection controls, selected-count display, and confirmation-gated batch actions. The leading native table column is the selection column and may have an empty header title; all other native columns still require a title and repeated item-template content. This template replaces the legacy `collection_control_grid_table_with_multiselect` only when the requirement calls for native desktop/tablet Table view plus mobile Card view. Do not omit page-level dependencies when cloning the Collection subtree, and do not substitute a legacy Flex Grid header/item pair.
 
 The card grid golden reference defaults to:
 

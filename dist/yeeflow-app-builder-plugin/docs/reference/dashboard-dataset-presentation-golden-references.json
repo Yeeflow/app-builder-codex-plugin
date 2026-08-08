@@ -5,6 +5,7 @@
   "approvedTemplateIds": [
     "collection_control_responsive_card_grid",
     "collection_control_responsive",
+    "collection_control_responsive_multiple_select",
     "collection_control_card_with_multiselect_toolbar",
     "collection_control_grid_table",
     "collection_control_grid_table_with_multiselect",
@@ -116,6 +117,68 @@
         ],
         "lockedRule": "Preserve the export-shaped native table/card responsive Collection mechanism; do not replace it with the legacy Flex Grid table or a static card lookalike."
       }
+    },
+    {
+      "templateId": "collection_control_responsive_multiple_select",
+      "displayName": "Responsive Table/Card Collection With Multiselect",
+      "sourceReference": "Projects Center_1 / All Tasks - multiple select (new) / grid_table_col_multiselect_wrapper export-shaped template",
+      "category": "collection-responsive-table-card-multiselect",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list"
+      ],
+      "whenToUse": [
+        "Users need native table scanning on computer, laptop, and tablet plus Card view on mobile.",
+        "The business process requires multi-row selection, selected count, and batch operations.",
+        "The page must preserve the complete page-level selection variables, batch Form Actions, confirmation flows, and Collection actions from the source pattern."
+      ],
+      "whenNotToUse": [
+        "The source is read-only Form Report or Data Report; use collection_control_responsive for display-only responsive presentation.",
+        "The desktop experience must use the legacy hand-built Flex Grid multiselect contract; use collection_control_grid_table_with_multiselect.",
+        "The experience is primarily a visual card gallery, Kanban board, timeline, grouped list, or nested Collection."
+      ],
+      "requiredBusinessSignals": [
+        "responsive table",
+        "desktop table mobile cards",
+        "multi-row selection",
+        "selected count",
+        "bulk action",
+        "batch operation",
+        "checkbox column"
+      ],
+      "requiredAppPlanDeclaration": "Select collection_control_responsive_multiple_select for the Dashboard dataset region and name the required batch operation, selected-count behavior, and the need for native desktop/tablet Table view with mobile Card view.",
+      "generationProof": [
+        "full grid_table_col_multiselect_wrapper subtree cloned from docs/reference/collection-control-responsive-multiple-select.template.json",
+        "native Collection tablecols, header, body, table, pagination, and list-display-preference preserved",
+        "non-empty mobile Card item tree preserved under grid_table_col_body.children",
+        "leading selection control with checked/unchecked states and Collection Select Items action",
+        "selected ids/count temp variables preserved and scoped",
+        "page-level Change multiple items to completed, Delete multiple items, Set default values, and onLoad formAction dependencies preserved and scoped",
+        "batch toolbar action buttons remain bound to page actions",
+        "Collection actions preserve Select Items, Edit item, Delete item, and Mark current item as Completed contracts"
+      ],
+      "proofBoundary": "Export-proven and configuration-visible responsive/multiselect behavior only. Generated-package desktop/tablet/mobile rendering and batch execution require focused runtime verification before claiming runtime proof.",
+      "fullTemplateReference": "docs/reference/collection-control-responsive-multiple-select.template.json",
+      "exportShapeContract": [
+        "copy grid_table_col_multiselect_wrapper and all descendants",
+        "preserve grid_table_col_item_select and native Table/Card structures",
+        "preserve Collection root attrs.actions and all page-level filterVars, tempVars, filter, actions, and formAction dependencies",
+        "allow edits only in grid_table_col_title_wrapper, op_normal, op_multipleselected, native tablecols/item controls, and grid_table_col_item_operations",
+        "do not substitute a legacy Flex Grid header/item pair or omit page-level action dependencies"
+      ],
+      "editableRegions": [
+        "grid_table_col_title_wrapper",
+        "op_normal",
+        "op_multipleselected",
+        "native tablecols labels, sortable fields, and repeated item controls",
+        "grid_table_col_item_operations"
+      ],
+      "lockedRegions": [
+        "grid_table_col_multiselect_wrapper",
+        "grid_table_col_item_select",
+        "grid_table_col_body native Table/Card structure",
+        "page-level filterVars, tempVars, actions, filter, and formAction dependency graph"
+      ]
     },
     {
       "templateId": "collection_control_card_with_multiselect_toolbar",

@@ -102,6 +102,7 @@ const mirrors = [
   "scripts/test-dashboard-dataset-presentation-golden-references.mjs",
   "docs/reference/dashboard-dataset-presentation-golden-references.json",
   "docs/reference/collection-control-responsive.template.json",
+  "docs/reference/collection-control-responsive-multiple-select.template.json",
   "docs/standards/dashboard-dataset-presentation-golden-reference-standard.md",
   "docs/standards/collection-control-generation-standard.md",
   "docs/standards/app-plan-standard-template.md",

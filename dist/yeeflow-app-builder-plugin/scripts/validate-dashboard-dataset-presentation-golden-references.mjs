@@ -9,6 +9,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-dataset-presentation-golden-references.json");
 const RESPONSIVE_CARD_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json");
 const RESPONSIVE_COLLECTION_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive.template.json");
+const RESPONSIVE_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive-multiple-select.template.json");
 const CARD_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json");
 const GRID_TABLE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table.template.json");
 const GRID_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json");
@@ -16,6 +17,7 @@ const GRID_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collectio
 const APPROVED_IDS = new Set([
   "collection_control_responsive_card_grid",
   "collection_control_responsive",
+  "collection_control_responsive_multiple_select",
   "collection_control_card_with_multiselect_toolbar",
   "collection_control_grid_table",
   "collection_control_grid_table_with_multiselect",
@@ -48,6 +50,7 @@ const GRID_TABLE_IDS = new Set([
 const MULTISELECT_IDS = new Set([
   "collection_control_card_with_multiselect_toolbar",
   "collection_control_grid_table_with_multiselect",
+  "collection_control_responsive_multiple_select",
 ]);
 
 const COLLECTION_ALLOWED_SLOT_IDS = new Set([
@@ -151,6 +154,7 @@ function validateRegistry(registry, findings, options = {}) {
   }
   validateResponsiveCardGridTemplateArtifact(registry, findings, options);
   validateResponsiveCollectionTemplateArtifact(registry, findings, options);
+  validateResponsiveMultiselectTemplateArtifact(registry, findings, options);
   validateCardMultiselectTemplateArtifact(registry, findings, options);
   validateGridTableTemplateArtifact(registry, findings, options);
   validateGridMultiselectTemplateArtifact(registry, findings, options);
@@ -272,6 +276,77 @@ function validateResponsiveCollectionTemplateArtifact(registry, findings, option
     code: "DASH_DATASET_TEMPLATE_DYNAMIC_USER_ITEM_PADDING_NOT_S0",
     templateId: "collection_control_responsive",
   });
+}
+
+function validateResponsiveMultiselectTemplateArtifact(registry, findings, options = {}) {
+  const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_responsive_multiple_select");
+  const referencePath = String(entry?.fullTemplateReference || "").trim();
+  if (referencePath !== "docs/reference/collection-control-responsive-multiple-select.template.json") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_REFERENCE_MISSING", "collection_control_responsive_multiple_select must point to the complete responsive multiselect template artifact.", {
+      expected: "docs/reference/collection-control-responsive-multiple-select.template.json",
+      actual: referencePath || null,
+    }));
+    return;
+  }
+  const templatePath = path.resolve(options.responsiveMultiselectTemplate || RESPONSIVE_MULTISELECT_TEMPLATE_PATH);
+  const template = readJson(templatePath, findings, "DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_FILE_MISSING");
+  if (!template) return;
+  if (template.templateId !== "collection_control_responsive_multiple_select") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_ID_INVALID", "Responsive multiselect template artifact has an unexpected templateId.", { actual: template.templateId }));
+  }
+  const root = template.templateResource?.rootContainer;
+  if (root?.nv_label !== "grid_table_col_multiselect_wrapper") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_ROOT_INVALID", "Responsive multiselect template must preserve grid_table_col_multiselect_wrapper as its root.", { actual: root?.nv_label || null }));
+  }
+  for (const slot of ["responsive_multiselect_wrapper", "grid_table_col_title_wrapper", "grid_table_col_operations", "op_normal", "op_multipleselected", "grid_table_col_content", "responsive_multiselect_collection", "grid_table_col_item_select", "responsive_multiselect_item"]) {
+    if (!template.extractionIndex?.slotPointers?.[slot]) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_SLOT_MISSING", "Responsive multiselect template artifact is missing a required slot pointer.", { slot }));
+    }
+  }
+  for (const key of ["filterVars", "tempVars", "filter", "actions", "formAction"]) {
+    const value = template.pageLevelDependencies?.[key];
+    const count = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : 0;
+    if (count < 1) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_DEPENDENCY_MISSING", "Responsive multiselect template must preserve complete page-level dependency data.", { dependency: key }));
+    }
+  }
+  const collections = findDescendants(root, (node) => String(node?.type || "") === "collection");
+  const collection = collections[0];
+  for (const key of ["data", "layout", "pagination", "tablecols", "header", "body", "table", "list-display-preference"]) {
+    if (collection?.attrs?.[key] === undefined) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_COLLECTION_ATTR_MISSING", "Responsive multiselect template is missing a required native Collection property.", { property: key }));
+    }
+  }
+  if (collection?.attrs?.["list-display-preference"] !== "default") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_LAYOUT_INVALID", "Responsive multiselect template must preserve list-display-preference = default.", { actual: collection?.attrs?.["list-display-preference"] ?? null }));
+  }
+  const columns = asArray(collection?.attrs?.tablecols);
+  if (columns.length < 3) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_TABLE_COLUMNS_MISSING", "Responsive multiselect template must preserve native table columns.", { count: columns.length }));
+  }
+  for (const [index, column] of columns.entries()) {
+    const isSelectionColumn = index === 0 && findDescendants(column, (node) => identityCandidates(node).some((identity) => normalizeIdentity(identity) === normalizeIdentity("grid_table_col_item_select"))).length > 0;
+    if ((!String(column?.attrs?.title?.value || "").trim() && !isSelectionColumn) || typeof column?.attrs?.sortingEnabled !== "boolean" || !asArray(column?.children).length) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_TABLE_COLUMN_INVALID", "Each responsive multiselect native table column requires item-template content; only the leading selection column may have an empty title.", { index, title: column?.attrs?.title?.value ?? null, sortingEnabled: column?.attrs?.sortingEnabled ?? null, childCount: asArray(column?.children).length }));
+    }
+  }
+  if (!asArray(collection?.children).length || !asArray(collection?.children).flatMap((child) => findDescendants(child, (node) => String(node?.type || "").startsWith("dynamic-"))).length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_CARD_VIEW_MISSING", "Responsive multiselect template must preserve a non-empty mobile Card view item tree."));
+  }
+  if (findDescendants(root, (node) => String(node?.type || "") === "flex_grid").length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_LEGACY_GRID_PRESENT", "Responsive multiselect template must not fall back to a legacy Flex Grid header/item pair."));
+  }
+  const collectionActions = asArray(template.templateResource?.collectionActions);
+  for (const token of ["Select Items", "Edit item", "Delete item", "Mark current item as Completed"]) {
+    if (!collectionActions.some((action) => String(action?.name || "") === token)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_COLLECTION_ACTION_MISSING", "Responsive multiselect template must preserve the complete Collection action contract.", { action: token }));
+    }
+  }
+  for (const token of ["var_SelectedItems", "var_SelectedItemsAmount", "Change multiple items to completed", "Delete multiple items"]) {
+    if (!JSON.stringify(template.pageLevelDependencies || {}).includes(token)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_ACTION_TOKEN_MISSING", "Responsive multiselect template must preserve its selected-state and batch-action dependency graph.", { token }));
+    }
+  }
 }
 
 function validateResponsiveCardGridTemplateArtifact(registry, findings, options = {}) {
@@ -955,6 +1030,10 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   validateCollectionStyleContracts(entry, page, findings, { templateId: provenance.templateId });
   if (GRID_TABLE_IDS.has(provenance.templateId)) validateGridTable(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive") validateResponsiveCollection(entry, page, findings);
+  if (provenance.templateId === "collection_control_responsive_multiple_select") {
+    validateResponsiveCollection(entry, page, findings, { wrapperIdentity: "grid_table_col_multiselect_wrapper", allowLeadingSelectionColumn: true });
+    validateResponsiveMultiselect(entry, page, findings);
+  }
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid") validateResponsiveCardGrid(entry, page, findings, context);
@@ -963,8 +1042,10 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
 }
 
-function validateResponsiveCollection(entry, page, findings) {
-  const wrapper = findNearestAncestorByIdentity(entry, "grid_table_col_wrapper");
+function validateResponsiveCollection(entry, page, findings, options = {}) {
+  const wrapperIdentity = options.wrapperIdentity || "grid_table_col_wrapper";
+  const allowLeadingSelectionColumn = options.allowLeadingSelectionColumn === true;
+  const wrapper = findNearestAncestorByIdentity(entry, wrapperIdentity);
   if (!wrapper) {
     findings.push(error("DASH_DATASET_RESPONSIVE_WRAPPER_MISSING", "collection_control_responsive must preserve the export-shaped responsive Collection wrapper.", { page: page.title, path: entry.pointer }));
     return;
@@ -992,7 +1073,8 @@ function validateResponsiveCollection(entry, page, findings) {
   const dynamicControls = [];
   for (const [index, column] of columns.entries()) {
     const title = String(column?.attrs?.title?.value || "").trim();
-    if (!title || typeof column?.attrs?.sortingEnabled !== "boolean" || !asArray(column?.children).length) {
+    const leadingSelectionColumn = allowLeadingSelectionColumn && index === 0 && !title && findDescendants(column, (node) => identityCandidates(node).some((identity) => normalizeIdentity(identity) === normalizeIdentity("grid_table_col_item_select"))).length > 0;
+    if ((!title && !leadingSelectionColumn) || typeof column?.attrs?.sortingEnabled !== "boolean" || !asArray(column?.children).length) {
       findings.push(error("DASH_DATASET_RESPONSIVE_TABLE_COLUMN_INVALID", "Each responsive native table column requires a title, boolean sorting setting, and card item-template content.", { page: page.title, path: `${entry.pointer}.attrs.tablecols[${index}]`, title: title || null }));
     }
     if (title) {
@@ -1720,6 +1802,53 @@ function validateMultiselect(entry, page, templateId, findings) {
   }
 }
 
+function validateResponsiveMultiselect(entry, page, findings) {
+  const templateId = "collection_control_responsive_multiple_select";
+  const wrapper = findNearestAncestorByIdentity(entry, "grid_table_col_multiselect_wrapper");
+  if (!wrapper) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_WRAPPER_MISSING", "collection_control_responsive_multiple_select must preserve grid_table_col_multiselect_wrapper as the component root.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+  for (const slot of ["grid_table_col_title_wrapper", "op_normal", "op_multipleselected", "grid_table_col_body", "grid_table_col_item_select"]) {
+    if (!findDescendantByIdentity(wrapper, slot)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_SLOT_MISSING", "Responsive multiselect Collection is missing a required export-shaped slot.", { page: page.title, path: entry.pointer, slot }));
+    }
+  }
+  if (findDescendants(wrapper, (node) => String(node?.type || "") === "flex_grid").length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_LEGACY_GRID_PRESENT", "Responsive multiselect Collection must not contain a legacy Flex Grid header/item pair.", { page: page.title, path: entry.pointer }));
+  }
+  const normalButtons = findDescendants(findDescendantByIdentity(wrapper, "op_normal"), (node) => String(node?.type || "") === "action_button");
+  const batchButtons = findDescendants(findDescendantByIdentity(wrapper, "op_multipleselected"), (node) => String(node?.type || "") === "action_button");
+  for (const button of [...normalButtons, ...batchButtons]) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_BUTTON_ACTION_MISSING", "Responsive multiselect toolbar buttons must remain bound to page actions.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+  validateMultiselect(entry, page, templateId, findings);
+  const dependencyChecks = [
+    ["filterVars", "DASH_DATASET_RESPONSIVE_MULTISELECT_FILTERVARS_MISSING"],
+    ["tempVars", "DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPVARS_MISSING"],
+    ["actions", "DASH_DATASET_RESPONSIVE_MULTISELECT_PAGE_ACTIONS_MISSING"],
+    ["formAction", "DASH_DATASET_RESPONSIVE_MULTISELECT_FORM_ACTION_MISSING"],
+  ];
+  for (const [key, code] of dependencyChecks) {
+    const value = entry.page?.resource?.[key] || entry.ancestors?.[0]?.[key] || page.resource?.[key];
+    const count = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : 0;
+    if (count < 1) {
+      findings.push(error(code, "Responsive multiselect Collection requires complete page-level dependency materialization.", { page: page.title, path: entry.pointer, dependency: key }));
+    }
+  }
+  for (const requiredToken of ["var_SelectedItems", "var_SelectedItemsAmount"]) {
+    if (!hasScopedTemplateTempVariable(page.resource, requiredToken)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_SELECTED_VARIABLE_MISSING", "Responsive multiselect Collection requires selected item IDs and selected count variables.", { page: page.title, path: entry.pointer, requiredToken }));
+    }
+  }
+  const opMulti = findDescendantByIdentity(wrapper, "op_multipleselected");
+  if (!findDescendantByIdentity(opMulti, "selected_items_amount") || !findDescendantByIdentity(opMulti, "multiple_operations_wrapper")) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_BULK_TOOLBAR_MISSING", "Responsive multiselect Collection requires the selected-count and batch-operation toolbar regions.", { page: page.title, path: entry.pointer }));
+  }
+}
+
 function validateCard(entry, page, findings) {
   if (!asArray(entry.control?.children).length) {
     findings.push(error("DASH_DATASET_CARD_ITEM_TEMPLATE_MISSING", "Card Collection templates require a non-empty item template.", { page: page.title, path: `${entry.pointer}.children` }));
@@ -2270,7 +2399,7 @@ function validateCollectionStyleContracts(entry, page, findings, { templateId } 
     path: entry.pointer,
     templateId,
   });
-  if (templateId !== "collection_control_responsive") {
+  if (!["collection_control_responsive", "collection_control_responsive_multiple_select"].includes(templateId)) {
     validateGridTableCaptionTitleTypography(root, findings, {
       code: "DASH_DATASET_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID",
       page: page.title,
@@ -2686,6 +2815,9 @@ function parseArgs(argv) {
     } else if (token === "--responsive-template") {
       args.responsiveTemplate = argv[i + 1];
       i += 1;
+    } else if (token === "--responsive-multiselect-template") {
+      args.responsiveMultiselectTemplate = argv[i + 1];
+      i += 1;
     } else if (token === "--card-template") {
       args.cardTemplate = argv[i + 1];
       i += 1;
@@ -2705,7 +2837,7 @@ function parseArgs(argv) {
 function printUsage() {
   console.log(`Usage:
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry
-  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --responsive-card-template <template.json> --responsive-template <template.json> --card-template <template.json> --grid-table-template <template.json> --grid-template <template.json>
+  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --responsive-card-template <template.json> --responsive-template <template.json> --responsive-multiselect-template <template.json> --card-template <template.json> --grid-table-template <template.json> --grid-template <template.json>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --app-plan <yeeflow-app-plan.md>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --package <app.yapk>`);
 }

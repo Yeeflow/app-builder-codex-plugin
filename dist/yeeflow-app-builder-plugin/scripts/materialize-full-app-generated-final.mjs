@@ -172,6 +172,7 @@ const DATA_TABLE_TEMPLATE_PATHS = {
 const APPROVED_DATA_TABLE_TEMPLATE_IDS = Object.freeze(Object.keys(DATA_TABLE_TEMPLATE_PATHS));
 const COLLECTION_TEMPLATE_PATHS = {
   collection_control_responsive: path.join(ROOT, "docs/reference/collection-control-responsive.template.json"),
+  collection_control_responsive_multiple_select: path.join(ROOT, "docs/reference/collection-control-responsive-multiple-select.template.json"),
   collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   "Event Pipeline Grid-Table": path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   collection_control_grid_table_with_multiselect: path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json"),
@@ -6101,9 +6102,14 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     ...analyticsRuntimeContracts.map((contract) => contract.controlId),
   ]);
   resource.exts = [
+    ...normalizeDependencyArray(templateDependencies.exts),
     ...summaryRuntimeExts,
     ...analyticsRuntimeContracts.map((contract) => contract.ext),
   ];
+  resource.filter = uniqueByName([
+    ...normalizeDependencyArray(resource.filter),
+    ...normalizeDependencyArray(templateDependencies.filter),
+  ]);
   resource.actions = normalizeDependencyArray(templateDependencies.actions);
   resource.formAction = normalizeDependencyArray(templateDependencies.formAction);
   removeUnresolvedPageActionControls(resource);
@@ -6978,8 +6984,10 @@ function mergePageDependencies(dependencies) {
   return {
     tempVars: dependencies.flatMap((item) => normalizeDependencyArray(item.tempVars)),
     filterVars: dependencies.flatMap((item) => normalizeDependencyArray(item.filterVars)),
+    filter: dependencies.flatMap((item) => normalizeDependencyArray(item.filter)),
     actions: dependencies.flatMap((item) => normalizeDependencyArray(item.actions)),
     formAction: dependencies.flatMap((item) => normalizeDependencyArray(item.formAction)),
+    exts: dependencies.flatMap((item) => normalizeDependencyArray(item.exts)),
   };
 }
 
@@ -6987,8 +6995,10 @@ function prepareTemplatePageDependencies(pageDependencies, replacements, scopePr
   const replaced = {
     tempVars: replaceCollectionTemplatePlaceholders(pageDependencies.tempVars || [], replacements),
     filterVars: replaceCollectionTemplatePlaceholders(pageDependencies.filterVars || [], replacements),
+    filter: replaceCollectionTemplatePlaceholders(pageDependencies.filter || [], replacements),
     actions: replaceCollectionTemplatePlaceholders(pageDependencies.actions || [], replacements),
     formAction: replaceCollectionTemplatePlaceholders(pageDependencies.formAction || [], replacements),
+    exts: replaceCollectionTemplatePlaceholders(pageDependencies.exts || [], replacements),
   };
   const maps = buildTemplateDependencyNameMaps(replaced, scopePrefix);
   return {
@@ -7620,8 +7630,8 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     control.label = field.displayName;
     if (control.type !== "dynamic-user") replaceUserLikeDynamicFieldText(control, field.displayName);
   }
-  if (templateId === "collection_control_responsive" && collection) {
-    mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName });
+  if ((templateId === "collection_control_responsive" || templateId === "collection_control_responsive_multiple_select") && collection) {
+    mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName, skipLeadingSelectionColumn: templateId === "collection_control_responsive_multiple_select" });
     mapResponsiveCollectionCardView(collection, { listMeta, listId, listName });
     enforceResponsiveCollectionMobileOperationWidth(root);
   }
@@ -7657,11 +7667,12 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   return root;
 }
 
-function mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName }) {
+function mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName, skipLeadingSelectionColumn = false }) {
   const fields = fieldsForDynamicControls(listMeta);
   const columns = Array.isArray(collection?.attrs?.tablecols) ? collection.attrs.tablecols : [];
   let fallbackIndex = 0;
-  for (const column of columns) {
+  for (const [index, column] of columns.entries()) {
+    if (skipLeadingSelectionColumn && index === 0) continue;
     const field = selectResponsiveTableColumnField(column, fields, fallbackIndex);
     fallbackIndex += 1;
     if (!field) continue;

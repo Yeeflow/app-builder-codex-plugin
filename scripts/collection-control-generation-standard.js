@@ -5,7 +5,7 @@ const PLACEHOLDER_TEXT_RE = /\bHere is the (title|description)\b|placeholder tex
 const CURRENT_ITEM_SOURCE_TYPES = new Set(["dynamic-field", "dynamic-image", "dynamic-user", "dynamic-file"]);
 const SYSTEM_COLLECTION_FIELDS = new Set(["ListDataID", "Created", "Modified", "CreatedBy", "ModifiedBy"]);
 const CARD_PATTERN_ALIASES = new Set(["", "card", "cards", "card-style", "card_style", "responsive-card-grid", "responsive_card_grid", "collection_control_responsive_card_grid"]);
-const RESPONSIVE_TABLE_CARD_PATTERN_ALIASES = new Set(["responsive", "responsive-table-card", "responsive_table_card", "desktop-table-mobile-card", "desktop_table_mobile_card", "collection_control_responsive"]);
+const RESPONSIVE_TABLE_CARD_PATTERN_ALIASES = new Set(["responsive", "responsive-table-card", "responsive_table_card", "desktop-table-mobile-card", "desktop_table_mobile_card", "collection_control_responsive", "collection_control_responsive_multiple_select"]);
 const GRID_TABLE_PATTERN_ALIASES = new Set(["grid", "grid-table", "grid_table", "table", "table-style", "table_style", "spreadsheet", "collection-grid", "collection_grid", "collection-control-grid-table", "collection_control_grid_table"]);
 const NON_CARD_PATTERN_ALIASES = new Set([
   "row-list",
@@ -479,7 +479,7 @@ function validateCollectionControls(options) {
   const enforcePatternScope = Boolean(options.requireCollection || options.generatedFinal || options.importQualified);
   const requestKind = requestedPatternKind(options);
   const validateGridTable = Boolean((requireGridTablePattern || requestKind === "grid-table" || options.templatePattern === "collection_control_grid_table") && !options.explicitCardFallbackAccepted);
-  const validateResponsiveTableCard = requestKind === "responsive-table-card" || options.templatePattern === "collection_control_responsive";
+  const validateResponsiveTableCard = requestKind === "responsive-table-card" || options.templatePattern === "collection_control_responsive" || options.templatePattern === "collection_control_responsive_multiple_select";
   if (enforcePatternScope && requestKind !== "card" && requestKind !== "grid-table" && requestKind !== "responsive-table-card" && !options.explicitCardFallbackAccepted) {
     const code = requestKind === "grid-table" ? "COLLECTION_GRID_TABLE_PATTERN_UNPROVEN" : "COLLECTION_PATTERN_UNPROVEN";
     emit(code, "The approved Collection references cover responsive card grids, native responsive table/card Collections, and legacy grid tables only; requested patterns need a separate export-backed study or an explicit fallback.", { pointer: rootPointer, requestedPattern: options.requestedCollectionPattern || options.collectionPattern || options.templatePattern || "" });

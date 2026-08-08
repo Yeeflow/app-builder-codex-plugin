@@ -22,6 +22,16 @@ try {
   expectPass("registry validates", ["--registry"]);
   const responsiveTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json"), "utf8"));
   const responsiveCollectionTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-responsive.template.json"), "utf8"));
+  const responsiveMultiselectTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-responsive-multiple-select.template.json"), "utf8"));
+  const badResponsiveMultiselectDependencyTemplate = structuredClone(responsiveMultiselectTemplate);
+  delete badResponsiveMultiselectDependencyTemplate.pageLevelDependencies.formAction;
+  expectCode("responsive multiselect template preserves complete page-level dependencies", ["--registry", REGISTRY, "--responsive-multiselect-template", writeJson("bad-responsive-multiselect-dependency-template.json", badResponsiveMultiselectDependencyTemplate)], "DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_DEPENDENCY_MISSING");
+  const badResponsiveMultiselectActionTemplate = structuredClone(responsiveMultiselectTemplate);
+  badResponsiveMultiselectActionTemplate.templateResource.collectionActions = badResponsiveMultiselectActionTemplate.templateResource.collectionActions.filter((action) => action.name !== "Select Items");
+  expectCode("responsive multiselect template preserves Collection selection action", ["--registry", REGISTRY, "--responsive-multiselect-template", writeJson("bad-responsive-multiselect-selection-action-template.json", badResponsiveMultiselectActionTemplate)], "DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_COLLECTION_ACTION_MISSING");
+  const badResponsiveMultiselectCardTemplate = structuredClone(responsiveMultiselectTemplate);
+  findByIdentity(badResponsiveMultiselectCardTemplate.templateResource.rootContainer, "grid_table_col_body").children = [];
+  expectCode("responsive multiselect template requires mobile Card content", ["--registry", REGISTRY, "--responsive-multiselect-template", writeJson("bad-responsive-multiselect-card-template.json", badResponsiveMultiselectCardTemplate)], "DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_CARD_VIEW_MISSING");
   const badResponsiveCollectionTemplate = structuredClone(responsiveCollectionTemplate);
   badResponsiveCollectionTemplate.templateResource.rootContainer.children[1].children[0].attrs.tablecols = [];
   expectCode("responsive table/card template native table columns are enforced", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-template.json", badResponsiveCollectionTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_TABLE_COLUMNS_MISSING");

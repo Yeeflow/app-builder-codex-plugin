@@ -17,4 +17,4 @@ The release adds source/distribution parity, template validation, materializer e
 
 ## Release Status
 
-RC packaging, isolated Marketplace installation smoke, fresh-task discovery, final tag, and stable promotion are recorded separately after they complete.
+RC1 packaging, Marketplace reinstallation, installed-cache checks, and fresh-task skill discovery passed. The final tag and stable promotion are recorded after the release branch is merged.

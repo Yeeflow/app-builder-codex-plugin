@@ -16,6 +16,7 @@ This standard keeps business planning separate from low-level Yeeflow payload ge
 | --- | --- |
 | `collection_control_responsive_card_grid` | Card-style record browsing. |
 | `collection_control_responsive` | Native responsive Collection: table on computer/laptop/tablet and cards on mobile. |
+| `collection_control_responsive_multiple_select` | Native responsive Collection with checkbox selection, selected count, page-level batch actions, and table/card presentation. |
 | `collection_control_card_with_multiselect_toolbar` | Card-style records with selected state and bulk toolbar. |
 | `collection_control_grid_table` | Dense table-like Collection records. |
 | `collection_control_grid_table_with_multiselect` | Dense table-like Collection records with checkbox selection and bulk operations. |
@@ -47,6 +48,7 @@ Validator scope rule: this gate parses canonical Dashboard record-display / data
 
 - Choose `collection_control_responsive_card_grid` for browsing records as cards.
 - Choose `collection_control_responsive` when the same operational dataset needs native sortable table columns on computer/laptop/tablet and card presentation on mobile. It is not the legacy Flex Grid table pattern.
+- Choose `collection_control_responsive_multiple_select` when the same operational dataset needs native table/card responsiveness plus multi-row selection, selected count, and page-level batch actions. Clone the complete page dependency graph together with the Collection subtree; it is the responsive replacement for `collection_control_grid_table_with_multiselect`.
 - Choose `collection_control_card_with_multiselect_toolbar` when card records need multi-select bulk actions.
 - Choose `collection_control_grid_table` for dense operational records without bulk selection.
 - Choose `collection_control_grid_table_with_multiselect` for dense operational records with multi-row selection and batch operations. Projects Center / Project Tasks is the export-proven source reference only, not a business-domain restriction.
