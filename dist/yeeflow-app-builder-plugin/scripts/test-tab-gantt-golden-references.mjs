@@ -49,7 +49,7 @@ const fixture = {
       { id: "programme", type: "ak-tabs-tab", label: "Programme", attrs: { isDefault: false, isDesignDefault: false }, children: [{ type: "container", children: [] }] },
     ] },
     { type: "gantt", attrs: { data: {
-      list: { ListID: "activities" },
+      list: { AppID: 41, ListSetID: "app", ListID: "activities" },
       filter: [{ left: "Text2", op: "0", right: [current], showCus: false, pre: "and" }],
       gantt: { fields: {
         text: { FieldName: "Title" }, start_date: { FieldName: "Datetime8" }, end_date: { FieldName: "Datetime16" }, dependency: { FieldName: "Text17" }, progress: { FieldName: "Decimal18" }, parent: { FieldName: "Text19" }, order: true,
@@ -59,6 +59,10 @@ const fixture = {
 
 try {
   expectPass("complete", fixture);
+  const badSourceApp = clone(fixture); delete badSourceApp.controls[1].attrs.data.list.AppID;
+  expectCode("source-app", badSourceApp, "GANTT_SOURCE_APP_ID_REQUIRED");
+  const badSourceListSet = clone(fixture); delete badSourceListSet.controls[1].attrs.data.list.ListSetID;
+  expectCode("source-listset", badSourceListSet, "GANTT_SOURCE_LISTSET_ID_REQUIRED");
   const noDefault = clone(fixture); noDefault.controls[0].children[0].attrs.isDefault = false; noDefault.controls[0].children[0].attrs.isDesignDefault = false;
   expectCode("tab-default", noDefault, "TAB_DEFAULT_COUNT_INVALID");
   const badStart = clone(fixture); badStart.Childs[1].Defs.find((field) => field.FieldName === "Datetime8").FieldType = "Text";

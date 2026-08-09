@@ -164,6 +164,11 @@ function validateLookup(field, sourceListId, multiple, role, pointer, findings) 
 
 function validateGantt(control, pointer, lists, findings) {
   const data = control?.attrs?.data || {};
+  const sourceAppId = text(data?.list?.AppID);
+  const sourceListSetId = text(data?.list?.ListSetID);
+  if (!sourceAppId) push(findings, "error", "GANTT_SOURCE_APP_ID_REQUIRED", "Gantt attrs.data.list.AppID is required so Designer field discovery has a complete source identity.", pointer);
+  if (!sourceListSetId) push(findings, "error", "GANTT_SOURCE_LISTSET_ID_REQUIRED", "Gantt attrs.data.list.ListSetID is required so Designer field discovery has a complete source identity.", pointer);
+  if (!sourceAppId || !sourceListSetId) return;
   const sourceId = text(data?.list?.ListID);
   const source = lists.get(sourceId);
   if (!sourceId || !source) {

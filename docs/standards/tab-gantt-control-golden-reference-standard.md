@@ -30,7 +30,7 @@ Clone `docs/reference/tab-control-workspace.template.json`.
 
 Clone `docs/reference/gantt-control-linked-activity.template.json` only after the Activity Data List and its Type 1 detail/View layout are resolved.
 
-1. `attrs.data.list` must identify the selected Activity Data List.
+1. `attrs.data.list` must include the resolved source `AppID`, `ListSetID`, and `ListID`. All three are required for Designer field discovery as well as runtime data binding.
 2. The standard related-record filter is `Activity.ParentBusinessLookup == current parent ListDataID`. The filter left field and Add `passvalues[].Name` must be the same Activity lookup field.
 3. `attrs.data.gantt.atts.allowadd = true` requires `passvalues` to set that lookup field from the current parent `ListDataID` expression.
 4. `linkLayout` must resolve to a Type 1 detail/View layout on the Activity source list. Keep the observed `modalsize: 2`, month scale, toolbar, milestones, automatic scheduling, and right skin unless the App Plan explicitly changes them.
@@ -59,7 +59,7 @@ node scripts/validate-tab-gantt-golden-references.mjs <decoded-app-or-fixture.js
 node scripts/test-tab-gantt-golden-references.mjs
 ```
 
-Stop before packaging or live save if any required Gantt source field is missing, either date field is not `Datetime`, Dependency is not a same-source multiple Lookup, Progress is not Decimal/percent, a mapped Parent is not a same-source single Lookup, the parent filter/`passvalues` relationship does not resolve, a Tab has no content, or the default-tab count is not exactly one.
+Stop before packaging or live save if source `AppID`, `ListSetID`, or `ListID` is missing; if any required Gantt source field is missing; if either date field is not `Datetime`; if Dependency is not a same-source multiple Lookup; if Progress is not Decimal/percent; if a mapped Parent is not a same-source single Lookup; if the parent filter/`passvalues` relationship does not resolve; if a Tab has no content; or if the default-tab count is not exactly one.
 
 ## Proof boundary
 
