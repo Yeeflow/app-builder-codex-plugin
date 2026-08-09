@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.10.0
+
+- Require every generated Data List Form (New, Edit, View, Document Library custom form) to select and materialize an explicit compatible Data List Form Layout rather than inheriting an implicit or blank layout.
+- Require Dashboard, Approval Form, and Public Form generation to select and materialize their matching Page Layout before controls are added.
+- Add structural page-layout and source/distribution regression coverage so missing, incompatible, or unmaterialized layouts fail generated-final validation.
+- Materialize responsive Collection Table and Card fields from the App Plan's resolved Display Fields and business intent; no fixed template column count, captions, or sample field bindings are retained in generated pages.
+- Fail closed when a responsive Collection has no explicit display-field plan or a requested display field cannot be resolved in the selected Data List.
+
 ## 1.9.0
 
 - Complete missing same-application `AppID` and `ListSetID` values for Data List-bound controls in generated Dashboard and custom-form resources, including JSON-encoded layout resources, without overwriting explicit sources.

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.9.0`
+- Version: `1.10.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.9.0` completes Data List-bound control source identity during materialization, so Dashboard and custom-form bindings retain `AppID`, `ListSetID`, and `ListID` for Designer field discovery. It adds fail-closed Type 1 Data List completion checks for a default view and resolvable New/Edit/View forms, and retains the responsive Collection plus Tab/Gantt contracts. Configuration readback remains separate from Designer/runtime proof.
+Version `1.10.0` requires explicit, materialized layouts for generated Data List Forms, Document Library custom forms, Dashboards, Approval Forms, and Public Forms. Responsive Collections now derive Table/Card fields, captions, and column count from the resolved App Plan rather than copying template sample columns. Configuration readback remains separate from Designer/runtime proof.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.9.0
+Version: 1.10.0
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.9.0
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.10.0
 ```
 
 ## What Is Included
