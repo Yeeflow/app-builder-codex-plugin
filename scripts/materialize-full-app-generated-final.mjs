@@ -1816,6 +1816,7 @@ function collectDashboardDatasetRecords(planText) {
     ]);
     const regionColumn = findHeaderIndex(normalizedHeaders, ["dataset region", "planned dashboard / region", "section", "section name", "region"]);
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source list", "source resource", "data source", "source data", "source"]);
+    const displayFieldsColumn = findHeaderIndex(normalizedHeaders, ["display fields", "visible fields", "table columns", "collection fields", "item fields", "columns"]);
     const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
     if (templateColumn === -1 || regionColumn === -1 || sourceColumn === -1) continue;
     let rowIndex = index + 2;
@@ -1829,6 +1830,7 @@ function collectDashboardDatasetRecords(planText) {
           dashboardPage: cleanResourceName(cells[pageColumn]) || currentDashboardPage,
           datasetRegion: cleanResourceName(cells[regionColumn]),
           sourceResource: cleanResourceName(cells[sourceColumn]),
+          displayFields: displayFieldsColumn === -1 ? "" : cleanResourceName(cells[displayFieldsColumn]),
           selectedTemplateId,
           retiredTemplateId,
           raw: raw.trim(),
@@ -3763,10 +3765,13 @@ function splitPlannedFieldList(value) {
   const text = cleanResourceName(value)
     .replace(/\bquery\b|\bsearch\b|\bfields?\b|\bcolumns?\b/gi, " ")
     .replace(/\s+and\s+/gi, ",");
-  if (!text || isNonResourceName(text) || /^(all|all fields|default)$/i.test(text)) return [];
+  // "Status" is a valid business field but is intentionally excluded from
+  // resource-name parsing. Field selections therefore use field-specific
+  // placeholder rules instead of isNonResourceName.
+  if (!text || isPlanningPlaceholder(text) || /^(all|all fields|default)$/i.test(text)) return [];
   return text.split(/[,;\uFF0C\uFF1B\u3001]/)
     .map((item) => cleanResourceName(item))
-    .filter((item) => item && !isNonResourceName(item));
+    .filter((item) => item && !isNonFieldName(item));
 }
 
 function resolveDataViewField(fields, requestedName) {
@@ -4496,14 +4501,13 @@ function configureReverseRelatedResponsiveColumns(wrapper, { childMeta, displayF
   const collection = findFirstByType(wrapper, "collection");
   if (!collection) return;
   const fields = displayFields.length ? displayFields : fieldsForDynamicControls(childMeta);
-  const displayMeta = { ...childMeta, fields };
   mapResponsiveCollectionTableColumns(collection, {
-    listMeta: displayMeta,
+    fields,
     listId: childMeta.listId,
     listName: childMeta.listName,
   });
   mapResponsiveCollectionCardView(collection, {
-    listMeta: displayMeta,
+    fields,
     listId: childMeta.listId,
     listName: childMeta.listName,
   });
@@ -6061,6 +6065,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
       rootListSetId,
       listId: recordListId,
       listMeta: recordListMeta,
+      displayFields: record.displayFields,
       detailLayoutId: recordListMeta.detailLayoutId,
       filterBindings: !isMasterDetailWorkspace && index === 0 ? normalizedFilters : [],
       collectionId: isMasterDetailWorkspace ? `${collectionId}_related_${index + 1}` : index === 0 ? collectionId : `${collectionId}_${index + 1}`,
@@ -7641,7 +7646,7 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId, rootListSet
   };
 }
 
-function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = "", dashboardName, datasetRegion, listName, rootListSetId, listId, listMeta, detailLayoutId, filterBindings, collectionId }) {
+function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = "", dashboardName, datasetRegion, listName, rootListSetId, listId, listMeta, displayFields = "", detailLayoutId, filterBindings, collectionId }) {
   const template = loadCollectionTemplate(templateId);
   const root = clone(template?.templateResource?.rootContainer || {});
   reinstantiateTemplateUuidValues(root);
@@ -7673,6 +7678,10 @@ function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = 
   };
   if (GRID_TABLE_TEMPLATE_IDS.has(templateId)) enforceGridWrapperGap(root);
   const collection = findFirstByType(root, "collection");
+  const requiresExplicitDisplayFields = templateId === "collection_control_responsive" || templateId === "collection_control_responsive_multiple_select";
+  const plannedDisplayFields = requiresExplicitDisplayFields
+    ? resolvePlannedCollectionDisplayFields({ displayFields, listMeta, dashboardName, datasetRegion, templateId })
+    : [];
   if (collection) {
     if (GRID_TABLE_TEMPLATE_IDS.has(templateId)) enforceContainerGap(findParent(root, collection));
     const filterConditions = buildCollectionFilterConditions(filterBindings);
@@ -7699,6 +7708,7 @@ function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = 
         sourceResourceType: "Data list",
         datasetRegion,
         datasetPresentationTemplateId: templateId,
+        ...(plannedDisplayFields.length ? { plannedDisplayFields: plannedDisplayFields.map((field) => ({ fieldName: field.fieldName, displayName: field.displayName })) } : {}),
         field: primaryFieldName(listMeta),
         sort: [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }],
         filter: filterConditions,
@@ -7759,8 +7769,8 @@ function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = 
     if (control.type !== "dynamic-user") replaceUserLikeDynamicFieldText(control, field.displayName);
   }
   if ((templateId === "collection_control_responsive" || templateId === "collection_control_responsive_multiple_select") && collection) {
-    mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName, skipLeadingSelectionColumn: templateId === "collection_control_responsive_multiple_select" });
-    mapResponsiveCollectionCardView(collection, { listMeta, listId, listName });
+    mapResponsiveCollectionTableColumns(collection, { fields: plannedDisplayFields, listId, listName, skipLeadingSelectionColumn: templateId === "collection_control_responsive_multiple_select" });
+    mapResponsiveCollectionCardView(collection, { fields: plannedDisplayFields, listId, listName });
     enforceResponsiveCollectionMobileOperationWidth(root, { templateId });
   }
   for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
@@ -7792,15 +7802,41 @@ function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = 
   return root;
 }
 
-function mapResponsiveCollectionTableColumns(collection, { listMeta, listId, listName, skipLeadingSelectionColumn = false }) {
-  const fields = fieldsForDynamicControls(listMeta);
+function resolvePlannedCollectionDisplayFields({ displayFields, listMeta, dashboardName, datasetRegion, templateId }) {
+  const requested = splitPlannedFieldList(displayFields);
+  if (!requested.length) {
+    throw new Error(`DASH_COLLECTION_DISPLAY_FIELDS_REQUIRED: Dashboard ${dashboardName} / ${datasetRegion} must explicitly plan the visible fields for ${templateId}.`);
+  }
+  const available = fieldsForDynamicControls(listMeta);
+  const resolved = [];
+  const seen = new Set();
+  for (const requestedField of requested) {
+    const normalized = normKey(requestedField);
+    const field = available.find((candidate) => normKey(candidate.fieldName) === normalized || normKey(candidate.displayName) === normalized);
+    if (!field) {
+      throw new Error(`DASH_COLLECTION_DISPLAY_FIELD_UNRESOLVED: Dashboard ${dashboardName} / ${datasetRegion} requests ${requestedField}, which is not a field on ${listMeta?.listName || "the selected source"}.`);
+    }
+    const key = normKey(field.fieldName);
+    if (!seen.has(key)) {
+      seen.add(key);
+      resolved.push(field);
+    }
+  }
+  return resolved;
+}
+
+function mapResponsiveCollectionTableColumns(collection, { fields, listId, listName, skipLeadingSelectionColumn = false }) {
   const columns = Array.isArray(collection?.attrs?.tablecols) ? collection.attrs.tablecols : [];
-  let fallbackIndex = 0;
-  for (const [index, column] of columns.entries()) {
-    if (skipLeadingSelectionColumn && index === 0) continue;
-    const field = selectResponsiveTableColumnField(column, fields, fallbackIndex);
-    fallbackIndex += 1;
-    if (!field) continue;
+  const leadingSelectionColumn = skipLeadingSelectionColumn && columns.length ? columns[0] : null;
+  const reusableColumns = columns.slice(leadingSelectionColumn ? 1 : 0);
+  if (!reusableColumns.length) throw new Error("DASH_COLLECTION_TEMPLATE_TABLE_COLUMN_MISSING: Responsive Collection template has no reusable native table column.");
+  const mappedColumns = [];
+  for (const field of fields) {
+    // The reference supplies native column *shapes*, not a fixed six-column
+    // business schema. Pick a shape compatible with the planned source field
+    // and clone it for every planned display column.
+    const column = clone(selectResponsiveTableColumnShape(reusableColumns, field));
+    reinstantiateTemplateUuidValues(column);
     column.attrs = {
       ...(column.attrs || {}),
       title: { ...(column.attrs?.title || {}), value: field.displayName, variable: null },
@@ -7851,17 +7887,33 @@ function mapResponsiveCollectionTableColumns(collection, { listMeta, listId, lis
     for (const heading of findDescendants(column, (node) => String(node?.type || "") === "heading")) {
       rewriteResponsiveColumnHeadingBindings(heading, field);
     }
+    mappedColumns.push(column);
   }
+  collection.attrs.tablecols = leadingSelectionColumn ? [leadingSelectionColumn, ...mappedColumns] : mappedColumns;
+}
+
+function selectResponsiveTableColumnShape(columns, field) {
+  const dynamicType = dynamicControlTypeForField(field);
+  const fieldShape = normKey(`${field?.fieldType || ""} ${field?.controlType || ""} ${field?.Type || ""}`);
+  const isPercent = /percent|percentage/.test(fieldShape);
+  if (isPercent) {
+    const progressColumn = columns.find((column) => findDescendants(column, (node) => String(node?.type || "") === "progress").length > 0);
+    if (progressColumn) return progressColumn;
+  }
+  if (dynamicType === "dynamic-user") {
+    const userColumn = columns.find((column) => findDescendants(column, (node) => String(node?.type || "") === "dynamic-user").length > 0);
+    if (userColumn) return userColumn;
+  }
+  return columns.find((column) => findDescendants(column, (node) => String(node?.type || "") === "dynamic-field").length > 0) || columns[0];
 }
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
-function mapResponsiveCollectionCardView(collection, { listMeta, listId, listName }) {
+function mapResponsiveCollectionCardView(collection, { fields, listId, listName }) {
   const cardItem = asArray(collection?.children)[0];
   if (!cardItem) return;
-  const fields = fieldsForDynamicControls(listMeta);
   const titleField = findFieldBySemanticTokens(fields, ["title", "subject", "name", "number"]) || fields.find((field) => field.fieldName === "Title") || fields[0];
   const ownerField = findFieldBySemanticTokens(fields, ["owner", "assignee", "assigned", "requester", "manager"]);
   const startField = findFieldBySemanticTokens(fields, ["start date", "start", "created"]);
@@ -7919,8 +7971,28 @@ function mapResponsiveCollectionCardView(collection, { listMeta, listId, listNam
     const index = cardItem.children.indexOf(statusRegion);
     cardItem.children[index] = rewriteStatus(statusRegion);
   }
+  pruneResponsiveCardToPlannedFields(cardItem, fields);
   cardItem.children = asArray(cardItem.children).filter((child) => child && typeof child === "object");
   removeNonLocalResponsiveCardDisplayRules(cardItem);
+}
+
+function pruneResponsiveCardToPlannedFields(cardItem, fields) {
+  const allowed = new Set(fields.map((field) => normKey(field.fieldName)));
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      const type = String(child?.type || "");
+      const dynamicField = String(child?.attrs?.field || child?.attrs?.["obj-f"] || child?.field || "").trim();
+      if (type.startsWith("dynamic-") && dynamicField && !allowed.has(normKey(dynamicField))) return false;
+      if (type === "progress") {
+        const references = collectionContextFieldRefs(child);
+        if (!references.some((fieldName) => allowed.has(normKey(fieldName)))) return false;
+      }
+      visit(child);
+      return true;
+    });
+  };
+  visit(cardItem);
 }
 
 function removeNonLocalResponsiveCardDisplayRules(cardItem) {
@@ -7960,23 +8032,6 @@ function enforceResponsiveCollectionMobileOperationWidth(root, { templateId = ""
       position: [...RESPONSIVE_COLLECTION_ITEM_OP_MENU_POSITION],
     };
   }
-}
-
-function selectResponsiveTableColumnField(column, fields, index) {
-  const title = String(column?.attrs?.title?.value || "").toLowerCase();
-  const typeHints = {
-    title: ["title", "subject", "name", "number"],
-    assignee: ["assignee", "assigned", "owner", "requester", "manager"],
-    owner: ["owner", "assignee", "assigned", "requester", "manager"],
-    start: ["start date", "start", "created"],
-    end: ["due date", "end date", "due", "end"],
-    due: ["due date", "due", "end date", "end"],
-    completion: ["completion", "progress", "percent", "percentage"],
-    progress: ["progress", "completion", "percent", "percentage"],
-    status: ["status", "state", "stage"],
-  };
-  const tokens = Object.entries(typeHints).find(([hint]) => title.includes(hint))?.[1] || [];
-  return findFieldBySemanticTokens(fields, tokens) || fields[index % fields.length] || fields[0] || null;
 }
 
 function rewriteResponsiveColumnHeadingBindings(heading, field) {

@@ -16,6 +16,14 @@ const CARD_TEMPLATE_IDS = new Set([
   "collection_control_card_with_multiselect_toolbar",
 ]);
 
+// Native responsive Collections use Collection.tablecols for desktop/tablet
+// Table view and a distinct Card item tree for mobile. They are not legacy
+// Flex Grid tables and must not be sent through the paired-header validator.
+const RESPONSIVE_TABLE_TEMPLATE_IDS = new Set([
+  "collection_control_responsive",
+  "collection_control_responsive_multiple_select",
+]);
+
 const PRINT_TEMPLATE_ID = "dashboard-print-multi-record-table-v1";
 
 if (isMainModule()) {
@@ -128,6 +136,7 @@ function validateDashboardCollection(entry, page, context) {
     validateCardCollection(entry, page, context, templateId);
     return;
   }
+  if (RESPONSIVE_TABLE_TEMPLATE_IDS.has(templateId)) return;
   if (templateId && !GRID_TABLE_TEMPLATE_IDS.has(templateId)) return;
   validateGridTableCollection(entry, page, context, templateId || "implicit-grid-table");
 }
@@ -240,7 +249,7 @@ function firstTemplateId(nodes) {
       node?.derivedFromCollectionTemplate,
       node?.derivedFromGoldenReference,
     ].filter(Boolean).map(String);
-    const found = candidates.find((candidate) => GRID_TABLE_TEMPLATE_IDS.has(candidate) || CARD_TEMPLATE_IDS.has(candidate) || candidate === PRINT_TEMPLATE_ID);
+    const found = candidates.find((candidate) => GRID_TABLE_TEMPLATE_IDS.has(candidate) || CARD_TEMPLATE_IDS.has(candidate) || RESPONSIVE_TABLE_TEMPLATE_IDS.has(candidate) || candidate === PRINT_TEMPLATE_ID);
     if (found) return found;
   }
   return "";

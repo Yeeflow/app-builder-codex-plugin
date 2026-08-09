@@ -1099,8 +1099,8 @@ function validateResponsiveCollection(entry, page, findings, options = {}) {
     findings.push(error("DASH_DATASET_RESPONSIVE_LAYOUT_INVALID", "Responsive Collection must preserve the export-proven responsive table/card display preference.", { page: page.title, path: entry.pointer, actual: attrs["list-display-preference"] ?? null }));
   }
   const columns = asArray(attrs.tablecols);
-  if (columns.length < 3) {
-    findings.push(error("DASH_DATASET_RESPONSIVE_TABLE_COLUMNS_MISSING", "Responsive Collection requires at least three native table columns.", { page: page.title, path: `${entry.pointer}.attrs.tablecols`, count: columns.length }));
+  if (columns.length < 1) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_TABLE_COLUMNS_MISSING", "Responsive Collection requires at least one native table column selected for the business dataset region.", { page: page.title, path: `${entry.pointer}.attrs.tablecols`, count: columns.length }));
   }
   const labels = new Set();
   const dynamicControls = [];

@@ -1420,8 +1420,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "f06661eaa72cbab6f4b2fcd6a5ad32c714d203dbc864fdb78e9b32140ee6b59a",
-      "distDigest": "f06661eaa72cbab6f4b2fcd6a5ad32c714d203dbc864fdb78e9b32140ee6b59a",
+      "sourceDigest": "12c85d4d5ab8463424934cc8ecac522f34d49d7aa43b3b11331fa0298d313df9",
+      "distDigest": "12c85d4d5ab8463424934cc8ecac522f34d49d7aa43b3b11331fa0298d313df9",
       "verificationStatus": "passed"
     },
     {
@@ -2355,8 +2355,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "2c5e6e6bd3b93054e61e80286aa677b4a390de3662d8d0c24d71efb926a4656d",
-      "distDigest": "2c5e6e6bd3b93054e61e80286aa677b4a390de3662d8d0c24d71efb926a4656d",
+      "sourceDigest": "53d68a79cfa3e2c782a35b926f70b64b249df1349ecd4cc269db51cb37956df0",
+      "distDigest": "53d68a79cfa3e2c782a35b926f70b64b249df1349ecd4cc269db51cb37956df0",
       "verificationStatus": "passed"
     },
     {
@@ -3477,8 +3477,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "aa0a5f5a3892f4f376b90a0c492ff1b4c2edb29a09578618f3e6641ab1d32718",
-      "distDigest": "aa0a5f5a3892f4f376b90a0c492ff1b4c2edb29a09578618f3e6641ab1d32718",
+      "sourceDigest": "6ab02a443852707b15e57d8d996c70137f286860b3e2a2e92d082e254a9700e2",
+      "distDigest": "6ab02a443852707b15e57d8d996c70137f286860b3e2a2e92d082e254a9700e2",
       "verificationStatus": "passed"
     },
     {
@@ -3510,8 +3510,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "d9f7c7d9c102e985aba06532a54f4c7559304ad186fb37c6ca1f8fcaa02ffd2d",
-      "distDigest": "d9f7c7d9c102e985aba06532a54f4c7559304ad186fb37c6ca1f8fcaa02ffd2d",
+      "sourceDigest": "bbad9b20f25ca73c4a5fc24942a4ad5038155ebe9dbbc15dc06c1f579966e8c9",
+      "distDigest": "bbad9b20f25ca73c4a5fc24942a4ad5038155ebe9dbbc15dc06c1f579966e8c9",
       "verificationStatus": "passed"
     },
     {

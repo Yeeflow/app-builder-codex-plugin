@@ -352,12 +352,12 @@ try {
     "### 14.1 Asset Loan Operations Dashboard",
     "",
     "#### Dashboard Sections",
-    "| Section Name | Data Source | Selected Record Display Control |",
-    "| --- | --- | --- |",
-    "| Active loans | Loan Transactions | collection_control_grid_table_with_multiselect |",
-    "| Availability cards | Office Assets | collection_control_responsive_card_grid |",
-    "| Batch card selection | Office Assets | collection_control_card_with_multiselect_toolbar |",
-    "| Asset categories work queue | Asset Categories | collection_control_grid_table |",
+    "| Section Name | Data Source | Selected Record Display Control | Display Fields |",
+    "| --- | --- | --- | --- |",
+    "| Active loans | Loan Transactions | collection_control_grid_table_with_multiselect | Title, Due Date, Status |",
+    "| Availability cards | Office Assets | collection_control_responsive_card_grid | Title, Asset Tag, Assigned To |",
+    "| Batch card selection | Office Assets | collection_control_card_with_multiselect_toolbar | Title, Asset Tag, Assigned To |",
+    "| Asset categories work queue | Asset Categories | collection_control_grid_table | Title |",
     "",
     "#### Data Analytics Template Selection",
     "| Dashboard Page | Analytics Region | Source Resource | Business Question | Selected Data Analytics Template | Grouping Field | Value Field |",
@@ -373,6 +373,11 @@ try {
     "| Dashboard | Overdue Monitor | Return inspections managed table | Return Inspections | data_table_control_caption_scroll | Title, Status | Caption search/add/import/export toolbar needed | Generated-final validation |",
     "",
     "### 14.2 Overdue Monitor",
+    "",
+    "#### Dashboard Sections",
+    "| Section Name | Data Source | Selected Record Display Control | Display Fields |",
+    "| --- | --- | --- | --- |",
+    "| Overdue loan monitor | Loan Transactions | collection_control_responsive | Title, Due Date, Status |",
     "",
     "## 15. Application Navigation Plan",
     "",
@@ -405,6 +410,24 @@ try {
     );
     cases.push(`${field} missing Choice Values fails approval-form planning validation`);
   }
+
+  const missingResponsiveCollectionFieldsPlan = path.join(tempDir, "missing-responsive-collection-display-fields.md");
+  fs.writeFileSync(
+    missingResponsiveCollectionFieldsPlan,
+    fs.readFileSync(resourcePlan, "utf8").replace(
+      "| Section Name | Data Source | Selected Record Display Control | Display Fields |",
+      "| Section Name | Data Source | Selected Record Display Control |",
+    ),
+  );
+  expectCode("responsive Collection without planned display fields fails before materialization", [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", missingResponsiveCollectionFieldsPlan,
+    "--out-dir", path.join(tempDir, "missing-responsive-collection-display-fields"),
+    "--api-id-manifest", apiIdManifest,
+    "--tenant-id", "1234567890123456",
+    "--json",
+  ], "DASH_COLLECTION_DISPLAY_FIELDS_REQUIRED");
 
   const resourceOut = path.join(tempDir, "resource-plan");
   const resourceRun = expectPass("nontrivial App Plan materializes minimal resource graph instead of placeholder package", [
@@ -445,10 +468,35 @@ try {
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dataLists, ["Office Assets", "Loan Transactions", "Asset Categories", "Return Inspections"]);
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dashboards, ["Asset Loan Operations Dashboard", "Overdue Monitor"]);
   assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardAnalyticsRecords.length, 2, "planned Data Analytics template selections are parsed");
-  assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardDatasetRecords.length, 4, "planned Dashboard Collection template selections are parsed");
+  assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardDatasetRecords.length, 5, "planned Dashboard Collection template selections are parsed");
+  assert.deepEqual(
+    resourceGenerationReport.plannedResourceDemand.dashboardDatasetRecords.find((record) => record.datasetRegion === "Active loans")?.displayFields,
+    "Title, Due Date, Status",
+    "responsive Collection visible fields are parsed from the App Plan rather than inherited from the template",
+  );
   assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardDataTableRecords.length, 3, "planned Data Table template selections are parsed");
   const decodedResource = JSON.parse(fs.readFileSync(resourceReport.outputs.decodedResource, "utf8"));
   const resourceWrapper = JSON.parse(fs.readFileSync(resourceReport.outputs.package, "utf8"));
+  const activeLoansCollection = decodedResource.Pages
+    .flatMap((page) => findNodes(parseJson(page.LayoutInResources?.[0]?.Resource), (node) => node?.type === "collection" && node?.datasetRegion === "Active loans"))
+    .find(Boolean);
+  assert.ok(activeLoansCollection, "planned Active loans responsive Collection is materialized");
+  assert.deepEqual(
+    activeLoansCollection.attrs.tablecols
+      .map((column) => String(column?.attrs?.title?.value || "").trim())
+      .filter(Boolean),
+    ["Title", "Due Date", "Status"],
+    "responsive Collection native table columns use the App Plan field order and count, not the golden-reference sample columns",
+  );
+  assert.deepEqual(
+    activeLoansCollection.attrs.data.plannedDisplayFields,
+    [
+      { fieldName: "Title", displayName: "Title" },
+      { fieldName: "Datetime2", displayName: "Due Date" },
+      { fieldName: "Text3", displayName: "Status" },
+    ],
+    "responsive Collection records its resolved source-field plan for package validation and audit",
+  );
   assert.equal(String(resourceWrapper.ListID), String(decodedResource.ListSet.ListID), "wrapper.ListID must equal decoded ListSet.ListID");
   assert.equal(String(resourceWrapper.ListID), String(decodedResource.Pages[0].ListID), "dashboard pages must belong to decoded root ListSetID");
   const dashboardUuids = new Set();
