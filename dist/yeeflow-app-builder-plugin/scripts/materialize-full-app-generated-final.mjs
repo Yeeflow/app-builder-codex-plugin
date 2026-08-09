@@ -907,6 +907,7 @@ function analyzeAppPlanResourceDemand(planText) {
     publicFormActionRecords: collectPublicFormActionRecords(planText),
     reverseRelatedRecords,
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
+    approvalFormLayoutTemplateSelections: collectApprovalFormLayoutTemplateSelections(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
     workflowQueryDataConfigs: collectWorkflowQueryDataConfigs(planText),
     workflowSetDataListRecords,
@@ -1981,8 +1982,8 @@ function collectCustomFormRecords(planText) {
     if (!currentList || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
-    const listColumn = findHeaderIndex(normalizedHeaders, ["data list", "host list", "list name", "source list", "list/library", "data list name"]);
-    const formColumn = findHeaderIndex(normalizedHeaders, ["form name", "custom form name"]);
+    const listColumn = findHeaderIndex(normalizedHeaders, ["data list", "data list or library", "host list", "list name", "source list", "list/library", "data list name"]);
+    const formColumn = findHeaderIndex(normalizedHeaders, ["form name", "custom form", "custom form name"]);
     const typeColumn = findHeaderIndex(normalizedHeaders, ["form type", "type", "purpose"]);
     const usageColumn = findHeaderIndex(normalizedHeaders, ["form usage", "usage"]);
     const templateColumn = findHeaderIndex(normalizedHeaders, ["selected data list form layout template", "data list form layout template", "selected layout template"]);
@@ -2029,6 +2030,25 @@ function collectCustomFormRecords(planText) {
   return records;
 }
 
+function collectApprovalFormLayoutTemplateSelections(planText) {
+  const section = extractNumberedSection(planText, /^##\s+5\.\s+Approval Forms Plan/im);
+  const selected = {};
+  if (!section.trim()) return selected;
+  for (const table of parseMarkdownTables(section)) {
+    const headers = table.headers.map((header) => normKey(header));
+    const roleColumn = findHeaderIndex(headers, ["page role", "form role", "approval page role"]);
+    const templateColumn = findHeaderIndex(headers, ["selected approval form layout template", "approval form layout template", "selected layout template", "layout template"]);
+    if (roleColumn === -1 || templateColumn === -1) continue;
+    for (const row of table.rows) {
+      const cells = table.headers.map((header) => row[header] || "");
+      const role = normKey(cells[roleColumn]);
+      const templateId = cleanResourceName(cells[templateColumn]);
+      if (role === "submission" || role === "task") selected[role] = templateId;
+    }
+  }
+  return selected;
+}
+
 function collectPublicFormRecords(planText) {
   const section = extractNumberedSection(planText, /^##\s+10\.\s+Custom Data List Forms Plan/im);
   if (!section.trim()) return [];
@@ -2065,7 +2085,8 @@ function collectPublicFormRecords(planText) {
             title: titleColumn === -1 ? formName : cleanResourceName(cells[titleColumn]) || formName,
             description: descriptionColumn === -1 ? "" : cleanResourceName(cells[descriptionColumn]),
             fields: fieldsColumn === -1 ? "" : cleanResourceName(cells[fieldsColumn]),
-            pageTemplateId: pageTemplateColumn === -1 ? PUBLIC_FORM_PAGE_TEMPLATE_ID : cleanResourceName(cells[pageTemplateColumn]) || PUBLIC_FORM_PAGE_TEMPLATE_ID,
+            pageTemplateId: pageTemplateColumn === -1 ? "" : cleanResourceName(cells[pageTemplateColumn]),
+            pageTemplateExplicitlySelected: pageTemplateColumn !== -1 && Boolean(cleanResourceName(cells[pageTemplateColumn])),
             fieldTemplateId: fieldTemplateColumn === -1 ? PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID : cleanResourceName(cells[fieldTemplateColumn]) || PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID,
           });
         }
@@ -3320,19 +3341,7 @@ function assignAllCustomFormLayoutPositions(planDemand, dataListNames) {
     if (assignedFormKeys.has(formKey)) continue;
     const listIndex = dataListNames.findIndex((name) => normKey(name) === normKey(inferredListName));
     if (listIndex < 0) continue;
-    const next = (offsetsByList.get(listIndex) || 0) + 1;
-    offsetsByList.set(listIndex, next);
-    assignedFormKeys.add(formKey);
-    fallbackAssignments.push({
-      listName: inferredListName,
-      formName,
-      formType: "",
-      selectedTemplate: "",
-      openIn: "",
-      generatedByPolicy: "fallback-custom-form-from-resource-list",
-      listIndex,
-      layoutIndex: next,
-    });
+    throw new Error(`DATA_LIST_FORM_LAYOUT_SELECTION_REQUIRED: ${inferredListName} / ${formName} is declared as a custom form but has no explicit Data List Form Layout Template Selection row.`);
   }
   return assignments.concat(fallbackAssignments);
 }
@@ -3364,30 +3373,42 @@ function ensureRequiredCustomFormRecords(planDemand, dataListNames) {
   for (const listName of dataListNames) {
     const listRecords = records.filter((record) => normKey(record.listName) === normKey(listName));
     if (!listRecords.some((record) => customFormUsage(record) === "newEdit")) {
-      records.push({
-        listName,
-        formName: `${listName} New/Edit Form`,
-        formType: "New/Edit",
-        generatedByPolicy: "required-new-edit-custom-form",
-      });
+      throw new Error(`DATA_LIST_FORM_LAYOUT_NEW_EDIT_SELECTION_REQUIRED: ${listName} must explicitly select a Data List Form Layout for New/Edit.`);
     }
     if (!listRecords.some((record) => customFormUsage(record) === "view")) {
-      records.push({
-        listName,
-        formName: `${listName} View Item`,
-        formType: "View",
-        generatedByPolicy: "required-view-custom-form",
-      });
+      throw new Error(`DATA_LIST_FORM_LAYOUT_VIEW_SELECTION_REQUIRED: ${listName} must explicitly select a Data List Form Layout for View.`);
     }
+    for (const record of listRecords) assertExplicitDataListFormTemplate(record);
   }
   return records;
 }
 
 function customFormUsage(record) {
   const text = `${record?.formType || ""} ${record?.formName || ""}`.toLowerCase();
-  if (/\bview\b|detail/.test(text)) return "view";
+  if (/\bview\b|detail|print/.test(text)) return "view";
   if (/new\s*\/\s*edit|\bnew\b|\bedit\b|create/.test(text)) return "newEdit";
   return "";
+}
+
+function assertExplicitDataListFormTemplate(record) {
+  const usage = customFormUsage(record);
+  const selectedTemplate = cleanResourceName(record?.selectedTemplate);
+  if (!usage) {
+    throw new Error(`DATA_LIST_FORM_LAYOUT_USAGE_REQUIRED: ${record?.listName || "Data List"} / ${record?.formName || "Custom Form"} must declare New, Edit, View, or an explicitly supported page role.`);
+  }
+  if (!selectedTemplate) {
+    throw new Error(`DATA_LIST_FORM_LAYOUT_SELECTION_REQUIRED: ${record?.listName || "Data List"} / ${record?.formName || "Custom Form"} must explicitly select a Data List Form Layout Template.`);
+  }
+  if (usage === "newEdit" && selectedTemplate !== "data_list_form_layout_new_edit_v1_1") {
+    throw new Error(`DATA_LIST_FORM_LAYOUT_TEMPLATE_MISMATCH: ${record?.listName || "Data List"} / ${record?.formName || "Custom Form"} must use data_list_form_layout_new_edit_v1_1.`);
+  }
+  if (usage === "view" && !["data_list_form_layout_view_item_v1_1", "data_list_form_layout_workbench"].includes(selectedTemplate)) {
+    throw new Error(`DATA_LIST_FORM_LAYOUT_TEMPLATE_MISMATCH: ${record?.listName || "Data List"} / ${record?.formName || "Custom Form"} must use a View Item or Workbench Data List Form Layout Template.`);
+  }
+  if (selectedTemplate === "data_list_form_layout_workbench" && !/^full\s*page$/i.test(cleanResourceName(record?.openIn))) {
+    throw new Error(`DATA_LIST_FORM_LAYOUT_WORKBENCH_FULL_PAGE_REQUIRED: ${record?.listName || "Data List"} / ${record?.formName || "Custom Form"} must declare Open in: Full page.`);
+  }
+  return { usage, selectedTemplate };
 }
 
 function buildDataListFormDisplaySettings({ customLayoutsForList, ids }) {
@@ -3887,8 +3908,8 @@ function defaultValueForFieldType(fieldType) {
 }
 
 function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", selectedTemplate = "", openIn = "", fields, planDemand = {}, listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map(), rootListSetId = "", embeddedSublistDescriptorHostContext = null }) {
-  const templateKind = isWorkbenchCustomForm({ formName, formType, selectedTemplate, openIn }) ? "workbench" : (/\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit");
-  const templateId = templateKind === "workbench" ? "data_list_form_layout_workbench" : (templateKind === "view" ? "data_list_form_layout_view_item_v1_1" : "data_list_form_layout_new_edit_v1_1");
+  const { selectedTemplate: templateId } = assertExplicitDataListFormTemplate({ listName, formName, formType, selectedTemplate, openIn });
+  const templateKind = templateId === "data_list_form_layout_workbench" ? "workbench" : (templateId === "data_list_form_layout_view_item_v1_1" ? "view" : "newEdit");
   const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields, planDemand, listMetaByName, approvalMetaByName, dashboardMetaByName, rootListSetId, layoutId, embeddedSublistDescriptorHostContext });
   const resourceJson = JSON.stringify(resource);
   return {
@@ -5437,7 +5458,9 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     if (host?.resourceType === "document-library") {
       findings.push(error("PUBLIC_FORM_HOST_TYPE_INVALID", "Public Forms are supported only on Type 1 Data Lists, not Document Libraries.", { publicForm: assignment.formName, listName: assignment.listName }));
     }
-    if (assignment.pageTemplateId !== PUBLIC_FORM_PAGE_TEMPLATE_ID) {
+    if (!assignment.pageTemplateExplicitlySelected) {
+      findings.push(error("PUBLIC_FORM_PAGE_LAYOUT_SELECTION_REQUIRED", "Every generated Public Form must explicitly select public-form-page-layout-standard in the App Plan; the generator must not silently choose a default page layout.", { publicForm: assignment.formName, listName: assignment.listName }));
+    } else if (assignment.pageTemplateId !== PUBLIC_FORM_PAGE_TEMPLATE_ID) {
       findings.push(error("PUBLIC_FORM_PAGE_LAYOUT_TEMPLATE_INVALID", "Generated Public Forms must select public-form-page-layout-standard.", { publicForm: assignment.formName, selectedTemplate: assignment.pageTemplateId }));
     }
     if (assignment.fieldTemplateId !== PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID) {
@@ -5613,6 +5636,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         formActionSetDataListRecords: planDemand.formActionSetDataListRecords,
         formActionOpenResourceRecords: planDemand.formActionOpenResourceRecords,
         formActionPrintBarcodeRecords: planDemand.formActionPrintBarcodeRecords,
+        approvalPageLayoutTemplateSelections: planDemand.approvalFormLayoutTemplateSelections,
         listMetaByName,
         approvalMetaByName,
         dashboardMetaByName,
@@ -5801,7 +5825,13 @@ function selectDashboardPageLayoutTemplateForPage({ planDemand, pageName }) {
   const records = planDemand.dashboardPageLayoutTemplateRecords || [];
   const exact = records.find((record) => normKey(pageName) === normKey(record.dashboardPage));
   const match = exact || records.find((record) => dashboardNameMatches(pageName, record.dashboardPage));
-  return match?.selectedTemplateId || PAGE_LAYOUT_TEMPLATE_ID;
+  if (!match?.selectedTemplateId) {
+    throw new Error(`DASH_LAYOUT_TEMPLATE_SELECTION_REQUIRED: Dashboard ${pageName} must explicitly select a Dashboard Page Layout Template.`);
+  }
+  if (!DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.includes(match.selectedTemplateId)) {
+    throw new Error(`DASH_LAYOUT_TEMPLATE_UNKNOWN: Dashboard ${pageName} selected unsupported template ${match.selectedTemplateId}.`);
+  }
+  return match.selectedTemplateId;
 }
 
 function selectDashboardDatasetRecord({ planDemand, pageName, pageIndex }) {
@@ -7483,8 +7513,9 @@ function buildCollectionFullTextConditions(filters) {
 
 function buildDashboardPageLayoutShell({ name, templateId = PAGE_LAYOUT_TEMPLATE_ID }) {
   const registry = JSON.parse(fs.readFileSync(DASHBOARD_V11_TEMPLATE_PATH, "utf8"));
-  const template = registry.templates?.find((item) => item?.id === templateId) || registry.templates?.find((item) => item?.id === PAGE_LAYOUT_TEMPLATE_ID) || registry.templates?.[0];
-  const selectedTemplateId = template?.id || PAGE_LAYOUT_TEMPLATE_ID;
+  const template = registry.templates?.find((item) => item?.id === templateId);
+  if (!template) throw new Error(`DASH_LAYOUT_TEMPLATE_UNKNOWN: Dashboard ${name} selected unsupported template ${templateId}.`);
+  const selectedTemplateId = template.id;
   const resource = clone(template?.template?.parsedResource || {});
   resource.__pageLayoutDependencies = {
     filterVars: clone(template?.template?.parsedResource?.filterVars || template?.filterVars || []),
@@ -10326,7 +10357,7 @@ function workflowMappingValueType(targetType) {
   return "string";
 }
 
-function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [], formActionSetVariableRecords = [], formActionSetDataListRecords = [], formActionOpenResourceRecords = [], formActionPrintBarcodeRecords = [], listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map() }) {
+function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], formActionSetVariableRecords = [], formActionSetDataListRecords = [], formActionOpenResourceRecords = [], formActionPrintBarcodeRecords = [], approvalPageLayoutTemplateSelections = {}, dataListMetas = [], listMetaByName = new Map(), approvalMetaByName = new Map(), dashboardMetaByName = new Map() }) {
   const {
     submissionPageId,
     taskPageId,
@@ -10361,8 +10392,8 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     variables,
     buildWorkflowVariablesFromSetDataListRecords(approvalWorkflowNodes.map((node) => node.setDataListRecord).filter(Boolean)),
   );
-  const submissionFormDef = approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || []);
-  const taskFormDef = approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs));
+  const submissionFormDef = approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || [], approvalPageLayoutTemplateSelections.submission);
+  const taskFormDef = approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs), approvalPageLayoutTemplateSelections.task);
   materializePlannedFormActionSetVariables(submissionFormDef, {
     records: formActionSetVariableRecords,
     hostResource: name,
@@ -11072,7 +11103,10 @@ function uniqueVariablesById(variables) {
   return out;
 }
 
-function approvalFormDef(id, title, role, fields = []) {
+function approvalFormDef(id, title, role, fields = [], selectedTemplateId = "") {
+  const expectedTemplateId = APPROVAL_FORM_TEMPLATE_IDS[role === "task" ? "task" : "submission"];
+  if (!selectedTemplateId) throw new Error(`APPROVAL_FORM_LAYOUT_SELECTION_REQUIRED: ${title} / ${role} must explicitly select ${expectedTemplateId}.`);
+  if (selectedTemplateId !== expectedTemplateId) throw new Error(`APPROVAL_FORM_LAYOUT_TEMPLATE_MISMATCH: ${title} / ${role} must select ${expectedTemplateId}.`);
   const resource = buildApprovalFormLayoutDef({ rootDir: ROOT, id, title, role, fields });
   return ensureApprovalSubListColumnTitles(resource);
 }

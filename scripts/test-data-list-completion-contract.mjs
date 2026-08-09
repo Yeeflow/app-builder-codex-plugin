@@ -23,10 +23,15 @@ function expectCode(value, code) {
 }
 
 assert.equal(validateDataListCompletionContract(complete).status, "pass");
+const completeDocumentLibrary = clone(complete);
+completeDocumentLibrary.Childs[0].List = { ...completeDocumentLibrary.Childs[0].List, Type: 16, Title: "Project Documents" };
+assert.equal(validateDataListCompletionContract(completeDocumentLibrary).status, "pass");
+const documentLibraryMissingView = clone(completeDocumentLibrary); documentLibraryMissingView.Childs[0].List.LayoutView = JSON.stringify({ add: "project-new", edit: "project-edit" });
+expectCode(documentLibraryMissingView, "DATA_LIST_COMPLETION_VIEW_FORM_REQUIRED");
 const missingView = clone(complete); missingView.Childs[0].Layouts = missingView.Childs[0].Layouts.filter((layout) => layout.Type !== 0);
 expectCode(missingView, "DATA_LIST_COMPLETION_DEFAULT_VIEW_REQUIRED");
 const unresolvedEdit = clone(complete); unresolvedEdit.Childs[0].List.LayoutView = JSON.stringify({ add: "project-new", edit: "default", view: "project-view" });
 expectCode(unresolvedEdit, "DATA_LIST_COMPLETION_EDIT_FORM_REQUIRED");
 const missingRoute = clone(complete); missingRoute.Childs[0].List.LayoutView = JSON.stringify({ add: "project-new", edit: "project-edit" });
 expectCode(missingRoute, "DATA_LIST_COMPLETION_VIEW_FORM_REQUIRED");
-console.log("DATA_LIST_COMPLETION_CONTRACT_REGRESSIONS_PASSED cases=4");
+console.log("DATA_LIST_COMPLETION_CONTRACT_REGRESSIONS_PASSED cases=6");

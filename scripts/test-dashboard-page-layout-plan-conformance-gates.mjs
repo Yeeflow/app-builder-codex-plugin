@@ -179,6 +179,22 @@ function appPlan(rows) {
     "| --- | --- |",
     "| Loan Transactions | Tracks asset loan transactions. |",
     "",
+    "## 10. Custom Data List Forms Plan",
+    "",
+    "### 10.1 Loan Transactions",
+    "",
+    "| Form Name | Form Type | Purpose | Used By |",
+    "| --- | --- | --- | --- |",
+    "| Loan Transaction New/Edit | New/Edit | Create and update loan transactions. | Loan Transactions |",
+    "| Loan Transaction View | View | Inspect a loan transaction. | Loan Transactions |",
+    "",
+    "#### Data List Form Layout Template Selection",
+    "",
+    "| List Name | Form Name | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Loan Transactions | Loan Transaction New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Current item fields | None | Current item editing | Generated-final validation |",
+    "| Loan Transactions | Loan Transaction View | View | data_list_form_layout_view_item_v1_1 | Current item details | None | Current item detail review | Generated-final validation |",
+    "",
     "## 14. Dashboard Pages Plan",
     "",
     "| Dashboard Page Name | Business Purpose |",
@@ -345,6 +361,15 @@ function tolerantBrotliDecodeSync(bytes) {
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dashboard-page-layout-plan-conformance-"));
 try {
+  const missingSelectionPlan = path.join(tempDir, "missing-dashboard-layout-selection.md");
+  fs.writeFileSync(missingSelectionPlan, appPlan([{ page: "Asset Loan Operations Dashboard", templateId: "dashboard-page-layouts-v1.1" }]).replace(/\n#### Dashboard Page Layout Template Selection[\s\S]*?\n#### Dashboard Dataset Presentation Template Selection/, "\n#### Dashboard Dataset Presentation Template Selection"));
+  expectCode(
+    "App Plan must explicitly select a Dashboard page layout for every generated page",
+    VALIDATOR,
+    ["--package", writePackage(tempDir, "missing-dashboard-layout-selection", decodedForPage("dashboard-page-layouts-v1.1")), "--app-plan", missingSelectionPlan],
+    "DASH_LAYOUT_APP_PLAN_TEMPLATE_SELECTION_REQUIRED",
+  );
+
   const workbenchPlan = writePlan(tempDir, [{ page: "Asset Loan Operations Dashboard", templateId: "dashboard-page-layouts-workbench", right: "Yes", charts: "Yes" }], "workbench-plan.md");
   expectCode(
     "App Plan Workbench selection fails when generated dashboard silently falls back to v1.1",

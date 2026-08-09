@@ -25,6 +25,8 @@ try {
   expectPass("Workbench item details template resource with marker passes", ["--resource", writeJson("workbench-valid.json", workbenchResource()), "--template", WORKBENCH_TEMPLATE_ID, "--form-usage", "view"]);
   expectPass("View item reverse-related Collection section with search and Add passvalues passes", ["--resource", writeJson("view-reverse-related-valid.json", reverseRelatedViewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"]);
   expectPass("generated package with New/Edit and View templates passes", ["--package", writePackage("valid-package.yapk", decodedPackage())]);
+  expectPass("Document Library package with the same New/Edit and View page layouts passes", ["--package", writePackage("document-library-valid-package.yapk", decodedPackage({ listName: "Project Documents", listType: 16 }))]);
+  expectCode("Document Library package missing View custom form assignment fails", ["--package", writePackage("document-library-missing-view-assignment.yapk", decodedPackage({ listName: "Project Documents", listType: 16, layoutView: { add: "layout-new-edit", edit: "layout-new-edit" } }))], "DATA_LIST_FORM_LAYOUT_USAGE_MISSING");
   expectPass("App Plan reverse-related Collection selection must match generated package", ["--package", writePackage("reverse-related-package.yapk", decodedPackage({ viewResource: reverseRelatedViewResource(), viewTitle: "Specialties View Item" })), "--plan", writeText("plan-reverse-related-valid.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))]);
   expectPass("App Plan reverse-related display lookup name may match generated resolved lookup alias", ["--package", writePackage("reverse-related-planned-alias-package.yapk", decodedPackage({ viewResource: reverseRelatedViewResource({ plannedLookupField: "Specialty" }), viewTitle: "Specialties View Item" })), "--plan", writeText("plan-reverse-related-planned-alias-valid.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true, reverseLookupField: "Specialty", reverseDefaultValue: "Specialty = current ListDataID" }))]);
   expectPass("generated package with full-page Workbench View template passes", ["--package", writePackage("workbench-package.yapk", decodedPackage({ viewResource: workbenchResource(), viewTitle: "Asset Workbench Details", layoutView: { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view", opentype: { view: "new" }, modalsize: {} } }))]);
@@ -558,7 +560,7 @@ function decodedPackage(options = {}) {
     ListSet: { ListID: "1909200000000000001", Title: "Data List Form Layout Test" },
     Childs: [
       {
-        List: { ListID: "1909200000000000100", Title: options.listName || "Assets", LayoutView: JSON.stringify(layoutView) },
+        List: { ListID: "1909200000000000100", Type: options.listType ?? 1, Title: options.listName || "Assets", LayoutView: JSON.stringify(layoutView) },
         Fields: [{ FieldName: "Title", DisplayName: options.titleFieldLabel || "Asset Name", FieldType: "Text", Type: "input" }],
         Layouts: layouts,
       },

@@ -64,6 +64,7 @@ try {
   expectCode("generated task form empty page title section content area fails", ["--resource", writeJson("task-empty-page-title-slot.json", taskEmptyPageTitleSlot), "--template", TASK_TEMPLATE_ID, "--page-role", "task"], "APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
 
   expectCode("App Plan approval form without layout selection table fails", ["--plan", writeText("plan-missing-selection.md", appPlan({ omitSelection: true }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING");
+  expectCode("App Plan approval form without explicit task layout selection fails", ["--plan", writeText("plan-missing-task-selection.md", appPlan({ taskTemplate: "" }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_PAGE_ROLE_SELECTION_REQUIRED");
   expectCode("App Plan submission selecting task template fails", ["--plan", writeText("plan-submission-wrong.md", appPlan({ submissionTemplate: TASK_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_SUBMISSION_TEMPLATE_MISMATCH");
   expectCode("App Plan task selecting submission template fails", ["--plan", writeText("plan-task-wrong.md", appPlan({ taskTemplate: SUBMISSION_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_TASK_TEMPLATE_MISMATCH");
   expectCode("App Plan schedule workflow task without layout table fails", ["--plan", writeText("plan-schedule-task-missing.md", appPlan({ omitScheduleTaskSelection: true }))], "APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_SELECTION_TABLE_MISSING");

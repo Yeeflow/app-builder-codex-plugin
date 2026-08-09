@@ -212,6 +212,12 @@ function validateDecoded(decoded, template, findings, registry, appPlanPath = nu
   const plannedLayouts = appPlanPath ? collectDashboardPageLayoutTemplateRecordsFromPlan(appPlanPath, findings) : [];
   for (const page of collectDashboardPages(decoded)) {
     const plannedTemplateId = selectedDashboardLayoutTemplateId(plannedLayouts, page.title);
+    if (appPlanPath && !plannedTemplateId) {
+      findings.push(error("DASH_LAYOUT_APP_PLAN_TEMPLATE_SELECTION_REQUIRED", "Every generated Dashboard page must have one explicit Dashboard Page Layout Template Selection row in the App Plan.", {
+        page: page.title,
+        pointer: page.pointer,
+      }));
+    }
     const actualTemplate = selectTemplateForResource(registry, page.resource) || template;
     const selectedTemplate = plannedTemplateId ? findTemplateById(registry, plannedTemplateId) || actualTemplate : actualTemplate;
     if (plannedTemplateId && actualTemplate?.id !== plannedTemplateId) {

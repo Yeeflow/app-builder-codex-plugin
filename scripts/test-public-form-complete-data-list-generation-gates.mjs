@@ -105,6 +105,17 @@ try {
   assert.equal(publicResource.tempVars.some((variable) => variable.id === "__temp_var_Value1"), true, "Public Form planned temp variable must be declared on the same form");
   cases.push("full-app materializer keeps Public Form additive to standard New/Edit/View custom forms");
 
+  const missingPublicLayoutPlanPath = path.join(tempDir, "yeeflow-app-plan-missing-public-layout.md");
+  fs.writeFileSync(missingPublicLayoutPlanPath, planText.replace("| Survey Responses | Customer Feedback Public Form | Customer Feedback Survey | Tell us about your experience. | Customer Name, Email, Overall Satisfaction, Improvement Feedback | public-form-page-layout-standard | public_form_fields_1col_v1_1 | Generated-final validation |", "| Survey Responses | Customer Feedback Public Form | Customer Feedback Survey | Tell us about your experience. | Customer Name, Email, Overall Satisfaction, Improvement Feedback |  | public_form_fields_1col_v1_1 | Generated-final validation |"));
+  expectFailureCode(MATERIALIZER, [
+    "--functional-spec", specPath,
+    "--app-plan", missingPublicLayoutPlanPath,
+    "--out-dir", path.join(tempDir, "out-missing-public-layout"),
+    "--allow-fixture-api-ids-for-tests",
+    "--json",
+  ], "PUBLIC_FORM_PAGE_LAYOUT_SELECTION_REQUIRED");
+  cases.push("Public Form page layout selection is explicit and cannot silently default");
+
   const noPublicPlanPath = path.join(tempDir, "yeeflow-app-plan-no-public-form.md");
   fs.writeFileSync(noPublicPlanPath, `${planText.replace(/\n#### Public Forms Plan[\s\S]*$/, "")}\n`);
   const noPublicOutDir = path.join(tempDir, "out-no-public-form");

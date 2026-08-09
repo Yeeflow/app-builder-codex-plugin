@@ -506,6 +506,7 @@ Required for every Section 4 Data List or Document Library. Each business list m
 Rules:
 
 - Keep the heading exactly `#### Data List Form Layout Template Selection`; this table is mandatory before API ID allocation.
+- Every Custom Data List Form row, including New, Edit, View, Detail, Print, and other custom forms, must have one explicit page-layout selection and a supported page role. Generators must clone that selected template and retain its provenance marker; they must not infer a template from the name, create a generic Container page, or silently fall back to a default.
 - The Selected Data List Form Layout Template must be one of `data_list_form_layout_new_edit_v1_1`, `data_list_form_layout_view_item_v1_1`, or `data_list_form_layout_workbench` from `docs/reference/data-list-form-layout-templates.json`.
 - New Item and Edit Item custom forms must select `data_list_form_layout_new_edit_v1_1`. If New and Edit use separate forms, both must still select this template.
 - Standard View Item custom forms must select `data_list_form_layout_view_item_v1_1`.
@@ -523,6 +524,8 @@ Optional and additive. Add rows only for Data Lists that require anonymous submi
 | Host Data List | Public Form Name | Form Title | Description / Purpose | Included Fields | Public Form Page Layout Template | Public Form Fields Layout Template | Business Sections Needed | CTA Actions | Section Title / Operations | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Data List> | <Public Form> | <Visible title> | <Anonymous submission purpose> | <Field labels or field names> | public-form-page-layout-standard | public_form_fields_1col_v1_1 | 1 column survey fields | None | Business-mapped title; no Operations | Generated-final validation; anonymous runtime submit proof separate |
+
+Every planned Public Form must explicitly select `public-form-page-layout-standard` in its own row. The generator must clone that page layout and retain the Public Form page-layout provenance marker; it must not use a default when the cell is blank or omitted.
 
 ##### Public Form Form Action Planning
 
@@ -713,6 +716,7 @@ Required for every generated Dashboard page.
 Rules:
 
 - Select exactly one Dashboard page layout template per Dashboard page from `docs/reference/dashboard-page-layout-templates.json`.
+- This selection is mandatory even for the standard `dashboard-page-layouts-v1.1` template. The generated Dashboard must be cloned from the selected template and retain its dashboard page-layout marker; no missing row may fall back to the default.
 - Use `dashboard-page-layouts-v1.1` for general overview dashboards, report-style dashboards, and section-first pages.
 - Use `dashboard-page-layouts-workbench` for operational workbench pages that need a primary working area, optional right-side panel, top filters, KPI cards, grouped analytics, and queue/list regions.
 - Use `dashboard-print-multi-record-table-v1` only for a Dashboard selected as a Print page target. It provides one-record-per-Collection-item Table layout, merged row/column support, and a current-Collection-item QR region.

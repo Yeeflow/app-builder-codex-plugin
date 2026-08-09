@@ -230,6 +230,7 @@ function validateAppPlan(planPath, findings) {
   const table = findMarkdownTable(selectionBlock, ["Page Role", "Selected Approval Form Layout Template"]);
   const rows = table?.rows || [];
   const selectedIds = [];
+  const selectedRoles = new Set();
   for (const row of rows) {
     const pageRole = markdownRowValue(table, row, "Page Role");
     const selectedTemplate = markdownRowValue(table, row, "Selected Approval Form Layout Template");
@@ -243,12 +244,19 @@ function validateAppPlan(planPath, findings) {
     if (/^submission$/i.test(pageRole) && !selectedTemplate.includes(SUBMISSION_TEMPLATE_ID)) {
       findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_SUBMISSION_TEMPLATE_MISMATCH", "Submission forms must select approval_form_layout_submission_v1_1.", { row: row.raw }));
     }
+    if (/^submission$/i.test(pageRole) && selectedTemplate.includes(SUBMISSION_TEMPLATE_ID)) selectedRoles.add("submission");
     if (/^task$/i.test(pageRole) && !selectedTemplate.includes(TASK_TEMPLATE_ID)) {
       findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_TASK_TEMPLATE_MISMATCH", "Task forms must select approval_form_layout_task_v1_1.", { row: row.raw }));
     }
+    if (/^task$/i.test(pageRole) && selectedTemplate.includes(TASK_TEMPLATE_ID)) selectedRoles.add("task");
   }
   if (!selectedIds.length) {
     findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_TEMPLATE_SELECTION_REQUIRED", "Approval Forms Plan must select approved templates for submission and task forms.", {}));
+  }
+  for (const role of ["submission", "task"]) {
+    if (!selectedRoles.has(role)) {
+      findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_PAGE_ROLE_SELECTION_REQUIRED", "Approval Forms Plan must explicitly select the approved layout template for every generated page role.", { pageRole: role, expectedTemplate: role === "submission" ? SUBMISSION_TEMPLATE_ID : TASK_TEMPLATE_ID }));
+    }
   }
 }
 

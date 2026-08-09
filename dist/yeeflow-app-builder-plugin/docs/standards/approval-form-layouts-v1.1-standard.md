@@ -144,7 +144,7 @@ Task form field controls must be readonly by default. If a reviewer needs to edi
 
 ## App Plan Requirements
 
-When the app includes Approval forms, the App Plan Approval Forms Plan must select the correct Approval Form Layout template for every generated submission and task page.
+When the app includes Approval forms, the App Plan Approval Forms Plan must select the correct Approval Form Layout template for every generated submission and task page. The generator must materialize the selected template and retain its `approvalFormLayoutTemplateId`/`derivedFromApprovalFormLayoutTemplate` marker; it must fail rather than silently choose a role-based default when either selection is absent.
 
 Add an Approval Form Layout Template Selection table under the Approval Forms Plan:
 

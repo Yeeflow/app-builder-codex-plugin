@@ -39,7 +39,7 @@ Field-table parsing must also tolerate legacy planning headings that appear in r
 
 Every generated business Data List or Document Library must have custom Data List forms assigned for New Item, Edit Item, and View Item. Default layouts are not signing-ready for generated business lists.
 
-Generated custom Data List forms must use Data List Form Layouts v1.1 when they are planned as New Item, Edit Item, or View Item forms.
+Every generated custom Data List form must explicitly select and materialize a Data List Form Layouts v1.1 page template. This is a hard plan-to-resource contract: New, Edit, View, Detail, Print, and other custom form rows must identify their page role and selected template in the App Plan, then serialize the matching `dataListFormLayoutTemplateId` and `derivedFromDataListFormLayoutTemplate` marker on the cloned resource. The generator must not infer a template from the form title, fabricate a generic Container root, silently add required forms, or fall back to a default page layout.
 
 Approved page-level templates:
 
@@ -52,6 +52,8 @@ The source registry is `docs/reference/data-list-form-layout-templates.json`.
 Generators must clone the selected export-shaped template first and then place business-specific fields, actions, analytics, or related data only inside approved business-content slots. They must not generate title-only, flat, or ad hoc custom Data List form layouts.
 
 `ListModel.LayoutView.add`, `ListModel.LayoutView.edit`, and `ListModel.LayoutView.view` must each point to a Type `1` custom form layout owned by the same list. The literal value `default`, missing display settings, unresolved layout IDs, or Type `0` data views used as form routes must fail generated-final validation. System/support lists may skip this requirement only with an explicit App Plan exemption and generated package policy marker.
+
+For the standard routes, New and Edit must select `data_list_form_layout_new_edit_v1_1`; standard View must select `data_list_form_layout_view_item_v1_1`; a full-page View workbench must select `data_list_form_layout_workbench` and declare `Open in: Full page`. A custom Detail or Print page must explicitly use the compatible View/Workbench family; no unclassified custom form can be materialized.
 
 Every generated Data List-bound control in a custom form or Dashboard must retain the complete source identity in `attrs.data.list`: `AppID`, `ListSetID`, and `ListID`. Do not rely on a persisted field mapping or `ListID` alone. Runtime may render with an incomplete source object, but the Designer cannot reliably rediscover compatible fields when `ListSetID` is absent. The final materialization pass must preserve explicit source identities and complete missing same-app identities before the resource is serialized.
 

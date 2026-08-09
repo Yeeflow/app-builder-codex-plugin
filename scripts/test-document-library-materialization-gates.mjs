@@ -12,6 +12,7 @@ import { encodeYapkResourceOfficial, readDecodedYapk } from "./lib/yapk-decode-u
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "document-library-materialization-gate-"));
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PLUGIN_ROOT = path.resolve(SCRIPT_DIR, "..");
+const FORM_LAYOUT_VALIDATOR = path.join(SCRIPT_DIR, "validate-data-list-form-layout-template.mjs");
 
 function write(file, content) {
   fs.writeFileSync(file, `${content.trim()}\n`, "utf8");
@@ -87,6 +88,24 @@ Application icon selection: fa-solid fa-laptop
 | Root | 02 Final Reports | Generate as root-level folder row | Export-proven | Final reports. |
 | Nested desired | Audit Year / Project ID | Post-import/runtime-proof-required | Deferred | Nested folders are not generated. |
 
+## 10. Custom Data List Forms Plan
+
+### 10.1 Audit Document Register
+
+#### Data List Form Layout Template Selection
+| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Audit Document Register | Audit Document Register New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Document registration fields | None | Register creation and maintenance | Generated-final validation |
+| Audit Document Register | Audit Document Register View | View | data_list_form_layout_view_item_v1_1 | Document registration details | None | Readonly record review | Generated-final validation |
+
+### 10.2 Audit Evidence Library
+
+#### Data List Form Layout Template Selection
+| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Audit Evidence Library | Audit Evidence Library New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Native document upload and metadata fields | None | Upload and update document records | Generated-final validation |
+| Audit Evidence Library | Audit Evidence Library View | View | data_list_form_layout_view_item_v1_1 | Document metadata and file context | None | Readonly document record review | Generated-final validation |
+
 ## 15. Application Navigation Plan
 | Group | Item | Target Resource | Yeeflow Resource Type | Icon |
 | --- | --- | --- | --- | --- |
@@ -117,6 +136,15 @@ Application icon selection: fa-solid fa-laptop
   assert.ok(library, "planned document library must materialize");
   assert.equal(Number(register.List?.Type), 1, "document register must remain a Type 1 data list");
   assert.equal(Number(library.List?.Type), 16, "document library must materialize as native Type 16");
+  const libraryLayoutView = JSON.parse(library.List?.LayoutView || "{}");
+  assert.ok(libraryLayoutView.add && libraryLayoutView.edit && libraryLayoutView.view, "Document Library must route New/Edit/View through explicit custom form layouts");
+  const libraryLayouts = new Map((library.Layouts || []).map((layout) => [layout.LayoutID, layout]));
+  for (const route of ["add", "edit", "view"]) {
+    const layout = libraryLayouts.get(libraryLayoutView[route]);
+    assert.equal(Number(layout?.Type), 1, `Document Library ${route} route must resolve to a Type 1 custom form`);
+    const layoutResource = JSON.parse(layout.LayoutInResources?.[0]?.Resource || "{}");
+    assert.ok(layoutResource.dataListFormLayoutTemplateId, `Document Library ${route} form must carry a page-layout provenance marker`);
+  }
   assert.ok((library.Fields || []).some((field) => field.FieldName === "Text4" && field.Type === "file-upload"), "document library must include native Upload File field");
   const nativeFieldContract = {
     Title: { Status: 1, IsSystem: true, IsIndex: true, Rules: { displayLabel: true, isLibrary: true } },
@@ -202,6 +230,12 @@ Application icon selection: fa-solid fa-laptop
     "--package", report.outputs.package,
   ]);
   assert.equal(completenessValidation.status, "pass", "planned Document Library folders must pass plan-to-package completeness validation");
+  const documentLibraryFormLayoutValidation = runJson(process.execPath, [
+    FORM_LAYOUT_VALIDATOR,
+    "--package", report.outputs.package,
+    "--plan", planPath,
+  ]);
+  assert.equal(documentLibraryFormLayoutValidation.status, "pass", "Document Library custom forms must pass the same page-layout template gate as Data List forms");
 
   const invalidDataListBigint = structuredClone(decoded);
   const invalidRegister = invalidDataListBigint.Childs.find((child) => child.List?.Title === "Audit Document Register");
@@ -319,6 +353,7 @@ Application icon selection: fa-solid fa-laptop
       "Document Libraries are not downgraded to Data Lists with file-upload fields",
       "Document Library navigation uses Type 16",
       "Document Library default upload field is present",
+      "Document Library New/Edit/View forms explicitly materialize the shared Data List Form page layouts",
       "All seven native Document Library fields preserve runtime-proven Status, Rules, IsSystem, and IsIndex metadata",
       "The dedicated runtime metadata validator inspects Type 16 resources and ignores Type 1 Data Lists",
       "Simplified Data List-style Document Library field metadata fails before signing",
