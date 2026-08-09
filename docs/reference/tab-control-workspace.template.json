@@ -1,0 +1,79 @@
+{
+  "templateId": "tab_control_workspace",
+  "sourceReference": "Real Estate Project Control Hub / Projects / Project Overview",
+  "proof": "configuration-readback and Tab runtime baseline",
+  "_ak_c": {
+    "id": "{{TabControlId}}",
+    "type": "aktabs",
+    "label": "Tab",
+    "nv_label": "tab_control_workspace",
+    "attrs": {
+      "common": {
+        "margin": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": null,
+            "bottom": null,
+            "left": null
+          }
+        ]
+      }
+    },
+    "children": [
+      {
+        "id": "{{TabOneId}}",
+        "type": "ak-tabs-tab",
+        "label": "{{TabOneTitle}}",
+        "attrs": {
+          "isDefault": true,
+          "isDesignDefault": true
+        },
+        "children": [
+          {
+            "id": "{{TabOneContentId}}",
+            "type": "container",
+            "nv_label": "tab_one_content",
+            "attrs": {},
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "{{TabTwoId}}",
+        "type": "ak-tabs-tab",
+        "label": "{{TabTwoTitle}}",
+        "attrs": {
+          "isDefault": false,
+          "isDesignDefault": false
+        },
+        "children": [
+          {
+            "id": "{{TabTwoContentId}}",
+            "type": "container",
+            "nv_label": "tab_two_content",
+            "attrs": {},
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "materializationContract": {
+    "minimumTabs": 2,
+    "defaultTabCount": 1,
+    "editable": [
+      "tab labels",
+      "tab icons",
+      "tab content containers and descendants",
+      "optional tabs-tabposition"
+    ],
+    "locked": [
+      "aktabs root type",
+      "ak-tabs-tab child type",
+      "stable unique control ids",
+      "exactly one default tab",
+      "non-empty child content per tab"
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Name": "Format text summary",
+  "Description": "Returns a sanitized summary string.",
+  "ImplType": 0,
+  "DraftCode": "export async function main({ connections, params, modules }: ServiceContext) {\n  const source = String(params?.source ?? \"\").trim();\n  if (!source) throw new Error(\"source is required\");\n  return { summary: source };\n}",
+  "DraftConfig": {
+    "params": [
+      {
+        "id": "source",
+        "type": "text",
+        "desc": "Source text."
+      }
+    ],
+    "connections": [],
+    "outputs": [
+      {
+        "id": "summary",
+        "type": "text",
+        "desc": "Sanitized summary."
+      }
+    ]
+  },
+  "ExtData": null
+}

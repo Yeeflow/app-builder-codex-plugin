@@ -1,0 +1,19 @@
+{
+  "endpointKind": "agent-import-export",
+  "envelope": {
+    "Category": null,
+    "Description": "Sanitized standalone AI Agent fixture.",
+    "IconUrl": "https://img.yeeflow.com/sanitized-agent-icon",
+    "Name": "Safe Agent",
+    "PackageJson": "c2FuaXRpemVkLW9wYXF1ZS1hZ2VudC1wYXlsb2Fk",
+    "TemplateId": null,
+    "Type": 0
+  },
+  "importRead": {
+    "Prompt": "Summarize the supplied text without using external tools.",
+    "Components": []
+  },
+  "operation": "export-and-importRead",
+  "responseId": "fixture-agent-response-1",
+  "source": "yeeflow-official-import-export-api"
+}

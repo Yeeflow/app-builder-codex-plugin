@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.7.2`
+- Version: `1.8.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.7.2` makes the native responsive Table/Card Collection references the only generated-final defaults. Legacy Flex Grid template IDs are migration-only: existing plans map safely to the matching responsive template with visible provenance, while new plans cannot select them. The Plugin preserves native table columns, mobile Card content, selected-state dependencies, item-operation layering, and explicit write/readback safety boundaries.
+Version `1.8.0` adds formal Tab and linked-activity Gantt golden references to the responsive Collection defaults. Tabs preserve one explicit runtime/Designer default. A linked Gantt requires date-typed start/end fields, same-source Lookup relationship fields, Decimal/percent progress, current-parent filtering, Add propagation, and a Type 1 activity detail layout. The Plugin validates these contracts before packaging and keeps configuration readback separate from Designer/runtime proof.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.7.2
+Version: 1.8.0
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.7.2
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.8.0
 ```
 
 ## What Is Included

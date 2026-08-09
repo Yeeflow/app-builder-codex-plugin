@@ -1,0 +1,107 @@
+{
+  "templateId": "gantt_control_linked_activity",
+  "sourceReference": "Real Estate Project Control Hub / Projects / Project Overview / Programme",
+  "proof": "configuration-readback; runtime interaction remains pending for this exact Gantt pattern",
+  "_ak_c": {
+    "id": "{{GanttControlId}}",
+    "type": "gantt",
+    "label": "Gantt",
+    "nv_label": "gantt_control_linked_activity",
+    "attrs": {
+      "data": {
+        "list": {
+          "AppID": 41,
+          "ListID": "{{ActivityListId}}",
+          "ListSetID": "{{ApplicationListSetId}}",
+          "Type": 1,
+          "Title": "{{ActivityListTitle}}"
+        },
+        "filter": [
+          {
+            "left": "{{ActivityParentBusinessField}}",
+            "op": "0",
+            "right": [
+              {
+                "type": "expr",
+                "exprType": "list_field",
+                "valueType": "input",
+                "prop": "ListDataID",
+                "id": "ListDataID",
+                "name": "List Fields:Id"
+              }
+            ],
+            "showCus": false,
+            "pre": "and"
+          }
+        ],
+        "sort": [
+          {
+            "SortName": "{{StartDateField}}",
+            "SortByDesc": false
+          }
+        ],
+        "gantt": {
+          "fields": {
+            "text": {
+              "gantt": "text",
+              "FieldName": "{{ActivityTitleField}}"
+            },
+            "start_date": {
+              "gantt": "start_date",
+              "FieldName": "{{StartDateField}}"
+            },
+            "end_date": {
+              "gantt": "end_date",
+              "FieldName": "{{EndDateField}}"
+            },
+            "dependency": {
+              "gantt": "dependency",
+              "FieldName": "{{DependencyLookupField}}"
+            },
+            "progress": {
+              "gantt": "progress",
+              "FieldName": "{{PercentCompleteField}}"
+            },
+            "parent": {
+              "gantt": "parent",
+              "FieldName": "{{OptionalParentLookupField}}"
+            },
+            "order": true
+          },
+          "atts": {
+            "allowadd": true,
+            "passvalues": [
+              {
+                "Name": "{{ActivityParentBusinessField}}",
+                "Value": [
+                  {
+                    "type": "expr",
+                    "exprType": "list_field",
+                    "valueType": "input",
+                    "prop": "ListDataID",
+                    "id": "ListDataID",
+                    "name": "List Fields:Id"
+                  }
+                ]
+              }
+            ],
+            "linkLayout": "{{ActivityViewLayoutId}}",
+            "modalsize": 2,
+            "scale": "month",
+            "auto_scheduling": true,
+            "milestone": true,
+            "toolbar": true,
+            "skins": "right"
+          }
+        }
+      }
+    }
+  },
+  "fieldContract": {
+    "start_date": "FieldType Datetime",
+    "end_date": "FieldType Datetime",
+    "dependency": "Type lookup; Rules.multiple true; Rules.listid equals the selected Gantt source list",
+    "progress": "FieldType Decimal; Type percent; normalized percent range 0..1",
+    "parent": "optional; when provided Type lookup; Rules.multiple false; Rules.listid equals the selected Gantt source list"
+  }
+}

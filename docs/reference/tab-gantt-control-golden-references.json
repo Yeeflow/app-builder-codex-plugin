@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "registryId": "tab-gantt-control-golden-references",
+  "references": [
+    {
+      "templateId": "tab_control_workspace",
+      "controlType": "aktabs",
+      "fullTemplateReference": "docs/reference/tab-control-workspace.template.json",
+      "hostEvidence": [
+        "Data List custom form"
+      ],
+      "requiredStructure": [
+        "aktabs root",
+        "two or more ak-tabs-tab children",
+        "one and only one default tab",
+        "stable non-empty tab labels and IDs",
+        "non-empty content container per tab"
+      ],
+      "whenToUse": [
+        "Related peer sections belong in one form or page and users need to switch context without navigation."
+      ],
+      "proofBoundary": "Tab switching is runtime-proven only for the focused Dashboard baseline. This Data List custom-form structure is configuration-readback-proven and must be runtime-tested when used in a generated form."
+    },
+    {
+      "templateId": "gantt_control_linked_activity",
+      "controlType": "gantt",
+      "fullTemplateReference": "docs/reference/gantt-control-linked-activity.template.json",
+      "hostEvidence": [
+        "Data List custom form"
+      ],
+      "requiredStructure": [
+        "selected Activity Data List source",
+        "current parent-record filter",
+        "start and end Datetime mappings",
+        "same-source multiple Lookup dependency mapping",
+        "Decimal percent progress mapping",
+        "optional same-source single Lookup parent mapping",
+        "linked Activity View layout and parent pass-through for Add"
+      ],
+      "whenToUse": [
+        "A parent record needs a scheduled view of related child activities with dependencies and optional work-breakdown hierarchy."
+      ],
+      "proofBoundary": "The template is configuration-readback-proven and validator-backed. Generated Gantt rendering, scheduling, add, click/open, and dependency execution require focused runtime proof."
+    }
+  ]
+}

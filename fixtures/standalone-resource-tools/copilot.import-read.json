@@ -1,0 +1,8 @@
+{
+  "Prompt": "",
+  "ModelId": "gpt-5",
+  "InputVariables": [],
+  "OutputVariables": [],
+  "Instructions": "Answer questions using only explicitly supplied context.",
+  "Components": []
+}

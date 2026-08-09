@@ -94,6 +94,23 @@ yeeflow-data-list-generator/
 # Large or decoded generated artifacts that may contain customer data.
 *.json
 !docs/architecture/yeeflow-app-builder-core-migration-state.json
+!docs/reference/tab-control-workspace.template.json
+!docs/reference/gantt-control-linked-activity.template.json
+!docs/reference/tab-gantt-control-golden-references.json
+!fixtures/
+!fixtures/standalone-resource-tools/
+!fixtures/standalone-resource-tools/custom-service.valid.input.json
+!fixtures/standalone-resource-tools/custom-service.invalid-secret.input.json
+!fixtures/standalone-resource-tools/scheduled-workflow.valid.input.json
+!fixtures/standalone-resource-tools/scheduled-workflow.issued-ids.json
+!fixtures/standalone-resource-tools/agent.structural-envelope.json
+!fixtures/standalone-resource-tools/agent.import-read.json
+!fixtures/standalone-resource-tools/copilot.structural-envelope.json
+!fixtures/standalone-resource-tools/copilot.import-read.json
+!fixtures/standalone-resource-tools/agent.official-response-evidence.json
+!fixtures/standalone-resource-tools/copilot.official-response-evidence.json
+!fixtures/standalone-resource-tools/scheduled-workflow.shared-plan.json
+!fixtures/standalone-resource-tools/scheduled-workflow.shared-plan-issued-ids.json
 !compatibility/capability-manifests/yeeflow-app-builder-capability-classification.v0.9.71.json
 !compatibility/capability-manifests/english-only-allowlist.json
 !compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.8.0
+
+- Add `tab_control_workspace` and `gantt_control_linked_activity` golden references based on the readback-safe Project Overview form structure.
+- Require exactly one Tab default and validate the complete linked-Gantt data contract: date Start/End, same-source multi Lookup Dependency, Decimal/percent progress, optional same-source single Lookup Parent, current-parent filtering, Add propagation, and a concrete Type 1 detail layout.
+- Add source/distribution templates, study, operating standard, training report, strict validator, and positive/negative regression suite; keep generated-form Designer/runtime behavior outside the configuration-readback proof boundary.
+
 ## 1.7.2
 
 - Retire `collection_control_grid_table` and `collection_control_grid_table_with_multiselect` from new Dashboard Collection golden-reference selection.

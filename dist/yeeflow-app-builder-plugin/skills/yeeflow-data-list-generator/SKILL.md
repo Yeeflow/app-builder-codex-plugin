@@ -767,6 +767,14 @@ Validation and proof boundaries:
 - Keep generated .yap files, decoded payloads, screenshots, and private data out of commits.
 <!-- advanced-controls-runtime-proof:end -->
 
+## Tab And Linked-Activity Gantt Golden References
+
+For a Data List custom form with peer sections or a schedule of related activity records, use `tab_control_workspace` and `gantt_control_linked_activity` from `docs/reference/tab-gantt-control-golden-references.json`. Clone their full templates, resolve target list/layout IDs and fields, and do not copy source-form Custom Code, document modules, labels, records, or IDs.
+
+Validate Tabs as `aktabs` with `ak-tabs-tab` children, stable IDs/labels, non-empty contents, and exactly one runtime/Designer default. Validate Gantt against the selected source Data List: Start/End are `Datetime`; Dependency is same-source Lookup with parsed `Rules.multiple = true`; Progress is `Decimal` storage with `percent` control and normalized `0..1` range; Parent is optional but must be same-source Lookup with `Rules.multiple = false` when mapped. A linked parent/child Gantt must filter through the current parent `ListDataID`, and Add defaults must use `passvalues` for that same relationship lookup. `linkLayout` must resolve to a Type 1 Activity detail/View form.
+
+Run `node scripts/validate-tab-gantt-golden-references.mjs <decoded-app-or-fixture.json> --strict` before packaging, plus `node scripts/test-tab-gantt-golden-references.mjs` for the regression suite. Configuration readback does not prove generated-form runtime scheduling, record creation, dependency execution, or detail opening; require focused runtime proof for those claims. See `docs/standards/tab-gantt-control-golden-reference-standard.md`.
+
 ## Multi-Column Form Workspace Pattern
 
 Use `docs/standards/multi-column-form-workspace-standard.md` and template `multi_column_form_workspace_shell` when a service desk, help desk, CRM workbench, support console, review queue, renewal review, case-management console, or operational inbox needs form actions, variables, selected-record state, comments/updates, dynamic form fields, or action-driven filtering. This is an approval/form workspace pattern, not a dashboard reporting pattern.
