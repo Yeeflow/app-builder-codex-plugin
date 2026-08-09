@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "contractVersion": "1.8.0",
-  "pluginVersion": "1.8.0",
+  "contractVersion": "1.9.0",
+  "pluginVersion": "1.9.0",
   "sourceRoot": "scripts",
   "distRoot": "dist/yeeflow-app-builder-plugin/scripts",
   "records": [
@@ -1416,12 +1416,12 @@
     {
       "sourcePath": "scripts/materialize-full-app-generated-final.mjs",
       "distPath": "dist/yeeflow-app-builder-plugin/scripts/materialize-full-app-generated-final.mjs",
-      "relationship": "transformed mirror",
-      "expectedDigestBehavior": "sha256_different_with_approved_semantic_delta",
-      "rationale": "Approved source and distribution semantic delta.",
+      "relationship": "exact mirror",
+      "expectedDigestBehavior": "sha256_equal",
+      "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
       "sourceDigest": "77c988278dd1668c16bac74d08feafda944e54bdb0aa12b1d4a02947726a2994",
-      "distDigest": "b2f3f824c4ccd2538d00d7ce1945d078bde29a31043941fe6947d555dbcb97bf",
+      "distDigest": "77c988278dd1668c16bac74d08feafda944e54bdb0aa12b1d4a02947726a2994",
       "verificationStatus": "passed"
     },
     {
@@ -7327,7 +7327,7 @@
       "expectedDigestBehavior": "no_dist_counterpart",
       "rationale": "Source-only development tooling is intentionally excluded from the packaged Plugin distribution.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "0427090cb1d47fe0728e1ee42a5c31721d0bc11c1262f3a5a35b862f979994b0",
+      "sourceDigest": "8c894432e15db7e3f008236d338afc970b99b8580a81d23b368f5267982d092f",
       "distDigest": null,
       "verificationStatus": "passed"
     },
@@ -8130,7 +8130,7 @@
       "expectedDigestBehavior": "no_dist_counterpart",
       "rationale": "Source-only development tooling is intentionally excluded from the packaged Plugin distribution.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "95fe379a7f661e00213e442000a2b7d78f11dc50471042c6e95413efc10a5323",
+      "sourceDigest": "5fa1632f812f70de511447aa7693bd04a987574db06aa5df5c8ea17efdc0cee0",
       "distDigest": null,
       "verificationStatus": "passed"
     },

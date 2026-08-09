@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const temporaryDirectory = join(repositoryRoot, ".phase0-topology-test-temp");
 const capabilityManifestPath = "compatibility/capability-manifests/yeeflow-app-builder-capability-classification.v0.9.71.json";
-const topologyContractPath = "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json";
+const pluginVersion = JSON.parse(readFileSync(join(repositoryRoot, "package.json"), "utf8")).version;
+const topologyContractPath = `compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v${pluginVersion}.json`;
 
 rmSync(temporaryDirectory, { recursive: true, force: true });
 mkdirSync(temporaryDirectory, { recursive: true });

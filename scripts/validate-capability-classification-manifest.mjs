@@ -29,6 +29,7 @@ const approvedPackages = new Set([
   "@yeeflow/app-builder-core-runtime-verification",
   "@yeeflow/app-builder-core-test-fixtures",
   "@yeeflow/app-builder-core-local-runtime",
+  "@yeeflow/app-builder-execution-contracts",
   "@yeeflow/codex-plugin-adapter",
 ]);
 const hostSideEffects = new Set(["codex", "oauth", "browser", "git", "ai-sdk", "nextjs", "react", "prisma", "terminal", "release", "marketplace"]);

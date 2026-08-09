@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.9.0
+
+- Complete missing same-application `AppID` and `ListSetID` values for Data List-bound controls in generated Dashboard and custom-form resources, including JSON-encoded layout resources, without overwriting explicit sources.
+- Add fail-closed Type 1 Data List completion validation: a default Type 0 view and resolvable New, Edit, and View Type 1 forms are now required before generated-final handoff.
+- Extend responsive multi-select Collection regression coverage to require complete source identity for every generated Data List-bound control.
+- Make Tab/Gantt source identity validation explicit for `AppID`, `ListSetID`, and `ListID`, preserving Designer field-discovery requirements alongside the existing Gantt field-type contract.
+- Restore the generated source/distribution topology contract and make it version-aware, so release validation verifies every source/dist script relationship.
+
 ## 1.8.0
 
 - Add `tab_control_workspace` and `gantt_control_linked_activity` golden references based on the readback-safe Project Overview form structure.

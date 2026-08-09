@@ -6214,7 +6214,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
 }
 
 // Every Data List-bound control in a generated app must retain the complete
-// source identity. Runtime rendering can use an already-persisted field map
+// source identity.  Runtime rendering can use an already-persisted field map
 // with only a ListID, but the Designer needs AppID + ListSetID + ListID to
 // rediscover compatible fields after a generated form/dashboard is reopened.
 function completeGeneratedDataListSourceIdentity(resource, { rootListSetId }) {
