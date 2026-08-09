@@ -6,7 +6,9 @@ import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const contractPath = resolve(repositoryRoot, argumentValue("--contract") || "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json");
+const pluginVersion = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8")).version;
+if (!/^\d+\.\d+\.\d+$/u.test(pluginVersion || "")) fail("SOURCE_DIST_TOPOLOGY_PLUGIN_VERSION_INVALID", "package.json must contain a semantic Plugin version.");
+const contractPath = resolve(repositoryRoot, argumentValue("--contract") || `compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v${pluginVersion}.json`);
 const sourceRoot = resolve(repositoryRoot, "scripts");
 const distRoot = resolve(repositoryRoot, "dist/yeeflow-app-builder-plugin/scripts");
 const relationships = new Set(["exact mirror", "transformed mirror", "root compatibility copy", "source-only development tool", "generated distribution artifact", "unexpected drift"]);
@@ -16,6 +18,7 @@ if (!existsSync(contractPath)) fail("SOURCE_DIST_TOPOLOGY_CONTRACT_MISSING", "So
 let contract;
 try { contract = JSON.parse(readFileSync(contractPath, "utf8")); } catch (error) { fail("SOURCE_DIST_TOPOLOGY_CONTRACT_INVALID_JSON", `Source/dist topology contract cannot be parsed: ${error.message}`); }
 const records = Array.isArray(contract.records) ? contract.records : [];
+if (contract.pluginVersion !== pluginVersion || contract.contractVersion !== pluginVersion) findings.push(finding("SOURCE_DIST_TOPOLOGY_CONTRACT_VERSION_STALE", contractPath, "Topology contractVersion and pluginVersion must match the current package.json version."));
 const expectedPairs = expectedTopologyPairs();
 const actualKeys = new Set();
 

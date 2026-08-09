@@ -8,7 +8,9 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = resolve(repositoryRoot, "scripts");
 const distRoot = resolve(repositoryRoot, "dist/yeeflow-app-builder-plugin/scripts");
-const outputPath = resolve(repositoryRoot, "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json");
+const pluginVersion = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8")).version;
+if (!/^\d+\.\d+\.\d+$/u.test(pluginVersion || "")) throw new Error("SOURCE_DIST_TOPOLOGY_PLUGIN_VERSION_INVALID");
+const outputPath = resolve(repositoryRoot, `compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v${pluginVersion}.json`);
 const nestedIconPath = "scripts/lib/application-icon-validation.cjs";
 
 const sourceScripts = scriptPaths(sourceRoot);
@@ -46,8 +48,8 @@ for (const distRelativePath of distScripts) {
 
 const contract = {
   schemaVersion: "1.0.0",
-  contractVersion: "0.9.71",
-  pluginVersion: "0.9.71",
+  contractVersion: pluginVersion,
+  pluginVersion,
   sourceRoot: "scripts",
   distRoot: "dist/yeeflow-app-builder-plugin/scripts",
   records: records.sort((left, right) => (left.distPath || left.sourcePath).localeCompare(right.distPath || right.sourcePath)),

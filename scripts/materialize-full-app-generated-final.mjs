@@ -323,6 +323,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
       appPlanText: planText,
     });
   if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
+  completeGeneratedDataListSourceIdentity(decoded, { rootListSetId: ids["decoded.ListSet.ListID"] });
   const resource = encodeYapkResourceOfficial(decoded);
   const wrapper = {
     PackageId: stringId(ids["wrapper.PackageId"]),
@@ -3980,6 +3981,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     rootListSetId,
   });
   reconcilePageTempVariableReferences(resource);
+  completeGeneratedDataListSourceIdentity(resource, { rootListSetId });
   return resource;
 }
 
@@ -6207,7 +6209,43 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   enforceCollectionTemplateStyleContracts(resource);
   normalizeAndPruneDashboardTempVars(resource);
   reconcilePageTempVariableReferences(resource);
+  completeGeneratedDataListSourceIdentity(resource, { rootListSetId });
   return resource;
+}
+
+// Every Data List-bound control in a generated app must retain the complete
+// source identity.  Runtime rendering can use an already-persisted field map
+// with only a ListID, but the Designer needs AppID + ListSetID + ListID to
+// rediscover compatible fields after a generated form/dashboard is reopened.
+function completeGeneratedDataListSourceIdentity(resource, { rootListSetId }) {
+  const listSetId = stringId(rootListSetId);
+  if (!resource || !listSetId) return;
+  const hasIdentityValue = (value) => value !== null && value !== undefined && String(value).trim() !== "";
+  const visited = new WeakSet();
+  const visit = (value) => {
+    if (!value || typeof value !== "object") return;
+    if (visited.has(value)) return;
+    visited.add(value);
+    const source = value?.attrs?.data?.list;
+    if (source && typeof source === "object" && !Array.isArray(source) && hasIdentityValue(source.ListID)) {
+      if (!hasIdentityValue(source.AppID)) source.AppID = 41;
+      if (!hasIdentityValue(source.ListSetID)) source.ListSetID = listSetId;
+    }
+    for (const [key, child] of Object.entries(value)) {
+      if (key === "Resource" && typeof child === "string") {
+        try {
+          const decodedResource = JSON.parse(child);
+          visit(decodedResource);
+          value[key] = JSON.stringify(decodedResource);
+        } catch {
+          // Non-JSON resource envelopes are outside this JSON layout contract.
+        }
+        continue;
+      }
+      visit(child);
+    }
+  };
+  visit(resource);
 }
 
 function restoreDashboardRootGoldenReferenceProvenance(resource) {

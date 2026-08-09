@@ -36,6 +36,18 @@ function containsType(root, type) {
   return (root.children || []).some((child) => containsType(child, type));
 }
 
+function dataListSources(root) {
+  const sources = [];
+  const visit = (value) => {
+    if (!value || typeof value !== "object") return;
+    const source = value?.attrs?.data?.list;
+    if (source && typeof source === "object" && !Array.isArray(source) && source.ListID) sources.push(source);
+    for (const child of Object.values(value)) visit(child);
+  };
+  visit(root);
+  return sources;
+}
+
 try {
   const specPath = write(path.join(tempDir, "functional-specification.md"), `
 # Functional Specification: Responsive Batch Workbench
@@ -115,6 +127,13 @@ Application icon: fa-solid fa-list-check
   assert.ok(Array.isArray(collection?.attrs?.tablecols) && collection.attrs.tablecols.length >= 3, "default template must keep native desktop/tablet Table columns");
   assert.ok(Array.isArray(collection?.children) && collection.children.length > 0, "default template must keep a non-empty mobile Card view");
   assert.equal(containsType(collection, "flex_grid"), false, "generic multiselect requirements must not route to the legacy Flex Grid template");
+  const sources = dataListSources(resource);
+  assert.ok(sources.length > 0, "responsive Collection resource must contain Data List-bound controls");
+  for (const source of sources) {
+    assert.ok(source.AppID, "every generated Data List-bound control must retain AppID");
+    assert.ok(source.ListSetID, `every generated Data List-bound control must retain ListSetID for Designer field discovery: ${JSON.stringify(source)}`);
+    assert.ok(source.ListID, "every generated Data List-bound control must retain ListID");
+  }
   for (const key of ["filterVars", "tempVars", "filter", "actions", "formAction"]) {
     const value = resource[key];
     assert.ok(Array.isArray(value) ? value.length > 0 : Boolean(value && Object.keys(value).length), `responsive multiselect default must preserve ${key}`);

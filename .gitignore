@@ -114,6 +114,7 @@ yeeflow-data-list-generator/
 !compatibility/capability-manifests/yeeflow-app-builder-capability-classification.v0.9.71.json
 !compatibility/capability-manifests/english-only-allowlist.json
 !compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v0.9.71.json
+!compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v*.json
 !compatibility/capability-manifests/app-builder-core-package-dependency-graph.v0.1.0.json
 !compatibility/capability-manifests/yeeflow-app-builder-core-distribution-contract.v0.1.0.json
 !compatibility/capability-manifests/app-builder-core-planning-public-api.v0.1.0.json
@@ -180,6 +181,7 @@ packages/**/lib/
 *validation*.json
 *graph*.json
 *compatibility*.json
+!compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v*.json
 *dependencies*.json
 *decomposition*.json
 *mapping*.json
