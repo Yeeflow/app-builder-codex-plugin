@@ -1360,6 +1360,14 @@
       "migrationStatus": "pending"
     },
     {
+      "sourcePath": "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v1.10.0.json",
+      "classification": "evidence-only",
+      "sideEffects": [],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "pending"
+    },
+    {
       "sourcePath": "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v1.9.0.json",
       "classification": "evidence-only",
       "sideEffects": [],
@@ -4257,6 +4265,16 @@
       "migrationStatus": "not-planned"
     },
     {
+      "sourcePath": "dist/yeeflow-app-builder-plugin/docs/releases/yeeflow-app-builder-v1.10.0.md",
+      "classification": "generated-distribution",
+      "sideEffects": [
+        "distribution"
+      ],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "not-planned"
+    },
+    {
       "sourcePath": "dist/yeeflow-app-builder-plugin/docs/releases/yeeflow-app-builder-v1.2.0-standalone-resource-acceptance.json",
       "classification": "generated-distribution",
       "sideEffects": [
@@ -4388,6 +4406,16 @@
     },
     {
       "sourcePath": "dist/yeeflow-app-builder-plugin/docs/releases/yeeflow-app-builder-v1.7.2.md",
+      "classification": "generated-distribution",
+      "sideEffects": [
+        "distribution"
+      ],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "not-planned"
+    },
+    {
+      "sourcePath": "dist/yeeflow-app-builder-plugin/docs/releases/yeeflow-app-builder-v1.9.0.md",
       "classification": "generated-distribution",
       "sideEffects": [
         "distribution"
@@ -22808,6 +22836,14 @@
     },
     {
       "sourcePath": "docs/releases/yeeflow-app-builder-v1.1.0.md",
+      "classification": "evidence-only",
+      "sideEffects": [],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "pending"
+    },
+    {
+      "sourcePath": "docs/releases/yeeflow-app-builder-v1.10.0.md",
       "classification": "evidence-only",
       "sideEffects": [],
       "targetPackage": null,
