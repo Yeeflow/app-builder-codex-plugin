@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.10.6
+
+- Remove stale standalone OAuth, REST helper, and API Operator references from distributed skills after the MCP-only migration.
+- Add an OpenAI plugin submission packet with reviewer setup, five positive cases, three negative cases, and MCP scan requirements.
+
 ## 1.10.5
 
 - Retire the bundled standalone OAuth and Yeeflow REST/API operator surface, including its CLI helpers, environment example, API Operator skill, package-automation resources, and historical distribution copies.

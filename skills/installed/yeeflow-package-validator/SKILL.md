@@ -167,7 +167,7 @@ Generated-final dashboard and YAPK validation must now fail closed for the 0.8.9
 
 For generated-final YAPK signing readiness, `scripts/yapk-first-generation-preflight.mjs --package <file.yapk> --plan <yeeflow-app-plan.md> --json` is the gating command when a plan exists. Do not call `setsign` if preflight fails canonical schema, decoded export-shape, generated-final resource completeness, ID provenance, app icon, navigation runtime metadata, dashboard materialization, live-install readiness, or redacted-output checks. The wrapper `TenantID` must be the real target tenant LongAsString; `TenantID: "0"` is a placeholder and is not signing-ready. API status `0` means submitted/accepted only; final install/upgrade success requires async materialization proof plus separate browser/runtime proof against the decoded package root `ListSet.ListID`. Runtime proof must fail target-app `Install failed` tiles, empty `Start to build with Components` shells, model-load errors, empty dashboards after seed, and visible source-domain/control-name residue. When home-page evidence includes multiple tiles, scope `Install failed` attribution to the generated app title/PackageId/ListSetID instead of treating unrelated historical failed tiles as current package proof.
 
-After preflight passes, use the official `scripts/yeeflow-yapk-sign.mjs --package <unsigned.yapk> --output <signed.yapk> --execute` entrypoint rather than ad hoc signing code. It preserves the unsigned input and unchanged `Resource`, accepts only a valid 32-byte base64 signature, proves `verifysign` through successful HTTP status including an empty response body, writes a separate output only after verification, and keeps install blocked on every failure. Diagnostics are limited to HTTP status, content type, raw length, response classification, signature-byte count, and sanitized API error category; raw response, raw signature, tokens, tenant identifiers, `Resource`, and decoded package content are forbidden.
+For signing after the required validation gates, use the App Builder MCP package-signing tools. Verify the returned signature before installation and keep installation blocked on any failure.
 
 Generated-final resource completeness also enforces App Plan reference integrity. Navigation entries whose Yeeflow Resource Type is Data List/Document Library must resolve to a planned Data List or a planned Data View with a planned host list. Lookup field targets named in Data List field tables must resolve to planned/generated Data Lists before materialization. Treat `APP_PLAN_NAVIGATION_DATA_LIST_TARGET_NOT_PLANNED`, `APP_PLAN_LOOKUP_TARGET_DATA_LIST_NOT_PLANNED`, and `FULL_APP_MATERIALIZATION_LOOKUP_TARGET_DATA_LIST_NOT_PLANNED` as signing blockers; they indicate the plan/generator is about to produce broken navigation or lookup fields with empty rules.
 
@@ -252,8 +252,8 @@ Treat hard `YAP_*` form-workspace findings as blockers for generated form worksp
 ## Public Tenant Safety
 
 - Never hardcode a tenant-specific Yeeflow URL. Use `https://<yourdomain>.yeeflow.com` in docs and examples.
-- Before Yeeflow API work, check local auth status with `node scripts/yeeflow-oauth-status.mjs` or `node scripts/yeeflow-api-auth-smoke.mjs`.
-- Before using a Yeeflow REST API, check the capability map with `node scripts/yeeflow-api-list-capabilities.mjs` or `scripts/lib/yeeflow-api-capabilities.mjs`.
+Use the matching hosted MCP tool; standalone OAuth and REST helper commands are retired.
+Use the matching hosted MCP tool; standalone OAuth and REST helper commands are retired.
 - Use only documented capabilities from the map. Do not guess endpoint paths or expose unrestricted raw API calls; report missing API coverage when no mapped capability exists.
 - Prefer Browser OAuth-backed Yeeflow API calls for user-facing usage. If OAuth is not authenticated, ask the user to sign in to Yeeflow using the plugin login flow; never ask for a Yeeflow password. If this runtime cannot start the plugin login action, ask the user to open the Yeeflow plugin login action in Codex, then retry the original request.
 - Prefer read-only capabilities for inspection and verification. Require explicit user confirmation for write capabilities and stronger confirmation for package install/import/upgrade/delete.
@@ -298,7 +298,7 @@ New application creation defaults to `.yapk`; `.yap` should be generated only wh
 
 When package API automation is in scope, validate request shaping before execution, confirm the active workspace, and require explicit confirmation for install/upgrade. API result summaries should classify `success`, `already_installed`, `api_rejected`, and `http_rejected` so duplicate/already-installed responses do not get mixed with unknown validation failures.
 
-For any Yeeflow REST API operation, consult `scripts/lib/yeeflow-api-capabilities.mjs` first. If the needed capability is absent, do not invent an endpoint; report the gap and use browser/manual workflow only if the user allows it.
+For any Yeeflow operation, use the matching hosted MCP tool and its schema. If the needed capability is absent, report the gap; do not invent an endpoint.
 
 Validation is not runtime proof. When validating a newly learned capability, report whether the package is export-proven, validator-backed, import-proven, configuration-visible, render-only, partial, or runtime-proven. Use validator hard errors only for proven invalid generated shapes; otherwise prefer warnings/dependencies and require a focused runtime baseline before broad runtime claims.
 
@@ -499,7 +499,7 @@ Runtime-proven layout values for generated packages are `default`, `left`, `onhe
 
 Workflow assignment task assignee validation should remain warning-first in compatibility mode. `Test ABC (1).yap` export-proves multiple `MultiAssignmentTask.properties.usertaskassignment[]` entries, user-group expression, position all-users expression, `issequential=true`, absent-`issequential` parallel/default shape, `approveway` variants, custom percentage, and email notification fields. Validators should warn for unknown assignee methods, unknown `approveway`, invalid `issequential`, missing custom percentage, and incomplete email notification shape, but should not hard-error existing exports solely from this study.
 
-For assignment-routing API coverage, `yeeflow-api-operator` can safely confirm documented read-only categories for users, user detail, departments, locations, location detail, positions, position assignments, groups, and group members. This supports validation/planning only; do not turn API-readable org data into hard package errors or runtime-routing claims.
+For authorized organization-reference lookup, use read-only `yeeflow_admin_mcp` tools. Do not require local credentials or use a standalone API Operator.
 <!-- application-settings-navigation-user-groups-learning:end -->
 
 <!-- app-creation-rules-learning:start -->
