@@ -51,8 +51,14 @@ try {
   findByType(findByIdentity(badResponsiveCardDisplayRuleTemplate.templateResource.rootContainer, "grid_table_col_body").children[0], "heading").attrs.control_display = [{ controlId: "foreign-card-control" }];
   expectCode("responsive table/card template rejects foreign Card display-rule control references", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-foreign-display-rule-template.json", badResponsiveCardDisplayRuleTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_CARD_DISPLAY_RULE_FOREIGN_CONTROL");
   const badResponsiveMobileOperationsTemplate = structuredClone(responsiveCollectionTemplate);
-  findByIdentity(badResponsiveMobileOperationsTemplate.templateResource.rootContainer, "grid_table_col_operations").attrs.style.widthtype = [null, "2", "1"];
+  findByIdentity(badResponsiveMobileOperationsTemplate.templateResource.rootContainer, "grid_table_col_operations").attrs.style.widthtype = [null, "2", "2"];
   expectCode("responsive table/card template keeps operation controls full width on mobile", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-mobile-operation-template.json", badResponsiveMobileOperationsTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_MOBILE_OPERATION_WIDTH_INVALID");
+  const badResponsiveOperationPresentationTemplate = structuredClone(responsiveCollectionTemplate);
+  findByIdentity(badResponsiveOperationPresentationTemplate.templateResource.rootContainer, "op_normal").attrs.style.gap = [null, "--sp--s100"];
+  expectCode("responsive table/card template keeps inline operation presentation contracts", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-operation-presentation-template.json", badResponsiveOperationPresentationTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_OPERATION_PRESENTATION_DRIFT");
+  const badResponsiveFullWidthTemplate = structuredClone(responsiveCollectionTemplate);
+  findByIdentity(badResponsiveFullWidthTemplate.templateResource.rootContainer, "grid_table_col_content").attrs.style.widthtype = [null, "2"];
+  expectCode("responsive table/card template keeps wrapper, caption, and content full width", ["--registry", REGISTRY, "--responsive-template", writeJson("bad-responsive-table-card-full-width-template.json", badResponsiveFullWidthTemplate)], "DASH_DATASET_RESPONSIVE_TEMPLATE_FULL_WIDTH_PRESENTATION_INVALID");
   const badResponsiveTemplate = structuredClone(responsiveTemplate);
   delete badResponsiveTemplate.extractionIndex.slotPointers.card_col_item;
   expectCode("responsive card grid source template slots are enforced", ["--registry", REGISTRY, "--responsive-card-template", writeJson("bad-responsive-card-template.json", badResponsiveTemplate)], "DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_SLOT_MISSING");

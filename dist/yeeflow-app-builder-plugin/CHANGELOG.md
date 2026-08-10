@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.10.1
+
+- Harden Nexus CRM Dashboard search, action ownership, inline toolbar width, KPI Summary-host visibility, and filter producer-consumer validation.
+- Preserve complete responsive reverse-related Collections and reject invalid Type 1 conditional-display cross-node targets.
+- Add source/distribution PIF-001 through PIF-011 static-fixture regression coverage; tenant Designer/runtime/round-trip proof remains separate.
+
 ## 1.10.0
 
 - Require every generated Data List Form (New, Edit, View, Document Library custom form) to select and materialize an explicit compatible Data List Form Layout rather than inheriting an implicit or blank layout.

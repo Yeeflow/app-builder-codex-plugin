@@ -197,8 +197,8 @@ function validateAppPlanReverseRelatedSelections(text, findings, context = {}) {
       findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_ROW_INCOMPLETE", "Reverse-Related Collection Selection rows must name host list, View Item form, related child list, child lookup field, and approved Collection template.", { row: row.raw }));
       continue;
     }
-    if (!/collection_control_grid_table|grid[-\s]?table/i.test(row.collectionTemplate)) {
-      findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_TEMPLATE_INVALID", "Reverse-related Data List View Item sections must use an approved grid-table Collection template for related child records.", { row: row.raw, actual: row.collectionTemplate }));
+    if (!/collection_control_responsive|collection_control_grid_table|grid[-\s]?table/i.test(row.collectionTemplate)) {
+      findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_TEMPLATE_INVALID", "Reverse-related Data List View Item sections must select the approved collection_control_responsive Collection template; legacy grid-table wording is accepted only for backward-compatible package validation.", { row: row.raw, actual: row.collectionTemplate }));
     }
     if (!/current\s+ListDataID/i.test(row.defaultValue) || !lineMentionsList(row.defaultValue, row.childLookupField)) {
       findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_DEFAULT_VALUE_INVALID", "Reverse-related Add defaults must declare <child lookup FieldName> = current ListDataID.", { row: row.raw, expectedField: row.childLookupField }));
@@ -264,7 +264,26 @@ function validateFormResource(resource, context) {
   validateUsageContract(resource, context.templateId || templateId, context);
   validateSectionContentAreaGap(resource, context);
   validateBusinessSlots(resource, context);
+  validateControlDisplayTargetOwnership(resource, context);
   validateReverseRelatedCollectionSections(resource, context);
+}
+
+function validateControlDisplayTargetOwnership(resource, context) {
+  for (const entry of flatten(resource)) {
+    if (entry.ancestors.some((ancestor) => String(ancestor?.type || "") === "collection")) continue;
+    const rules = asArray(entry.node?.attrs?.control_display);
+    if (!rules.length) continue;
+    const ownerId = stringValue(entry.node?.id || entry.node?.ID);
+    for (const [index, rule] of rules.entries()) {
+      const targetId = stringValue(rule?.controlId || rule?.controlID || rule?.targetControlId);
+      if (!targetId || targetId === ownerId) continue;
+      context.findings.push(error(
+        "DATA_LIST_FORM_CONTROL_DISPLAY_CROSS_NODE_TARGET",
+        "Type 1 custom form control_display rules must target their owning control. Cross-node display targets can blank the complete form; a separately export-proven nested-grid holder is required before any exception is generated.",
+        { source: context.source, path: `${entry.pointer}.attrs.control_display[${index}]`, ownerId: ownerId || null, targetId },
+      ));
+    }
+  }
 }
 
 function validateSectionContentAreaGap(resource, context) {
@@ -476,8 +495,7 @@ function validateReverseRelatedOfficialSectionShape(section, collection, detail,
   const operations = collectionWrapper ? findFirstByIdentity(collectionWrapper, "grid_table_col_operations") : null;
   const opNormal = operations ? findFirstByIdentity(operations, "op_normal") : null;
   const content = collectionWrapper ? findFirstByIdentity(collectionWrapper, "grid_table_col_content") : null;
-  const header = content ? findFirstByIdentity(content, "grid_table_col_header") : null;
-  const itemGrid = collection ? findFirstByIdentity(collection, "grid_col_item") : null;
+  const collectionTemplate = stringValue(collection?.collectionTemplateId || collection?.derivedFromCollectionTemplate || collection?.attrs?.collectionTemplateId || collection?.attrs?.derivedFromCollectionTemplate);
   const missing = [];
   if (!contentCard) missing.push("content_card_wrapper");
   if (!sectionContent) missing.push("section_content_area");
@@ -487,12 +505,10 @@ function validateReverseRelatedOfficialSectionShape(section, collection, detail,
   if (!operations) missing.push("grid_table_col_operations");
   if (!opNormal) missing.push("op_normal");
   if (!content) missing.push("grid_table_col_content");
-  if (!header) missing.push("grid_table_col_header");
-  if (!itemGrid) missing.push("grid_col_item");
   if (missing.length) {
     context.findings.push(error(
       "DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH",
-      "Reverse-related View Item Collections must use the official designer-open .ydl section shape: 1_columns_section > content_card_wrapper > section_content_area > related Collection wrapper with caption, operations/op_normal, grid header, and Collection row grid.",
+      "Reverse-related View Item Collections must use the official designer-open section shape: 1_columns_section > content_card_wrapper > section_content_area > responsive related Collection wrapper with caption, operations/op_normal, and content.",
       { source: context.source, path: sectionPath, detail, missing },
     ));
     return;
@@ -504,12 +520,20 @@ function validateReverseRelatedOfficialSectionShape(section, collection, detail,
       { source: context.source, path: pointerForNode(resource, contentCard), detail },
     ));
   }
-  const collectionTemplate = stringValue(collection?.collectionTemplateId || collection?.derivedFromCollectionTemplate || collection?.attrs?.collectionTemplateId || collection?.attrs?.derivedFromCollectionTemplate);
-  if (collectionTemplate !== "collection_control_grid_table") {
+  for (const [identity, node] of [["grid_table_col_wrapper", collectionWrapper], ["grid_table_col_caption", caption], ["grid_table_col_content", content]]) {
+    if (node?.attrs?.style?.widthtype?.[1] !== "1") {
+      context.findings.push(error(
+        "DATA_LIST_FORM_REVERSE_RELATED_FULL_WIDTH_MISSING",
+        "Reverse-related responsive Collection wrapper, caption, and content must remain Full width after business mapping.",
+        { source: context.source, path: pointerForNode(resource, node || section), detail, control: identity, actual: node?.attrs?.style?.widthtype ?? null },
+      ));
+    }
+  }
+  if (collectionTemplate !== "collection_control_responsive") {
     context.findings.push(error(
       "DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_TEMPLATE_MARKER_MISSING",
-      "Reverse-related View Item Collections must materialize from the full collection_control_grid_table golden reference template, not a hand-built grid-like structure.",
-      { source: context.source, path: pointerForNode(resource, collection), detail, expected: "collection_control_grid_table", actual: collectionTemplate || null },
+      "Reverse-related View Item Collections must materialize from the full collection_control_responsive golden reference template, not a hand-built or legacy grid-like structure.",
+      { source: context.source, path: pointerForNode(resource, collection), detail, expected: "collection_control_responsive", actual: collectionTemplate || null },
     ));
   }
   const searchControls = flatten(opNormal).map((entry) => entry.node).filter((node) => String(node?.type || "") === "search-filter");
@@ -702,6 +726,35 @@ function validateReverseRelatedCollectionFilter(collection, detail, context, res
 
 function validateReverseRelatedCollectionOfficialShape(collection, detail, context, resource) {
   const attrs = collection?.attrs || {};
+  const templateId = stringValue(collection?.collectionTemplateId || collection?.derivedFromCollectionTemplate || attrs.collectionTemplateId || attrs.derivedFromCollectionTemplate);
+  const nativeResponsiveAttrs = ["tablecols", "header", "body", "table", "list-display-preference"];
+  if (templateId === "collection_control_responsive") {
+    const generatedResidue = ["reverseRelatedCollection", "generatedBy", "templateSource", "sourceTemplateId"]
+      .filter((key) => attrs[key] !== undefined);
+    if (generatedResidue.length) {
+      context.findings.push(error(
+        "DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_ATTRS_UNOFFICIAL",
+        "Responsive reverse-related Collections must retain native Collection attrs only; generator metadata and source-template residue belong on the owning section, not the Collection control.",
+        { source: context.source, path: pointerForNode(resource, collection), detail, unexpectedAttrs: generatedResidue },
+      ));
+    }
+    const missing = nativeResponsiveAttrs.filter((key) => attrs[key] === undefined);
+    if (missing.length || attrs["list-display-preference"] !== "default") {
+      context.findings.push(error(
+        "DATA_LIST_FORM_REVERSE_RELATED_RESPONSIVE_ATTRS_MISSING",
+        "Responsive reverse-related Collections must preserve the native table/card attrs from collection_control_responsive; do not reduce a cloned template to a hybrid Collection.",
+        { source: context.source, path: pointerForNode(resource, collection), detail, missing, listDisplayPreference: attrs["list-display-preference"] ?? null },
+      ));
+    }
+    if (!asArray(attrs.tablecols).length || !asArray(collection.children).length) {
+      context.findings.push(error(
+        "DATA_LIST_FORM_REVERSE_RELATED_RESPONSIVE_PRESENTATION_MISSING",
+        "Responsive reverse-related Collections must map child-list columns and retain a non-empty mobile Card view item tree.",
+        { source: context.source, path: pointerForNode(resource, collection), detail },
+      ));
+    }
+    return;
+  }
   const allowedAttrs = new Set(["data", "layout", "actions", "pagination"]);
   const unexpected = Object.keys(attrs).filter((key) => !allowedAttrs.has(key));
   if (unexpected.length) {

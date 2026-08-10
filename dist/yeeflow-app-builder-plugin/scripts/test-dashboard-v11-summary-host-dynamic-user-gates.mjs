@@ -69,13 +69,24 @@ Business defaults approval status: user-default-approved-for-generation.
 | Profile Owner | Text4 | identity-picker | Existing Yeeflow user responsible for profile maintenance |
 | Employment Status | Text5 | Choice | Active, On Leave, Inactive |
 
+## 10. Custom Data List Forms Plan
+
+### 10.1 Doctor Profiles
+
+#### Data List Form Layout Template Selection
+
+| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Doctor Profiles | Doctor Profile New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Current record fields | None | New/Edit focuses on the current doctor profile. | Generated-final validation |
+| Doctor Profiles | Doctor Profile View | View | data_list_form_layout_view_item_v1_1 | Current record, related context | None | View Item provides the record context. | Generated-final validation |
+
 ## 14. Dashboard Pages Plan
 
 ### 14.1 Doctor Operations Dashboard
 - Page name: Doctor Operations Dashboard
 - Business purpose: Operations overview for active doctors and profile maintenance.
 - Layout template: dashboard-page-layouts-v1.1
-- Dataset presentation: collection_control_grid_table
+- Dataset presentation: collection_control_responsive
 
 #### Dashboard Sections
 
@@ -90,9 +101,9 @@ Business defaults approval status: user-default-approved-for-generation.
 | Pending Reviews | Doctor Operations Dashboard | Doctor Profiles | ListDataID | Count pending profile reviews |
 
 #### Record Display Control Selection
-| Dashboard Page | Dataset Region | Source List | Selected Collection Template | Selection Reason |
-| --- | --- | --- | --- | --- |
-| Doctor Operations Dashboard | Doctor work queue | Doctor Profiles | collection_control_grid_table | Dense table for row and column scanning. |
+| Dashboard Page | Dataset Region | Source List | Selected Collection Template | Display Fields | Selection Reason |
+| --- | --- | --- | --- | --- | --- |
+| Doctor Operations Dashboard | Doctor work queue | Doctor Profiles | collection_control_responsive | Title, Text1, Text2, Text3, Text4, Text5 | Dense table for row and column scanning with a responsive mobile Card view. |
 
 ## 15. Application Navigation Plan
 | Group | Item | Target Resource | Yeeflow Resource Type | Icon |
@@ -158,7 +169,7 @@ Business defaults approval status: user-default-approved-for-generation.
   assert.ok(ownerControls.every((entry) => entry.node.type === "dynamic-user"), "Profile Owner identity fields must render as dynamic-user");
   const dynamicSlotFields = findAll(resource, (node) => String(node.type || "").startsWith("dynamic-"))
     .map((entry) => entry.node.field || entry.node.attrs?.data?.field);
-  assert.deepEqual(dynamicSlotFields, ["Title", "Text4", "Text2"], "The surviving grid-table dynamic slots must preserve the current Legacy field/type selection order after schema pruning");
+  assert.deepEqual(dynamicSlotFields, ["Title", "Text4", "Text2", "Text3"], "The responsive Collection must materialize every explicitly planned display field with its list-scoped type binding");
 
   console.log(JSON.stringify({
     status: "pass",
@@ -167,7 +178,7 @@ Business defaults approval status: user-default-approved-for-generation.
       "v1.1 Summary hidden host is nested inside approved KPI business slot",
       "Employee Number dynamic-field is not misclassified as a user field",
       "Profile Owner identity-picker renders as dynamic-user",
-      "fixture uses the current list-scoped field-table shape and asserts fixed grid-table slot selection",
+      "fixture uses the current list-scoped field-table shape and asserts explicit responsive Collection field mapping",
       "generated package passes dashboard page-layout and golden conformance gates",
     ],
   }, null, 2));

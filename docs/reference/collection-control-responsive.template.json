@@ -62,7 +62,7 @@
           ],
           "widthtype": [
             null,
-            "2"
+            "1"
           ]
         }
       },
@@ -97,7 +97,7 @@
               ],
               "widthtype": [
                 null,
-                "2"
+                "1"
               ]
             }
           },
@@ -117,9 +117,9 @@
                     null,
                     "--sp--s050"
                   ],
-                  "widthtype": [
-                    null,
-                    "2"
+                      "widthtype": [
+                        null,
+                        "1"
                   ]
                 }
               },
@@ -155,15 +155,23 @@
                     null,
                     "row"
                   ],
-                  "gap": [
-                    null,
-                    "--sp--s100"
-                  ],
-                  "widthtype": [
-                    null,
-                    "2",
-                    "2"
-                  ]
+                "gap": [
+                  null,
+                  10
+                ],
+                "widthtype": [
+                  null,
+                  "2",
+                  "1"
+                ],
+                "align_items": [
+                  null,
+                  "center"
+                ],
+                "justify_content": [
+                  null,
+                  "flex-end"
+                ]
                 }
               },
               "children": [
@@ -178,15 +186,23 @@
                         null,
                         "row"
                       ],
-                      "gap": [
-                        null,
-                        "--sp--s100"
-                      ],
-                      "widthtype": [
-                        null,
-                        "2",
-                        "2"
-                      ]
+                    "gap": [
+                      null,
+                      10
+                    ],
+                    "widthtype": [
+                      null,
+                      "2",
+                      "1"
+                    ],
+                    "align_items": [
+                      null,
+                      "center"
+                    ],
+                    "justify_content": [
+                      null,
+                      "flex-end"
+                    ]
                     }
                   },
                   "children": [
@@ -226,7 +242,7 @@
             "style": {
               "widthtype": [
                 null,
-                "2"
+                "1"
               ]
             }
           },

@@ -85,6 +85,11 @@ try {
   firstSlot(legacySectionGap).attrs.style.gap = [null, "--sp--s0"];
   expectCode("Data List form section_content_area legacy zero gap fails", ["--resource", writeJson("new-edit-legacy-section-gap.json", legacySectionGap), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_SECTION_CONTENT_AREA_GAP_INVALID");
 
+  const crossNodeControlDisplay = newEditResource();
+  const owningControl = firstSlot(crossNodeControlDisplay).children.find((node) => node && typeof node === "object") || firstSlot(crossNodeControlDisplay);
+  owningControl.attrs = { ...(owningControl.attrs || {}), control_display: [{ controlId: "unrelated_outer_grid_control" }] };
+  expectCode("Type 1 form control display rules cannot target an outer grid control", ["--resource", writeJson("new-edit-cross-node-control-display.json", crossNodeControlDisplay), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_CONTROL_DISPLAY_CROSS_NODE_TARGET");
+
   const residualTemplateLabel = newEditResource();
   firstSlot(residualTemplateLabel).children.push({ type: "text", id: "stale_section_text", nv_label: "stale_section_text", text: "Active Loan Pipeline" });
   expectCode("generated Data List form residual template label fails", ["--resource", writeJson("new-edit-residual-template-label.json", residualTemplateLabel), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_TEMPLATE_RESIDUAL_LABEL");
@@ -105,6 +110,12 @@ try {
   expectCode("reverse-related Collection row dropbar operations fail", ["--resource", writeJson("view-reverse-related-row-dropbar.json", reverseRelatedViewResource({ includeDropbar: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN");
   expectCode("reverse-related Collection nested inside details section fails", ["--resource", writeJson("view-reverse-related-nested-details.json", reverseRelatedViewResource({ nestedInsideDetails: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_INDEPENDENT_SECTION_REQUIRED");
   expectCode("reverse-related Collection unofficial attrs fail", ["--resource", writeJson("view-reverse-related-unofficial-attrs.json", reverseRelatedViewResource({ unofficialCollectionAttrs: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_ATTRS_UNOFFICIAL");
+  const reverseRelatedMissingResponsiveAttrs = reverseRelatedViewResource();
+  delete find(reverseRelatedMissingResponsiveAttrs, "grid_table_col_body").attrs.tablecols;
+  expectCode("reverse-related responsive Collection missing native table/card attrs fails", ["--resource", writeJson("view-reverse-related-missing-responsive-attrs.json", reverseRelatedMissingResponsiveAttrs), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_RESPONSIVE_ATTRS_MISSING");
+  const reverseRelatedNotFullWidth = reverseRelatedViewResource();
+  find(reverseRelatedNotFullWidth, "grid_table_col_caption").attrs.style.widthtype = [null, "2"];
+  expectCode("reverse-related responsive Collection caption must remain full width", ["--resource", writeJson("view-reverse-related-caption-not-full-width.json", reverseRelatedNotFullWidth), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_FULL_WIDTH_MISSING");
   expectCode("reverse-related Collection partial generated-style section shape fails", ["--resource", writeJson("view-reverse-related-partial-generated-shape.json", reverseRelatedPartialShapeViewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH");
   expectCode("reverse-related Collection content card missing golden style fails", ["--resource", writeJson("view-reverse-related-card-style-missing.json", reverseRelatedViewResource({ omitContentCardStyle: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_CONTENT_CARD_STYLE_MISMATCH");
   expectCode("reverse-related Collection search-filter visible label fails", ["--resource", writeJson("view-reverse-related-search-label-visible.json", reverseRelatedViewResource({ visibleSearchLabel: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_LABEL_VISIBLE");
@@ -301,8 +312,8 @@ function reverseRelatedSection(options = {}) {
     type: "collection",
     id: "doctor_profiles_collection",
     nv_label: "grid_table_col_body",
-    collectionTemplateId: "collection_control_grid_table",
-    derivedFromCollectionTemplate: "collection_control_grid_table",
+    collectionTemplateId: "collection_control_responsive",
+    derivedFromCollectionTemplate: "collection_control_responsive",
     attrs: {
       ...(options.unofficialCollectionAttrs ? { reverseRelatedCollection: true, generatedBy: "bad-test" } : {}),
       data: {
@@ -419,10 +430,10 @@ function reverseRelatedSection(options = {}) {
 }
 
 function reverseRelatedGoldenCollectionWrapper({ options = {}, collection, addButton, searchBinding }) {
-  const template = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"), "utf8"));
+  const template = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-responsive.template.json"), "utf8"));
   const wrapper = clone(template.templateResource.rootContainer);
-  wrapper.collectionTemplateId = "collection_control_grid_table";
-  wrapper.derivedFromCollectionTemplate = "collection_control_grid_table";
+  wrapper.collectionTemplateId = "collection_control_responsive";
+  wrapper.derivedFromCollectionTemplate = "collection_control_responsive";
   setHeadingValue(find(wrapper, "grid_table_col_title"), "Doctors in this Specialty");
   const opNormal = find(wrapper, "op_normal");
   if (opNormal) {
@@ -440,9 +451,12 @@ function reverseRelatedGoldenCollectionWrapper({ options = {}, collection, addBu
   }
   const templateCollection = find(wrapper, "grid_table_col_body");
   if (templateCollection) {
-    templateCollection.collectionTemplateId = "collection_control_grid_table";
-    templateCollection.derivedFromCollectionTemplate = "collection_control_grid_table";
-    templateCollection.attrs = clone(collection.attrs);
+    templateCollection.collectionTemplateId = "collection_control_responsive";
+    templateCollection.derivedFromCollectionTemplate = "collection_control_responsive";
+    templateCollection.attrs = {
+      ...clone(templateCollection.attrs || {}),
+      ...clone(collection.attrs),
+    };
     templateCollection.children = [reverseRelatedGoldenRowGrid({ options })];
   }
   const header = find(wrapper, "grid_table_col_header");
@@ -603,7 +617,7 @@ ${selectionRows}
 
 | Host Data List | View Item Form | Related Child List | Child Lookup Field | Section Title | Collection Template | Search | Add Record | Default Value |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ${listName} | ${viewFormName} | Doctor Profiles | ${reverseLookupField} | Doctors in this Specialty | collection_control_grid_table | Title, Specialty | Add doctor | ${reverseDefaultValue} |
+| ${listName} | ${viewFormName} | Doctor Profiles | ${reverseLookupField} | Doctors in this Specialty | collection_control_responsive | Title, Specialty | Add doctor | ${reverseDefaultValue} |
 ` : "";
   return `
 # Office Asset Loan Management - Yeeflow App Plan

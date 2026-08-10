@@ -281,7 +281,13 @@ function pageResource(flags = {}) {
   if (kpiRow) kpiRow.children = [kpiCard(flags.kpiMode || "valid", flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR)];
   const columns = [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
   businessSection.children = [
-    summary,
+    {
+      type: "container",
+      id: "kpi_data_host",
+      name: "KPI data host",
+      attrs: { style: style([null, "1"]), common: { hide: [null, true, true, true] }, display: { rule: "1 == 0" } },
+      children: [summary],
+    },
     {
       type: "flex_grid",
       id: "event_pipeline_grid_table_header_grid",
@@ -422,7 +428,17 @@ function validV11Resource(flags = {}) {
   adaptReferenceDomain(root);
   removeOperations(root);
   const businessSection = findBusinessSectionContentArea(root);
-  businessSection.children = [eventPortfolioFilterGroup(flags.filterPatch || {}), summaryControl(flags.summaryPatch || {}), eventPipelineGridTableRegion()];
+  businessSection.children = [
+    eventPortfolioFilterGroup(flags.filterPatch || {}),
+    {
+      type: "container",
+      id: "kpi_data_host",
+      name: "KPI data host",
+      attrs: { style: style([null, "1"]), common: { hide: [null, true, true, true] }, display: { rule: "1 == 0" } },
+      children: [summaryControl(flags.summaryPatch || {})],
+    },
+    eventPipelineGridTableRegion(),
+  ];
   const kpiWrapper = find(root, "kpi_metrics_wrapper") || find(root, "kpi_cards_wrapper");
   if (kpiWrapper) {
     kpiWrapper.derivedFromGoldenReference = "event_portfolio_kpi_row";
@@ -667,6 +683,38 @@ try {
     attrs: { placeholder: { value: "Search Requests" } },
   });
   expectCode("search filter placeholder value object fails", ["--package", writePackage(tempDir, "search-placeholder-value-object", decodedWithResource(searchPlaceholderValueObject))], "DASH_SEARCH_FILTER_PLACEHOLDER_OBJECT_FORBIDDEN");
+
+  const searchMissingBinding = validV11Resource();
+  findBusinessSectionContentArea(searchMissingBinding).children.unshift({
+    type: "search-filter",
+    id: "search_filter_missing_binding",
+    name: "Search Requests",
+    displayLabel: [null, false],
+    attrs: { placeholder: "Search requests" },
+  });
+  expectCode("dashboard search filter must bind to a Collection fulltext consumer", ["--package", writePackage(tempDir, "search-missing-binding", decodedWithResource(searchMissingBinding))], "DASH_SEARCH_FILTER_BINDING_MISSING");
+
+  const searchMissingConsumer = validV11Resource();
+  findBusinessSectionContentArea(searchMissingConsumer).children.unshift({
+    type: "search-filter",
+    id: "search_filter_missing_consumer",
+    name: "Search Requests",
+    binding: "__filter_search_requests",
+    displayLabel: [null, false],
+    attrs: { placeholder: "Search requests" },
+  });
+  expectCode("dashboard search filter binding must be consumed by Collection fulltext", ["--package", writePackage(tempDir, "search-missing-consumer", decodedWithResource(searchMissingConsumer))], "DASH_SEARCH_FILTER_COLLECTION_FULLTEXT_CONSUMER_MISSING");
+
+  const searchVisibleLabel = validV11Resource();
+  findBusinessSectionContentArea(searchVisibleLabel).children.unshift({
+    type: "search-filter",
+    id: "search_filter_visible_label",
+    name: "Search Requests",
+    binding: "__filter_search_requests",
+    displayLabel: [null, true],
+    attrs: { placeholder: "Search requests" },
+  });
+  expectCode("dashboard search filter label must stay hidden", ["--package", writePackage(tempDir, "search-visible-label", decodedWithResource(searchVisibleLabel))], "DASH_SEARCH_FILTER_LABEL_VISIBLE");
 
   const missingCollectionNavLabel = validV11Resource();
   let navLabelControl = null;

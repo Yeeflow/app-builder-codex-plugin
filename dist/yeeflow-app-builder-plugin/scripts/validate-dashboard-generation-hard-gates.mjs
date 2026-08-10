@@ -155,6 +155,8 @@ function validateDecodedDashboards(decoded, findings) {
     validateKpiCards(page, findings);
     validateKpiTempVarReferences(page, findings);
     validateSummaryBindings(page, listIndex, findings);
+    validateDashboardSearchFilterConsumers(page, findings);
+    validateCaptionActionButtonContracts(page, findings);
     validateMasterDetailWorkspaceItemSemantics(page, findings);
   }
 }
@@ -265,6 +267,53 @@ function validateFilter(entry, page, listIndex, findings) {
 function validateSearchFilter(entry, page, findings) {
   const attrs = entry.control?.attrs || {};
   validatePlaceholderShape(attrs.placeholder, `${entry.pointer}.attrs.placeholder`, page, findings, { codePrefix: "DASH_SEARCH_FILTER", required: true, stringOnly: true });
+  const displayLabel = entry.control?.displayLabel ?? attrs.displayLabel;
+  if (!Array.isArray(displayLabel) || displayLabel[0] !== null || displayLabel[1] !== false) {
+    findings.push(error("DASH_SEARCH_FILTER_LABEL_VISIBLE", "Dashboard search-filter controls must preserve the Golden Reference hidden-label presentation: displayLabel = [null, false].", {
+      page: page.title,
+      path: entry.pointer,
+      displayLabel: displayLabel ?? null,
+    }));
+  }
+}
+
+function validateDashboardSearchFilterConsumers(page, findings) {
+  const collections = page.controls.filter((entry) => String(entry.control?.type || "") === "collection");
+  for (const search of page.controls.filter((entry) => String(entry.control?.type || "") === SEARCH_FILTER_TYPE)) {
+    const binding = String(search.control?.binding || search.control?.attrs?.binding || search.control?.attrs?.filterVariable || "").trim();
+    if (!binding) {
+      findings.push(error("DASH_SEARCH_FILTER_BINDING_MISSING", "Dashboard search-filter controls must declare a stable filter-variable binding so a Collection can consume it.", { page: page.title, path: search.pointer }));
+      continue;
+    }
+    const consumers = collections.filter((collection) => {
+      const fulltext = asArray(collection.control?.attrs?.data?.fulltext || collection.control?.attrs?.fulltext);
+      return fulltext.some((entry) => JSON.stringify(entry).includes(binding));
+    });
+    if (!consumers.length) {
+      findings.push(error("DASH_SEARCH_FILTER_COLLECTION_FULLTEXT_CONSUMER_MISSING", "Every generated Dashboard search-filter variable must be consumed by at least one Collection attrs.data.fulltext expression; visual search controls without a data consumer are invalid.", {
+        page: page.title,
+        path: search.pointer,
+        binding,
+      }));
+    }
+  }
+}
+
+function validateCaptionActionButtonContracts(page, findings) {
+  for (const entry of page.controls.filter((item) => String(item.control?.type || "") === "action_button")) {
+    const ancestors = findAncestors(page.resource, entry.control);
+    if (!ancestors.some((node) => matchesSemanticId(node, "op_normal"))) continue;
+    const attrs = entry.control?.attrs || {};
+    const isAdd = String(attrs["action-type"] || attrs.actionType || attrs.operation || "").toLowerCase() === "5" || /\badd\b/i.test(`${entry.control?.label || ""} ${entry.control?.name || ""} ${entry.control?.title || ""}`);
+    if (!isAdd) continue;
+    if (!Array.isArray(attrs?.common?.positioning?.widthtype) || attrs.common.positioning.widthtype[1] !== "2"
+      || !Array.isArray(attrs?.common?.container?.size) || attrs.common.container.size[1] !== "grow" || attrs.common.container.size[2] !== "none") {
+      findings.push(error("DASH_CAPTION_ACTION_BUTTON_INLINE_WIDTH_MISSING", "Dashboard caption/operations Add buttons must preserve inline width and grow/none container sizing unless the App Plan explicitly selects full width.", { page: page.title, path: entry.pointer }));
+    }
+    if (String(attrs["action-type"] || attrs.actionType || "") === "5" && !attrs?.data?.list?.ListID && !attrs?.data?.ListID) {
+      findings.push(error("DASH_CAPTION_ADD_ACTION_TARGET_MISSING", "Dashboard caption Add buttons must carry a self-contained type-5 target list rather than rely on a sibling Collection-local action.", { page: page.title, path: entry.pointer }));
+    }
+  }
 }
 
 function validatePlaceholderShape(value, pointer, page, findings, { codePrefix, required, stringOnly = false }) {
@@ -726,10 +775,17 @@ function validateKpiCardSurface(entry, page, findings) {
 function validateSummaryBindings(page, listIndex, findings) {
   const summaryControls = page.controls.filter((entry) => entry.control?.type === "summary");
   if (!summaryControls.length) return;
+  const hasVisibleKpiCards = page.controls.some((entry) => isKpiCard(entry.control));
   const exts = asArray(page.resource?.exts);
   const reportIds = new Set(asArray(page.resource?.ReportIds).map(String));
   const tempVars = new Set(asArray(page.resource?.tempVars).flatMap((item) => [item?.id, item?.name, item?.key].filter(Boolean).map(String)));
   for (const summary of summaryControls) {
+    if (hasVisibleKpiCards && !summaryHasNonRenderingHost(page, summary.control)) {
+      findings.push(error("DASH_KPI_SUMMARY_HOST_VISIBLE", "Dashboard KPI Summary controls must be placed in the exported non-rendering host shape so source Summary values do not visibly leak below KPI cards.", {
+        page: page.title,
+        path: summary.pointer,
+      }));
+    }
     const id = String(summary.control?.id || summary.control?.ID || summary.control?.name || "");
     const ext = exts.find((item) => String(item?.i || item?.id || "") === id && item?.category === "___Pivot___" && item?.key === "summary");
     if (!ext) {
@@ -757,6 +813,15 @@ function validateSummaryBindings(page, listIndex, findings) {
       findings.push(error("DASH_SUMMARY_REPORTIDS_MISSING", "Resource.ReportIds[] must include every Summary control id.", { page: page.title, path: `${page.pointer}.ReportIds`, summaryId: id }));
     }
   }
+}
+
+function summaryHasNonRenderingHost(page, summary) {
+  const host = findAncestors(page.resource, summary).reverse().find((node) => String(node?.type || "") === "container" && (matchesSemanticId(node, "kpi_data_host") || matchesSemanticId(node, "KPI data host")));
+  if (!host) return false;
+  return host?.attrs?.common?.hide?.[1] === true
+    && host?.attrs?.common?.hide?.[2] === true
+    && host?.attrs?.common?.hide?.[3] === true
+    && host?.attrs?.display?.rule === "1 == 0";
 }
 
 function validateKpiTempVarReferences(page, findings) {

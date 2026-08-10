@@ -192,6 +192,15 @@ function validateResponsiveCollectionTemplateArtifact(registry, findings, option
     }
   }
   const collection = findDescendants(root, (node) => String(node?.type || "") === "collection")[0];
+  for (const identity of ["grid_table_col_wrapper", "grid_table_col_caption", "grid_table_col_content"]) {
+    const node = identity === "grid_table_col_wrapper" ? root : findDescendantByIdentity(root, identity);
+    if (!deepEqual(node?.attrs?.style?.widthtype, [null, "1"])) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_FULL_WIDTH_PRESENTATION_INVALID", "Responsive Collection outer wrapper, caption, and content regions must preserve the live Full-width contract.", {
+        control: identity,
+        actual: node?.attrs?.style?.widthtype ?? null,
+      }));
+    }
+  }
   const requiredAttrs = ["data", "layout", "pagination", "tablecols", "header", "body", "table", "list-display-preference"];
   for (const key of requiredAttrs) {
     if (collection?.attrs?.[key] === undefined) {
@@ -245,10 +254,20 @@ function validateResponsiveCollectionTemplateArtifact(registry, findings, option
   }
   for (const identity of ["grid_table_col_operations", "op_normal"]) {
     const node = findDescendantByIdentity(root, identity);
-    if (!deepEqual(node?.attrs?.style?.widthtype, [null, "2", "2"])) {
+    if (!deepEqual(node?.attrs?.style?.widthtype, [null, "2", "1"])) {
       findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_MOBILE_OPERATION_WIDTH_INVALID", "Responsive Collection operation containers must be Full width on mobile.", {
         control: identity,
         actual: node?.attrs?.style?.widthtype ?? null,
+      }));
+    }
+    if (!deepEqual(node?.attrs?.style?.gap, [null, 10])
+      || !deepEqual(node?.attrs?.style?.align_items, [null, "center"])
+      || !deepEqual(node?.attrs?.style?.justify_content, [null, "flex-end"])) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_TEMPLATE_OPERATION_PRESENTATION_DRIFT", "Responsive Collection operations must preserve the live reference gap 10 and centered/right-aligned toolbar presentation.", {
+        control: identity,
+        gap: node?.attrs?.style?.gap ?? null,
+        alignItems: node?.attrs?.style?.align_items ?? null,
+        justifyContent: node?.attrs?.style?.justify_content ?? null,
       }));
     }
   }
@@ -1132,6 +1151,29 @@ function validateResponsiveCollection(entry, page, findings, options = {}) {
     const node = findDescendantByIdentity(wrapper, identity);
     if (!deepEqual(node?.attrs?.style?.widthtype, expectedMobileOperationWidth)) {
       findings.push(error("DASH_DATASET_RESPONSIVE_MOBILE_OPERATION_WIDTH_INVALID", "Responsive Collection operation containers must be Full width on mobile.", { page: page.title, path: entry.pointer, control: identity, actual: node?.attrs?.style?.widthtype ?? null }));
+    }
+    if (entry.templateId === "collection_control_responsive" && (!deepEqual(node?.attrs?.style?.gap, [null, 10])
+      || !deepEqual(node?.attrs?.style?.align_items, [null, "center"])
+      || !deepEqual(node?.attrs?.style?.justify_content, [null, "flex-end"]))) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_OPERATION_PRESENTATION_DRIFT", "Generated Responsive Collection operations must preserve the live-reference gap and centered/right-aligned presentation.", {
+        page: page.title,
+        path: entry.pointer,
+        control: identity,
+        gap: node?.attrs?.style?.gap ?? null,
+        alignItems: node?.attrs?.style?.align_items ?? null,
+        justifyContent: node?.attrs?.style?.justify_content ?? null,
+      }));
+    }
+  }
+  for (const identity of ["grid_table_col_wrapper", "grid_table_col_caption", "grid_table_col_content"]) {
+    const node = identity === "grid_table_col_wrapper" ? wrapper : findDescendantByIdentity(wrapper, identity);
+    if (!deepEqual(node?.attrs?.style?.widthtype, [null, "1"])) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_FULL_WIDTH_PRESENTATION_INVALID", "Generated Responsive Collection outer wrapper, caption, and content regions must remain Full width.", {
+        page: page.title,
+        path: entry.pointer,
+        control: identity,
+        actual: node?.attrs?.style?.widthtype ?? null,
+      }));
     }
   }
   if (operationButtons.length && !deepEqual(operations?.attrs?.common?.zidx, [null, null, null, 2])) {
