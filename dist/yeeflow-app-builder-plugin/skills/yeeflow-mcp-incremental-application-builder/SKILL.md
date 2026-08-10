@@ -84,11 +84,11 @@ Create or select the Application first, then build dependencies before their con
 
 Use the source Skill only if it is present in the current installation. If a listed specialist is absent, use MCP contract discovery plus the generic lifecycle, label the specialized local validation gap, and do not claim full type-specific proof.
 
-## DataList Direct Lookup Runtime Gate
+## DataList Designer And Lookup Runtime Gate
 
-For a flowcraft `DataList` that will be the target of a direct Lookup picker, discover and materialize the full AppID `41` storage contract before the first save. The required storage metadata is `TableCode: "flowcraft"` and `IndexCode: "flowcraft"`; do not send only one field or infer missing values from a package template. The exact saved DataList must then read back both fields.
+For every incremental Type `1` Data List form layout, write `LayoutInResources[0]` on the initial save. Its `ID` and `RefId` must both equal `LayoutID`, and `Resource` must be parseable JSON for the complete form tree. Preserve the complete component with `deleteMissing: false`. After a Designer open/save, Yeeflow may keep that embedded resource while clearing `LayoutView`; treat this resource-authoritative shape as valid rather than overwriting it as corruption.
 
-Treat that readback as persisted configuration proof only. Before declaring the Lookup ready, create a target record, open the consumer's direct New/Edit picker, and verify that the newly created record is selectable. A successful save, a structural readback, or a contextual related-record Add action does not prove direct-picker runtime. If the discovered hosted-MCP contract cannot accept or return either storage field, block the direct-Lookup claim as `lookup-runtime-proof-required`; record the contract gap and do not substitute guessed raw API calls.
+For every generated Data List, preserve the native Title field exactly: `FieldName: "Title"`, `InternalName: "Title"`, `IsSystem: true`, and `IsSort: true`. Never derive the native Title internal name from a business label. For a direct Lookup, first resolve the field `Rules` target (`appid`, `listsetid`, `listid`, `listfield`) and then read back the target List and its canonical Title metadata. Before declaring the Lookup ready, create a target record, open the consumer's direct New/Edit picker, and verify that the newly created record is selectable. A successful save, structural readback, or contextual related-record Add does not prove direct-picker runtime.
 
 ## FormNewReport Physical Field Gate
 

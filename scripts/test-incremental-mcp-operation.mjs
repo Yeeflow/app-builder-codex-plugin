@@ -51,21 +51,15 @@ function testDefaultRegistryIntegration(ledgerPath, registryPath) {
   assert.equal(plan.capability.supportedActions.includes("create"), true);
   assert.equal(Array.isArray(plan.capability.requiredLifecycle), true);
   assert.equal(plan.capability.requiredLifecycle.includes("get_readback"), true);
-  assert.deepEqual(plan.capability.lookupRuntimeContract, {
-    appId: 41,
-    requiredStorageMetadata: { TableCode: "flowcraft", IndexCode: "flowcraft" },
-    requiredReadbackFields: ["TableCode", "IndexCode"],
-    onContractOrReadbackGap: "lookup-runtime-proof-required",
-    runtimeProof: "direct-picker-must-list-a-created-target-record",
+  assert.deepEqual(plan.capability.constraints.nativeTitle, {
+    FieldName: "Title",
+    InternalName: "Title",
+    IsSystem: true,
+    IsSort: true,
   });
-  assert.match(plan.lifecycle[3].purpose, /TableCode=flowcraft, IndexCode=flowcraft/);
-  assert.match(plan.lifecycle[6].purpose, /direct lookup picker/);
-
-  const incompleteLookupRegistry = JSON.parse(readFileSync(resolve(ROOT, "schemas/mcp-incremental-capability-registry.v1.json"), "utf8"));
-  delete incompleteLookupRegistry.resources.DataList.lookupRuntimeContract.requiredStorageMetadata.IndexCode;
-  writeJson(registryPath, incompleteLookupRegistry);
-  assertFailure(run(ledgerPath, registryPath, "data-list"), "DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID");
-  writeJson(registryPath, registry());
+  assert.equal(plan.capability.constraints.type1Layout.initialSaveRequiresEmbeddedResource, true);
+  assert.equal(plan.capability.constraints.type1Layout.designerNormalizedLayoutViewMayBeEmpty, true);
+  assert.equal(plan.capability.constraints.lookupRuntimeProof, "direct-picker-must-list-a-created-target-record");
 }
 
 function testDefaultRegistryPlansEveryCapability(ledgerPath) {

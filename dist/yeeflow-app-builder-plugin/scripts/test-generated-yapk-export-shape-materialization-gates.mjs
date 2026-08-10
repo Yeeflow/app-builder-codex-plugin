@@ -121,7 +121,7 @@ function field(name, extra = {}) {
 }
 
 function titleField(extra = {}) {
-  return field("Title", { IsSystem: true, IsIndex: true, Status: 0, FieldIndex: 0, ...extra });
+  return field("Title", { IsSystem: true, IsIndex: true, IsSort: true, Status: 0, FieldIndex: 0, ...extra });
 }
 
 function dashboardResource({ hiddenSummary = false, unsafeSummary = false, unsafeChart = false, textOnlyNavLabel = false, residueText = "" } = {}) {
@@ -273,6 +273,9 @@ try {
 
   expectCode("Native Title without IsIndex true fails", runValidator(writePackage(tempDir, "title-no-isindex", decoded({ titleField: { IsIndex: false } }))), "NATIVE_TITLE_ISINDEX_MISSING");
   cases.push({ case: "fail: native Title without IsIndex:true", status: "pass" });
+
+  expectCode("Native Title without IsSort true fails", runValidator(writePackage(tempDir, "title-no-issort", decoded({ titleField: { IsSort: false } }))), "NATIVE_TITLE_ISSORT_MISSING");
+  cases.push({ case: "fail: native Title without IsSort:true", status: "pass" });
 
   expectCode("nav_label/nv_label metadata does not satisfy Text control content", runValidator(writePackage(tempDir, "text-nav-label-only", decoded({ dashboard: { textOnlyNavLabel: true } }))), "DASHBOARD_TEXT_CONTROL_CONTENT_MISSING");
   cases.push({ case: "fail: nav_label/nv_label metadata is not rendered text proof", status: "pass" });

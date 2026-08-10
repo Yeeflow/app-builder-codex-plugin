@@ -46,7 +46,12 @@ try {
     { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
     { LayoutID: "layout-new-edit", Title: "New and Edit form", Type: 1, LayoutInResources: [] },
     formLayout("layout-view", "View item", viewResource()),
-  ] }))], "DATA_LIST_FORM_LAYOUTVIEW_RESOURCE_MISSING");
+  ] }))], "DATA_LIST_FORM_LAYOUTINRESOURCE_RESOURCE_MISSING");
+  expectPass("Designer-normalized Type 1 resource-authoritative layout passes", ["--package", writePackage("designer-normalized-resource-authoritative.yapk", decodedPackage({ layouts: [
+    { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
+    formLayout("layout-new-edit", "New and Edit form", newEditResource(), { layoutView: "" }),
+    formLayout("layout-view", "View item", viewResource(), { layoutView: "" }),
+  ] }))]);
   expectCode("generated package using default New/Edit/View layouts fails", ["--package", writePackage("default-layout-package.yapk", decodedPackage({ layoutView: { add: "default", edit: "default", view: "default" }, layouts: [{ LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] }] }))], "DATA_LIST_FORM_LAYOUT_DEFAULT_USAGE_FORBIDDEN");
   expectCode("generated package missing View custom form assignment fails", ["--package", writePackage("missing-view-assignment.yapk", decodedPackage({ layoutView: { add: "layout-new-edit", edit: "layout-new-edit" } }))], "DATA_LIST_FORM_LAYOUT_USAGE_MISSING");
   expectCode("generated package with display setting pointing to Type 0 layout fails", ["--package", writePackage("type0-form-assignment.yapk", decodedPackage({ layoutView: { add: "layout-default", edit: "layout-new-edit", view: "layout-view" } }))], "DATA_LIST_FORM_LAYOUT_USAGE_NOT_CUSTOM_FORM");

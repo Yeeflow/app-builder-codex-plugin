@@ -61,7 +61,11 @@ for (const code of [
   "DATA_LIST_FORM_REVERSE_RELATED_RESPONSIVE_ATTRS_MISSING",
   "DATA_LIST_FORM_REVERSE_RELATED_RESPONSIVE_PRESENTATION_MISSING",
   "DATA_LIST_FORM_LAYOUTVIEW_RESOURCE_DRIFT",
+  "DATA_LIST_FORM_LAYOUTINRESOURCE_IDENTITY_INVALID",
 ]) assert.match(formGates, new RegExp(code));
+
+const dataListSchemaGates = fs.readFileSync(path.join(ROOT, "scripts/validate-data-list-system-schema.mjs"), "utf8");
+assert.match(dataListSchemaGates, /NATIVE_TITLE_ISSORT_MISSING/);
 
 for (const script of [
   "test-dashboard-generation-hard-gates.mjs",
@@ -72,7 +76,7 @@ for (const script of [
 
 console.log(JSON.stringify({
   status: "pass",
-  marker: "NEXUS_CRM_PLUGIN_FEEDBACK_PIF_001_011_STATIC_FIXTURE_GATES_PASSED",
+  marker: "NEXUS_CRM_PLUGIN_FEEDBACK_PIF_001_014_STATIC_FIXTURE_GATES_PASSED",
   covered: {
     "PIF-001": "dashboard search hidden-label and primitive-placeholder contracts",
     "PIF-002": "caption Add self-contained action and inline width contracts",
@@ -85,9 +89,10 @@ console.log(JSON.stringify({
     "PIF-009": "LayoutView and LayoutInResources equivalence regression",
     "PIF-010": "responsive reverse-related native attrs, Card tree, and child mapping shape gates",
     "PIF-011": "responsive template source contracts",
+    "PIF-014": "Type-1 Designer resource and native Title/Lookup contracts; tenant direct-picker proof remains external",
   },
   proofBoundary: {
-    staticFixture: ["PIF-001", "PIF-002", "PIF-003", "PIF-004", "PIF-005", "PIF-006", "PIF-007", "PIF-008", "PIF-009", "PIF-010", "PIF-011"],
+    staticFixture: ["PIF-001", "PIF-002", "PIF-003", "PIF-004", "PIF-005", "PIF-006", "PIF-007", "PIF-008", "PIF-009", "PIF-010", "PIF-011", "PIF-014"],
     tenantDesigner: "not exercised",
     tenantRuntime: "not exercised",
     roundTrip: "not exercised",

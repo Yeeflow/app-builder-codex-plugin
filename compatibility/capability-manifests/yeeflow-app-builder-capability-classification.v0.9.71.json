@@ -1368,6 +1368,22 @@
       "migrationStatus": "pending"
     },
     {
+      "sourcePath": "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v1.10.1.json",
+      "classification": "evidence-only",
+      "sideEffects": [],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "pending"
+    },
+    {
+      "sourcePath": "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v1.10.2.json",
+      "classification": "evidence-only",
+      "sideEffects": [],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "pending"
+    },
+    {
       "sourcePath": "compatibility/plugin-baselines/yeeflow-app-builder-source-dist-topology.v1.9.0.json",
       "classification": "evidence-only",
       "sideEffects": [],
@@ -15465,6 +15481,16 @@
       "migrationStatus": "not-planned"
     },
     {
+      "sourcePath": "dist/yeeflow-app-builder-plugin/scripts/test-nexus-crm-plugin-feedback-regressions.mjs",
+      "classification": "generated-distribution",
+      "sideEffects": [
+        "distribution"
+      ],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "not-planned"
+    },
+    {
       "sourcePath": "dist/yeeflow-app-builder-plugin/scripts/test-northpeak-schema-workflow-guardrails.mjs",
       "classification": "generated-distribution",
       "sideEffects": [
@@ -15645,7 +15671,27 @@
       "migrationStatus": "not-planned"
     },
     {
+      "sourcePath": "dist/yeeflow-app-builder-plugin/scripts/test-responsive-collection-default-routing.mjs",
+      "classification": "generated-distribution",
+      "sideEffects": [
+        "distribution"
+      ],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "not-planned"
+    },
+    {
       "sourcePath": "dist/yeeflow-app-builder-plugin/scripts/test-responsive-multiselect-default-routing.mjs",
+      "classification": "generated-distribution",
+      "sideEffects": [
+        "distribution"
+      ],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "not-planned"
+    },
+    {
+      "sourcePath": "dist/yeeflow-app-builder-plugin/scripts/test-retired-collection-template-migrations.mjs",
       "classification": "generated-distribution",
       "sideEffects": [
         "distribution"
@@ -22844,6 +22890,14 @@
     },
     {
       "sourcePath": "docs/releases/yeeflow-app-builder-v1.10.0.md",
+      "classification": "evidence-only",
+      "sideEffects": [],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "pending"
+    },
+    {
+      "sourcePath": "docs/releases/yeeflow-app-builder-v1.10.1.md",
       "classification": "evidence-only",
       "sideEffects": [],
       "targetPackage": null,
@@ -37675,6 +37729,14 @@
     },
     {
       "sourcePath": "scripts/test-mixed-file-decomposition-ledger.mjs",
+      "classification": "evidence-only",
+      "sideEffects": [],
+      "targetPackage": null,
+      "parityFixtures": [],
+      "migrationStatus": "pending"
+    },
+    {
+      "sourcePath": "scripts/test-nexus-crm-plugin-feedback-regressions.mjs",
       "classification": "evidence-only",
       "sideEffects": [],
       "targetPackage": null,

@@ -547,6 +547,9 @@ function validateChild(child, issues, context, args) {
     if (titleField.IsIndex !== true) {
       addIssue(issues, "error", "NATIVE_TITLE_ISINDEX_MISSING", child.title, "Native Title field must preserve export-aligned IsIndex:true metadata.");
     }
+    if (titleField.IsSort !== true) {
+      addIssue(issues, "error", "NATIVE_TITLE_ISSORT_MISSING", child.title, "Native Title field must preserve IsSort:true so direct lookup pickers can order and display the target list.");
+    }
     if (titleField.Type !== "input" || titleField.FieldType !== "Text") {
       addIssue(issues, "error", "NATIVE_TITLE_TYPE_INVALID", child.title, "Native Title field must use Type input and FieldType Text.");
     }

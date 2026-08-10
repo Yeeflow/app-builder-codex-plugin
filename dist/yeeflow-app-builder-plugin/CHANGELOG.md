@@ -6,8 +6,9 @@
 
 - Preserve the responsive Collection mobile operations contract (`[2,1]`) during reverse-related and Dashboard materialization rather than overwriting it with the legacy `[2,2]` shape.
 - Fail full-application materialization when an App Plan declares business resources but yields no materializable resources; trivial schema smoke plans remain explicitly supported.
-- Add the fail-closed incremental DataList direct-Lookup contract: `TableCode` and `IndexCode` must both be `flowcraft`, both must be persisted/read back, and a newly created target record must be proven selectable in the direct picker before Lookup runtime is claimed.
-- Add source/distribution regression coverage for the three conditions above. Hosted-MCP contract acceptance and tenant direct-picker behavior remain separately verified runtime evidence.
+- Correct the incremental DataList direct-Lookup diagnosis: `IndexCode` is backend-populated and is not a Plugin or MCP defect. Require canonical native Title metadata (`FieldName`/`InternalName` = `Title`, `IsSystem`/`IsSort` = true), resolved field-level Lookup Rules, and a direct-picker runtime test before Lookup readiness is claimed.
+- Require initial Type-1 custom-form saves to carry a parseable `LayoutInResources[0].Resource` with `ID = RefId = LayoutID`; accept the Designer's later resource-authoritative `LayoutView` normalization on readback.
+- Add source/distribution regression coverage for the three conditions above. Hosted-MCP contract acceptance, Designer open, and tenant direct-picker behavior remain separately verified evidence.
 
 ## 1.10.1
 

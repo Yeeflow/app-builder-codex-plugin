@@ -92,7 +92,7 @@ function fieldInfo(base) {
     Status: base.IsSystem ? 0 : 1,
     Category: 1,
     Rules: "{}",
-    IsSort: false,
+    IsSort: base.IsSort ?? isNativeTitle,
     IsUnique: false,
     IsIndex: base.IsIndex ?? isNativeTitle,
     ...base,

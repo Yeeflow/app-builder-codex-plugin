@@ -440,6 +440,7 @@ function validateNativeTitleMetadata(decoded, findings) {
     if (!isDocumentLibrary && Number(title.Status) !== 0) findings.push(error("NATIVE_TITLE_STATUS_INVALID", "Native Data List Title field must preserve Status:0.", { path: `$.Childs[${childIndex}].Fields.Title.Status` }));
     if (isDocumentLibrary && Number(title.Status) !== 1) findings.push(error("DOCUMENT_LIBRARY_NATIVE_TITLE_STATUS_INVALID", "Native Document Library Title field must preserve Status:1.", { path: `$.Childs[${childIndex}].Fields.Title.Status` }));
     if (title.IsIndex !== true) findings.push(error("NATIVE_TITLE_ISINDEX_MISSING", "Native Title field must preserve IsIndex:true.", { path: `$.Childs[${childIndex}].Fields.Title.IsIndex` }));
+    if (title.IsSort !== true) findings.push(error("NATIVE_TITLE_ISSORT_MISSING", "Native Title field must preserve IsSort:true for lookup display/order runtime.", { path: `$.Childs[${childIndex}].Fields.Title.IsSort` }));
   }
 }
 

@@ -104,17 +104,19 @@ assert.equal(documentCapability.materializer.liveStatus, "available_document_lib
 assert.equal(documentCapability.validator.liveStatus, "available_document_library_only", "Document requires its specialist persisted readback validator.");
 const dataListCapability = byId.get("DataList");
 assert.equal(dataListCapability.materializer.liveStatus, "no_generic_specialist_live_materializer_claimed", "DataList must not claim a generic specialist live materializer.");
-const dataListLookupRuntimeContract = {
-  appId: 41,
-  requiredStorageMetadata: { TableCode: "flowcraft", IndexCode: "flowcraft" },
-  requiredReadbackFields: ["TableCode", "IndexCode"],
-  onContractOrReadbackGap: "lookup-runtime-proof-required",
-  runtimeProof: "direct-picker-must-list-a-created-target-record",
-};
 assert.deepEqual(
-  registry.resources.DataList.lookupRuntimeContract,
-  dataListLookupRuntimeContract,
-  "DataList direct-lookup provisioning must require the complete flowcraft storage contract and runtime picker proof."
+  dataListCapability.constraints,
+  {
+    nativeTitle: { FieldName: "Title", InternalName: "Title", IsSystem: true, IsSort: true },
+    type1Layout: {
+      initialSaveRequiresEmbeddedResource: true,
+      resourceIdentity: "ID=RefId=LayoutID",
+      resourceMustBeParseable: true,
+      designerNormalizedLayoutViewMayBeEmpty: true,
+    },
+    lookupRuntimeProof: "direct-picker-must-list-a-created-target-record",
+  },
+  "DataList generation must preserve native Title identity, materialize a Designer resource on initial Type-1 save, and require direct-picker runtime proof."
 );
 assert.deepEqual(dataListCapability.materializer.specializedSubcapabilities, [{
   id: "DataListWorkflow",

@@ -3473,11 +3473,21 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
       fieldOrdinal: fieldIndex,
       projection: result.projection,
     }));
-    return coreLowerDataListScalarResourceIdentityAtHost(intent, Object.freeze({
+    const scalarRecord = { ...coreLowerDataListScalarResourceIdentityAtHost(intent, Object.freeze({
       listId: scalarListId,
       fieldIdsByRequestId: Object.freeze({ [intent.fieldRequest.requestId]: scalarFieldId }),
       fieldScopesByRequestId: Object.freeze({ [intent.fieldRequest.requestId]: resourceScope }),
-    }));
+    })) };
+    // The Core scalar projection is generic; retain the native Data List Title
+    // identity at the host boundary so generated direct Lookup pickers use it.
+    if (fieldIndex === 0 || /^title$/i.test(String(scalarRecord?.FieldName || ""))) {
+      scalarRecord.FieldName = "Title";
+      scalarRecord.InternalName = "Title";
+      scalarRecord.IsSystem = true;
+      scalarRecord.IsSort = true;
+      scalarRecord.IsIndex = true;
+    }
+    return scalarRecord;
   }
   // DATA_LIST_SCALAR_FIELD_PROJECTION_CORE_ROUTE_END
   const fieldType = normalizeFieldType(field.fieldType);
@@ -3504,7 +3514,9 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
     Category: 0,
     DefaultValue: coreDefaultValueForFieldType(fieldType),
     Rules: rules,
-    IsSort: false,
+    // The native primary field is also the default lookup display/sort field.
+    // Never inherit a business-label-derived non-sortable shape here.
+    IsSort: isTitle,
     IsSystem: isTitle,
     IsUnique: false,
     IsIndex: isTitle,

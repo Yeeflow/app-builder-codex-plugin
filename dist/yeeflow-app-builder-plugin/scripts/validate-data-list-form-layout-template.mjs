@@ -1005,7 +1005,8 @@ function collectDataListForms(decoded) {
     const listTitle = child?.List?.Title || child?.ListModel?.Title || child?.Title || child?.Name || `Childs[${childIndex}]`;
     for (const [layoutIndex, layout] of asArray(child?.Layouts || child?.Item?.Layouts).entries()) {
       if (Number(layout?.Type) !== 1) continue;
-      const layoutResourceValue = asArray(layout?.LayoutInResources)[0]?.Resource;
+      const layoutInResource = asArray(layout?.LayoutInResources)[0];
+      const layoutResourceValue = layoutInResource?.Resource;
       const resource = parseResource(layoutResourceValue);
       const layoutViewResource = parseResource(layout?.LayoutView);
       forms.push({
@@ -1013,6 +1014,8 @@ function collectDataListForms(decoded) {
         title: layout?.Title || `Layouts[${layoutIndex}]`,
         layoutId: layout?.LayoutID,
         layoutIndex,
+        layoutResourceId: layoutInResource?.ID,
+        layoutResourceRefId: layoutInResource?.RefId,
         resource: resource || layoutViewResource,
         layoutViewResource,
         layoutResource: resource,
@@ -1031,14 +1034,18 @@ function validateCustomFormRuntimeSource(form, context) {
     layoutId: form.layoutId,
     layoutIndex: form.layoutIndex,
   };
-  if (!isObject(form.layoutViewResource)) {
-    context.findings.push(error("DATA_LIST_FORM_LAYOUTVIEW_RESOURCE_MISSING", "Type 1 custom Data List form Layout.LayoutView must contain the complete form JSON used by runtime/designer, not a placeholder, blank, null, or omitted value.", detail));
-    return;
-  }
   if (!isObject(form.layoutResource)) {
     context.findings.push(error("DATA_LIST_FORM_LAYOUTINRESOURCE_RESOURCE_MISSING", "Type 1 custom Data List form LayoutInResources[0].Resource must contain the complete form JSON.", detail));
     return;
   }
+  if (String(form.layoutResourceId || "") !== String(form.layoutId || "") || String(form.layoutResourceRefId || "") !== String(form.layoutId || "")) {
+    context.findings.push(error("DATA_LIST_FORM_LAYOUTINRESOURCE_IDENTITY_INVALID", "Type 1 custom Data List form LayoutInResources[0].ID and RefId must both equal LayoutID.", detail));
+  }
+  // The initial MCP save carries a Runtime/LayoutView mirror. After a Designer
+  // open/save, Yeeflow can legitimately normalize to Resource-authoritative
+  // storage and clear LayoutView. The embedded resource is the durable
+  // Designer invariant; a missing LayoutView is not corruption in that state.
+  if (!isObject(form.layoutViewResource)) return;
   if (isPlaceholderLayoutView(form.layoutViewResource)) {
     context.findings.push(error("DATA_LIST_FORM_LAYOUTVIEW_PLACEHOLDER", "Type 1 custom Data List form Layout.LayoutView must not be a minimal/source placeholder. It must duplicate the complete form JSON so runtime and Designer can load fields.", { ...detail, layoutView: form.layoutViewResource }));
   }

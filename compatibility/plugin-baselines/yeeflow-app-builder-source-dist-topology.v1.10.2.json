@@ -1420,8 +1420,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "a32294ac26db964a7687d2b97d81264fd58f22c063b36d29231e2e9bf1a9e101",
-      "distDigest": "a32294ac26db964a7687d2b97d81264fd58f22c063b36d29231e2e9bf1a9e101",
+      "sourceDigest": "e4b2629fd6786de57b80ce4c8e8637e402872eb6904724382bf3c10c22f612c8",
+      "distDigest": "e4b2629fd6786de57b80ce4c8e8637e402872eb6904724382bf3c10c22f612c8",
       "verificationStatus": "passed"
     },
     {
@@ -1486,8 +1486,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "6a243001b24197164a418aff9d33c1c0a6f695ba1d57da20bac6de3ceae9b535",
-      "distDigest": "6a243001b24197164a418aff9d33c1c0a6f695ba1d57da20bac6de3ceae9b535",
+      "sourceDigest": "456dc6450472b5ccdf7c89a4a0149343d504de9a449df42145bc50134ed1c4c9",
+      "distDigest": "456dc6450472b5ccdf7c89a4a0149343d504de9a449df42145bc50134ed1c4c9",
       "verificationStatus": "passed"
     },
     {
@@ -1541,8 +1541,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "6c04ca2e0d3e7a66c55063b8f6c38724f220f430bc656b79ec6660b9a79669c2",
-      "distDigest": "6c04ca2e0d3e7a66c55063b8f6c38724f220f430bc656b79ec6660b9a79669c2",
+      "sourceDigest": "9bb93cc7495b2886f310756da6d6c653b107a86e42bd95d967e6fcecf2d85ace",
+      "distDigest": "9bb93cc7495b2886f310756da6d6c653b107a86e42bd95d967e6fcecf2d85ace",
       "verificationStatus": "passed"
     },
     {
@@ -2047,8 +2047,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "9c6ebf9a67197251de937e28840c410d32e519893b7d871ee39722480913edf8",
-      "distDigest": "9c6ebf9a67197251de937e28840c410d32e519893b7d871ee39722480913edf8",
+      "sourceDigest": "36104e622ab614a5d8f8644036931479d6941c2f80b5bba6f6a6e1447ed56c93",
+      "distDigest": "36104e622ab614a5d8f8644036931479d6941c2f80b5bba6f6a6e1447ed56c93",
       "verificationStatus": "passed"
     },
     {
@@ -2410,8 +2410,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "1d93219dcb341542b5a891571d911fd18335103ab4f666bfad53960e4d918a4a",
-      "distDigest": "1d93219dcb341542b5a891571d911fd18335103ab4f666bfad53960e4d918a4a",
+      "sourceDigest": "45093eafa6fc5c48227b174901c82d2429b8c0884a7fe15f057f3689b9353aeb",
+      "distDigest": "45093eafa6fc5c48227b174901c82d2429b8c0884a7fe15f057f3689b9353aeb",
       "verificationStatus": "passed"
     },
     {
@@ -2443,8 +2443,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "b93d0ff1a579aee23cc2aed5325d63de97a7ddc8d189d18318f86c34369ee765",
-      "distDigest": "b93d0ff1a579aee23cc2aed5325d63de97a7ddc8d189d18318f86c34369ee765",
+      "sourceDigest": "484f49044ceaf5ebe294f517df41f7498252bc45bd583cff5f53a5c56131a415",
+      "distDigest": "484f49044ceaf5ebe294f517df41f7498252bc45bd583cff5f53a5c56131a415",
       "verificationStatus": "passed"
     },
     {
@@ -2476,8 +2476,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "6bcdadc331d86518aa5ed2dd145c66ce10ed7fed8fbe85d88b44dd008a0c4104",
-      "distDigest": "6bcdadc331d86518aa5ed2dd145c66ce10ed7fed8fbe85d88b44dd008a0c4104",
+      "sourceDigest": "728341479cf7cecb33bb4fd6c7f9e29ee5c0ce0435e9b9169ad64504b7ec704b",
+      "distDigest": "728341479cf7cecb33bb4fd6c7f9e29ee5c0ce0435e9b9169ad64504b7ec704b",
       "verificationStatus": "passed"
     },
     {
@@ -2487,8 +2487,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "d6ccfbf5cac86c5d6a6016e9c5e88d98c79d73d92398156f6f6c4019e3ed5396",
-      "distDigest": "d6ccfbf5cac86c5d6a6016e9c5e88d98c79d73d92398156f6f6c4019e3ed5396",
+      "sourceDigest": "62c7ccb5742486acc7bd4b59d571cfadf1c2c676c38da4a2b1d054e551a02a3e",
+      "distDigest": "62c7ccb5742486acc7bd4b59d571cfadf1c2c676c38da4a2b1d054e551a02a3e",
       "verificationStatus": "passed"
     },
     {
@@ -3620,8 +3620,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "02ee334bda5d5db8b5c8c338153bd4ed91868a462b9918401516816a0840da8e",
-      "distDigest": "02ee334bda5d5db8b5c8c338153bd4ed91868a462b9918401516816a0840da8e",
+      "sourceDigest": "607725d0b392e42c328c4e7c2f052e554e5f1771d3901945adcb1b393d44bd74",
+      "distDigest": "607725d0b392e42c328c4e7c2f052e554e5f1771d3901945adcb1b393d44bd74",
       "verificationStatus": "passed"
     },
     {
@@ -3631,8 +3631,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "b2d9996894c299b16038ad0958625449ba487d3641a901faa69952200acf50f0",
-      "distDigest": "b2d9996894c299b16038ad0958625449ba487d3641a901faa69952200acf50f0",
+      "sourceDigest": "61d80a3a573940b2af735c69e8873b6fc1549e4a413a9c0952bc3fcb5857f953",
+      "distDigest": "61d80a3a573940b2af735c69e8873b6fc1549e4a413a9c0952bc3fcb5857f953",
       "verificationStatus": "passed"
     },
     {
@@ -3796,8 +3796,8 @@
       "expectedDigestBehavior": "sha256_equal",
       "rationale": "Distribution script is byte-identical to the source script.",
       "owner": "Codex Plugin Adapter",
-      "sourceDigest": "4f3705cf683794c4b01c9c11e3e285ebb0851dd917aa7beb3ada7c27b2d1d7e9",
-      "distDigest": "4f3705cf683794c4b01c9c11e3e285ebb0851dd917aa7beb3ada7c27b2d1d7e9",
+      "sourceDigest": "5a827fd2768db11b667704e6ba025ae8c0551410590c408d618f44e837a1d3b5",
+      "distDigest": "5a827fd2768db11b667704e6ba025ae8c0551410590c408d618f44e837a1d3b5",
       "verificationStatus": "passed"
     },
     {

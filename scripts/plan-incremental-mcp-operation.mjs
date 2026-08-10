@@ -37,8 +37,7 @@ export function planIncrementalMcpOperation({ ledger, registry, operationId }) {
   const capability = resolveCapability(registry, operation);
   validateCapabilityDependencies(operation, capability, ledger);
   const confirmation = confirmationRequirement(operation, capability);
-  const lookupRuntimeContract = lookupRuntimeContractFor(operation, capability);
-  const lifecycle = lifecycleFor(operation, capability, confirmation, ledger.application, lookupRuntimeContract);
+  const lifecycle = lifecycleFor(operation, capability, confirmation, ledger.application);
   return {
     result: "INCREMENTAL_MCP_OPERATION_PLAN_READY",
     executionMode: "plan-only-no-network-no-mcp-call",
@@ -64,7 +63,6 @@ export function planIncrementalMcpOperation({ ledger, registry, operationId }) {
       requiredLifecycle: capability.requiredLifecycle,
       materialization: capability.materialization,
       ...(capability.constraints ? { constraints: capability.constraints } : {}),
-      ...(lookupRuntimeContract ? { lookupRuntimeContract } : {}),
     },
     confirmation,
     lifecycle,
@@ -94,7 +92,7 @@ export function planIncrementalMcpOperation({ ledger, registry, operationId }) {
   };
 }
 
-function lifecycleFor(operation, capability, confirmation, application, lookupRuntimeContract) {
+function lifecycleFor(operation, capability, confirmation, application) {
   const persistenceVerb = operation.action === "delete" ? "delete" : "save";
   const bootstrapApplicationCreate = isBootstrapApplicationCreate(operation, application);
   const applicationUpsert = isApplicationUpsert(operation, application);
@@ -116,9 +114,7 @@ function lifecycleFor(operation, capability, confirmation, application, lookupRu
         ? "Read the exact current Application, preserve its stable fields, and materialize only the declared application-level change. Reject replace/delete-missing semantics and validate IconUrl when it is the intended field."
         : formNewReport
           ? "Require the readback-verified source Approval Form, non-empty Model.Settings.Fields, and one MCP-issued physical Type 32 Fields[] entry for every mapping. Use live-contract-valid native storage names with positive indexes (observed TextN, DecimalN, and DatetimeN); never use a v_<variable> mapping key as a physical FieldName. Bind the default view only to each physical FieldID and native FieldName."
-        : lookupRuntimeContract
-          ? `Materialize only the declared resource shape and run the type-specific local validator before persistence. For direct Lookup provisioning, use the live-discovered AppID ${lookupRuntimeContract.appId} storage contract: ${Object.entries(lookupRuntimeContract.requiredStorageMetadata).map(([key, value]) => `${key}=${value}`).join(", ")}. Do not mark the lookup usable if the live MCP contract cannot accept every required storage field.`
-          : "Materialize only the declared resource shape and run the type-specific local validator before persistence.", { required: true, materialization: capability.materialization, ...(lookupRuntimeContract ? { lookupRuntimeContract } : {}), ...(bootstrapApplicationCreate ? { themeStrategy: bootstrapContract.themeStrategy } : {}) }),
+        : "Materialize only the declared resource shape and run the type-specific local validator before persistence.", { required: true, materialization: capability.materialization, ...(bootstrapApplicationCreate ? { themeStrategy: bootstrapContract.themeStrategy } : {}) }),
     step("explicit-confirmation", "Obtain a confirmation receipt bound to this exact operation immediately before the mutating MCP call.", confirmation),
     step(persistenceVerb, operation.action === "delete" ? "Perform the explicitly confirmed delete through the mapped MCP operation." : applicationUpsert ? "Use the discovered workspace Application upsert endpoint with the existing ID, required identity fields, and only the declared application-level change." : "Persist the validated resource through the mapped MCP save operation.", { required: true, action: operation.action }),
     step("get-readback", bootstrapApplicationCreate
@@ -127,9 +123,7 @@ function lifecycleFor(operation, capability, confirmation, application, lookupRu
         ? "Call appbuilder_application_get for the exact existing Application. Verify the intended field changed while ID, workspace, title when not intended, and other declared stable fields remain preserved. Report API acceptance separately from persisted readback verification."
         : formNewReport
           ? "Get the exact saved FormNewReport and verify its DefKey, matching Type 32 child, every persisted physical field, and the default view bindings. API acceptance without all four readback checks is not persisted report proof."
-        : lookupRuntimeContract
-          ? `Get the persisted resource and require readback of ${lookupRuntimeContract.requiredReadbackFields.join(" and ")}. Then separately prove that a newly created target record is selectable in the direct lookup picker; API acceptance, structural readback, and contextual Add do not prove direct-picker runtime.`
-          : "Get the persisted resource, validate its returned identity and type-specific fields, and record API acceptance separately from Designer/runtime proof.", { required: true, ...(lookupRuntimeContract ? { requiredReadbackFields: lookupRuntimeContract.requiredReadbackFields, runtimeProof: lookupRuntimeContract.runtimeProof } : {}) }),
+        : "Get the persisted resource, validate its returned identity and type-specific fields, and record API acceptance separately from Designer/runtime proof.", { required: true }),
     step("ledger-update", "Only after persisted readback passes, append the safe status transition and evidence to the ledger in a separate authorized operation.", { required: true, allowedAfter: "readback-verified" }),
   ];
 }
@@ -144,32 +138,6 @@ function isApplicationUpsert(operation, application) {
 
 function isFormNewReport(operation) {
   return operation.category === "component" && operation.resourceType === "FormNewReport" && operation.action !== "delete";
-}
-
-function lookupRuntimeContractFor(operation, capability) {
-  if (operation.category !== "component" || operation.resourceType !== "DataList" || operation.action === "delete") return null;
-  const contract = capability.lookupRuntimeContract;
-  if (!contract) return null;
-  if (!Number.isInteger(contract.appId) || contract.appId <= 0) fail("DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID", "DataList lookup runtime contract requires a positive AppID.");
-  if (!contract.requiredStorageMetadata || typeof contract.requiredStorageMetadata !== "object" || Array.isArray(contract.requiredStorageMetadata)) fail("DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID", "DataList lookup runtime contract requires storage metadata.");
-  for (const [field, value] of Object.entries(contract.requiredStorageMetadata)) {
-    if (!field || typeof value !== "string" || !value.trim()) fail("DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID", "DataList lookup runtime storage metadata must contain non-empty fields and values.");
-  }
-  if (contract.requiredStorageMetadata.TableCode !== "flowcraft" || contract.requiredStorageMetadata.IndexCode !== "flowcraft") {
-    fail("DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID", "DataList direct Lookup provisioning requires TableCode=flowcraft and IndexCode=flowcraft.");
-  }
-  if (!Array.isArray(contract.requiredReadbackFields) || !contract.requiredReadbackFields.length || !contract.requiredReadbackFields.every((field) => typeof field === "string" && field.trim())) fail("DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID", "DataList lookup runtime contract requires persisted readback fields.");
-  if (!contract.requiredReadbackFields.includes("TableCode") || !contract.requiredReadbackFields.includes("IndexCode")) {
-    fail("DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID", "DataList direct Lookup provisioning must read back TableCode and IndexCode.");
-  }
-  if (contract.onContractOrReadbackGap !== "lookup-runtime-proof-required" || contract.runtimeProof !== "direct-picker-must-list-a-created-target-record") fail("DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID", "DataList lookup runtime contract must fail closed and require direct-picker proof.");
-  return {
-    appId: contract.appId,
-    requiredStorageMetadata: { ...contract.requiredStorageMetadata },
-    requiredReadbackFields: [...contract.requiredReadbackFields],
-    onContractOrReadbackGap: contract.onContractOrReadbackGap,
-    runtimeProof: contract.runtimeProof,
-  };
 }
 
 function step(name, purpose, details) { return { name, purpose, ...details }; }
