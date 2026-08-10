@@ -6,6 +6,8 @@
 
 - Remove stale standalone OAuth, REST helper, and API Operator references from distributed skills after the MCP-only migration.
 - Add an OpenAI plugin submission packet with reviewer setup, five positive cases, three negative cases, and MCP scan requirements.
+- Remap cloned Dashboard action targets recursively and fail closed on stale ListID/LayoutID/action references, unresolved Add/Edit layouts, or missing Collection record-open bindings.
+- Add CRM Dashboard regression coverage for Add and Collection record-open actions, and report API acceptance, readback, Designer-open, and browser action runtime as distinct evidence levels.
 
 ## 1.10.5
 
