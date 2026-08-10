@@ -82,6 +82,9 @@ try {
   assert.equal(fs.existsSync(report.outputs.idProvenance), true, "id provenance exists");
   assert.equal(fs.existsSync(report.outputs.generationReport), true, "generation report exists");
   assert.match(fs.readFileSync(report.outputs.generationReport, "utf8"), /No signing was attempted/);
+  const generationReport = JSON.parse(fs.readFileSync(report.outputs.generationReport, "utf8"));
+  assert.equal(generationReport.dashboardActionEvidence.actionsUsable, false, "materialization must not claim Dashboard action usability without browser runtime evidence");
+  assert.equal(generationReport.dashboardActionEvidence.browserActionRuntime.status, "unattempted");
   assert.match(fs.readFileSync(report.outputs.idProvenance, "utf8"), /api-generated-fixture-for-tests/);
   cases.push("materialized outputs include package, decoded resource, provenance, and generation report");
 

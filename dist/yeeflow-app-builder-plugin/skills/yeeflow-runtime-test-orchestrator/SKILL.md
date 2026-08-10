@@ -5,6 +5,13 @@ description: Standardize runtime testing for generated or modified Yeeflow appli
 
 # Yeeflow Runtime Test Orchestrator
 
+## Dashboard Action Runtime Evidence Boundary
+
+For a Dashboard that contains Add actions or Collection record-open behavior, report `apiAccepted`, `persistedReadback`, `designerOpen`, and `browserActionRuntime` as separate evidence levels. The first two prove at most request acceptance and stored configuration; neither may be described as action usable. Before focused runtime smoke, run `scripts/validate-dashboard-action-reference-closure.mjs` after component readback. Then click each Add action and at least one Collection record per Collection; only a rendered New/Edit form with no persistent Loading state can set `browserActionRuntime` to passed. Report Designer opening separately rather than inferring it from readback.
++## Hosted MCP-Only Yeeflow Access
+
+For live Yeeflow work, use only the appropriate hosted MCP tool. Its service negotiates authentication; standalone OAuth, local REST/API helpers, API-key fallbacks, profile/environment configuration, and direct endpoint calls are retired and must not be used. `workspace_list` is the sole workspace-discovery route. Require explicit confirmation for writes, and treat MCP acceptance as distinct from materialization and runtime proof.
+
 ## UI Generation Hard-Gate Skill
 
 Phase 3B adds workflow-level enforcement. Final reports for high-quality UI work must include contract, scope, runtime evidence, and structure-comparison artifact paths as applicable. Run `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` before claiming high-quality UI or design fidelity. Generation from design/mockup requires a UI contract. UI upgrades require a scope manifest. Runtime UI quality claims require runtime evidence. Design fidelity claims require structure comparison. Dynamic KPI proof requires before/after mutation evidence. Install/sign/upgrade success is not visual proof.

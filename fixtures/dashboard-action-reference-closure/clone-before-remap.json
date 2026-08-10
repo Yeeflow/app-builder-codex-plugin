@@ -1,0 +1,40 @@
+{
+  "ListSetID": "target-list-set",
+  "Childs": [
+    {"ListModel":{"ListID":"target-opportunities","ListSetID":"target-list-set"},"Defs":[{"FieldID":"target-opportunity-title"}],"Layouts":[{"LayoutID":"target-opportunities-new","Type":1,"Title":"New Opportunity"},{"LayoutID":"target-opportunities-edit","Type":1,"Title":"Edit Opportunity"}]},
+    {"ListModel":{"ListID":"target-activities","ListSetID":"target-list-set"},"Defs":[{"FieldID":"target-activity-title"}],"Layouts":[{"LayoutID":"target-activities-new","Type":1,"Title":"New Activity"},{"LayoutID":"target-activities-edit","Type":1,"Title":"Edit Activity"}]}
+  ],
+  "Pages": [{
+    "Type": 103,
+    "LayoutInResources": [{
+      "Resource": {
+        "type": "container",
+        "children": [
+          {
+            "type": "action_button",
+            "attrs": {
+              "action-type": "5",
+              "data": { "list": { "ListID": "old-opportunities" } },
+              "layout": "old-opportunities-new"
+            }
+          },
+          {
+            "type": "collection",
+            "attrs": {
+              "data": { "list": { "ListID": "old-activities" } },
+              "actions": [{
+                "id": "old-open-activity",
+                "type": "coll",
+                "steps": [
+                  { "type": "listitem", "attrs": { "op_type": "add", "data": { "list": { "ListID": "old-activities" } }, "layout": "old-activities-new" } },
+                  { "type": "listitem", "attrs": { "op_type": "edit", "data": { "list": { "ListID": "old-activities" } }, "layout": "old-activities-edit", "listdataid": [{ "exprType": "variable_ctx", "ctx": "__ctx_coll", "id": "ListDataID" }] } }
+                ]
+              }]
+            },
+            "children": [{ "type": "container", "attrs": { "control_action": "old-open-activity" } }]
+          }
+        ]
+      }
+    }]
+  }]
+}

@@ -566,6 +566,14 @@ Focused runtime proof: `tools/generators/generate-kanban-collection-timeline-run
 
 ## Dashboard v1.1 Generated-Final Materialization
 
+## Dashboard Clone Action-Reference Closure
+
+When cloning or remapping a Dashboard, treat Button, clickable Container, Collection `attrs.actions[]`, and item-template `attrs.control_action` as one action-target dependency closure. Before `appbuilder_component_save`, allocate current-app targets and run `scripts/lib/dashboard-action-target-remapper.mjs` (or its equivalent) recursively for old `ListID`, `ListSetID`, `LayoutID`/`layout`, field IDs, and local action IDs. Do not only remove old ListIDs.
+
+Every action_button/Container Add list item action (action type `5`) must resolve `attrs.data.list.ListID` to the current target Data List and `attrs.layout` to that list's current New Type-1 layout. Every Collection local `listitem` Add action follows the same rule. A Collection record-open path must have a local `type: "coll"` `listitem` Edit action, target the current source list and its Edit Type-1 layout, pass `__ctx_coll` / `ListDataID`, and be reached by an item-template root container or explicit item button `attrs.control_action`.
+
+After save, retrieve the component and fail closed with `scripts/validate-dashboard-action-reference-closure.mjs`: `DASHBOARD_ACTION_LAYOUT_UNRESOLVED`, `DASHBOARD_COLLECTION_OPEN_ACTION_MISSING`, and `DASHBOARD_STALE_LAYOUT_REFERENCE` are generated-final blockers. For a Dashboard with Add/Collection operations, static closure plus API/readback is still not interaction proof: run focused browser smoke by clicking every Add control and one Collection record, then confirm the New/Edit form renders with no indefinite Loading.
+
 When generating Dashboard Page Layouts v1.1 pages, use the v1.1 page shell and place Event Portfolio golden-reference components only inside approved slots. Do not put business/data controls directly under root `Content`, and keep `page_title_section` limited to title/header content.
 
 When generating `dashboard-page-layouts-workbench` pages, use the Workbench page shell and place Workbench business content only inside approved Workbench slots. Keep chart-like `chart_cards_section` under `primary_working_area` or `right_side_panel`, remove it when empty, split chart-like analytics across multiple chart sections when more than three are planned, place Pivot tables in `content_card_wrapper > section_content_area` instead of `chart_cards_section`, and remove `right_side_panel` when it has no real business content.

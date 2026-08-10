@@ -379,6 +379,14 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     materializerSigningEligible: false,
     preflightEligibleForSigning: null,
     signingReadinessSource: "not-run",
+    dashboardActionEvidence: {
+      apiAccepted: { status: "unattempted" },
+      persistedReadback: { status: "unattempted" },
+      designerOpen: { status: "unattempted" },
+      browserActionRuntime: { status: "unattempted" },
+      actionsUsable: false,
+      rule: "API acceptance and persisted readback never establish Add/Edit action usability; only focused browserActionRuntime=passed can do so.",
+    },
     package: summarizePath(packagePath),
     allocations: Object.entries(ids).map(([pathName, id]) => ({
       path: pathName,
@@ -399,6 +407,14 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     materializerSigningEligible: false,
     preflightEligibleForSigning: null,
     signingReadinessSource: "not-run",
+    dashboardActionEvidence: {
+      apiAccepted: { status: "unattempted" },
+      persistedReadback: { status: "unattempted" },
+      designerOpen: { status: "unattempted" },
+      browserActionRuntime: { status: "unattempted" },
+      actionsUsable: false,
+      rule: "API acceptance and persisted readback never establish Add/Edit action usability; only focused browserActionRuntime=passed can do so.",
+    },
     plannedResourceDemand: planDemand,
     inputs: {
       functionalSpecification: summarizePath(specPath),
@@ -415,6 +431,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
       "No signing was attempted.",
       "No install/import/upgrade was attempted.",
       "No browser/runtime proof was attempted.",
+      "Dashboard API acceptance, persisted readback, Designer opening, and browser action runtime must be reported as separate evidence levels.",
       "Generated-final preflight is required before any signing request.",
       "Standalone materialization emits the planned generated-final resource surfaces but remains signing-ineligible until all generated-final hard gates pass.",
       "Use yapk-first-generation-preflight output as the signing-readiness handoff; materializer signingEligible remains false because this script does not run the final preflight/signing stage.",
