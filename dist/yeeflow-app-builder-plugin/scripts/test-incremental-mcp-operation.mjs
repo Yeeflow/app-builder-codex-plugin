@@ -16,7 +16,7 @@ try {
   const registryPath = join(directory, "registry.json");
   writeJson(ledgerPath, ledger());
   writeJson(registryPath, registry());
-  testDefaultRegistryIntegration(ledgerPath);
+  testDefaultRegistryIntegration(ledgerPath, registryPath);
   testDefaultRegistryPlansEveryCapability(ledgerPath);
   testBootstrapApplicationPlan(ledgerPath);
   testServerAllocatedBootstrapApplicationPlan(ledgerPath);
@@ -43,7 +43,7 @@ function testHappyPath(ledgerPath, registryPath) {
   assert.deepEqual(plan.lifecycle.map((item) => item.name), ["runtime-contract-discovery", "list-get-current-state", "mcp-id-allocation", "local-validation", "explicit-confirmation", "save", "get-readback", "ledger-update"]);
 }
 
-function testDefaultRegistryIntegration(ledgerPath) {
+function testDefaultRegistryIntegration(ledgerPath, registryPath) {
   const result = spawnSync(process.execPath, [SCRIPT, "--ledger", ledgerPath, "--operation", "data-list"], { cwd: ROOT, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
   const plan = JSON.parse(result.stdout);
@@ -51,6 +51,21 @@ function testDefaultRegistryIntegration(ledgerPath) {
   assert.equal(plan.capability.supportedActions.includes("create"), true);
   assert.equal(Array.isArray(plan.capability.requiredLifecycle), true);
   assert.equal(plan.capability.requiredLifecycle.includes("get_readback"), true);
+  assert.deepEqual(plan.capability.lookupRuntimeContract, {
+    appId: 41,
+    requiredStorageMetadata: { TableCode: "flowcraft", IndexCode: "flowcraft" },
+    requiredReadbackFields: ["TableCode", "IndexCode"],
+    onContractOrReadbackGap: "lookup-runtime-proof-required",
+    runtimeProof: "direct-picker-must-list-a-created-target-record",
+  });
+  assert.match(plan.lifecycle[3].purpose, /TableCode=flowcraft, IndexCode=flowcraft/);
+  assert.match(plan.lifecycle[6].purpose, /direct lookup picker/);
+
+  const incompleteLookupRegistry = JSON.parse(readFileSync(resolve(ROOT, "schemas/mcp-incremental-capability-registry.v1.json"), "utf8"));
+  delete incompleteLookupRegistry.resources.DataList.lookupRuntimeContract.requiredStorageMetadata.IndexCode;
+  writeJson(registryPath, incompleteLookupRegistry);
+  assertFailure(run(ledgerPath, registryPath, "data-list"), "DATALIST_LOOKUP_RUNTIME_CONTRACT_INVALID");
+  writeJson(registryPath, registry());
 }
 
 function testDefaultRegistryPlansEveryCapability(ledgerPath) {

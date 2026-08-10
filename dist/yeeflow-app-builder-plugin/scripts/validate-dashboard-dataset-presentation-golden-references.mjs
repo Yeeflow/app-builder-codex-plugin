@@ -1096,7 +1096,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
 function validateResponsiveCollection(entry, page, findings, options = {}) {
   const wrapperIdentity = options.wrapperIdentity || "grid_table_col_wrapper";
   const allowLeadingSelectionColumn = options.allowLeadingSelectionColumn === true;
-  const expectedMobileOperationWidth = options.expectedMobileOperationWidth || [null, "2", "2"];
+  const expectedMobileOperationWidth = options.expectedMobileOperationWidth || [null, "2", "1"];
   const wrapper = findNearestAncestorByIdentity(entry, wrapperIdentity);
   if (!wrapper) {
     findings.push(error("DASH_DATASET_RESPONSIVE_WRAPPER_MISSING", "collection_control_responsive must preserve the export-shaped responsive Collection wrapper.", { page: page.title, path: entry.pointer }));

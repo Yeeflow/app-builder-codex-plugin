@@ -297,6 +297,15 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   }
   if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
   const planDemand = analyzeAppPlanResourceDemand(planText);
+  // A deliberately trivial smoke plan may still use the fallback envelope, but
+  // a plan that declares business resources must never silently degrade to it.
+  const declaresBusinessResources = /\b(?:data\s*lists?|document\s*libraries|approval\s*forms?|dashboards?|form\s*reports?|custom\s+data\s*list\s+forms?)\b/i.test(planText);
+  if (!planDemand.hasMaterialResources && declaresBusinessResources) {
+    findings.push(error("FULL_APP_MATERIALIZATION_PLANNED_RESOURCES_UNPARSED", "The App Plan did not yield any materializable business resources. Refusing to report fallback-page output as a successful full application.", {
+      parsed: planDemand.resources,
+    }));
+    return buildFailure(findings, { outDir, specPath, planPath });
+  }
   fs.mkdirSync(outDir, { recursive: true });
   const appTitle = sanitizeTitle(options.title || extractApplicationName(planText) || extractTitle(planText) || extractTitle(specText) || "Generated Yeeflow Application");
   const slug = slugify(appTitle);
@@ -7777,6 +7786,7 @@ function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = 
     search.attrs = {
       ...(search.attrs || {}),
       placeholder: `Search ${listName}`,
+      displayLabel: [null, false],
       data: {
         ...(search.attrs?.data || {}),
         list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
@@ -8009,7 +8019,22 @@ function removeNonLocalResponsiveCardDisplayRules(cardItem) {
 }
 
 function enforceResponsiveCollectionMobileOperationWidth(root, { templateId = "" } = {}) {
-  const mobileWidth = templateId === "collection_control_responsive_multiple_select" ? "1" : "2";
+  // Both responsive Collection references use an inline desktop/tablet toolbar
+  // and a Full-width mobile operation row.  Do not infer the legacy grid-table
+  // `[2,2]` shape here: this helper runs after template cloning and previously
+  // overwrote the live responsive reference's `[2,1]` contract.
+  const mobileWidth = "1";
+  // Callers pass either the responsive wrapper itself or a cloned collection
+  // subtree.  The wrapper's identity is not always stored in nv_label, so make
+  // the passed root Full width as well as any named descendants.
+  root.attrs = root.attrs || {};
+  root.attrs.style = { ...(root.attrs.style || {}), widthtype: [null, "1"] };
+  for (const identity of ["grid_table_col_wrapper", "grid_table_col_caption", "grid_table_col_content"]) {
+    const node = identity === "grid_table_col_wrapper" && hasIdentity(root, identity) ? root : findFirstByIdentity(root, identity);
+    if (!node) continue;
+    node.attrs = node.attrs || {};
+    node.attrs.style = { ...(node.attrs.style || {}), widthtype: [null, "1"] };
+  }
   for (const identity of ["grid_table_col_operations", "op_normal"]) {
     const node = findFirstByIdentity(root, identity);
     if (!node) continue;

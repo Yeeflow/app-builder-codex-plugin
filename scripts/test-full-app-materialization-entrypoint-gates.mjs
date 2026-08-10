@@ -144,6 +144,23 @@ try {
   assert.equal(JSON.parse(fs.readFileSync(envTenantReport.outputs.package, "utf8")).TenantID, "1234567890999999");
   cases.push("materializer resolves target TenantID from environment when explicitly available");
 
+  const unparsedBusinessPlan = path.join(tempDir, "unparsed-business-resources-plan.md");
+  fs.writeFileSync(unparsedBusinessPlan, [
+    "# Yeeflow App Plan: Parser Canary",
+    "",
+    "## 4. Data Lists and Document Libraries Plan",
+    "",
+    "The approved business scope includes Data Lists, but its resource rows are not present in this document.",
+  ].join("\n"));
+  expectCode("declared but unparsed business resources fail closed instead of emitting a fallback dashboard", [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", unparsedBusinessPlan,
+    "--out-dir", path.join(tempDir, "unparsed-business-resources"),
+    "--allow-fixture-api-ids-for-tests",
+    "--json",
+  ], "FULL_APP_MATERIALIZATION_PLANNED_RESOURCES_UNPARSED");
+
   const resourcePlan = path.join(tempDir, "resource-yeeflow-app-plan.md");
   fs.writeFileSync(resourcePlan, [
     "# Yeeflow App Plan: Office Asset Loan Management",

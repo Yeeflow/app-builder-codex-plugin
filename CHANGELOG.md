@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.10.2
+
+- Preserve the responsive Collection mobile operations contract (`[2,1]`) during reverse-related and Dashboard materialization rather than overwriting it with the legacy `[2,2]` shape.
+- Fail full-application materialization when an App Plan declares business resources but yields no materializable resources; trivial schema smoke plans remain explicitly supported.
+- Add the fail-closed incremental DataList direct-Lookup contract: `TableCode` and `IndexCode` must both be `flowcraft`, both must be persisted/read back, and a newly created target record must be proven selectable in the direct picker before Lookup runtime is claimed.
+- Add source/distribution regression coverage for the three conditions above. Hosted-MCP contract acceptance and tenant direct-picker behavior remain separately verified runtime evidence.
+
 ## 1.10.1
 
 - Harden Nexus CRM Dashboard search, action ownership, inline toolbar width, KPI Summary-host visibility, and filter producer-consumer validation.

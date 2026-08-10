@@ -106,6 +106,8 @@ const mirrors = [
   "scripts/test-release-1.0.3-clean-room-contracts.mjs",
   "scripts/test-fixtures/release-1.0.3-clean-room-plan.mjs",
   "scripts/test-full-app-materialization-entrypoint-gates.mjs",
+  "scripts/test-responsive-collection-default-routing.mjs",
+  "scripts/test-retired-collection-template-migrations.mjs",
   "scripts/test-collection-control-generation-standard.mjs",
   "scripts/test-dashboard-dataset-presentation-golden-references.mjs",
   "scripts/validate-tab-gantt-golden-references.mjs",
