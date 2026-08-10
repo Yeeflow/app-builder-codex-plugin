@@ -4,6 +4,9 @@ description: orchestrate end-to-end Yeeflow feature learning from real exports b
 ---
 
 # Yeeflow Feature Learning Orchestrator
++## Hosted MCP-Only Yeeflow Access
+
+For live Yeeflow work, use only the appropriate hosted MCP tool. Its service negotiates authentication; standalone OAuth, local REST/API helpers, API-key fallbacks, profile/environment configuration, and direct endpoint calls are retired and must not be used. `workspace_list` is the sole workspace-discovery route. Require explicit confirmation for writes, and treat MCP acceptance as distinct from materialization and runtime proof.
 
 ## UI Generation Hard-Gate Skill
 

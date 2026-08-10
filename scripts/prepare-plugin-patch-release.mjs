@@ -145,9 +145,6 @@ const mirrors = [
   "docs/reference/full-app-generation-entrypoints.json",
   "scripts/validate-pre-id-allocation-readiness.mjs",
   "scripts/test-pre-id-allocation-readiness-gates.mjs",
-  "scripts/lib/yeeflow-yapk-signing.mjs",
-  "scripts/yeeflow-yapk-sign.mjs",
-  "scripts/test-yeeflow-yapk-signing-distribution.mjs",
   "docs/yapk-generation-guardrails.md",
   "docs/studies/form-report-resource.md",
 ].map((sourcePath) => [sourcePath, sourcePath]);
@@ -194,7 +191,6 @@ mirrors.push(
   ["skills/installed/yeeflow-data-list-generator/SKILL.md", "skills/yeeflow-data-list-generator/SKILL.md"],
   ["skills/installed/yeeflow-data-list-generator/agents/openai.yaml", "skills/yeeflow-data-list-generator/agents/openai.yaml"],
   ["skills/installed/yeeflow-dashboard-generator/SKILL.md", "skills/yeeflow-dashboard-generator/SKILL.md"],
-  ["generated-skills/yeeflow-api-operator/SKILL.md", "skills/yeeflow-api-operator/SKILL.md"],
   ["skills/installed/yeeflow-package-validator/SKILL.md", "skills/yeeflow-package-validator/SKILL.md"],
   ["skills/installed/yeeflow-yapk-package-generator/SKILL.md", "skills/yeeflow-yapk-package-generator/SKILL.md"],
 );

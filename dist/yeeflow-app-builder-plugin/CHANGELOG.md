@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.10.5
+
+- Retire the bundled standalone OAuth and Yeeflow REST/API operator surface, including its CLI helpers, environment example, API Operator skill, package-automation resources, and historical distribution copies.
+- Keep all live Yeeflow access on the four scoped hosted MCP services; authentication is service-negotiated and no credentials are bundled.
+- Add release validation that fails when a standalone API Operator skill, OAuth CLI, or REST capability CLI is present in the distribution.
+
 ## 1.10.4
 
 - Restore the source/distribution mirrors for scoped MCP routing so reproducible packaging retains the four-server configuration, regression test, and operator guidance.

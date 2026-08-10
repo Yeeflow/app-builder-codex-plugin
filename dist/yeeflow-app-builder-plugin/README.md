@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.10.0`
+- Version: `1.10.5`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.10.0` requires explicit, materialized layouts for generated Data List Forms, Document Library custom forms, Dashboards, Approval Forms, and Public Forms. Responsive Collections now derive Table/Card fields, captions, and column count from the resolved App Plan rather than copying template sample columns. Configuration readback remains separate from Designer/runtime proof.
+Version `1.10.5` removes the standalone OAuth and REST/API surface from the plugin. Live Yeeflow work uses the four scoped hosted MCP services, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.10.0
+Version: 1.10.5
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.10.0
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.10.5
 ```
 
 ## What Is Included
@@ -47,7 +47,7 @@ node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1
 - `scripts/` and root development helpers for YAP/YAPK/YDL/YWF generation, inspection, validation, and package automation dry-runs.
 - `schemas/yap-schema.json`, `schemas/yapk-schema.json`, and `schemas/yapk-schema-codex.json`.
 - Sanitized docs, studies, standards, templates, examples, and historical notes.
-- OAuth helpers and the documented Yeeflow REST API capability map.
+- Hosted scoped MCP configuration; no standalone OAuth, REST/API, or credential-handling helpers.
 
 ## Key Workflows
 
@@ -78,33 +78,9 @@ Proof boundaries remain separate:
 - API acceptance is not runtime proof.
 - Runtime proof applies only to the exact tested scope.
 
-## Local Environment
+## Yeeflow Access
 
-Normal user-facing API work is OAuth-based. `.env.local` may be absent or empty for OAuth login, API access, and workspace discovery. Fixed API/OAuth defaults are bundled by the plugin, and legacy API-key mode remains available only as a deprecated fallback for older internal workflows.
-
-```env
-# No required values for normal OAuth + workspace discovery.
-```
-
-OAuth login is required before API access. Package import/install/upgrade automation still requires an explicit target workspace, but local `YEEFLOW_WORKSPACE_ID` is ignored for package write target selection. Discover app/package workspaces with `node scripts/yeeflow-workspace-list.mjs --category flowcraft`, ask the current user to choose from the redacted API-discovered list, then pass `--selected-workspace-id` or `--workspace-id` only as that explicit user-selected target. The documented workspace categories are `settings` and `flowcraft`; current app/package workflows use `flowcraft` unless product/API docs change. The plugin uses Authorization Code with PKCE S256 and generates the `code_verifier`; no OAuth client secret is required for normal login/refresh. Raw tokens, full decoded token payloads, tenant IDs, tenant URLs, raw workspace responses, and full workspace IDs are never printed. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only.
-
-Do not paste secrets, authorization codes, cookies, bearer tokens, or passwords into chat.
-
-## Useful Commands
-
-```sh
-node scripts/yeeflow-oauth-status.mjs
-node scripts/yeeflow-oauth-refresh.mjs
-node scripts/yeeflow-api-list-capabilities.mjs --read-only
-node scripts/yeeflow-api-call-capability.mjs --name locations.list
-node scripts/yeeflow-workspace-list.mjs --all
-node scripts/yeeflow-workspace-list.mjs --category flowcraft
-node scripts/test-yeeflow-oauth-auth.mjs
-node scripts/test-yeeflow-api-capabilities.mjs
-node scripts/test-package-api-dry-run-env.mjs
-```
-
-The read-only capability helper executes only mapped read-only `GET` capabilities and never accepts arbitrary raw paths.
+All live Yeeflow operations use the four hosted MCP services declared in the plugin. Authentication is negotiated by the service; the plugin has no local OAuth flow, REST CLI, API-key configuration, or workspace environment variables. Use `workspace_list` to inspect workspaces and the matching scoped MCP tool for every read or confirmed write. Do not paste credentials, tokens, cookies, or passwords into chat.
 
 ## Development Assets
 

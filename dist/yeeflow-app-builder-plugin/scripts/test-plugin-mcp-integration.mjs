@@ -12,7 +12,6 @@ const manifestText = readFileSync(resolve(pluginRoot, ".codex-plugin/plugin.json
 const manifest = readJson(resolve(pluginRoot, ".codex-plugin/plugin.json"));
 const packageManifest = sourceCheckout ? readJson(resolve(root, "package.json")) : null;
 const mcpManifest = readJson(resolve(pluginRoot, ".mcp.json"));
-const distributedApiSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-api-operator/SKILL.md"), "utf8");
 const distributedApplicationBuilderSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-application-builder/SKILL.md"), "utf8");
 const distributedIncrementalSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-mcp-incremental-application-builder/SKILL.md"), "utf8");
 const distributedFormReportSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-form-report-generator/SKILL.md"), "utf8");
@@ -46,18 +45,12 @@ for (const [serverName, url] of Object.entries(expectedMcpServers)) {
 }
 
 if (sourceCheckout) {
-  const sourceApiSkill = readFileSync(resolve(root, "generated-skills/yeeflow-api-operator/SKILL.md"), "utf8");
   const sourceApplicationBuilderSkill = readFileSync(resolve(root, "skills/installed/yeeflow-application-builder/SKILL.md"), "utf8");
-  assert.equal(distributedApiSkill, sourceApiSkill, "source and distributed API Operator skills must remain byte-identical");
   assert.equal(distributedApplicationBuilderSkill, sourceApplicationBuilderSkill, "source and distributed Application Builder skills must remain byte-identical");
 }
-assert.match(distributedApiSkill, /Use the bundled scoped MCP route before local REST helper scripts/);
-assert.match(distributedApiSkill, /yeeflow_operations_mcp/);
-assert.match(distributedApiSkill, /yeeflow_admin_mcp/);
-assert.match(distributedApiSkill, /yeeflow_service_portal_mcp/);
-assert.match(distributedApiSkill, /Require explicit user authorization for MCP create\/save\/import\/install\/upgrade calls/);
-assert.match(distributedApiSkill, /MCP tool acceptance is API acceptance only/);
-assert.match(distributedApiSkill, /two-phase merge\/readback workflow/);
+assert.equal(existsSync(resolve(pluginRoot, "skills/yeeflow-api-operator/SKILL.md")), false, "standalone API Operator skill must not be distributed");
+assert.equal(existsSync(resolve(pluginRoot, "scripts/yeeflow-oauth-login.mjs")), false, "standalone OAuth CLI must not be distributed");
+assert.equal(existsSync(resolve(pluginRoot, "scripts/yeeflow-api-call-capability.mjs")), false, "standalone REST CLI must not be distributed");
 assert.match(distributedApplicationBuilderSkill, /DEFAULT_DELIVERY_MODE: MCP_INCREMENTAL/);
 assert.match(distributedApplicationBuilderSkill, /Do not require the user to say “use MCP incremental construction”; this is the default/);
 assert.match(distributedApplicationBuilderSkill, /Use the explicit YAPK package path only when the user asks for a complete versioned package/);

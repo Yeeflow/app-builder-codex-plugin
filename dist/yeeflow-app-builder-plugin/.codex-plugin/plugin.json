@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "1.10.4",
-  "description": "Yeeflow App Builder skills with an OAuth-backed hosted MCP connection and a separately published host-neutral Execution SDK 1.0.0 asset.",
+  "version": "1.10.5",
+  "description": "Yeeflow App Builder skills with four scoped hosted MCP services and a separately published host-neutral Execution SDK 1.0.0 asset.",
   "keywords": [
     "yeeflow",
     "application-builder",
@@ -233,7 +233,7 @@
   "interface": {
     "displayName": "Yeeflow App Builder",
     "shortDescription": "Build Yeeflow apps with AI",
-    "longDescription": "Build and maintain Yeeflow business applications in Codex using guided skills and an OAuth-backed hosted MCP server. The plugin helps you plan application architecture; discover authorized workspaces and applications; generate, inspect, and validate Yeeflow packages, forms, workflows, dashboards, data lists, portals, custom services, AI agents, and copilots; and manage supported App Builder resources. Read operations can inspect Yeeflow data you are authorized to access. Create, update, delete, signing, import, install, and upgrade actions require appropriate permissions and explicit confirmation. Validation or API acceptance does not by itself prove Designer rendering or production runtime behavior.",
+    "longDescription": "Build and maintain Yeeflow business applications in Codex using guided skills and four scoped hosted MCP services. The plugin helps you plan application architecture; discover authorized workspaces and applications; generate, inspect, and validate Yeeflow packages, forms, workflows, dashboards, data lists, portals, custom services, AI agents, and copilots; and manage supported App Builder resources. Authentication is service-negotiated and no credentials are bundled. Read operations can inspect Yeeflow data you are authorized to access. Create, update, delete, signing, import, install, and upgrade actions require appropriate permissions and explicit confirmation. Validation or MCP acceptance does not by itself prove Designer rendering or production runtime behavior.",
     "developerName": "Yeeflow",
     "websiteURL": "https://www.yeeflow.com/",
     "privacyPolicyURL": "https://www.yeeflow.com/privacy",

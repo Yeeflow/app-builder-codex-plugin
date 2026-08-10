@@ -4,6 +4,9 @@ description: generate, inspect, validate, and document Yeeflow expression editor
 ---
 
 # Yeeflow Expression Generator
++## Hosted MCP-Only Yeeflow Access
+
+For live Yeeflow work, use only the appropriate hosted MCP tool. Its service negotiates authentication; standalone OAuth, local REST/API helpers, API-key fallbacks, profile/environment configuration, and direct endpoint calls are retired and must not be used. `workspace_list` is the sole workspace-discovery route. Require explicit confirmation for writes, and treat MCP acceptance as distinct from materialization and runtime proof.
 
 Business Travel workflow-publish practice: expression-bearing workflow surfaces must resolve variable IDs before packaging. Sequence-flow conditions, assignment expressions, Set Variable values/targets, form bindings, and sub-list summary bindings cannot reference deleted or undeclared variables. If a summary-bound variable is renamed, update every `conditioninfo`, binding, and expression-token reference together. Treat unresolved workflow variables as publish blockers, not cosmetic warnings.
 
