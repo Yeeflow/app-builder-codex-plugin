@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.10.4
+
+- Restore the source/distribution mirrors for scoped MCP routing so reproducible packaging retains the four-server configuration, regression test, and operator guidance.
+
+## 1.10.3
+
 - Move the bundled App Builder MCP from `/v1/mcp` to `/v1/mcp/app-builder` and add scoped Operations, Admin, and Service Portal MCP connections. All four use Codex-negotiated OAuth and contain no embedded credentials.
 
 ## 1.10.2

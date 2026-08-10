@@ -26,18 +26,24 @@ assert.deepEqual(manifest.interface?.capabilities, ["Skills", "Interactive", "Wr
 assert.equal((manifestText.match(/"capabilities"/g) ?? []).length, 1, "plugin manifest must not contain duplicate capabilities keys");
 
 assert.deepEqual(Object.keys(mcpManifest), ["mcpServers"]);
-assert.deepEqual(Object.keys(mcpManifest.mcpServers ?? {}), ["yeeflow_app_builder_mcp"]);
-assert.deepEqual(mcpManifest.mcpServers.yeeflow_app_builder_mcp, {
-  type: "http",
-  url: "https://api.yeeflow.com/v1/mcp",
-});
-
-const endpoint = new URL(mcpManifest.mcpServers.yeeflow_app_builder_mcp.url);
-assert.equal(endpoint.protocol, "https:");
-assert.equal(endpoint.username, "");
-assert.equal(endpoint.password, "");
-assert.equal(endpoint.search, "");
-assert.equal(endpoint.hash, "");
+const expectedMcpServers = {
+  yeeflow_app_builder_mcp: "https://api.yeeflow.com/v1/mcp/app-builder",
+  yeeflow_operations_mcp: "https://api.yeeflow.com/v1/mcp/operations",
+  yeeflow_admin_mcp: "https://api.yeeflow.com/v1/mcp/admin",
+  yeeflow_service_portal_mcp: "https://api.yeeflow.com/v1/mcp/service-portal",
+};
+assert.deepEqual(Object.keys(mcpManifest.mcpServers ?? {}), Object.keys(expectedMcpServers));
+for (const [serverName, url] of Object.entries(expectedMcpServers)) {
+  assert.deepEqual(mcpManifest.mcpServers[serverName], { type: "http", url });
+  const endpoint = new URL(url);
+  assert.equal(endpoint.protocol, "https:");
+  assert.equal(endpoint.username, "");
+  assert.equal(endpoint.password, "");
+  assert.equal(endpoint.search, "");
+  assert.equal(endpoint.hash, "");
+  assert.equal(endpoint.hostname, "api.yeeflow.com");
+  assert.match(endpoint.pathname, /^\/v1\/mcp\/(app-builder|operations|admin|service-portal)$/);
+}
 
 if (sourceCheckout) {
   const sourceApiSkill = readFileSync(resolve(root, "generated-skills/yeeflow-api-operator/SKILL.md"), "utf8");
@@ -45,7 +51,10 @@ if (sourceCheckout) {
   assert.equal(distributedApiSkill, sourceApiSkill, "source and distributed API Operator skills must remain byte-identical");
   assert.equal(distributedApplicationBuilderSkill, sourceApplicationBuilderSkill, "source and distributed Application Builder skills must remain byte-identical");
 }
-assert.match(distributedApiSkill, /use the bundled MCP route before local REST helper scripts/);
+assert.match(distributedApiSkill, /Use the bundled scoped MCP route before local REST helper scripts/);
+assert.match(distributedApiSkill, /yeeflow_operations_mcp/);
+assert.match(distributedApiSkill, /yeeflow_admin_mcp/);
+assert.match(distributedApiSkill, /yeeflow_service_portal_mcp/);
 assert.match(distributedApiSkill, /Require explicit user authorization for MCP create\/save\/import\/install\/upgrade calls/);
 assert.match(distributedApiSkill, /MCP tool acceptance is API acceptance only/);
 assert.match(distributedApiSkill, /two-phase merge\/readback workflow/);
@@ -105,7 +114,7 @@ console.log(JSON.stringify({
   marker: "YEEFLOW_PLUGIN_MCP_INTEGRATION_PASSED",
   pluginVersion: manifest.version,
   rootMode: sourceCheckout ? "source-checkout" : "installed-cache-root",
-  serverName: "yeeflow_app_builder_mcp",
+  serverNames: Object.keys(expectedMcpServers),
   transport: "http",
   authentication: "server-negotiated-oauth",
   embeddedCredentials: false,
