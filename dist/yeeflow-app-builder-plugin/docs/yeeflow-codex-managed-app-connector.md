@@ -12,7 +12,7 @@ The current plugin combines Skills with an active hosted MCP connection:
 
 - `dist/yeeflow-app-builder-plugin/.codex-plugin/plugin.json` declares `skills`.
 - The manifest declares `mcpServers: "./.mcp.json"`.
-- `.mcp.json` points only to `https://api.yeeflow.com/v1/mcp`; it embeds no token, header, client secret, or API key.
+- `.mcp.json` declares four scoped hosted MCP endpoints: App Builder (`https://api.yeeflow.com/v1/mcp/app-builder`), Operations (`https://api.yeeflow.com/v1/mcp/operations`), Admin (`https://api.yeeflow.com/v1/mcp/admin`), and Service Portal (`https://api.yeeflow.com/v1/mcp/service-portal`). It embeds no token, header, client secret, or API key.
 - The plugin interface currently advertises skills behavior.
 - The repo has no active `.app.json`.
 - Local OAuth scripts store credentials in a local token file and are not managed by Codex App.

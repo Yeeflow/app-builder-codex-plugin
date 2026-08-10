@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Move the bundled App Builder MCP from `/v1/mcp` to `/v1/mcp/app-builder` and add scoped Operations, Admin, and Service Portal MCP connections. All four use Codex-negotiated OAuth and contain no embedded credentials.
+
 ## 1.10.2
 
 - Preserve the responsive Collection mobile operations contract (`[2,1]`) during reverse-related and Dashboard materialization rather than overwriting it with the legacy `[2,2]` shape.

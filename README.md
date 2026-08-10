@@ -54,7 +54,7 @@ node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1
 Use the plugin to plan, incrementally build, generate, inspect, validate, and harden Yeeflow applications and packages. A normal requirement-to-live-application request defaults to the confirmation-gated MCP incremental path; package generation is an explicit delivery choice. The current package preserves support for:
 
 - Browser OAuth login, status, refresh, logout, and OAuth/API auth wrapper helpers.
-- Hosted Yeeflow App Builder MCP tools through `https://api.yeeflow.com/v1/mcp`, with OAuth negotiated by Codex and no credentials embedded in the Plugin.
+- Hosted Yeeflow MCP tools through the scoped App Builder (`/v1/mcp/app-builder`), Operations (`/v1/mcp/operations`), Admin (`/v1/mcp/admin`), and Service Portal (`/v1/mcp/service-portal`) endpoints, with OAuth negotiated by Codex and no credentials embedded in the Plugin.
 - Legacy API-key fallback for internal/package automation scenarios.
 - Documented REST API capability listing and guarded read-only capability calls.
 - Package API automation with dry-run defaults and explicit confirmation gates.
