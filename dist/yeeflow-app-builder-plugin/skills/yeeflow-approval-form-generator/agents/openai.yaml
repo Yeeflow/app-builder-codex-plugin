@@ -1,6 +1,6 @@
 interface:
   display_name: "Yeeflow Approval Form Generator"
   short_description: "Generate and validate Yeeflow approval form definitions safely."
-  default_prompt: "Use $yeeflow-approval-form-generator to generate and validate a standalone Yeeflow Approval Form file from these requirements."
+  default_prompt: "Use this skill to decompose requirements, generate approval form drafts, map dependencies, run validators, and build workflow wrappers only after validation passes."
 policy:
   allow_implicit_invocation: true

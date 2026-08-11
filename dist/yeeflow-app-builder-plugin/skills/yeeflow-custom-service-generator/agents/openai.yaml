@@ -1,6 +1,6 @@
 interface:
   display_name: "Yeeflow Custom Service Generator"
-  short_description: "Generate and validate Yeeflow Custom Services"
-  default_prompt: "Use $yeeflow-custom-service-generator to generate and validate an independent Yeeflow Custom Service file."
+  short_description: "Generate, inspect, validate, document, and debug Yeeflow Custom Service scripts."
+  default_prompt: "Use this skill to generate or validate Yeeflow Custom Service scripts with explicit schema and runtime proof boundaries."
 policy:
   allow_implicit_invocation: true

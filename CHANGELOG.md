@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.11.0
+
+- Add the MCP-only `yeeflow-data-report-generator` skill for Data Report definition create, update, validation, and guarded deletion workflows.
+- Add redacted Service Desk Pro structure learning, a synthetic Data Report contract fixture, and fail-closed stage-graph validation with regression coverage.
+- Migrate the distributed plugin layout to the current validator contract: remove legacy installed-skill mirrors, normalize plugin and skill metadata, and make the packaging step enforce the normalized bundle.
+
 ## 1.10.7
 
 - Harden live Dashboard component updates: normalize and validate both `LayoutView` and runtime-authoritative `LayoutInResources[].Resource` before save and after MCP readback.

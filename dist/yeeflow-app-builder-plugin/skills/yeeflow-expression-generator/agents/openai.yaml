@@ -1,4 +1,4 @@
 interface:
   display_name: "Yeeflow Expression Generator"
-  short_description: "Generate and validate Yeeflow expression tokens"
-  default_prompt: "Use $yeeflow-expression-generator to generate and validate the Yeeflow expression required here."
+  short_description: "Generate and validate Yeeflow expression editor token arrays."
+  default_prompt: "Use SKILL.md as the entry point. Prefer normalized expression references and never invent Yeeflow functions, operators, or variable value types."
