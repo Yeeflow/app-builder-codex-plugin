@@ -1,6 +1,6 @@
 interface:
   display_name: "Yeeflow Service Portal Generator"
-  short_description: "Plan and validate Yeeflow Service Portal payloads"
-  default_prompt: "Use $yeeflow-service-portal-generator to plan and validate a Yeeflow Service Portal payload."
+  short_description: "Plan, inspect, validate, and generate Yeeflow Service Portal payloads."
+  default_prompt: "Use this skill to plan and validate Yeeflow Service Portal resources while separating schema evidence from runtime proof."
 policy:
   allow_implicit_invocation: true

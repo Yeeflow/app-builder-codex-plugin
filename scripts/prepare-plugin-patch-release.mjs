@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -156,6 +157,10 @@ const mirrors = [
   "docs/reference/full-app-generation-entrypoints.json",
   "scripts/validate-pre-id-allocation-readiness.mjs",
   "scripts/test-pre-id-allocation-readiness-gates.mjs",
+  "scripts/validate-data-report-detail.mjs",
+  "scripts/test-data-report-detail.mjs",
+  "scripts/normalize-plugin-distribution.mjs",
+  "fixtures/data-report-live-contract/data-report.detail.valid.json",
   "docs/yapk-generation-guardrails.md",
   "docs/studies/form-report-resource.md",
 ].map((sourcePath) => [sourcePath, sourcePath]);
@@ -205,6 +210,9 @@ mirrors.push(
   ["skills/installed/yeeflow-runtime-test-orchestrator/SKILL.md", "skills/yeeflow-runtime-test-orchestrator/SKILL.md"],
   ["skills/installed/yeeflow-package-validator/SKILL.md", "skills/yeeflow-package-validator/SKILL.md"],
   ["skills/installed/yeeflow-yapk-package-generator/SKILL.md", "skills/yeeflow-yapk-package-generator/SKILL.md"],
+  ["skills/installed/yeeflow-data-report-generator/SKILL.md", "skills/yeeflow-data-report-generator/SKILL.md"],
+  ["skills/installed/yeeflow-data-report-generator/agents/openai.yaml", "skills/yeeflow-data-report-generator/agents/openai.yaml"],
+  ["skills/installed/yeeflow-data-report-generator/references/data-report-live-contract.md", "skills/yeeflow-data-report-generator/references/data-report-live-contract.md"],
 );
 
 for (const [sourcePath, destinationPath] of mirrors) {
@@ -212,6 +220,9 @@ for (const [sourcePath, destinationPath] of mirrors) {
   mkdirSync(dirname(destination), { recursive: true });
   copyFileSync(resolve(root, sourcePath), destination);
 }
+
+const normalization = spawnSync(process.execPath, [resolve(root, "scripts/normalize-plugin-distribution.mjs"), resolve(root, "dist/yeeflow-app-builder-plugin")], { encoding: "utf8" });
+if (normalization.status !== 0) throw new Error(`PLUGIN_DISTRIBUTION_NORMALIZATION_FAILED ${normalization.stderr || normalization.stdout}`);
 
 console.log(`PLUGIN_PATCH_RELEASE_PREPARED version=${packageManifest.version} mirroredFiles=${mirrors.length}`);
 

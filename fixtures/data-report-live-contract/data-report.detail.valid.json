@@ -1,0 +1,33 @@
+{
+  "Model": {
+    "ID": "7000000000000000001",
+    "Name": "SLA Compliance Summary",
+    "Description": "Synthetic structural fixture; not a tenant export.",
+    "Status": 1,
+    "Attr": "{\"isExport\":true}",
+    "Ver": 1,
+    "Settings": "{\"ListIds\":[],\"Stages\":[{\"Id\":\"input-target\",\"Type\":\"input\",\"Name\":\"SLA Target\",\"AppID\":\"7000000000000000101\",\"ListID\":\"7000000000000000102\",\"ListType\":1,\"Fields\":[\"Title\",\"Decimal1\"],\"Tables\":[],\"Sqls\":[],\"OutputTableName\":\"s_target\"},{\"Id\":\"group-tickets\",\"Type\":\"group\",\"Name\":\"Ticket aggregates\",\"Fields\":[\"Priority\",\"ResponseHours\"],\"Tables\":[\"s_target\"],\"Sqls\":[\"SELECT Priority, AVG(ResponseHours) FROM s_target GROUP BY Priority\"],\"OutputTableName\":\"s_ticket_group\"},{\"Id\":\"map-compliance\",\"Type\":\"map\",\"Name\":\"Compliance rate\",\"Fields\":[\"Title\",\"Decimal1\"],\"Tables\":[\"s_ticket_group\"],\"Sqls\":[\"SELECT Priority AS Title, ResponseHours AS Decimal1 FROM s_ticket_group\"],\"OutputTableName\":\"s_compliance\"},{\"Id\":\"output-summary\",\"Type\":\"output\",\"Name\":\"Output\",\"Fields\":[\"Title\",\"Decimal1\"],\"Tables\":[\"s_compliance\"],\"Sqls\":[\"SELECT Title, Decimal1 FROM s_compliance\"],\"OutputTableName\":\"s_compliance\"}]}",
+    "Schedules": "{\"Refresh\":false}",
+    "ScheduleTimes": "[]",
+    "ResourceDraft": "{\"childshapes\":[],\"lineType\":\"rounded\"}"
+  },
+  "List": {
+    "ListID": "7000000000000000002",
+    "Title": "SLA Compliance Summary",
+    "Description": "Synthetic structural fixture",
+    "Status": 1,
+    "Type": 64,
+    "Flags": 1,
+    "LayoutView": "{\"IsPublish\":true,\"isExport\":true}",
+    "Perms": [],
+    "AdvancePerms": [],
+    "Items": {}
+  },
+  "Fields": [
+    {"ListID":"7000000000000000002","FieldID":"7000000000000000003","FieldName":"Title","FieldType":"Text","FieldIndex":0,"DisplayName":"Priority","InternalName":"Priority","Type":"input","Status":1,"Category":0,"DefaultValue":"","Rules":"{}","IsSort":false,"IsSystem":true,"IsUnique":false,"Ext1":"","Ext2":"","Ext3":""},
+    {"ListID":"7000000000000000002","FieldID":"7000000000000000004","FieldName":"Decimal1","FieldType":"Decimal","FieldIndex":1,"DisplayName":"Compliance Rate","InternalName":"ComplianceRate","Type":"input_number","Status":1,"Category":0,"DefaultValue":"","Rules":"{}","IsSort":false,"IsSystem":false,"IsUnique":false,"Ext1":"","Ext2":"","Ext3":""}
+  ],
+  "Layouts": [
+    {"ListID":"7000000000000000002","LayoutID":"7000000000000000005","Type":0,"Title":"All Items","LayoutView":"{\"layout\":[\"Title\",\"Decimal1\"],\"query\":[],\"filter\":[]}","IsDefault":true,"LayoutInResources":[]}
+  ]
+}
