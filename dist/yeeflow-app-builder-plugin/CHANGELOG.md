@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.10.7
+
+- Harden live Dashboard component updates: normalize and validate both `LayoutView` and runtime-authoritative `LayoutInResources[].Resource` before save and after MCP readback.
+- Fail closed for embedded-resource drift and incomplete Master–Detail selection closure, including card click binding, `__ctx_coll/ListDataID` propagation, and single-record detail filtering.
+- Add bundled live-component regression fixtures and training guidance; API acceptance/readback remain distinct from browser action runtime evidence.
+
 ## 1.10.6
 
 - Remove stale standalone OAuth, REST helper, and API Operator references from distributed skills after the MCP-only migration.
