@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Data Report Generator"
+  short_description: "Build and validate MCP-backed Yeeflow Data Report definitions."
+  default_prompt: "Use this skill to inspect or safely create, update, validate, or delete a Yeeflow Data Report definition through the App Builder MCP, keeping persistence and runtime evidence separate."

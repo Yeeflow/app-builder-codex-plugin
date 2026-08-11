@@ -89,6 +89,8 @@ yeeflow-data-list-generator/
 !skills/installed/yeeflow-expression-generator/**
 !skills/installed/yeeflow-design-system-alignment/
 !skills/installed/yeeflow-design-system-alignment/**
+!skills/installed/yeeflow-data-report-generator/
+!skills/installed/yeeflow-data-report-generator/**
 .DS_Store
 
 # Large or decoded generated artifacts that may contain customer data.
@@ -129,6 +131,7 @@ packages/**/lib/
 !docs/reference/form-action-open-dashboard.template.json
 !docs/reference/collection-control-responsive-multiple-select.template.json
 !fixtures/runtime-test-specs/dashboard-collection-first-generation-test-spec.json
+!fixtures/data-report-live-contract/data-report.detail.valid.json
 !it-hardware-capex-request-ui-generation-spec.json
 !it-hardware-capex-request-v3-ui-refresh-spec.json
 !workflow-action-configurations.normalized.json
