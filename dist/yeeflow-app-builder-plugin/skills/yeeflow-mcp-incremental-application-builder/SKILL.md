@@ -90,6 +90,14 @@ For every incremental Type `1` Data List form layout, write `LayoutInResources[0
 
 For every generated Data List, preserve the native Title field exactly: `FieldName: "Title"`, `InternalName: "Title"`, `IsSystem: true`, and `IsSort: true`. Never derive the native Title internal name from a business label. For a direct Lookup, first resolve the field `Rules` target (`appid`, `listsetid`, `listid`, `listfield`) and then read back the target List and its canonical Title metadata. Before declaring the Lookup ready, create a target record, open the consumer's direct New/Edit picker, and verify that the newly created record is selectable. A successful save, structural readback, or contextual related-record Add does not prove direct-picker runtime.
 
+## Live Dashboard Resource And Master-Detail Gate
+
+For every incremental Dashboard update, read the complete live component first. A Dashboard can persist both `LayoutView` and `LayoutInResources[0].Resource`; the embedded Resource is runtime-authoritative. Never modify only `LayoutView`: that can make `component_save` and `component_get` appear successful while the running page still renders the old Resource.
+
+Before `component_save`, run `scripts/lib/dashboard-live-component-resource-sync.mjs` through its exported `normalizeLiveDashboardDetail()` and `validateLiveDashboardDetail()` helpers. Normalize the intended page into both persisted surfaces, require `LayoutInResources[0].ID = RefId = LayoutID`, preserve unplanned component properties, and fail closed on `DASHBOARD_LIVE_RESOURCE_DRIFT`, missing resource, or ID mismatch. After save, get the component again and run the same validation against readback; persisted readback is not browser-action proof.
+
+For a master-detail Dashboard, the live save gate additionally requires a clickable left Collection item bound to a local `coll` action that writes `__ctx_coll/ListDataID` into `vCurrentItemID`; a same-source current-item Collection with `limit = true` and `ps = 1`; and a `ListDataID = vCurrentItemID` filter. Do not declare a page usable until focused browser smoke selects record A, confirms all target regions, selects record B, confirms B appears and A-only content disappears. Report `apiAccepted`, `persistedReadback`, `designerOpen`, and `browserActionRuntime` separately; until the last is passed, set `actionsUsable: false`.
+
 ## FormNewReport Physical Field Gate
 
 For a `FormNewReport`, `Model.Settings.Fields[]` maps Approval Form variables into report columns, but it is not a physical list-field definition. Before the first save, require all of the following:

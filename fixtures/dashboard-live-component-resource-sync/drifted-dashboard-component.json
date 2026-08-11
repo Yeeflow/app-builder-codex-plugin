@@ -1,0 +1,11 @@
+{
+  "Detail": {
+    "LayoutID": "dashboard-1",
+    "LayoutView": "{\"id\":\"updated-page\"}",
+    "LayoutInResources": [{
+      "ID": "dashboard-1",
+      "RefId": "dashboard-1",
+      "Resource": "{\"id\":\"stale-page\"}"
+    }]
+  }
+}
