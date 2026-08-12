@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.12.0
+
+- Add `yeeflow-knowledge-source-operator` for application-bound Knowledge source lifecycle, explicit AI Agent/Copilot bindings, readback, reverse-reference-safe deletion, and runtime-proof boundaries.
+- Add source/distribution binding validation and fixtures that fail unresolved Knowledge IDs, mismatched names, unbound Agent/Copilot prompt claims, and deletion while referenced.
+- Strengthen AI Agent and Copilot template, instruction, prompt, and UI skills so a displayed name or prompt claim is never treated as a real Knowledge binding.
+
 ## 1.11.0
 
 - Add the MCP-only `yeeflow-data-report-generator` skill for Data Report definition create, update, validation, and guarded deletion workflows.
