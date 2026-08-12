@@ -9,6 +9,7 @@
     "test:ydp-wrapper": "node scripts/test-ydp-wrapper-gates.mjs",
     "test:standalone-resource-release": "node scripts/test-standalone-resource-release-gates.mjs",
     "test:plugin-mcp-integration": "node scripts/test-plugin-mcp-integration.mjs",
+    "test:knowledge-source-bindings": "node scripts/test-knowledge-source-bindings.mjs",
     "test:mcp-incremental-registry": "node scripts/test-mcp-incremental-capability-registry.mjs",
     "test:mcp-incremental-ledger": "node scripts/test-incremental-mcp-build-ledger.mjs",
     "test:mcp-incremental-operation": "node scripts/test-incremental-mcp-operation.mjs",

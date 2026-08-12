@@ -47,6 +47,8 @@ Pause and report if:
 When inspecting app-bound Agents in Yeeflow UI, expect tools that point to app lists, knowledge resources, connected Agents/Copilots, or application connections. Do not execute external Outlook, SharePoint, OAuth, or HTTP tools during verification unless safe test credentials and call scope are explicitly approved.
 
 For runtime checks, prefer non-executing confirmation first: Agent appears, configuration page opens, components/tool names render, linked list/knowledge/connection references are visible, and no live external call is triggered.
+
+For each visible Knowledge component, verify it is the intended source rather than a same-name substitute: open the source where possible, compare the saved Knowledge name and ID, and confirm the Agent prompt names no additional unbound Knowledge source. Save/read-back is required before publish; a safe retrieval test is a separate, explicit runtime step.
 <!-- agent-copilot-application-resource-learning:end -->
 
 <!-- scheduled-workflow-ai-assistant-learning:start -->

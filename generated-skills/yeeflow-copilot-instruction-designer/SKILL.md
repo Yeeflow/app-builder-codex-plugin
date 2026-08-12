@@ -67,6 +67,8 @@ node scripts/validate_copilot_instruction.js working/final-copilot-creation-mani
 
 App-contained Copilots may have bound tools. Instructions should distinguish conversational guidance from autonomous execution, name destructive or external actions as confirmation-required, and avoid claims for unconfigured tools. Quick prompts are export-proven as Suggestions on app-contained Copilots.
 
+For a configured Knowledge source, require a `Components[]` entry with `Type = 1`, the exact Knowledge ID in `Source`, and the matching Knowledge name. Instructions may name or rely on a source only when that binding has been saved and read back. Before publish/package, run `node scripts/validate-knowledge-source-bindings.mjs <app.yap-or-decoded-data.json> --mode final`; it catches unbound Knowledge claims but does not replace a safe chat-retrieval test.
+
 Connected-Agent tools should be described as delegated workflows only when the target Agent binding exists. External Outlook, SharePoint, OAuth, or HTTP tools must be framed as governed and credential-sensitive.
 <!-- agent-copilot-application-resource-learning:end -->
 

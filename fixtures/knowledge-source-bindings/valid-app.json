@@ -1,0 +1,44 @@
+{
+  "OtherModules": [
+    {
+      "Type": "Knowledges",
+      "Data": [
+        {
+          "ID": "knowledge-contract-library",
+          "Name": "Contract Library Knowledge Base",
+          "Status": 1,
+          "Datas": [
+            {
+              "ID": "knowledge-data-contract-library",
+              "Name": "Contract Library",
+              "Type": 16,
+              "Source": "document-library-contracts",
+              "Settings": "{\"Fields\":[\"Title\",\"Content\"]}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Type": "Agents",
+      "Data": [
+        {
+          "ID": "agent-contract-review",
+          "Name": "Contract Review Agent",
+          "Type": 0,
+          "Publisher": 0,
+          "Settings": "{\"Prompt\":\"Use the Contract Library Knowledge Base to identify relevant clauses.\"}",
+          "Components": [
+            {
+              "ID": "component-contract-library",
+              "Name": "Contract Library Knowledge Base",
+              "Type": 1,
+              "Source": "knowledge-contract-library",
+              "Settings": "{}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
