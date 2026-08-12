@@ -66,6 +66,12 @@ In app-level .yap exports, Copilots are AI resources in OtherModules Type "Agent
 
 Reusable Copilot templates should not include app-bound Components unless the target lists, Agents, knowledge resources, and connections are explicit. Generated packages should defer or placeholder external connections and require post-import reconfiguration.
 
+### Knowledge Source Binding Gate
+
+When a Copilot is configured for a real application, each usable Knowledge source must be represented by `Components[]` with `Type = 1`, `Source` equal to the exact Knowledge resource ID, and a matching component name. Instructions and Suggestions may reference that source only after the Copilot and Knowledge resource have both been saved and read back.
+
+Run `node scripts/validate-knowledge-source-bindings.mjs <app.yap-or-decoded-data.json> --mode final` before generated-final packaging or publish. It fails unresolved bindings and instructions that claim an unbound Knowledge source; UI and chat retrieval remain separate verification gates.
+
 Runtime import update: generated app-contained Copilot resources imported successfully in the Asia Tech visitor Copilot app after setting top-level `Publisher: 0`. Do not generate app-level Copilot records with `Publisher: null`; treat missing/null/non-numeric Publisher as an import blocker for generated-final packages. This proves import acceptance and resource materialization only, not Copilot chat execution.
 
 For Copilot Access application resources tools, use compact list-resource entries with numeric bitmask permissions: `{ id: <ListID>, permissions: <number> }`. Permission bits are create/add = `1`, update/edit = `2`, delete = `4`, read/view = `8`; combine with bitwise OR. Do not use string permission arrays.

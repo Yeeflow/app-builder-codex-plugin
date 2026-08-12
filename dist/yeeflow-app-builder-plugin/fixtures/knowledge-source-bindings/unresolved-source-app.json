@@ -1,0 +1,12 @@
+{
+  "OtherModules": [
+    {
+      "Type": "Knowledges",
+      "Data": [{"ID":"knowledge-contract-library","Name":"Contract Library Knowledge Base","Datas":[{"ID":"data-1","Type":16,"Source":"document-library-contracts"}]}]
+    },
+    {
+      "Type": "Agents",
+      "Data": [{"ID":"agent-contract-review","Name":"Contract Review Agent","Type":0,"Publisher":0,"Settings":"{\"Prompt\":\"Review contracts.\"}","Components":[{"ID":"component-missing","Name":"Missing Knowledge","Type":1,"Source":"knowledge-missing","Settings":"{}"}]}]
+    }
+  ]
+}

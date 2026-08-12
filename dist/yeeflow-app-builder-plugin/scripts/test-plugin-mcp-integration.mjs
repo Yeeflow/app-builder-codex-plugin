@@ -15,6 +15,7 @@ const mcpManifest = readJson(resolve(pluginRoot, ".mcp.json"));
 const distributedApplicationBuilderSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-application-builder/SKILL.md"), "utf8");
 const distributedIncrementalSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-mcp-incremental-application-builder/SKILL.md"), "utf8");
 const distributedFormReportSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-form-report-generator/SKILL.md"), "utf8");
+const distributedKnowledgeSourceSkill = readFileSync(resolve(pluginRoot, "skills/yeeflow-knowledge-source-operator/SKILL.md"), "utf8");
 const distributedIncrementalRegistry = readFileSync(resolve(pluginRoot, "schemas/mcp-incremental-capability-registry.v1.json"), "utf8");
 
 assert.equal(manifest.name, "yeeflow-app-builder");
@@ -73,6 +74,9 @@ assert.match(distributedIncrementalSkill, /one MCP-issued physical Type `32` `Fi
 assert.match(distributedFormReportSkill, /MCP Type 32 Physical Field Gate/);
 assert.match(distributedFormReportSkill, /Do not submit an empty `Fields\[\]` array/);
 assert.match(distributedFormReportSkill, /`Text0` is rejected/);
+assert.match(distributedKnowledgeSourceSkill, /appbuilder_component_save/);
+assert.match(distributedKnowledgeSourceSkill, /Components\[\].*Type: 1/);
+assert.match(distributedKnowledgeSourceSkill, /validate-knowledge-source-bindings\.mjs/);
 for (const componentType of ["ApprovalForm", "ScheduleForm", "Dashboard", "DataList", "Document", "DataReport", "FormNewReport", "Knowledge", "AIAgent", "Copilot", "CustomService"]) {
   assert.match(distributedIncrementalSkill, new RegExp(`\\\`${componentType}\\\``));
 }

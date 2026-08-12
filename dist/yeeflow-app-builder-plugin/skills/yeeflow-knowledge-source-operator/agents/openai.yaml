@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Knowledge Source Operator"
+  short_description: "Configure and validate Agent/Copilot knowledge sources."
+  default_prompt: "Use this skill to configure a Yeeflow Knowledge source, bind it to AI Agents or Copilots, and validate persisted bindings before publish or deletion."

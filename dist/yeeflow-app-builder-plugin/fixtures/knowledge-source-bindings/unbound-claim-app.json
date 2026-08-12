@@ -1,0 +1,12 @@
+{
+  "OtherModules": [
+    {
+      "Type": "Knowledges",
+      "Data": [{"ID":"knowledge-contract-library","Name":"Contract Library Knowledge Base","Datas":[{"ID":"data-1","Name":"Contract Library","Type":16,"Source":"document-library-contracts"}]}]
+    },
+    {
+      "Type": "Agents",
+      "Data": [{"ID":"agent-contract-review","Name":"Contract Review Agent","Type":0,"Publisher":0,"Settings":"{\"Prompt\":\"Use the Contract Library Knowledge Base to review contracts.\"}","Components":[]}]
+    }
+  ]
+}

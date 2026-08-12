@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Knowledge Source Operator"
+  short_description: "Configure and validate Agent/Copilot knowledge sources"
+  default_prompt: "Create or audit a Yeeflow Knowledge source, bind it to the intended AI Agent or Copilot, and prove the saved configuration with reverse-reference validation."

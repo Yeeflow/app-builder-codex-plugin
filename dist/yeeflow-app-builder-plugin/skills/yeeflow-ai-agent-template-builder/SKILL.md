@@ -48,6 +48,12 @@ The app-level .yap structure is export-proven but generated import behavior is n
 
 Reusable templates should keep operational tools as guidance unless target app resources are explicit. App-bound generation must include a resource graph for lists, knowledge, Agents, Copilots, and connections, with fresh IDs and no real credentials.
 
+### Knowledge Source Binding Gate
+
+For every real app-bound Knowledge source, create or read back the `Knowledge` resource first. Bind it in the Agent `Components[]` with `Type = 1`, the exact Knowledge ID in `Source`, and the matching Knowledge name. A component name, a prompt sentence, or a source description alone is not a binding.
+
+Only name a Knowledge source in `Settings.Prompt` after that binding is present and re-read. Before generated-final packaging or publishing, run `node scripts/validate-knowledge-source-bindings.mjs <app.yap-or-decoded-data.json> --mode final`. This validates binding identity and prompt claims; it does not prove live retrieval quality.
+
 Runtime import update: generated app-contained AI Agent resources imported successfully in the Asia Tech visitor Copilot app after setting top-level `Publisher: 0`. Do not generate app-level Agent records with `Publisher: null`; treat missing/null/non-numeric Publisher as an import blocker for generated-final packages. This proves import acceptance only, not Agent execution.
 
 For app-contained Access application resources tools, use compact list-resource entries with numeric bitmask permissions: `{ id: <ListID>, permissions: <number> }`. Permission bits are create/add = `1`, update/edit = `2`, delete = `4`, read/view = `8`; combine with bitwise OR.

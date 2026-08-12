@@ -20,6 +20,11 @@ const legacyInstalled = resolve(pluginRoot, "skills/installed");
 if (existsSync(legacyInstalled)) rmSync(legacyInstalled, { recursive: true, force: true });
 
 const agents = {
+  "yeeflow-knowledge-source-operator": agent(
+    "Yeeflow Knowledge Source Operator",
+    "Configure and validate Agent/Copilot knowledge sources.",
+    "Use this skill to configure a Yeeflow Knowledge source, bind it to AI Agents or Copilots, and validate persisted bindings before publish or deletion.",
+  ),
   "yeeflow-ai-agent-template-builder": agent(
     "Yeeflow AI Agent Template Builder",
     "Build Yeeflow AI Agent manifests.",

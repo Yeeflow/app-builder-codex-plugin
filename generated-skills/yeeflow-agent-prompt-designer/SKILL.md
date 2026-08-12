@@ -55,6 +55,8 @@ Run `scripts/validate_prompt_refs.js <manifest.json>` after updating prompts.
 
 App-contained Agents can have Components for knowledge, list query/create/update/delete tools, connected application connections, and connected Copilot/Agent orchestration. Prompt text may describe those tools only when the bindings are actually present. For destructive tools such as delete-by-ID, require record identification, ownership checks, dependency checks, and human-readable blocked/deleted responses.
 
+For a Knowledge source, the real binding is `Components[]` with `Type = 1` and `Source` equal to the returned Knowledge resource ID; the displayed component name must match that resource. Do not write “use the <Knowledge name> knowledge base” unless this binding has been saved and read back. Validate the application package with `node scripts/validate-knowledge-source-bindings.mjs <app.yap-or-decoded-data.json> --mode final`; this proves configuration consistency, not retrieval execution.
+
 Do not imply Outlook, SharePoint, HTTP, OpenAPI, document generation, image generation, image analysis, code interpreter, MCP, or Services runtime access unless the specific tool component is present and validated.
 <!-- agent-copilot-application-resource-learning:end -->
 
