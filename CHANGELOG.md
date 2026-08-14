@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.12.2
+
+- Harden `dashboard-page-layouts-workbench` Header generation: `page_title_content` must preserve its inline width, and configured Header operations must remain inside `Operations`.
+- Require Header operation modules to retain the export-proven `btn_operation_primary` or `btn_operation_normal` structure; reject direct or generic action containers.
+- Add source/distribution regression coverage for the malformed Workbench Header pattern and restore the Workflow hard-gate test mirror required by release validation.
+
 ## 1.12.1
 
 - Treat an embedded Dashboard `LayoutInResources[].Resource` as runtime-authoritative and preserve valid blank `LayoutView` embedded-only mode.

@@ -28,6 +28,8 @@ const WORKBENCH_LIKE_TEMPLATE_IDS = new Set([
 ]);
 const BACKGROUND = "#f4f7fb";
 const SECTION_CONTENT_AREA_GAP = "--sp--s200";
+const WORKBENCH_PAGE_TITLE_CONTENT_INLINE_WIDTH = [null, "2", null, "1"];
+const WORKBENCH_OPERATION_BUTTON_VARIANTS = ["btn_operation_normal", "btn_operation_primary"];
 const DEFAULT_REQUIRED_FULL_WIDTH_IDS = [
   "main",
   "content",
@@ -450,10 +452,76 @@ function validatePageShell(resource, findings, context) {
 
 function validateWorkbenchSpecificContracts(resource, findings, context, rules) {
   if (rules.id !== WORKBENCH_TEMPLATE_ID) return;
+  validateWorkbenchHeaderContract(resource, findings, context);
   for (const entry of findAllByIdentityWithPointers(resource, "dashboard_standard_filter_group")) {
     validateWorkbenchStandardFilterGroup(entry, findings, context);
   }
   if (!context.allowTemplateOperations) validateWorkbenchEmptyRightColumnPruned(resource, findings, context);
+}
+
+function validateWorkbenchHeaderContract(resource, findings, context) {
+  for (const entry of findAllByIdentityWithPointers(resource, "page_title_header")) {
+    const header = entry.control;
+    const children = asArray(header?.children).filter(isObject);
+    const titleContents = children.filter((child) => hasIdentity(child, "page_title_content"));
+    const operations = children.filter((child) => hasIdentity(child, "Operations"));
+
+    if (!titleContents.length) {
+      findings.push(error("DASH_WORKBENCH_PAGE_TITLE_CONTENT_MISSING", "Workbench page_title_header must preserve page_title_content as a direct child copied from the registered Workbench template.", {
+        page: context.page,
+        pointer: entry.pointer,
+      }));
+    }
+    for (const titleContent of titleContents) {
+      if (stableJson(titleContent?.attrs?.style?.widthtype ?? null) !== stableJson(WORKBENCH_PAGE_TITLE_CONTENT_INLINE_WIDTH)) {
+        findings.push(error("DASH_WORKBENCH_PAGE_TITLE_CONTENT_NOT_INLINE", "Workbench page_title_content must retain the registered inline width attrs.style.widthtype [null,\"2\",null,\"1\"]; omitted width defaults to Full Width and breaks the header/action layout.", {
+          page: context.page,
+          pointer: entry.pointer,
+          actual: titleContent?.attrs?.style?.widthtype ?? null,
+        }));
+      }
+    }
+
+    const configuredActions = collectConfiguredActionEntries(header);
+    if (configuredActions.length && !operations.length) {
+      findings.push(error("DASH_WORKBENCH_HEADER_OPERATIONS_MISSING", "Workbench page_title_header with a configured action must contain Operations as a direct child; do not append an action beside page_title_content.", {
+        page: context.page,
+        pointer: entry.pointer,
+        actions: configuredActions.map((action) => firstIdentity(action.control) || action.control?.type || null),
+      }));
+    }
+
+    const outsideOperations = configuredActions.filter((action) => !action.ancestors.some((ancestor) => hasIdentity(ancestor, "Operations")));
+    if (outsideOperations.length) {
+      findings.push(error("DASH_WORKBENCH_HEADER_ACTION_OUTSIDE_OPERATIONS", "Configured Workbench header actions must be descendants of the direct Operations slot. Clone a btn_operation_primary or btn_operation_normal module instead of hand-creating a header container.", {
+        page: context.page,
+        pointer: entry.pointer,
+        actions: outsideOperations.map((action) => firstIdentity(action.control) || action.control?.type || null),
+      }));
+    }
+
+    for (const action of configuredActions.filter((candidate) => candidate.ancestors.some((ancestor) => hasIdentity(ancestor, "Operations")))) {
+      const actionPath = [action.control, ...action.ancestors];
+      if (!actionPath.some((control) => hasAnyIdentity(control, WORKBENCH_OPERATION_BUTTON_VARIANTS))) {
+        findings.push(error("DASH_WORKBENCH_OPERATION_BUTTON_VARIANT_INVALID", "Configured Workbench Operations actions must retain a btn_operation_primary or btn_operation_normal template module; generic action containers are not permitted.", {
+          page: context.page,
+          pointer: action.pointer,
+          control: firstIdentity(action.control) || action.control?.type || null,
+        }));
+      }
+    }
+  }
+}
+
+function collectConfiguredActionEntries(root) {
+  const out = [];
+  const visit = (node, ancestors = [], pointer = "$") => {
+    if (!isObject(node)) return;
+    if (node !== root && hasActionConfiguration(node)) out.push({ control: node, ancestors, pointer });
+    asArray(node.children).forEach((child, index) => visit(child, [...ancestors, node], `${pointer}.children[${index}]`));
+  };
+  visit(root);
+  return out;
 }
 
 function validateWorkbenchStandardFilterGroup(entry, findings, context) {
@@ -621,7 +689,9 @@ function validateOperations(resource, findings, page) {
     if (!actionable.length) {
       findings.push(error("DASH_LAYOUT_OPERATIONS_WITHOUT_ACTIONS", "Operations container may exist only when it contains real configured action controls.", { page }));
     }
-    const visualOnly = descendants.find((control) => isActionLooking(control) && !hasActionConfiguration(control));
+    const visualOnly = descendants.find((control) => isActionLooking(control)
+      && !hasActionConfiguration(control)
+      && !findAncestors(operations, control).some((ancestor) => hasActionConfiguration(ancestor)));
     if (visualOnly) {
       findings.push(error("DASH_LAYOUT_VISUAL_ACTION_WITHOUT_BINDING", "Visual button/action-looking controls must include valid Yeeflow action configuration.", { page, control: firstIdentity(visualOnly) || null }));
     }

@@ -635,6 +635,12 @@ function approvalPlanMarkdown() {
     "| 5 | Security Review | MultiAssignmentTask | Security approval. | Security Officer | Job position | Approved; Rejected | Always | Read request | Generated-final validation |",
     "| 6 | Director Approval | MultiAssignmentTask | Director approval. | Director | Job position | Approved; Rejected | Always | Read request | Generated-final validation |",
     "| 7 | Create Vendor Master | ContentList | Create approved vendor record. | System | System action | Complete | Approved path only | Vendor Master create | Generated-final validation |",
+    "",
+    "#### Workflow Set Data List Action Plan",
+    "",
+    "| Workflow Host | Workflow Name | Node Name | Target Mode | Target Resource | Target Resource Type | Operation | Mappings JSON | Filters JSON | Workflow Variable Declarations JSON | Batch Source Type | Batch Source | Batch Source Fields JSON | Parent Loop | Proof Boundary | Notes |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Approval Form | Vendor Approval | Create Vendor Master | select | Vendor Master | Data List | add | `[{\"Columns\":\"VendorName\",\"TargetType\":\"text\",\"Per\":\"0\",\"Data\":[{\"exprType\":\"variable\",\"valueType\":\"text\",\"id\":\"VendorName\",\"type\":\"expr\",\"name\":\"Workflow Variables:Vendor Name\"}]}]` | `[]` | `[{\"id\":\"VendorName\",\"type\":\"text\",\"valueType\":\"text\",\"name\":\"Vendor Name\",\"expressionName\":\"Workflow Variables:Vendor Name\"}]` |  |  | `[]` |  | export-proven | Create the approved vendor. |",
   ].join("\n");
 }
 

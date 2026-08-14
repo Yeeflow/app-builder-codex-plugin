@@ -53,6 +53,23 @@ The primary structure is:
 - `primary_working_area`: the main operational queue/analytics area.
 - `right_side_panel`: optional supporting context panel.
 
+## Header And Operations Contract
+
+The Workbench Header is a fixed template module, not a convenient place to append a new container. Its direct-child structure is:
+
+```text
+page_title_header
+├─ page_title_content  (attrs.style.widthtype = [null, "2", null, "1"])
+└─ Operations          (present only when a real Header action is planned)
+   └─ btn_operation_primary | btn_operation_normal
+```
+
+`page_title_content` must retain the registered inline-width shape. Omitting it makes the title content Full Width and prevents the operation area from aligning as the Workbench template intends.
+
+For any planned Header action, copy `Operations` and clone either `btn_operation_primary` for the primary create/commit action or `btn_operation_normal` for a secondary action. Configure the action only after cloning its module. Do not append an action button or a generic `container` directly under `page_title_header`, and do not hand-create a replacement button style. Remove the entire `Operations` module only when no Header actions are planned.
+
+Before `component_save`, run the Workbench page-layout validator. `DASH_WORKBENCH_PAGE_TITLE_CONTENT_NOT_INLINE`, `DASH_WORKBENCH_HEADER_OPERATIONS_MISSING`, `DASH_WORKBENCH_HEADER_ACTION_OUTSIDE_OPERATIONS`, and `DASH_WORKBENCH_OPERATION_BUTTON_VARIANT_INVALID` are generated-final blockers. After save, distinguish API acceptance/readback from Designer-open and browser action runtime evidence; click each Header operation before declaring it usable.
+
 ## Standard Filter Group
 
 When a Workbench Dashboard has two or more page-level/global Data Filter controls, the filters must be placed inside `dashboard_standard_filter_group` in the top `section_content_area`.
