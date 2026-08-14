@@ -102,6 +102,19 @@ function addRightSidePanel(resource, withContent = true) {
   find(resource, "main_work_queue_wrapper").children.push(rightSide);
 }
 
+function addConfiguredHeaderOperation(resource, variant = "btn_operation_primary") {
+  const template = registry().templates.find((entry) => entry.id === TEMPLATE_ID).template.parsedResource;
+  const operations = clone(find(template, "Operations"));
+  const button = clone(find(operations, variant));
+  button.attrs = {
+    ...(button.attrs || {}),
+    "action-type": 5,
+    data: { list: { ListID: LIST_ID, Title: "Loan Transactions" } },
+  };
+  operations.children = [button];
+  find(resource, "page_title_header").children.push(operations);
+}
+
 function decoded(resource = workbenchTemplate()) {
   return {
     ListSet: { ListID: APP_ID, Title: "Office Asset Loan Management" },
@@ -204,7 +217,41 @@ try {
   addRightSidePanel(emptyRightPanel, false);
   expectCode("empty right_side_panel fails", ["--package", writePackage(tempDir, "empty-right-panel", decoded(emptyRightPanel))], "DASH_LAYOUT_EMPTY_RIGHT_SIDE_PANEL");
 
-  console.log(JSON.stringify({ status: "pass", cases: 9 }, null, 2));
+  const configuredHeaderAction = workbenchTemplate();
+  addConfiguredHeaderOperation(configuredHeaderAction);
+  expectPass("configured Workbench header action cloned from Operations primary button passes", ["--package", writePackage(tempDir, "valid-header-action", decoded(configuredHeaderAction))]);
+
+  const fullWidthTitle = workbenchTemplate();
+  find(fullWidthTitle, "page_title_content").attrs.style.widthtype = [null, "1"];
+  expectCode("Workbench page title content must retain inline width", ["--package", writePackage(tempDir, "full-width-title", decoded(fullWidthTitle))], "DASH_WORKBENCH_PAGE_TITLE_CONTENT_NOT_INLINE");
+
+  const actionOutsideOperations = workbenchTemplate();
+  find(actionOutsideOperations, "page_title_header").children.push({
+    type: "container",
+    nv_label: "create_finding_action",
+    attrs: {
+      "action-type": 5,
+      data: { list: { ListID: LIST_ID, Title: "Loan Transactions" } },
+    },
+  });
+  expectCode("Workbench header action without Operations fails closed", ["--package", writePackage(tempDir, "header-action-without-operations", decoded(actionOutsideOperations))], "DASH_WORKBENCH_HEADER_OPERATIONS_MISSING");
+  expectCode("Workbench header action outside Operations fails closed", ["--package", writePackage(tempDir, "header-action-outside-operations", decoded(actionOutsideOperations))], "DASH_WORKBENCH_HEADER_ACTION_OUTSIDE_OPERATIONS");
+
+  const genericOperationButton = workbenchTemplate();
+  const operationsTemplate = registry().templates.find((entry) => entry.id === TEMPLATE_ID).template.parsedResource;
+  const operations = clone(find(operationsTemplate, "Operations"));
+  operations.children = [{
+    type: "container",
+    nv_label: "create_finding_action",
+    attrs: {
+      "action-type": 5,
+      data: { list: { ListID: LIST_ID, Title: "Loan Transactions" } },
+    },
+  }];
+  find(genericOperationButton, "page_title_header").children.push(operations);
+  expectCode("Workbench Operations rejects generic action containers", ["--package", writePackage(tempDir, "generic-operation-button", decoded(genericOperationButton))], "DASH_WORKBENCH_OPERATION_BUTTON_VARIANT_INVALID");
+
+  console.log(JSON.stringify({ status: "pass", cases: 14 }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
