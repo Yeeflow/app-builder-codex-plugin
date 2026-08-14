@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.12.1
+
+- Treat an embedded Dashboard `LayoutInResources[].Resource` as runtime-authoritative and preserve valid blank `LayoutView` embedded-only mode.
+- Fail closed for unmaterialized or mismatched Dashboard Resources, invalid Custom Code `main -> content` structure, missing `codein` scripts, and post-save Resource drift.
+- Add an embedded Custom Code Dashboard fixture and evidence reporting that keeps API acceptance, readback, Designer open, and browser action runtime distinct.
+
 ## 1.12.0
 
 - Add `yeeflow-knowledge-source-operator` for application-bound Knowledge source lifecycle, explicit AI Agent/Copilot bindings, readback, reverse-reference-safe deletion, and runtime-proof boundaries.
