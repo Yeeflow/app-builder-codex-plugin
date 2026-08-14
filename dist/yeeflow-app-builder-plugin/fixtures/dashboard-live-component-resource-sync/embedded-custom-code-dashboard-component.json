@@ -1,0 +1,14 @@
+{
+  "Detail": {
+    "LayoutID": "dashboard-fixture",
+    "LayoutView": "",
+    "Ext2": "{\"src\":true,\"generatedFinal\":true}",
+    "LayoutInResources": [
+      {
+        "ID": "dashboard-fixture",
+        "RefId": "dashboard-fixture",
+        "Resource": "{\"id\":\"root\",\"children\":[{\"id\":\"main\",\"children\":[{\"id\":\"content\",\"children\":[{\"id\":\"custom-dashboard\",\"type\":\"codein\",\"attrs\":{\"codein-script\":\"export default function Dashboard() { return null; }\"}}]}]}]}"
+      }
+    ]
+  }
+}

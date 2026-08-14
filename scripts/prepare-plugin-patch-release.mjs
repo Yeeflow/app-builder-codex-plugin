@@ -78,6 +78,7 @@ const mirrors = [
   "fixtures/standalone-resource-tools/custom-service.valid.input.json",
   "fixtures/dashboard-action-reference-closure/clone-before-remap.json",
   "fixtures/dashboard-live-component-resource-sync/drifted-dashboard-component.json",
+  "fixtures/dashboard-live-component-resource-sync/embedded-custom-code-dashboard-component.json",
   "fixtures/standalone-resource-tools/custom-service.invalid-secret.input.json",
   "fixtures/standalone-resource-tools/scheduled-workflow.valid.input.json",
   "fixtures/standalone-resource-tools/scheduled-workflow.issued-ids.json",
