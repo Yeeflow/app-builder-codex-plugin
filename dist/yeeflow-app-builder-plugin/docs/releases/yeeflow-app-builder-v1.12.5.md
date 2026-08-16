@@ -19,3 +19,11 @@
 - Local source and distribution suites prove generated-final structural closure.
 - API save acceptance and persisted readback do not prove Workflow Designer readability or runtime routing.
 - Designer-open and disposable-request browser workflow smoke remain required for those claims.
+
+## Final release install evidence
+
+- Stable Marketplace source: `https://github.com/Yeeflow/app-builder-codex-plugin.git`, ref `stable`, with sparse paths `.agents/plugins/marketplace.json` and `dist/yeeflow-app-builder-plugin`.
+- Stable commit: `47149943b8d856f45c50b4f88f7eea68878b3004`.
+- Installed Plugin: `yeeflow-app-builder@yeeflow` version `1.12.5`.
+- Installed-cache validation passed for Plugin structure, Approval workflow layout, Approval publish readiness, and bundled MCP integration.
+- This verifies install/discovery and bundled local checks; it does not claim a live Workflow Designer or browser execution result.
