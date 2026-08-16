@@ -218,7 +218,19 @@ export function validateDashboardBindings(decoded, options = {}) {
   for (const { layout, page, resource } of dashboards) {
     const pageName = safeString(layout?.Title || page?.title || "Dashboard");
     const layoutId = safeString(layout?.LayoutID);
-    const filterVars = new Set(asArray(page?.filterVars).map((item) => safeString(item?.id || item?.name)).filter(Boolean));
+    const filterVarDefinitions = asArray(page?.filterVars);
+    const filterVars = new Set(filterVarDefinitions.map((item) => safeString(item?.id || item?.name)).filter(Boolean));
+    for (const [index, definition] of filterVarDefinitions.entries()) {
+      const filterVarId = safeString(definition?.id || definition?.name);
+      if (filterVarId.startsWith("__filter_")) {
+        add(findings, "error", "DASHBOARD_FILTER_VAR_ID_RUNTIME_PREFIX", "Dashboard filterVars[] ids are declarations and must not include the runtime __filter_ prefix.", {
+          page: pageName,
+          filterVariable: filterVarId,
+          pointer: `filterVars[${index}]`,
+          recommendedFix: "Declare filter_<page>_<name>; use __filter_<declared-id> only in control bindings and consumer expressions.",
+        });
+      }
+    }
     const consumedVars = new Map();
     const exts = asArray(page?.exts);
     const extByControlId = new Map(exts.map((ext) => [safeString(ext?.i), ext]));
