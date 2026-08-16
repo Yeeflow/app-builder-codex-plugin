@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.12.3
+
+- Add a Dashboard Filter Dependency Closure standard: stable declaration/runtime token shapes, an applicability matrix, same-source consumer checks, and explicit cross-lookup mirror requirements.
+- Fail fast when a Dashboard `filterVars[].id` incorrectly includes the runtime `__filter_` prefix, with regression coverage for the observed filter-binding defect.
+- Require focused browser filter smoke evidence; API acceptance and persisted readback do not establish filter usability.
+
 ## 1.12.2
 
 - Harden `dashboard-page-layouts-workbench` Header generation: `page_title_content` must preserve its inline width, and configured Header operations must remain inside `Operations`.

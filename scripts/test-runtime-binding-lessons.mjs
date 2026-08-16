@@ -108,6 +108,11 @@ expectCode("summary ext missing values", validateDashboardBindings(decodedDashbo
 expectCode("summary missing report id", validateDashboardBindings(decodedDashboard({ summary: { noReportId: true }, filter: { summaryConsumes: true, consumer: true } })), "DASHBOARD_SUMMARY_MISSING_REPORT_ID");
 assert.equal(validateDashboardBindings(decodedDashboard({ summary: { omitListDataIdFromSchema: true }, filter: { summaryConsumes: true, consumer: true } })).filter((finding) => finding.severity === "error").length, 0, "ListDataID Summary count is a system field and does not need to appear in business Fields[]");
 expectCode("declared filter not consumed", validateDashboardBindings(decodedDashboard()), "DASHBOARD_FILTER_VAR_DECLARED_NOT_CONSUMED");
+const runtimePrefixedFilterVarDashboard = decodedDashboard({ filter: { summaryConsumes: true, consumer: true } });
+const runtimePrefixedPage = JSON.parse(runtimePrefixedFilterVarDashboard.Pages[0].LayoutInResources[0].Resource);
+runtimePrefixedPage.filterVars[0].id = "__filter_filter_Overview_Category";
+runtimePrefixedFilterVarDashboard.Pages[0].LayoutInResources[0].Resource = JSON.stringify(runtimePrefixedPage);
+expectCode("filter declaration must not include runtime prefix", validateDashboardBindings(runtimePrefixedFilterVarDashboard), "DASHBOARD_FILTER_VAR_ID_RUNTIME_PREFIX");
 expectCode("filter control without var", validateDashboardBindings(decodedDashboard({ filter: { noBinding: true } })), "DASHBOARD_FILTER_CONTROL_WITHOUT_FILTER_VAR");
 expectCode("consumer invalid field", validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true, invalidField: true } })), "DASHBOARD_FILTER_CONSUMER_INVALID_FIELD");
 expectCode("lookup display filter", validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true, lookupDisplayValue: true } })), "DASHBOARD_LOOKUP_FILTER_VALUE_NOT_RECORD_ID");
