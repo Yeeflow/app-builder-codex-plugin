@@ -202,6 +202,7 @@ function validateDashboardBusinessRuntime(page, listIndex, findings) {
   validateNonEmptyBusinessSections(page, findings);
   validateIndependentContentCardWrappers(page, collections, findings);
   validateDynamicUserFieldTypes(page, listIndex, findings);
+  validateDynamicLookupDisplayFields(page, listIndex, findings);
 }
 
 function hasApprovedDataTableTemplateProvenance(control) {
@@ -512,6 +513,112 @@ function validateDynamicUserFieldTypes(page, listIndex, findings) {
       }));
     }
   }
+}
+
+function validateDynamicLookupDisplayFields(page, listIndex, findings) {
+  for (const entry of page.controls) {
+    const control = entry.control;
+    if (String(control?.type || "") !== "dynamic-field" || String(control?.attrs?.source || "") !== "3") continue;
+    const fieldName = String(control?.attrs?.["obj-f"] || "");
+    const source = resolveDatasetDynamicFieldSource(entry, page, listIndex);
+    if (!source.list) {
+      findings.push(error("DASH_DYNAMIC_LOOKUP_SOURCE_LIST_UNRESOLVED", "A Collection/Kanban/Timeline Dynamic field using current-item source 3 must inherit a resolvable dataset source list.", {
+        page: page.title,
+        path: entry.pointer,
+        field: fieldName || null,
+        sourceListId: source.listId || null,
+      }));
+      continue;
+    }
+    const field = source.list.fieldsByName.get(fieldName) || source.list.fieldsById.get(fieldName);
+    if (!field) continue;
+    if (!isLookupField(field)) continue;
+
+    const lookup = resolveLookupDisplayContract(field);
+    if (!lookup.targetListId || !listIndex.byId.has(lookup.targetListId)) {
+      findings.push(error("DASH_DYNAMIC_LOOKUP_TARGET_UNRESOLVED", "Lookup-backed Dynamic fields must resolve their target data list before generated-final handoff.", {
+        page: page.title,
+        path: entry.pointer,
+        sourceListId: source.listId,
+        field: fieldName,
+        lookupTargetListId: lookup.targetListId || null,
+      }));
+      continue;
+    }
+
+    const target = listIndex.byId.get(lookup.targetListId);
+    const expectedDisplayField = lookup.displayField;
+    if (!expectedDisplayField || !fieldResolves(target, expectedDisplayField)) {
+      findings.push(error("DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_UNRESOLVED", "Lookup-backed Dynamic fields must resolve the Lookup field's configured Display field on the target data list.", {
+        page: page.title,
+        path: entry.pointer,
+        sourceListId: source.listId,
+        field: fieldName,
+        lookupTargetListId: lookup.targetListId,
+        expectedDisplayField: expectedDisplayField || null,
+      }));
+      continue;
+    }
+
+    const configuredDisplayField = String(control?.attrs?.["dis-f"] || "");
+    if (!configuredDisplayField) {
+      findings.push(error("DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_REQUIRED", "Lookup-backed Dynamic fields must set attrs.dis-f to the Lookup field's configured Display field; do not display the stored record ID or assume Title.", {
+        page: page.title,
+        path: `${entry.pointer}.attrs.dis-f`,
+        sourceListId: source.listId,
+        field: fieldName,
+        lookupTargetListId: lookup.targetListId,
+        expectedDisplayField,
+      }));
+    } else if (configuredDisplayField !== expectedDisplayField) {
+      findings.push(error("DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_MISMATCH", "attrs.dis-f must match the Lookup field's configured Display field on the target data list.", {
+        page: page.title,
+        path: `${entry.pointer}.attrs.dis-f`,
+        sourceListId: source.listId,
+        field: fieldName,
+        lookupTargetListId: lookup.targetListId,
+        expectedDisplayField,
+        configuredDisplayField,
+      }));
+    }
+  }
+}
+
+function resolveDatasetDynamicFieldSource(entry, page, listIndex) {
+  const ancestors = findAncestors(page.resource, entry.control).reverse();
+  const host = ancestors.find((node) => ["collection", "kanban", "timeline-v", "timeline-h"].includes(String(node?.type || "")));
+  const listId = String(host?.attrs?.data?.list?.ListID || host?.attrs?.data?.listId || host?.attrs?.list?.ListID || "");
+  return { listId, list: listIndex.byId.get(listId) || null };
+}
+
+function resolveLookupDisplayContract(field) {
+  const configs = [field?.Rules, field?.rules, field?.Settings, field?.settings, field?.lookup, field?.Lookup]
+    .map((value) => parseJsonMaybe(value))
+    .filter(isObject);
+  const targetListId = firstConfigValue(configs, ["listid", "listId", "ListID", "lookupListId", "lookup_list_id"]);
+  const displayField = firstConfigValue(configs, ["listfield", "listField", "displayField", "display_field", "dis-f"]);
+  return {
+    targetListId: targetListId === null || targetListId === undefined ? "" : String(targetListId),
+    displayField: displayField === null || displayField === undefined ? "" : String(displayField),
+  };
+}
+
+function firstConfigValue(configs, keys) {
+  const normalizedKeys = new Set(keys.map((key) => key.toLowerCase()));
+  const stack = [...configs];
+  while (stack.length) {
+    const current = stack.shift();
+    if (Array.isArray(current)) {
+      stack.push(...current);
+      continue;
+    }
+    if (!isObject(current)) continue;
+    for (const [key, value] of Object.entries(current)) {
+      if (normalizedKeys.has(key.toLowerCase()) && value !== "" && value !== null && value !== undefined) return value;
+      if (isObject(value) || Array.isArray(value)) stack.push(value);
+    }
+  }
+  return null;
 }
 
 function validateDesignerNavigatorLabel(entry, page, findings) {
@@ -1086,6 +1193,11 @@ function resolveBoundField(control, listIndex) {
 function isUserField(field) {
   const text = `${field?.Type || ""} ${field?.FieldType || ""} ${field?.ControlType || ""} ${field?.DisplayName || ""}`.toLowerCase();
   return /\b(identity-picker|user|person|people|owner|requester|assignee|createdby|modifiedby)\b/.test(text);
+}
+
+function isLookupField(field) {
+  const text = `${field?.Type || ""} ${field?.FieldType || ""} ${field?.ControlType || ""}`.toLowerCase();
+  return /\blookup\b/.test(text);
 }
 
 function isNumericField(field) {

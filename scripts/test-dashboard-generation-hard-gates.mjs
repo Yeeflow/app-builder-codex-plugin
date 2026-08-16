@@ -32,7 +32,7 @@ function field(FieldName, FieldType, Type, FieldID = FieldName) {
   return { FieldID, FieldName, InternalName: FieldName, DisplayName: FieldName, FieldType, Type };
 }
 
-function dynamicField(name, type, fieldName) {
+function dynamicField(name, type, fieldName, patch = {}) {
   const navLabel = `collection_item_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "field"}`;
   return {
     type,
@@ -48,6 +48,7 @@ function dynamicField(name, type, fieldName) {
       "obj-f": fieldName,
       field: fieldName,
       data: { field: fieldName, fieldName },
+      ...patch,
       ...(type === "dynamic-user" ? {
         user: { field: fieldName, fieldName },
         item_style: {
@@ -145,6 +146,14 @@ function find(node, id) {
   let found = null;
   visit(node, (current) => {
     if (!found && ids(current).includes(id)) found = current;
+  });
+  return found;
+}
+
+function findDynamicByField(root, fieldName) {
+  let found = null;
+  visit(root, (current) => {
+    if (!found && current?.type === "dynamic-field" && current?.attrs?.["obj-f"] === fieldName) found = current;
   });
   return found;
 }
@@ -404,7 +413,16 @@ function decodedWithResource(resource) {
         field("Text1", "Text", "select"),
         field("User1", "Text", "identity-picker"),
         field("Text2", "Text", "select"),
+        { ...field("Text3", "Text", "lookup", "field-lookup-3"), Rules: JSON.stringify({ listid: "lookup-observations", listfield: "Title" }) },
         field("Decimal1", "Decimal", "input_number", "field-decimal-1"),
+      ],
+      Layouts: [],
+    }, {
+      List: { ListID: "lookup-observations", Title: "Observations" },
+      Fields: [
+        field("ListDataID", "Text", "input"),
+        field("Title", "Text", "input"),
+        field("Text2", "Text", "input"),
       ],
       Layouts: [],
     }],
@@ -521,6 +539,7 @@ function eventPipelineGridTableRegion() {
             children: [
               dynamicField("Request Title", "dynamic-field", "Title"),
               dynamicField("Priority", "dynamic-field", "Text1"),
+              dynamicField("Finding", "dynamic-field", "Text3", { "dis-f": "Title" }),
               dynamicField("Owner", "dynamic-user", "User1"),
               dynamicField("Status", "dynamic-field", "Text2"),
             ],
@@ -727,6 +746,25 @@ try {
   delete navLabelControl.attrs.nv_label;
   delete navLabelControl.attrs.nav_label;
   expectCode("collection item internal controls without semantic navigator labels fail", ["--package", writePackage(tempDir, "collection-nav-label-missing", decodedWithResource(missingCollectionNavLabel))], "DASH_DESIGNER_NAV_LABEL_MISSING");
+
+  const lookupDisplayMissing = validV11Resource();
+  const missingLookupDynamic = findDynamicByField(lookupDisplayMissing, "Text3");
+  assert.ok(missingLookupDynamic, "Expected valid fixture to contain a Lookup Dynamic field.");
+  delete missingLookupDynamic.attrs["dis-f"];
+  expectCode("Lookup Dynamic field without Display field fails", ["--package", writePackage(tempDir, "lookup-display-missing", decodedWithResource(lookupDisplayMissing))], "DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_REQUIRED");
+
+  const lookupDisplayMismatch = validV11Resource();
+  const mismatchLookupDynamic = findDynamicByField(lookupDisplayMismatch, "Text3");
+  mismatchLookupDynamic.attrs["dis-f"] = "Text2";
+  expectCode("Lookup Dynamic field with a non-default Display field fails", ["--package", writePackage(tempDir, "lookup-display-mismatch", decodedWithResource(lookupDisplayMismatch))], "DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_MISMATCH");
+
+  const lookupDisplayUnresolved = validV11Resource();
+  const unresolvedLookupDynamic = findDynamicByField(lookupDisplayUnresolved, "Text3");
+  unresolvedLookupDynamic.attrs["dis-f"] = "MissingTargetField";
+  const unresolvedLookupDecoded = decodedWithResource(lookupDisplayUnresolved);
+  const unresolvedLookupField = unresolvedLookupDecoded.Childs[0].Fields.find((candidate) => candidate.FieldName === "Text3");
+  unresolvedLookupField.Rules = JSON.stringify({ listid: "lookup-observations", listfield: "MissingTargetField" });
+  expectCode("Lookup Dynamic field whose configured target Display field is unresolved fails", ["--package", writePackage(tempDir, "lookup-display-unresolved", unresolvedLookupDecoded)], "DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_UNRESOLVED");
 
   const rawExpressionText = validV11Resource();
   let rawExpressionCollection = null;
