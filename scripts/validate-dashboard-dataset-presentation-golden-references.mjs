@@ -95,6 +95,7 @@ const DYNAMIC_USER_ZERO_ITEM_PADDING = {
 };
 const OP_MENU_BUTTON_TRANSPARENT_BG = "rgba(255, 255, 255, 0)";
 const GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY = [null, "l-medium"];
+const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -345,6 +346,14 @@ function validateResponsiveMultiselectTemplateArtifact(registry, findings, optio
     const isSelectionColumn = index === 0 && findDescendants(column, (node) => identityCandidates(node).some((identity) => normalizeIdentity(identity) === normalizeIdentity("grid_table_col_item_select"))).length > 0;
     if ((!String(column?.attrs?.title?.value || "").trim() && !isSelectionColumn) || typeof column?.attrs?.sortingEnabled !== "boolean" || !asArray(column?.children).length) {
       findings.push(error("DASH_DATASET_RESPONSIVE_MULTISELECT_TEMPLATE_TABLE_COLUMN_INVALID", "Each responsive multiselect native table column requires item-template content; only the leading selection column may have an empty title.", { index, title: column?.attrs?.title?.value ?? null, sortingEnabled: column?.attrs?.sortingEnabled ?? null, childCount: asArray(column?.children).length }));
+    }
+    for (const key of ["id", "mapkey"]) {
+      if (!UUID_CONTROL_ID_RE.test(String(column?.[key] || ""))) {
+        findings.push(error("DASHBOARD_COLLECTION_DESIGNER_COLUMN_INVALID", "The responsive multiselect Golden Reference must retain Designer-native list-column UUID identity; do not use a visual-only tablecols object as its source.", { templateId: "collection_control_responsive_multiple_select", index, property: key, actual: column?.[key] ?? null }));
+      }
+    }
+    if (String(column?.type || "") !== "list-column") {
+      findings.push(error("DASHBOARD_COLLECTION_DESIGNER_COLUMN_INVALID", "The responsive multiselect Golden Reference must retain type = list-column on every native table column.", { templateId: "collection_control_responsive_multiple_select", index, actual: column?.type ?? null }));
     }
   }
   if (!asArray(collection?.children).length || !asArray(collection?.children).flatMap((child) => findDescendants(child, (node) => String(node?.type || "").startsWith("dynamic-"))).length) {
@@ -1084,6 +1093,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   if (provenance.templateId === "collection_control_responsive") validateResponsiveCollection(entry, page, findings);
   if (provenance.templateId === "collection_control_responsive_multiple_select") {
     validateResponsiveCollection(entry, page, findings, { wrapperIdentity: "grid_table_col_multiselect_wrapper", allowLeadingSelectionColumn: true, expectedMobileOperationWidth: [null, "2", "1"] });
+    validateCollectionDesignerColumnContract(entry, page, findings, { templateId: provenance.templateId, allowLeadingSelectionColumn: true });
     validateResponsiveMultiselect(entry, page, findings);
   }
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
@@ -1202,6 +1212,38 @@ function validateResponsiveCollection(entry, page, findings, options = {}) {
   const hasDeleteButton = operationButtons.some((button) => /delete/i.test(`${identityCandidates(button).join(" ")} ${button?.label || ""}`));
   if (hasDeleteButton && !/var_isDeleteConfirmed|isDeleteConfirmed|confirm/i.test(JSON.stringify(page.resource || {}))) {
     findings.push(error("DASH_DATASET_RESPONSIVE_DELETE_CONFIRMATION_TEMPVAR_MISSING", "Responsive Collection Delete item requires a confirmation temp variable and conditional delete flow.", { page: page.title, path: entry.pointer }));
+  }
+}
+
+function validateCollectionDesignerColumnContract(entry, page, findings, { templateId, allowLeadingSelectionColumn = false } = {}) {
+  // This requirement is deliberately template-aware. The responsive multiselect
+  // Golden Reference uses Designer-native list-column wrappers; the plain
+  // responsive reference uses an older tablecols shape and must not be mutated
+  // into a hybrid solely to satisfy this newer reference contract.
+  const columns = asArray(entry.control?.attrs?.tablecols);
+  const ids = new Set();
+  const mapKeys = new Set();
+  for (const [index, column] of columns.entries()) {
+    const pointer = `${entry.pointer}.attrs.tablecols[${index}]`;
+    if (String(column?.type || "") !== "list-column") {
+      findings.push(error("DASHBOARD_COLLECTION_DESIGNER_COLUMN_INVALID", "Collection table columns selected from this Golden Reference must preserve type = list-column; a visual-only object cannot be edited reliably in Designer.", { page: page.title, path: pointer, templateId, expected: "list-column", actual: column?.type ?? null }));
+      continue;
+    }
+    for (const [key, seen] of [["id", ids], ["mapkey", mapKeys]]) {
+      const value = String(column?.[key] || "");
+      if (!UUID_CONTROL_ID_RE.test(value) || seen.has(value)) {
+        findings.push(error("DASHBOARD_COLLECTION_DESIGNER_COLUMN_INVALID", "Collection list-column nodes must retain unique UUID id and mapkey values from the Golden Reference clone.", { page: page.title, path: `${pointer}.${key}`, templateId, property: key, actual: value || null }));
+      }
+      if (value) seen.add(value);
+    }
+    const title = String(column?.attrs?.title?.value || "").trim();
+    const isSelectionColumn = allowLeadingSelectionColumn && index === 0 && !title
+      && findDescendants(column, (node) => identityCandidates(node).some((identity) => normalizeIdentity(identity) === normalizeIdentity("grid_table_col_item_select"))).length > 0;
+    if (isSelectionColumn) continue;
+    const dynamicControls = findDescendants(column, (node) => String(node?.type || "").startsWith("dynamic-"));
+    if (!dynamicControls.length || dynamicControls.some((node) => node?.attrs?.source !== "3" || !String(node?.attrs?.["obj-f"] || "").trim())) {
+      findings.push(error("DASHBOARD_COLLECTION_DESIGNER_COLUMN_DYNAMIC_BINDING_INVALID", "Each non-selection list-column must contain an item-context Dynamic control with attrs.source = 3 and a resolved attrs.obj-f field binding.", { page: page.title, path: pointer, templateId }));
+    }
   }
 }
 

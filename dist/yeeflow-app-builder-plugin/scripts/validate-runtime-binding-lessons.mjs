@@ -11,6 +11,7 @@ const DASHBOARD_CONSUMER_TYPES = new Set(["summary", "collection", "data-list", 
 const DATA_FILTER_TYPES = new Set(["search", "select", "checkbox", "radio", "date", "range", "check-range", "relative-period", "hierarchy", "sorting"]);
 const LOOKUP_CONTROL_TYPES = new Set(["lookup", "organization-picker", "identity-picker"]);
 const SYSTEM_DASHBOARD_FIELDS = new Set(["ListDataID", "Created", "CreatedBy", "Modified", "ModifiedBy"]);
+const TEMP_RUNTIME_PREFIX = "__temp_";
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -157,6 +158,38 @@ function containsFilterVar(value, filterVar) {
   return found;
 }
 
+function validateTempVarClosure({ findings, page, pageName }) {
+  const definitions = asArray(page?.tempVars);
+  const declared = new Set();
+  for (const [index, definition] of definitions.entries()) {
+    const id = safeString(definition?.id || definition?.name);
+    const name = safeString(definition?.name || definition?.id);
+    if (id.startsWith(TEMP_RUNTIME_PREFIX) || name.startsWith(TEMP_RUNTIME_PREFIX)) {
+      add(findings, "error", "DASHBOARD_TEMP_VAR_ID_SYSTEM_PREFIX", "Dashboard tempVars[] declarations must use a semantic raw id/name; __temp_ is reserved for runtime references.", {
+        page: pageName, pointer: `tempVars[${index}]`, id: id || null, name: name || null,
+        recommendedFix: "Declare var_<page>_<metric>; use __temp_<declared-id> only in expression references.",
+      });
+    }
+    if (id && name && id !== name) add(findings, "error", "DASHBOARD_TEMP_VAR_DECLARATION_NAME_MISMATCH", "Dashboard tempVars[] id and name must match for generated KPI/Summary bindings.", { page: pageName, pointer: `tempVars[${index}]`, id, name });
+    if (id) declared.add(id);
+  }
+  walk(page, (node, pointer) => {
+    if (!isObject(node)) return;
+    const runtimeId = safeString(node.id);
+    const name = safeString(node.name);
+    const usesExpressionTemp = safeString(node.exprType) === "variable" && runtimeId.startsWith(TEMP_RUNTIME_PREFIX);
+    const usesPrefixTemp = safeString(node.prefix) === TEMP_RUNTIME_PREFIX && safeString(node.value);
+    if (!usesExpressionTemp && !usesPrefixTemp) return;
+    const rawId = usesPrefixTemp ? safeString(node.value) : runtimeId.slice(TEMP_RUNTIME_PREFIX.length);
+    if (rawId.startsWith(TEMP_RUNTIME_PREFIX)) {
+      add(findings, "error", "DASHBOARD_TEMP_VAR_DOUBLE_RUNTIME_PREFIX", "Dashboard temp variable runtime reference double-prefixes __temp_.", { page: pageName, pointer, runtimeId: usesPrefixTemp ? `${TEMP_RUNTIME_PREFIX}${rawId}` : runtimeId, recommendedFix: "Keep tempVars[].id unprefixed and reference it exactly once as __temp_<declared-id>." });
+      return;
+    }
+    if (usesExpressionTemp && name && name !== rawId) add(findings, "error", "DASHBOARD_TEMP_VAR_REFERENCE_NAME_MISMATCH", "Dashboard temp expression name must equal the raw declared ID while expression id uses __temp_<declared-id>.", { page: pageName, pointer, runtimeId, name, expectedName: rawId });
+    if (!rawId || !declared.has(rawId)) add(findings, "error", "DASHBOARD_TEMP_VAR_REFERENCE_UNRESOLVED", "Dashboard temp variable runtime reference does not resolve to page.tempVars[].", { page: pageName, pointer, runtimeId: usesPrefixTemp ? `${TEMP_RUNTIME_PREFIX}${rawId}` : runtimeId, expectedDeclaration: rawId || null, recommendedFix: "Declare the raw id in page.tempVars[] or remove the stale reference." });
+  });
+}
+
 function validRecordIdLike(value) {
   if (Array.isArray(value)) return value.every(validRecordIdLike);
   if (isObject(value)) return true;
@@ -231,6 +264,7 @@ export function validateDashboardBindings(decoded, options = {}) {
         });
       }
     }
+    validateTempVarClosure({ findings, page, pageName });
     const consumedVars = new Map();
     const exts = asArray(page?.exts);
     const extByControlId = new Map(exts.map((ext) => [safeString(ext?.i), ext]));

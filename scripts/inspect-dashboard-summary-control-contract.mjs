@@ -19,6 +19,7 @@ import {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const PROVEN_UUID_SUMMARY_SHAPE = "uuid-summary-v1.0.1";
+const TEMP_RUNTIME_PREFIX = "__temp_";
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -41,15 +42,21 @@ export function inspectDashboardSummaryControlContract({ package: packagePath } 
   const pages = collectPages(pkg);
   const summaries = allControlsFromPages(pages).filter((item) => isSummaryControl(item.control));
   const tempVars = new Set();
+  const validatedTempVarPages = new Set();
   const uuidProofRequested = hasUuidSummaryProofClaim(pkg);
 
   for (const item of summaries) {
+    if (!validatedTempVarPages.has(item.page.layoutId)) {
+      validateTempVarDeclarations(item.page, findings);
+      validatedTempVarPages.add(item.page.layoutId);
+    }
     validateHiddenHost(item, findings);
     validateSummary(item, pkg, fieldMaps, findings);
     if (uuidProofRequested || controlRequestsUuidSummaryProof(item.control)) validateUuidSummaryProofShape(item, findings);
     const saveVar = item.control.attrs?.save_var;
-    if (isObject(saveVar) && saveVar.name) {
-      const name = scalar(saveVar.name);
+    const tempBinding = inspectTempBinding(item, saveVar);
+    if (tempBinding.valid) {
+      const name = tempBinding.rawId;
       if (tempVars.has(`${item.page.layoutId}:${name}`)) {
         addFinding(findings, "error", "SUMMARY_TEMP_VAR_DUPLICATE", "Summary temp variable names must be unique per page/metric.", { page: item.page.title, variable: name });
       }
@@ -149,11 +156,12 @@ function validateSummary(item, pkg, fieldMaps, findings) {
   if (!isObject(attrs.save_var) || attrs.save_var.type !== "expr" || attrs.save_var.exprType !== "variable" || !attrs.save_var.id || !attrs.save_var.name) {
     addFinding(findings, "error", "SUMMARY_SAVE_VAR_EXPRESSION_OBJECT_REQUIRED", "Summary save_var must use designer-exported expression-object shape, not a plain string.", { page: item.page.title });
   } else {
-    const saveVarIds = [attrs.save_var.id, attrs.save_var.name].map(scalar).filter(Boolean);
-    if (!summaryTempVarDeclared(item, saveVarIds)) {
-      addFinding(findings, "error", "SUMMARY_TEMP_VAR_DECLARATION_MISSING", "Summary save_var must resolve to a dashboard layout resource tempVars[] declaration.", { page: item.page.title });
+    const tempBinding = inspectTempBinding(item, attrs.save_var);
+    if (!tempBinding.valid) {
+      addFinding(findings, "error", tempBinding.code, tempBinding.message, { page: item.page.title, ...tempBinding.detail });
+      return;
     }
-    const visibleBinding = visibleSummaryBindingStatus(item, saveVarIds);
+    const visibleBinding = visibleSummaryBindingStatus(item, tempBinding);
     if (!visibleBinding.valid) {
       addFinding(findings, "error", "SUMMARY_VISIBLE_BINDING_MISSING", "Visible Heading/Text controls must bind to Summary temp variables through attrs.headc.title.variable[].", { page: item.page.title });
     } else if (visibleBinding.mode === "static-visible-value") {
@@ -221,7 +229,7 @@ function validateUuidSummaryProofShape(item, findings) {
     addFinding(findings, "error", "SUMMARY_UUID_PROOF_ID_NOT_UUID", "The proven dynamic KPI shape requires UUID Summary control IDs.", { page: item.page.title, summaryId: controlId || null });
   }
   const saveVar = item.control.attrs?.save_var || {};
-  const saveVarIds = [saveVar.id, saveVar.name].map(scalar).filter(Boolean);
+  const tempBinding = inspectTempBinding(item, saveVar);
   const pageResources = item.page.roots;
   const exts = pageResources.flatMap((root) => asArray(root.exts || root.Exts));
   const visibleBindings = [];
@@ -236,31 +244,68 @@ function validateUuidSummaryProofShape(item, findings) {
   if (!extsMatch) {
     addFinding(findings, "error", "SUMMARY_UUID_PROOF_EXTS_MISSING", "The proven UUID Summary shape requires Resource.exts[] with i equal to the Summary UUID, category ___Pivot___, and key summary.", { page: item.page.title, summaryId: controlId || null });
   }
-  if (!summaryTempVarDeclared(item, saveVarIds)) {
+  if (!tempBinding.valid) {
     addFinding(findings, "error", "SUMMARY_UUID_PROOF_TEMPVAR_MISSING", "The proven UUID Summary shape requires Resource.tempVars[] to declare the same temp variable saved by Summary attrs.save_var.", { page: item.page.title, summaryId: controlId || null });
   }
-  const visibleBindingMatch = saveVarIds.length && visibleBindings.some((variable) => saveVarIds.includes(scalar(variable.id || variable.ID || variable.name || variable.Name || variable)));
+  const visibleBindingMatch = tempBinding.valid && visibleBindings.some((variable) =>
+    scalar(variable.id || variable.ID) === tempBinding.runtimeId
+    && scalar(variable.name || variable.Name) === tempBinding.rawId
+  );
   if (!visibleBindingMatch) {
     addFinding(findings, "error", "SUMMARY_UUID_PROOF_VISIBLE_BINDING_MISSING", "The proven UUID Summary shape requires visible Heading/Text controls to bind through attrs.headc.title.variable[].", { page: item.page.title, summaryId: controlId || null });
   }
 }
 
-function summaryTempVarDeclared(item, saveVarIds) {
-  if (!saveVarIds.length) return false;
-  const tempVars = item.page.roots.flatMap((root) => asArray(root.tempVars || root.TempVars));
-  return tempVars.some((variable) => saveVarIds.includes(scalar(variable.id || variable.ID || variable.name || variable.Name)));
+function tempVarDeclarations(page) {
+  return page.roots.flatMap((root) => asArray(root.tempVars || root.TempVars));
 }
 
-function visibleSummaryBindingStatus(item, saveVarIds) {
-  if (!saveVarIds.length) return false;
+function validateTempVarDeclarations(page, findings) {
+  for (const variable of tempVarDeclarations(page)) {
+    const id = scalar(variable.id || variable.ID);
+    const name = scalar(variable.name || variable.Name || id);
+    if (id.startsWith(TEMP_RUNTIME_PREFIX) || name.startsWith(TEMP_RUNTIME_PREFIX)) {
+      addFinding(findings, "error", "SUMMARY_TEMP_VAR_DECLARATION_SYSTEM_PREFIX", "Dashboard tempVars[] declares a semantic variable ID/name; __temp_ is reserved for runtime references only.", { page: page.title, id: id || null, name: name || null });
+    }
+    if (id && name && id !== name) {
+      addFinding(findings, "error", "SUMMARY_TEMP_VAR_DECLARATION_NAME_MISMATCH", "Dashboard tempVars[] id and name must use the same semantic identifier for KPI/Summary bindings.", { page: page.title, id, name });
+    }
+  }
+}
+
+function inspectTempBinding(item, value) {
+  if (!isObject(value)) return { valid: false, code: "SUMMARY_TEMP_VAR_DECLARATION_MISSING", message: "Summary save_var must resolve to a declared dashboard temp variable.", detail: {} };
+  const runtimeId = scalar(value.id || value.ID);
+  const rawId = scalar(value.name || value.Name);
+  if (!runtimeId.startsWith(TEMP_RUNTIME_PREFIX)) {
+    return { valid: false, code: "SUMMARY_SAVE_VAR_RUNTIME_PREFIX_MISSING", message: "Summary save_var.id must use __temp_<declared-id>; the prefix is a runtime reference, not the declaration name.", detail: { runtimeId: runtimeId || null, name: rawId || null } };
+  }
+  const declaredId = runtimeId.slice(TEMP_RUNTIME_PREFIX.length);
+  if (declaredId.startsWith(TEMP_RUNTIME_PREFIX)) {
+    return { valid: false, code: "SUMMARY_SAVE_VAR_DOUBLE_RUNTIME_PREFIX", message: "Summary save_var.id double-prefixes __temp_. Declare the variable without the prefix and reference it once at runtime.", detail: { runtimeId, name: rawId || null } };
+  }
+  if (!rawId || rawId.startsWith(TEMP_RUNTIME_PREFIX) || rawId !== declaredId) {
+    return { valid: false, code: "SUMMARY_SAVE_VAR_NAME_MISMATCH", message: "Summary save_var.name must equal the raw declared tempVars[].id, while save_var.id is __temp_<declared-id>.", detail: { runtimeId, name: rawId || null, expectedName: declaredId || null } };
+  }
+  const declaration = tempVarDeclarations(item.page).find((variable) => scalar(variable.id || variable.ID) === declaredId && scalar(variable.name || variable.Name || variable.id || variable.ID) === declaredId);
+  if (!declaration) {
+    return { valid: false, code: "SUMMARY_TEMP_VAR_DECLARATION_MISSING", message: "Summary save_var must resolve to a dashboard layout resource tempVars[] declaration with the same raw id/name.", detail: { runtimeId, name: rawId, expectedDeclaration: declaredId } };
+  }
+  return { valid: true, runtimeId, rawId, declaration };
+}
+
+function visibleSummaryBindingStatus(item, tempBinding) {
   const visibleBindings = [];
   const visibleTexts = [];
   for (const root of item.page.roots) {
     walkVisibleVariables(root, visibleBindings);
     walkVisibleText(root, visibleTexts);
   }
-  const hasBinding = visibleBindings.some((variable) => saveVarIds.includes(scalar(variable.id || variable.ID || variable.name || variable.Name || variable)));
-  const showsRawVariable = visibleTexts.some((text) => saveVarIds.some((saveVarId) => text.includes(saveVarId)));
+  const hasBinding = visibleBindings.some((variable) =>
+    scalar(variable.id || variable.ID) === tempBinding.runtimeId
+    && scalar(variable.name || variable.Name) === tempBinding.rawId
+  );
+  const showsRawVariable = visibleTexts.some((text) => text.includes(tempBinding.runtimeId) || text.includes(tempBinding.rawId));
   if (showsRawVariable) return { valid: false, mode: "raw-variable-text" };
   if (hasBinding) return { valid: true, mode: "dynamic-variable-binding" };
   return { valid: false, mode: "missing" };

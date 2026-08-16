@@ -91,6 +91,9 @@ function run() {
   expectFail("Summary missing layout-resource ReportIds fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-reportids.json", decoded({ summary: "missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
   expectFail("Summary missing layout-resource exts match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-exts.json", decoded({ summary: "missing-exts" })) }), "SUMMARY_EXTS_REGISTRATION_MISSING");
   expectFail("Summary save_var missing from layout-resource tempVars fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-tempvars.json", decoded({ summary: "missing-tempvars" })) }), "SUMMARY_TEMP_VAR_DECLARATION_MISSING");
+  expectFail("Dashboard temp variable declarations cannot use runtime prefix", inspectDashboardSummaryControlContract({ package: writeJson("summary-prefixed-temp-declaration.json", decoded({ summary: "prefixed-temp-declaration" })) }), "SUMMARY_TEMP_VAR_DECLARATION_SYSTEM_PREFIX");
+  expectFail("Summary save_var cannot double-prefix runtime temp IDs", inspectDashboardSummaryControlContract({ package: writeJson("summary-double-temp-prefix.json", decoded({ summary: "double-temp-prefix" })) }), "SUMMARY_SAVE_VAR_DOUBLE_RUNTIME_PREFIX");
+  expectFail("Summary save_var name must match the raw declaration", inspectDashboardSummaryControlContract({ package: writeJson("summary-temp-name-mismatch.json", decoded({ summary: "temp-name-mismatch" })) }), "SUMMARY_SAVE_VAR_NAME_MISMATCH");
   expectFail("Visible Text showing raw temp variable instead of variable binding fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-raw-temp-visible.json", decoded({ summary: "raw-temp-visible" })) }), "SUMMARY_VISIBLE_BINDING_MISSING");
   expectFail("UUID Summary proof missing Resource.exts match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-exts.json", decoded({ summary: "uuid-proof-no-exts" })) }), "SUMMARY_UUID_PROOF_EXTS_MISSING");
   expectFail("UUID Summary proof missing Resource.ReportIds match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-missing-reportids.json", decoded({ summary: "uuid-proof-missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
@@ -219,7 +222,10 @@ function decoded(flags = {}) {
   const tempVars = summaries
     .map((summary) => summary.attrs?.save_var)
     .filter((saveVar) => typeof saveVar === "object")
-    .map((saveVar) => ({ id: saveVar.id, name: saveVar.name }));
+    .map((saveVar) => ({ id: String(saveVar.id || "").replace(/^__temp_/, ""), name: saveVar.name }));
+  if (flags.summary === "prefixed-temp-declaration") {
+    tempVars.forEach((tempVar) => { tempVar.id = `__temp_${tempVar.id}`; tempVar.name = `__temp_${tempVar.name}`; });
+  }
   const root = flags.rootOverride || {
     type: "page",
     attrs: dashboardRootAttrs(flags),
@@ -337,9 +343,12 @@ function summaryControl(mode, index = 0) {
   const func = mode === "bad-sum" ? "sum" : "count";
   const metadata = mode === "missing-metadata" ? null : fieldMeta;
   const id = mode === "non-uuid" || mode === "semantic-runtime-proven" ? "summary-planned-events" : summaryUuid(index);
-  const saveVar = scalar(mode).startsWith("uuid-proof")
-    ? { exprType: "variable", valueType: "string", id: "__temp___temp_total_records", type: "expr", name: "__temp_total_records" }
-    : { exprType: "variable", valueType: "string", id: `__temp___temp_event_count_${index}`, type: "expr", name: `__temp_event_count_${index}` };
+  const rawTempId = scalar(mode).startsWith("uuid-proof") ? "var_total_records" : `var_event_count_${index}`;
+  const saveVar = mode === "double-temp-prefix"
+    ? { exprType: "variable", valueType: "string", id: `__temp___temp_${rawTempId}`, type: "expr", name: `__temp_${rawTempId}` }
+    : mode === "temp-name-mismatch"
+      ? { exprType: "variable", valueType: "string", id: `__temp_${rawTempId}`, type: "expr", name: `wrong_${rawTempId}` }
+      : { exprType: "variable", valueType: "string", id: `__temp_${rawTempId}`, type: "expr", name: rawTempId };
   return {
     id,
     type: "summary",
@@ -501,7 +510,7 @@ function runtimeEvidence(overrides = {}) {
 
 function analyticsDecoded({ type, id, extKey, reportIds = [], resourceReportIds = [], runtimeProofClaimed = false, semanticKey = "analytics:synthetic", dataFieldName = "ListDataID", omitTempVars = false, seriesName = "" } = {}) {
   const dataField = field(dataFieldName, dataFieldName === "Decimal1" ? "Decimal" : "Text", dataFieldName === "Decimal1" ? "Amount" : "Record ID");
-  const saveVar = { exprType: "variable", valueType: "string", id: "__temp___temp_analytics_summary", type: "expr", name: "__temp_analytics_summary" };
+  const saveVar = { exprType: "variable", valueType: "string", id: "__temp_var_analytics_summary", type: "expr", name: "var_analytics_summary" };
   const control = {
     id,
     type,
@@ -520,7 +529,7 @@ function analyticsDecoded({ type, id, extKey, reportIds = [], resourceReportIds 
   const root = {
     type: "page",
     ReportIds: resourceReportIds,
-    tempVars: omitTempVars ? [] : [{ id: "__temp___temp_analytics_summary", name: "__temp_analytics_summary" }],
+    tempVars: omitTempVars ? [] : [{ id: "var_analytics_summary", name: "var_analytics_summary" }],
     children: [control],
   };
   if (extKey) root.exts = [{ i: id, category: "___Pivot___", key: extKey }];
