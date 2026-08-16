@@ -163,6 +163,7 @@ function defaultRules() {
         minimumNearCollisionDeltaY: 40,
         minimumForwardFlowDeltaX: 180,
         minimumTaskColumnDeltaX: 305,
+        minimumForwardNodeClearance: 110,
         mainLaneY: 40,
         rejectUpGap: 125,
         rejectDownGap: 135,
@@ -205,6 +206,8 @@ function defaultRules() {
         maxNonReturnVertexFlowRatio: 0.25,
         maxAverageVerticesPerFlow: 1.25,
         connectorDetourRatioMax: 2.35,
+        routeOrthogonalTolerance: 1,
+        routeSourceExitAlignmentTolerance: 12,
         gatewayBranchLocalMaxDeltaX: 650,
         endMergeMaxDeltaX: 650,
         endMergeVerticalToleranceY: 130,
@@ -376,6 +379,8 @@ function validateOneWorkflow(resource, reference, findings) {
         delta: { x: dx, y: dy },
       }));
     }
+    validateExplicitRouteOrthogonality({ resource, flow, flowPath, vertices, spacing, findings });
+    validateRouteSourceExit({ resource, flow, flowPath, sourceNode, vertices, spacing, findings });
     validateFlowRouteY({
       resource,
       flow,
@@ -411,6 +416,19 @@ function validateOneWorkflow(resource, reference, findings) {
         delta: { x: dx, y: dy },
       }));
     }
+    validateForwardNodeClearance({
+      resource,
+      flow,
+      flowPath,
+      sourceNode,
+      targetNode,
+      sourceStencil,
+      targetStencil,
+      signedDx,
+      sameRow,
+      spacing,
+      findings,
+    });
     const isLongBackwardFlow = signedDx < 0 && dx >= Number(spacing.longFlowVertexRequiredDeltaX);
     if (remoteRejectEndpointRoute && !vertices.length) {
       findings.push(issue("WORKFLOW_LAYOUT_REJECT_ENDPOINT_VERTICES_MISSING", "A rejected or return connector to a non-local End with Rejection endpoint must use explicit vertices; split the endpoint locally when a safe route cannot be produced.", {
@@ -559,7 +577,9 @@ function isLocalForwardAutoRouteCandidate({ flow, sourceNode, targetNode, spacin
   const sourceStencil = stencilId(sourceNode.shape);
   const targetStencil = stencilId(targetNode.shape);
   if (sourceStencil === "StartNoneEvent" || sourceStencil === "EndRejectEvent" || targetStencil === "EndRejectEvent") return false;
-  if (isRejectedFlow(flow) || isReturnFlow(flow)) return false;
+  // A "Returned for Rework" label can still lead to a nearby, rightward
+  // action branch. That is a local branch, not a long return route.
+  if (isRejectedFlow(flow)) return false;
   const signedDx = Number(targetNode.position.x) - Number(sourceNode.position.x);
   if (signedDx <= 0) return false;
   const dx = Math.abs(signedDx);
@@ -773,6 +793,76 @@ function validateFlowRouteX({ resource, flow, flowPath, sourceNode, targetNode, 
       tolerance,
     }));
   }
+}
+
+function validateExplicitRouteOrthogonality({ resource, flow, flowPath, vertices, spacing, findings }) {
+  const tolerance = Number(spacing.routeOrthogonalTolerance || 1);
+  for (let index = 1; index < vertices.length; index += 1) {
+    const previous = vertices[index - 1];
+    const current = vertices[index];
+    const dx = Math.abs(Number(current?.x) - Number(previous?.x));
+    const dy = Math.abs(Number(current?.y) - Number(previous?.y));
+    if (!Number.isFinite(dx) || !Number.isFinite(dy) || dx <= tolerance || dy <= tolerance) continue;
+    findings.push(issue("WORKFLOW_LAYOUT_VERTEX_SEGMENT_DIAGONAL", "Explicit SequenceFlow route vertices must form orthogonal segments; two consecutive vertices may not change both x and y.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: `${flowPath}.vertices[${index - 1}]`,
+      flowId: flow.id,
+      sourceId: refId(flow.shape.source),
+      targetId: refId(flow.shape.target),
+      previous,
+      current,
+      delta: { x: dx, y: dy },
+      tolerance,
+    }));
+  }
+}
+
+function validateRouteSourceExit({ resource, flow, flowPath, sourceNode, vertices, spacing, findings }) {
+  if (!sourceNode?.position || !vertices.length) return;
+  const firstVertex = vertices[0];
+  const x = Number(firstVertex?.x);
+  const y = Number(firstVertex?.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+  const bounds = nodeBounds(sourceNode);
+  const tolerance = Number(spacing.routeSourceExitAlignmentTolerance || 12);
+  const exitsAboveOrBelow = y < bounds.top - tolerance || y > bounds.bottom + tolerance;
+  if (!exitsAboveOrBelow) return;
+  const center = nodeCenter(sourceNode);
+  if (Math.abs(x - center.x) <= tolerance) return;
+  findings.push(issue("WORKFLOW_LAYOUT_ROUTE_SOURCE_EXIT_NOT_VERTICAL", "A routed connector that leaves above or below its source node must begin on the source center line so its first visible leg is vertical; recompute vertices after final node placement.", {
+    source: resource.source,
+    workflowName: resource.workflowName,
+    path: `${flowPath}.vertices[0]`,
+    flowId: flow.id,
+    sourceId: sourceNode.id,
+    targetId: refId(flow.shape.target),
+    sourceCenterX: Math.round(center.x),
+    firstVertex,
+    tolerance,
+  }));
+}
+
+function validateForwardNodeClearance({ resource, flow, flowPath, sourceNode, targetNode, sourceStencil, targetStencil, signedDx, sameRow, spacing, findings }) {
+  if (!sourceNode?.position || !targetNode?.position || !sameRow || signedDx <= 0) return;
+  if (sourceStencil === "EndRejectEvent" || targetStencil === "EndRejectEvent") return;
+  const sourceBounds = nodeBounds(sourceNode);
+  const targetBounds = nodeBounds(targetNode);
+  const clearance = targetBounds.left - sourceBounds.right;
+  const minimumClearance = Number(spacing.minimumForwardNodeClearance || 110);
+  if (clearance >= minimumClearance) return;
+  findings.push(issue("WORKFLOW_LAYOUT_FORWARD_NODE_CLEARANCE_TOO_SMALL", "Adjacent forward workflow nodes must retain enough visible clearance for rounded connectors and labels; widen the lane or fold the graph instead of compressing cards.", {
+    source: resource.source,
+    workflowName: resource.workflowName,
+    path: flowPath,
+    flowId: flow.id,
+    sourceId: sourceNode.id,
+    targetId: targetNode.id,
+    sourceBounds: roundBox(sourceBounds),
+    targetBounds: roundBox(targetBounds),
+    clearance: Math.round(clearance),
+    minimumClearance,
+  }));
 }
 
 function workflowRowBandsBetween(nodes, sourceNode, targetNode, spacing) {

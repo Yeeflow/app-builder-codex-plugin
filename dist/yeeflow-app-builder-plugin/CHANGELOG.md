@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.12.7
+
+- Strengthen Approval workflow route generation from the Audit Management `Engagement Closure Approval 2` and `Fieldword Gate Approval 2` Golden Reference: local rightward `Returned for Rework` branches use native rounded auto-routing rather than cosmetic vertices.
+- Fail workflow layout validation for diagonal explicit vertex segments, a vertical source exit whose first vertex still uses a moved node's former x coordinate, and same-row forward cards with less than `110px` edge-to-edge clearance.
+- Require route geometry to be regenerated after final node placement and prefer `130-160px` main-lane card clearance; row folding remains the remedy for canvas width pressure.
+- Add positive/negative regression coverage and approval-generator training for orthogonal return routing, local rework branches, and final-layout coordinate closure.
+
 ## 1.12.6
 
 - Add a Lookup-aware Dashboard Dynamic field contract. Collection, Kanban, and Timeline Dynamic fields now derive `attrs.dis-f` from the referenced Lookup field's configured target display field instead of assuming `Title` or exposing the stored record ID.

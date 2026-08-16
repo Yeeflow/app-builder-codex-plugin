@@ -69,6 +69,10 @@ It does not prove business behavior, assignment correctness, workflow execution,
 36. Local rejected connectors to a nearby `EndRejectEvent` should not carry explicit vertices. If the rejection endpoint is correctly placed above/below the source group, rounded auto-routing is sufficient.
 37. Local forward or merge connectors between nearby upper/lower lanes should also use rounded auto-routing with empty `vertices[]`. Do not add explicit vertices to nearby Completed/Approved merge lines merely because the source and target are on different y lanes. If a short local merge needs several bends to look readable, move the branch/merge nodes into a clearer golden-reference motif instead.
 38. Connector display labels must stay concise. Use short visible labels such as `Amount >= 5000`, `Sensitive data`, or `Approved`, and keep the full expression in `conditioninfo`; do not put long business sentences on connector labels.
+39. A nearby forward branch, including an outcome labelled `Returned for Rework`, must use empty `vertices[]` when its target is to the right and within the local branch distance. The outcome label does not turn that connector into a long backward return route.
+40. Every explicit `vertices[]` polyline must be orthogonal: adjacent vertices must share either x or y. A connector that exits above or below its source card must start at the source card center x (within the configured tolerance), so the first visible leg is vertical.
+41. Recalculate every explicit route only after the complete node layout is final. Moving a node without recalculating its connected vertices is a generated-final failure.
+42. Same-row forward cards must retain at least `110px` of visible edge-to-edge clearance. Prefer the Golden Reference's `130-160px` clearance; fold into another row rather than compressing cards to make a graph narrower.
 
 ## Standard Spacing
 
@@ -107,6 +111,8 @@ The `workflow_actions_layout` reference establishes the following default spacin
 | `CONNECTOR_LABEL_MAX` | `42 chars` | fixed | Maximum suggested visible business-condition connector label length. |
 | `LOCAL_REJECT_VERTEX_DELTA` | `760 x 260` | fixed | Local rejected connectors within this x/y distance should not use explicit vertices. |
 | `LOCAL_FORWARD_AUTO_ROUTE_DELTA` | `1250 x 360` | fixed | Local forward or merge connectors within this x/y distance should not use explicit vertices. |
+| `FORWARD_NODE_CLEARANCE_MIN` | `110px` | fixed | Minimum visible gap between adjacent same-row forward cards. |
+| `ROUTE_SOURCE_EXIT_ALIGNMENT_TOLERANCE` | `12px` | fixed | Permitted horizontal variance between a vertical source exit and the source center line. |
 | `CANVAS_RATIO` | `16:9` | advisory | Preferred visible Designer canvas usage. |
 
 ## Assignment Task Outcome Rules
@@ -245,6 +251,10 @@ vertices = [
 ```
 
 Use an external return lane below or above the graph only when the row gap is too narrow, already crowded, or the connector spans many logical workflow groups. Do not send short local return lines to arbitrary fixed y values.
+
+Do not add vertices to a local outcome branch merely because its label contains `Return`, `Returned`, or `Rework`. For example, an Approval Task that sends `Returned for Rework` to a nearby lower-right `Return stage gate` is a local forward branch and must leave `vertices = []`; Workflow Designer will render its rounded bend. Reserve explicit vertices for the later genuinely leftward/backward return route.
+
+For an explicit lower return route, the first point below the source must align with the source center line. Thus, if the source card center is `(1625, 433)`, the route begins with a point such as `(1625, 530)` before travelling horizontally. Do not reuse a previous source's x coordinate after moving the node.
 
 For long return/backward lines that cross multiple workflow rows, first cluster all rows between source and target. The horizontal segment must use an open adjacent row gap, not the midpoint between the source row and target row when an intermediate row exists. For example, if rows occupy `160..246`, `320..406`, and `480..566`, a return from the third row to the first row should use the first open gap midpoint `283`, not `(160 + 86 + 480) / 2 = 363`, because `363` passes through the middle row.
 
