@@ -461,6 +461,22 @@ function approvalPlanMarkdown() {
     "| Form Report Name | Related Approval Form | Purpose |",
     "| --- | --- | --- |",
     "| Business Travel Request Report | Business Travel Request Approval | Approval reporting. |",
+    "",
+    "## 10. Custom Data List Forms Plan",
+    "",
+    "### 10.1 Travel Requests",
+    "",
+    "| Form Name | Form Type | Selected Data List Form Layout Template | Open In | Selection Reason |",
+    "| --- | --- | --- | --- | --- |",
+    "| Travel Requests New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Pop-up window | Request capture needs editable current fields |",
+    "| Travel Requests View | View | data_list_form_layout_view_item_v1_1 | Slide panel | Request review needs current item context |",
+    "",
+    "### 10.2 Travel Records",
+    "",
+    "| Form Name | Form Type | Selected Data List Form Layout Template | Open In | Selection Reason |",
+    "| --- | --- | --- | --- | --- |",
+    "| Travel Records New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Pop-up window | Travel records need editable current fields |",
+    "| Travel Records View | View | data_list_form_layout_view_item_v1_1 | Slide panel | Travel record review needs current item context |",
   ].join("\n");
 }
 

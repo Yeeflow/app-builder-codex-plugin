@@ -4,6 +4,9 @@ description: generate, inspect, validate, package, and improve yeeflow approval 
 ---
 
 # Yeeflow Approval Form Generator
++## Hosted MCP-Only Yeeflow Access
+
+For live Yeeflow work, use only the appropriate hosted MCP tool. Its service negotiates authentication; standalone OAuth, local REST/API helpers, API-key fallbacks, profile/environment configuration, and direct endpoint calls are retired and must not be used. `workspace_list` is the sole workspace-discovery route. Require explicit confirmation for writes, and treat MCP acceptance as distinct from materialization and runtime proof.
 
 ## Approval Workflow Set Variable
 
@@ -24,6 +27,16 @@ Every `SequenceFlow.source`, `target`, `incoming[0]`, and `outgoing[0]` must use
 QueryData result/count targets written under `__variables_` must be declared in `DefResource.variables.basic`, use compatible types, and include selected fields for multiple results. ContentList add/edit actions must contain real field mappings; edit/remove must contain target-record criteria; Update/Edit actions must not materialize as add. Do not guess edit/remove criteria when the App Plan does not identify the target record: fail generation and request/record the missing contract. Run `validate-ywf-def.js --mode final` and `scripts/validate-approval-workflow-publish-readiness.mjs` before signing, install, import, or publish claims. Keep standalone wrapper `Settings: null` through the standard wrapper builder.
 
 Approval variable identity hard rule: all IDs and `idx` values in one Approval Form are resource-scoped across `variables.basic[]`, `variables.tempVars[]`, and `variables.filter[]`. Reject literal duplicates and canonical collisions after lowercasing and removing spaces/punctuation. Built-ins `Applicant`, `ApplicantUserID`, and `requestTitle` are reserved; a planned Request Title field must reuse exact `requestTitle`, never generate `Request Title` or `RequestTitle` as a second variable. Treat `DUPLICATE_VARIABLE_ID_CANONICAL` and `DUPLICATE_VARIABLE_IDX_CANONICAL` as signing/publish blockers.
+
+## Approval Workflow Final Layout Closure
+
+Apply `docs/standards/approval-workflow-final-layout-closure-standard.md` together with `docs/standards/workflow-layout-golden-reference-standard.md`. Build the complete semantic topology first: distinguish final rejection, request clarification/return, and post-approval system actions. Do not append nodes or rewire a saved graph without re-running complete graph layout, connector routing, graph bounds, and validation on the final node set.
+
+For sequential generated workflows, fold execution nodes into readable rows instead of creating one long horizontal strip. A row transition is a deliberate return route: it must use a safe open row-gap or external lane with explicit `vertices[]`; it is never a direct diagonal or an unplanned backward auto-route. A final `EndNoneEvent` must remain local to the final row/source group.
+
+`EndRejectEvent` is local-only. A nearby rejected Assignment Task may use empty `vertices[]` and Designer rounded auto-routing. A rejected or return connector to an endpoint that is leftward, cross-row, or outside the local reject distance must use explicit safe route vertices; if it cannot be routed safely, split the endpoint or remodel the path as a return/rework action. Never reuse an early shared rejection endpoint for later rework or post-action completion.
+
+Before `component_save`, decode the exact final `DefResource` and run `scripts/validate-approval-workflow-publish-readiness.mjs` and `scripts/validate-workflow-layout-golden-reference.mjs`. After save, `component_get` the persisted Approval Form, decode it again, and run the same gates. The result report must separate `apiAccepted`, `persistedReadback`, `designerOpen`, and `browserWorkflowRuntime`; the first two are not evidence that routing or diagram readability works. For multi-step, return/rework, branch, or system-action workflows, do not claim readiness without focused Workflow Designer-open evidence and a browser submit/Approve/Reject/Return smoke on a disposable test request.
 
 ## Generated-Final YAPK ID And Navigation Hard Gates
 

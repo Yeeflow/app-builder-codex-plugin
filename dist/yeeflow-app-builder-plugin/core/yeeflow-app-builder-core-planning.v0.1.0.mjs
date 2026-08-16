@@ -517,9 +517,21 @@ function wfStaticLayoutRows(entries, tolerance) {
     }
     return rows;
 }
-function wfStaticRejectedVertices(source, target) { const sx = wfStaticNumber(source.x, NaN), sy = wfStaticNumber(source.y, NaN), tx = wfStaticNumber(target.x, NaN), ty = wfStaticNumber(target.y, NaN); if (!Number.isFinite(sx) || !Number.isFinite(sy) || !Number.isFinite(tx) || !Number.isFinite(ty))
-    return []; const dx = Math.abs(tx - sx), dy = Math.abs(ty - sy); if (dx < 520 && dy < 220)
-    return []; const x = sx + Math.max(120, Math.round(dx / 2)); return [{ x, y: sy }, { x, y: ty }, { x: tx - 120, y: ty }]; }
+function wfStaticRejectedVertices(source, target) {
+    const sx = wfStaticNumber(source.x, NaN), sy = wfStaticNumber(source.y, NaN), tx = wfStaticNumber(target.x, NaN), ty = wfStaticNumber(target.y, NaN);
+    if (!Number.isFinite(sx) || !Number.isFinite(sy) || !Number.isFinite(tx) || !Number.isFinite(ty))
+        return [];
+    const signedDx = tx - sx, dx = Math.abs(signedDx), dy = Math.abs(ty - sy);
+    // A rejected link may auto-route only when its endpoint is locally forward.
+    // A shared Reject endpoint can be centered between three tasks, which makes
+    // the rightmost task's link backward even when the group itself is local.
+    // Route those links explicitly outside the source column so they cannot cut
+    // back through the approval backbone.
+    if (signedDx >= 0 && dx < 520 && dy < 220)
+        return [];
+    const routeX = signedDx < 0 ? sx + 260 : sx + Math.max(120, Math.round(dx / 2));
+    return [{ x: routeX, y: sy }, { x: routeX, y: ty }];
+}
 function wfStaticContentListOperation(step) { const text = [step.nodeName, step.description, step.dataReadWrite].map(wfStaticClean).join(" "); if (/\b(remove|delete)\b/i.test(text))
     return "remove"; if (/\b(update|edit)\b/i.test(text))
     return "edit"; return "add"; }
