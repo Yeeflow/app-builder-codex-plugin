@@ -6183,14 +6183,14 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   resource.tempVars = uniqueByName([
     ...normalizeDependencyArray(templateDependencies.tempVars),
     ...kpiContracts.map((contract) => ({
-      id: `__temp_${contract.tempVar}`,
+      id: contract.tempVar,
       name: contract.tempVar,
       type: "number",
       source: contract.summaryId,
       kpiKey: contract.businessKey || contract.key,
     })),
     ...(isMasterDetailWorkspace ? [
-      { id: "__temp_vCurrentItemID", name: "vCurrentItemID", type: "string", source: "left_panel_data_items_wrapper" },
+      { id: "vCurrentItemID", name: "vCurrentItemID", type: "string", source: "left_panel_data_items_wrapper" },
     ] : []),
   ]);
   const summaryRuntimeExts = kpiContracts.map((contract) => ({
@@ -7810,6 +7810,7 @@ function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = 
     mapResponsiveCollectionTableColumns(collection, { fields: plannedDisplayFields, listId, listName, skipLeadingSelectionColumn: templateId === "collection_control_responsive_multiple_select" });
     mapResponsiveCollectionCardView(collection, { fields: plannedDisplayFields, listId, listName });
     enforceResponsiveCollectionMobileOperationWidth(root, { templateId });
+    assertResponsiveCollectionDesignerColumnContract(collection, { templateId });
   }
   for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
     search.attrs = {
@@ -7929,6 +7930,35 @@ function mapResponsiveCollectionTableColumns(collection, { fields, listId, listN
     mappedColumns.push(column);
   }
   collection.attrs.tablecols = leadingSelectionColumn ? [leadingSelectionColumn, ...mappedColumns] : mappedColumns;
+}
+
+function assertResponsiveCollectionDesignerColumnContract(collection, { templateId }) {
+  // The plain responsive reference predates Designer's list-column identity
+  // wrapper. The multiselect Golden Reference does use it, so do not apply the
+  // newer identity shape to a different template family merely because both
+  // expose attrs.tablecols.
+  if (templateId !== "collection_control_responsive_multiple_select") return;
+
+  const seenIds = new Set();
+  const seenMapKeys = new Set();
+  for (const [index, column] of asArray(collection?.attrs?.tablecols).entries()) {
+    if (String(column?.type || "") !== "list-column") {
+      throw new Error(`DASHBOARD_COLLECTION_DESIGNER_COLUMN_INVALID: ${templateId} table column ${index} must preserve type = list-column from the Golden Reference.`);
+    }
+    for (const [key, seen] of [["id", seenIds], ["mapkey", seenMapKeys]]) {
+      const value = String(column?.[key] || "");
+      if (!UUID_CONTROL_ID_RE.test(value) || seen.has(value)) {
+        throw new Error(`DASHBOARD_COLLECTION_DESIGNER_COLUMN_INVALID: ${templateId} table column ${index} must preserve a unique UUID ${key}.`);
+      }
+      seen.add(value);
+    }
+    const isSelectionColumn = index === 0 && findDescendants(column, (node) => hasIdentity(node, "grid_table_col_item_select")).length > 0;
+    if (isSelectionColumn) continue;
+    const dynamicControls = findDescendants(column, (node) => String(node?.type || "").startsWith("dynamic-"));
+    if (!dynamicControls.length || dynamicControls.some((node) => node?.attrs?.source !== "3" || !String(node?.attrs?.["obj-f"] || "").trim())) {
+      throw new Error(`DASHBOARD_COLLECTION_DESIGNER_COLUMN_INVALID: ${templateId} table column ${index} must retain an item-context Dynamic control with attrs.source = 3 and attrs.obj-f.`);
+    }
+  }
 }
 
 function selectResponsiveTableColumnShape(columns, field) {
@@ -8538,9 +8568,9 @@ function uniqueByName(items) {
 
 function normalizeAndPruneDashboardTempVars(resource) {
   const candidates = uniqueByName(normalizeDependencyArray(resource?.tempVars).map((item, index) => {
-    const id = cleanResourceName(item?.id || item?.name);
+    const id = cleanResourceName(item?.id || item?.name).replace(/^__temp_+/, "");
     if (!id) return null;
-    const name = cleanResourceName(item?.name) || id.replace(/^__temp_/, "");
+    const name = (cleanResourceName(item?.name) || id).replace(/^__temp_+/, "");
     return {
       ...item,
       idx: cleanResourceName(item?.idx) || deterministicUuid(`${resource.id || resource.title}:temp:${id}:${index}`),
@@ -9437,7 +9467,7 @@ function buildLegacyMaterialDashboardResource({ name, layoutId, listName, listId
     ver: "1.0.0",
     attrs: { container: { padding: ["--sp--s0", "--sp--s0", "--sp--s0", "--sp--s0"] } },
     filterVars: [],
-    tempVars: [{ name: tempVar, type: "number", source: summaryId }],
+    tempVars: [{ id: tempVar, name: tempVar, type: "number", source: summaryId }],
     ReportIds: [summaryId],
     exts: [{
       i: summaryId,
@@ -9479,8 +9509,8 @@ function buildLegacyMaterialDashboardResource({ name, layoutId, listName, listId
                 id: summaryId,
                 name: "Active Records",
                 title: "Active Records",
-                save_var: { name: tempVar },
-                attrs: { data: { list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName }, aggregation: "count", field: "ListDataID" }, save_var: { name: tempVar } },
+                save_var: summarySaveVariable(tempVar),
+                attrs: { data: { list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName }, aggregation: "count", field: "ListDataID" }, save_var: summarySaveVariable(tempVar) },
               },
               {
                 type: "data-filter",

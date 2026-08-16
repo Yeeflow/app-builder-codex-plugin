@@ -448,7 +448,7 @@ function testInternalBindingHiddenPasses() {
     {
       id: "event_portfolio_summary_hidden",
       expectedRole: "summary",
-      attrs: { save_var: { name: "__temp_event_count" }, headc: { title: { variable: ["__temp_event_count"] } } },
+      attrs: { save_var: { exprType: "variable", type: "expr", id: "__temp_var_event_count", name: "var_event_count" }, headc: { title: { variable: [{ id: "__temp_var_event_count", name: "var_event_count" }] } } },
     },
   ];
   const report = inspectFixture("internal-binding-hidden-pass.json", spec);
@@ -1451,8 +1451,8 @@ function fullPageSpec() {
     controlType: "summary",
     hiddenHostId: "planning_metric_data_sources",
     attrs: {
-      save_var: { exprType: "variable", name: "__temp_planning_total_events" },
-      saveVar: "__temp_planning_total_events",
+      save_var: { exprType: "variable", type: "expr", id: "__temp_var_planning_total_events", name: "var_planning_total_events" },
+      saveVar: "var_planning_total_events",
       data: {
         list: {
           AppID: 41,
@@ -1462,8 +1462,8 @@ function fullPageSpec() {
         func: "COUNT",
       },
     },
-    save_var: { exprType: "variable", name: "__temp_planning_total_events" },
-    saveVar: "__temp_planning_total_events",
+    save_var: { exprType: "variable", type: "expr", id: "__temp_var_planning_total_events", name: "var_planning_total_events" },
+    saveVar: "var_planning_total_events",
   };
   spec.summaryHiddenHost = {
     id: "planning_metric_data_sources",
@@ -1506,7 +1506,7 @@ function fullPageSpec() {
   spec.visibleKpiValues = [
     {
       id: "planning_total_events_value",
-      summaryTempVar: "__temp_planning_total_events",
+      summaryTempVar: "var_planning_total_events",
       visibleText: "24",
     },
   ];

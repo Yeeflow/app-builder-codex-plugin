@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.12.4
+
+- Define a fail-closed Dashboard KPI/Summary/Text temp-variable contract: `tempVars[]` declarations are raw semantic IDs, while Summary and visible KPI expressions use exactly one `__temp_` runtime prefix.
+- Reject prefixed declarations, double-prefixed Summary/runtime references, raw-name mismatches, and unresolved KPI/Summary temp-variable references in source and distributed validation paths.
+- Correct Summary/Data Analytics regression fixtures to the persisted runtime shape and add positive/negative coverage for KPI variable closure.
+- Require Dashboard Collections to be cloned from their selected Golden Reference rather than hand-built from a field list; preserve native `tablecols` Designer contracts when the reference uses them.
+- Fail closed for missing/non-unique `list-column` UUID `id` or `mapkey`, or missing item-context Dynamic bindings in the responsive multiselect Collection reference and generated output.
+- Add Designer-open/readback training guidance: API save and visible rows are not proof that Collection columns and Dynamic controls remain editable in Designer.
+
 ## 1.12.3
 
 - Add a Dashboard Filter Dependency Closure standard: stable declaration/runtime token shapes, an applicability matrix, same-source consumer checks, and explicit cross-lookup mirror requirements.

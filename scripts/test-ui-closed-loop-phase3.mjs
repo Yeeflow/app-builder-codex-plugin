@@ -107,7 +107,7 @@ function testTopLevelReportIdsOptionalOnly() {
 function testAnalyticsSummaryTempVariableFalsePositiveStaysFixed() {
   const report = inspectDashboardSummaryControlContract({
     package: writeJson("summary-save-var-name-not-field.json", summaryPackage({
-      saveVarName: "__temp_marketing_event_total",
+      saveVarName: "var_marketing_event_total",
       summaryFunc: "count",
       fieldName: "ListDataID",
     })),
@@ -297,7 +297,7 @@ function scopePackage({ budgetReviewTitle = "Budget Review", navigationExtra = f
   };
 }
 
-function summaryPackage({ includeTopLevelReportIds = false, omitLayoutReportIds = false, saveVarName = "__temp_event_count", summaryFunc = "count", fieldName = "ListDataID" } = {}) {
+function summaryPackage({ includeTopLevelReportIds = false, omitLayoutReportIds = false, saveVarName = "var_event_count", summaryFunc = "count", fieldName = "ListDataID" } = {}) {
   const saveVar = { exprType: "variable", valueType: "string", id: `__temp_${saveVarName}`, type: "expr", name: saveVarName };
   const sourceField = field(fieldName, "Text", "Record ID");
   const summary = {
@@ -316,7 +316,7 @@ function summaryPackage({ includeTopLevelReportIds = false, omitLayoutReportIds 
     type: "page",
     ReportIds: omitLayoutReportIds ? [] : [SUMMARY_ID],
     exts: [summaryExtRegistration()],
-    tempVars: [{ id: saveVar.id, name: saveVar.name }],
+    tempVars: [{ id: saveVar.name, name: saveVar.name }],
     children: [
       {
         id: "hidden-summary-host",

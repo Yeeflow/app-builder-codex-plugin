@@ -257,6 +257,18 @@ KPI Runtime Binding Proof v1.0.1 proved dynamic visible KPI binding for one exac
 - The proof does not use static or formatted fallback values.
 - Summary field metadata is complete in `attrs.data.field`, `attrs.field`, `fieldObject`, and `fieldInfo`.
 
+### Temp variable identity and KPI binding
+
+Use two distinct identifiers for the same Dashboard temp variable:
+
+- Declaration: `tempVars[].id = tempVars[].name = "var_<page>_<metric>"`. Never begin either declaration value with `__temp_`.
+- Summary write: `attrs.save_var = { exprType: "variable", type: "expr", id: "__temp_var_<page>_<metric>", name: "var_<page>_<metric>" }`.
+- Visible KPI Heading/Text read: `attrs.headc.title.variable[]` uses the same pair: `id = "__temp_" + declared id`, `name = declared id`.
+
+`__temp_` is a runtime expression prefix, not part of the stored variable name. Do not write `__temp_` in `tempVars[].id` or `tempVars[].name`; do not double-prefix a reference as `__temp___temp_*`; and do not use the `{ prefix, value }` serialization for a KPI Summary/Text binding unless that specific control property is separately export-proven. For custom-code or other property families that do use `{ prefix: "__temp_", value: "<declared-id>" }`, keep `value` as the unprefixed declared ID.
+
+Before save, verify each Summary write and each visible KPI Text/Heading reference resolves to exactly one same-page temp declaration. After `component_save`, reread the persisted Resource and report this structural closure separately from Designer-open and browser value-refresh evidence.
+
 Runtime proof must include before/after source data mutation evidence, expected-value notes, inspector output, and refreshed/recalculated after-evidence. The v1.0.1 proof changed the KPI values from `3 / 600 / 2 / 300` to `4 / 1000 / 3 / 700`. Because Summary recalculation can be asynchronous or cache-delayed, stale after-evidence that still shows before values is not proof.
 
 When generated apps use seed/demo rows for runtime verification, KPI proof must also include seed-derived expected values and compare them with the visible runtime KPI text. A KPI that is merely bound to a Summary control is package-valid, but not business-semantically proven until the visible value matches the expected count/sum/rate derived from the seeded records.

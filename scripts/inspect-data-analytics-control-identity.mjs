@@ -281,18 +281,23 @@ function isAllowedSystemCountField(item, fieldRef, attrs, settings) {
 function validateSummaryTempVar(item, findings) {
   const saveVar = item.control.attrs?.save_var;
   if (!isObject(saveVar)) return;
-  const saveVarIds = [saveVar.id, saveVar.name].map(scalar).filter(Boolean);
-  if (!saveVarIds.length) return;
-  if (!summaryTempVarDeclared(item, saveVarIds)) {
-    addFinding(findings, "error", "ANALYTICS_SUMMARY_TEMP_VAR_MISSING", "Summary save_var expression must resolve to a page Resource.tempVars[] declaration, not a source-list field.", { page: item.page.title, analyticsType: item.analyticsType });
+  const runtimeId = scalar(saveVar.id);
+  const rawId = scalar(saveVar.name);
+  if (!runtimeId.startsWith("__temp_") || runtimeId.slice("__temp_".length).startsWith("__temp_") || !rawId || rawId.startsWith("__temp_") || runtimeId.slice("__temp_".length) !== rawId) {
+    addFinding(findings, "error", "ANALYTICS_SUMMARY_TEMP_VAR_REFERENCE_INVALID", "Summary save_var must use id __temp_<declared-id> and name <declared-id>; __temp_ is runtime-only.", { page: item.page.title, analyticsType: item.analyticsType, runtimeId: runtimeId || null, name: rawId || null });
+    return;
+  }
+  if (!summaryTempVarDeclared(item, rawId)) {
+    addFinding(findings, "error", "ANALYTICS_SUMMARY_TEMP_VAR_MISSING", "Summary save_var expression must resolve to a page Resource.tempVars[] declaration with the same raw id/name, not a source-list field.", { page: item.page.title, analyticsType: item.analyticsType });
   }
 }
 
-function summaryTempVarDeclared(item, saveVarIds) {
+function summaryTempVarDeclared(item, rawId) {
   const tempVars = item.page.roots.flatMap((root) => asArray(root.tempVars || root.TempVars));
   return tempVars.some((tempVar) => {
-    const candidates = [tempVar.id, tempVar.ID, tempVar.name, tempVar.Name].map(scalar).filter(Boolean);
-    return candidates.some((candidate) => saveVarIds.includes(candidate));
+    const id = scalar(tempVar.id || tempVar.ID);
+    const name = scalar(tempVar.name || tempVar.Name || id);
+    return id === rawId && name === rawId && !id.startsWith("__temp_") && !name.startsWith("__temp_");
   });
 }
 
