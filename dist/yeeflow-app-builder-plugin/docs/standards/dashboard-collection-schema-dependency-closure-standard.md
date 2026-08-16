@@ -11,6 +11,19 @@ Golden Collection templates provide structure and style, not reusable business f
 
 `DASH_DATASET_COLLECTION_CTX_FIELD_MISSING` is always a generated-final blocker.
 
+## Lookup-aware Dynamic field contract
+
+A Dashboard `dynamic-field` that reads a Collection, Kanban, or Timeline current item (`attrs.source = "3"`) must be type-aware. The stored value of a Lookup is a target-record identity, not its business label.
+
+- Resolve `attrs["obj-f"]` on the host dataset. When it is a Lookup, resolve the Lookup rule's target list and configured display field (for example `Rules.listid` and `Rules.listfield`).
+- Set `attrs["dis-f"]` to that resolved target display field. Do not hard-code `Title`; `Title` is correct only when the Lookup itself configures `Title` as its display field.
+- During clone/remap, retain the current application's source field mapping, then derive `dis-f` from the remapped Lookup metadata. Never preserve a source-template `dis-f` without resolving the target list again.
+- Do not use a source-field display name, a lookup ID, or a target field that is absent from the resolved target list as `dis-f`.
+
+The generated-final Dashboard gate fails closed on `DASH_DYNAMIC_LOOKUP_SOURCE_LIST_UNRESOLVED`, `DASH_DYNAMIC_LOOKUP_TARGET_UNRESOLVED`, `DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_REQUIRED`, `DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_UNRESOLVED`, and `DASH_DYNAMIC_LOOKUP_DISPLAY_FIELD_MISMATCH`.
+
+After `component_save`, distinguish API acceptance and persisted readback from a Designer-open check of the Dynamic field's Display field and a browser row-render smoke using a real associated record. The first two levels do not establish that users see the intended lookup label.
+
 ## Designer-native column contract
 
 A Dashboard Collection is not correct merely because rows render or `component_save` accepts its JSON. Its selected Golden Reference determines the required Designer control tree.

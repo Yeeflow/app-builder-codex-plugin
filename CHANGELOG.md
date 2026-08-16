@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.12.6
+
+- Add a Lookup-aware Dashboard Dynamic field contract. Collection, Kanban, and Timeline Dynamic fields now derive `attrs.dis-f` from the referenced Lookup field's configured target display field instead of assuming `Title` or exposing the stored record ID.
+- Fail generated-final Dashboard validation when a Lookup Dynamic field has an unresolved source/target list, missing Display field, unresolved configured target field, or mismatched `attrs.dis-f`.
+- Add positive and negative regression coverage for metadata-driven Lookup display fields, including an intentionally non-`Title` mismatch case.
+- Add training guidance that separates API acceptance, persisted readback, Designer-open, and browser row-render evidence for Lookup Dynamic fields.
+
 ## 1.12.5
 
 - Require Approval workflow final-layout closure: complete topology before layout, reroute/rebound after every graph change, and pre-save plus persisted-readback validation.
