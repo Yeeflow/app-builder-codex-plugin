@@ -142,6 +142,43 @@ try {
   }), "WORKFLOW_LAYOUT_LOCAL_FORWARD_VERTICES_UNNECESSARY");
   cases.push({ case: "fail: local cross-lane forward/merge connectors should use auto-routing", status: "pass" });
 
+  expectCode("local returned-for-rework branch with vertices fails", mutateReadable("local-returned-for-rework-with-vertices.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    def.childshapes.push(flow("flow-local-returned-for-rework", review, create, "Returned for Rework", [
+      { x: 515, y: 333 },
+      { x: 815, y: 333 },
+    ]));
+  }), "WORKFLOW_LAYOUT_LOCAL_FORWARD_VERTICES_UNNECESSARY");
+  cases.push({ case: "fail: a nearby rightward Returned for Rework branch must use Designer auto-routing", status: "pass" });
+
+  expectCode("diagonal explicit vertices fail", mutateReadable("diagonal-route-vertices.json", (def) => {
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    def.childshapes.push(flow("flow-diagonal-route", create, end, "Completed", [
+      { x: 815, y: 480 },
+      { x: 900, y: 530 },
+    ]));
+  }), "WORKFLOW_LAYOUT_VERTEX_SEGMENT_DIAGONAL");
+  cases.push({ case: "fail: explicit route vertices may not form a diagonal segment", status: "pass" });
+
+  expectCode("stale source route vertex fails", mutateReadable("stale-source-route-vertex.json", (def) => {
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    const reject = def.childshapes.find((shape) => shape.id === "reject");
+    def.childshapes.push(flow("flow-stale-source-route", create, reject, "Completed", [
+      { x: 600, y: 520 },
+      { x: 515, y: 520 },
+    ]));
+  }), "WORKFLOW_LAYOUT_ROUTE_SOURCE_EXIT_NOT_VERTICAL");
+  cases.push({ case: "fail: a route vertex copied from a node's former x position is rejected", status: "pass" });
+
+  expectCode("forward nodes with inadequate card clearance fail", mutateReadable("forward-node-clearance-too-small.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const compact = node("compact-forward-action", "ContentList", "Compact forward action", 650, 220);
+    def.childshapes.push(compact, flow("flow-compact-forward-action", review, compact, "Approved"));
+  }), "WORKFLOW_LAYOUT_FORWARD_NODE_CLEARANCE_TOO_SMALL");
+  cases.push({ case: "fail: same-row forward cards require usable visual clearance", status: "pass" });
+
   expectPass("same-column vertical branch route may keep vertices", ["--resource", writeResource("same-column-vertical-route-with-vertices.json", sameColumnVerticalRouteWorkflow())]);
   cases.push({ case: "pass: same-column vertical branch route may use explicit vertices", status: "pass" });
 
