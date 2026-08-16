@@ -9913,7 +9913,7 @@ function refId(ref) {
 
 function workflowLayoutForSteps(workflowSteps) {
   const mainLaneY = 40;
-  const actionLaneY = 195;
+  const actionLaneOffset = 155;
   const rejectUpGap = 125;
   const rejectDownGap = 135;
   const workflowNodeWidth = 190;
@@ -9921,17 +9921,26 @@ function workflowLayoutForSteps(workflowSteps) {
   const startX = -170;
   const firstStepX = 135;
   const columnGap = 335;
-  const rowGap = 155;
+  // A sequential workflow may still be visually folded.  Five execution
+  // nodes is the maximum readable backbone row density; the next row starts
+  // at the left and the transition is explicitly routed through the open row
+  // gap by workflowVerticesBetween().
+  const mainRowNodeCapacity = 5;
+  const foldedRowGap = 360;
   const stepPositions = workflowSteps.map((step, index) => {
     const isAction = ["ContentList", "QueryData", "SetVariableTask"].includes(step.nodeType);
+    const row = Math.floor(index / mainRowNodeCapacity);
+    const column = index % mainRowNodeCapacity;
     return {
-      x: firstStepX + index * columnGap,
-      y: isAction ? actionLaneY : mainLaneY,
+      x: firstStepX + column * columnGap,
+      y: mainLaneY + row * foldedRowGap + (isAction ? actionLaneOffset : 0),
     };
   });
   const lastStepIndex = Math.max(0, workflowSteps.length - 1);
-  const endX = firstStepX + (lastStepIndex + 1) * columnGap;
-  const endY = mainLaneY;
+  const lastStepPosition = stepPositions[lastStepIndex] || { x: firstStepX, y: mainLaneY };
+  const lastStepRow = Math.floor(lastStepIndex / mainRowNodeCapacity);
+  const endX = lastStepPosition.x + columnGap;
+  const endY = mainLaneY + lastStepRow * foldedRowGap;
   const approvalEntries = stepPositions.map((position, index) => {
     const nodeType = workflowSteps[index]?.nodeType || "";
     const isApproval = ["MultiAssignmentTask", "CandidateTask"].includes(nodeType);
@@ -10011,7 +10020,12 @@ function workflowVerticesBetween(sourcePosition, targetPosition, options = {}) {
       { x: targetCenterX, y: routeY },
     ];
   }
-  const bendX = sourcePosition.x + Math.max(120, Math.round(dx / 2));
+  // If no row/column gap exists, a leftward return must use the external
+  // left lane.  Bending to the right of the source would route a return back
+  // through the main backbone.
+  const bendX = signedDx < 0
+    ? Math.min(sourcePosition.x, targetPosition.x) - Math.max(120, Math.round(dx / 2))
+    : sourcePosition.x + Math.max(120, Math.round(dx / 2));
   return [
     { x: bendX, y: sourcePosition.y },
     { x: bendX, y: targetPosition.y },

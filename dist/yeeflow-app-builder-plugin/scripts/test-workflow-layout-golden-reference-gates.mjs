@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import zlib from "node:zlib";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const VALIDATOR = path.join(ROOT, "scripts/validate-workflow-layout-golden-reference.mjs");
@@ -95,6 +96,16 @@ try {
     def.childshapes.push(flow("flow-return", create, review, "Reject and return"));
   }), "WORKFLOW_LAYOUT_BACKWARD_FLOW_VERTICES_MISSING");
   cases.push({ case: "fail: backward return flow missing vertices", status: "pass" });
+
+  expectCode("non-local reject endpoint without vertices fails", mutateReadable("remote-reject-endpoint-no-vertices.json", (def) => {
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    const reject = def.childshapes.find((shape) => shape.id === "reject");
+    def.childshapes.push(flow("flow-remote-rejected", create, reject, "Rejected"));
+  }), "WORKFLOW_LAYOUT_REJECT_ENDPOINT_VERTICES_MISSING");
+  cases.push({ case: "fail: non-local reject endpoint missing explicit route", status: "pass" });
+
+  expectPass("non-local reject endpoint with an external safe route passes", ["--resource", writeResource("remote-reject-endpoint-safe-route.json", nonLocalRejectedEndpointWithSafeRouteWorkflow())]);
+  cases.push({ case: "pass: non-local reject endpoint with a safe external route", status: "pass" });
 
   expectCode("submitted connector with cosmetic vertices fails", mutateReadable("submitted-with-vertices.json", (def) => {
     const submit = def.childshapes.find((shape) => shape.id === "flow-submit");
@@ -377,8 +388,9 @@ try {
   }), "WORKFLOW_LAYOUT_GRAPH_TOO_COMPRESSED");
   cases.push({ case: "fail: complex graph compressed into unreadable span", status: "pass" });
 
-  const packagePath = materializeApprovalPackage();
-  expectPass("materialized generated-final package passes workflow layout gate", ["--package", packagePath]);
+  const materialized = materializeApprovalPackage();
+  expectPass("materialized generated-final package passes workflow layout gate", ["--package", materialized.package]);
+  assertFoldedGeneratedApprovalWorkflow(materialized.decodedResource);
   cases.push({ case: "pass: materializer emits lane-based readable Approval workflow layout", status: "pass" });
 
   console.log(JSON.stringify({
@@ -524,6 +536,17 @@ function sameColumnVerticalRouteWorkflow() {
   };
 }
 
+function nonLocalRejectedEndpointWithSafeRouteWorkflow() {
+  const def = readableWorkflow();
+  const create = def.childshapes.find((shape) => shape.id === "create");
+  const reject = def.childshapes.find((shape) => shape.id === "reject");
+  def.childshapes.push(flow("flow-remote-rejected-safe", create, reject, "Rejected", [
+    { x: 815, y: 0 },
+    { x: 515, y: 0 },
+  ]));
+  return def;
+}
+
 function node(id, stencil, name, x, y) {
   return {
     id,
@@ -563,6 +586,7 @@ function materializeApprovalPackage() {
     "# Functional Specification: Workflow Layout Test",
     "",
     "| Application Name | Workflow Layout Test |",
+    "| Application icon | fa-solid fa-diagram-project |",
     "",
     "Business defaults approval status: user-default-approved-for-generation.",
   ].join("\n"));
@@ -583,12 +607,49 @@ function materializeApprovalPackage() {
   const report = JSON.parse(result.stdout);
   assert.equal(report.status, "pass");
   assert.equal(fs.existsSync(report.outputs.package), true);
-  return report.outputs.package;
+  return {
+    package: report.outputs.package,
+    decodedResource: report.outputs.decodedResource,
+  };
+}
+
+function assertFoldedGeneratedApprovalWorkflow(decodedResourcePath) {
+  const decoded = JSON.parse(fs.readFileSync(decodedResourcePath, "utf8"));
+  const approval = decoded.Forms.find((form) => form.Name === "Vendor Approval");
+  assert.ok(approval, "generated package includes the vendor approval workflow");
+  const def = decodeDefResource(approval.DefResource);
+  const nodes = def.childshapes.filter((shape) => shape.stencil?.id !== "SequenceFlow" && shape.stencil?.id !== "StartNoneEvent" && shape.stencil?.id !== "EndNoneEvent" && shape.stencil?.id !== "EndRejectEvent");
+  const rows = [];
+  for (const node of nodes) {
+    const row = rows.find((entry) => Math.abs(entry.y - node.position.y) <= 60);
+    if (row) row.nodes.push(node);
+    else rows.push({ y: node.position.y, nodes: [node] });
+  }
+  assert.ok(rows.length >= 2, "seven-step approval workflow is folded into multiple readable rows");
+  assert.ok(rows.every((row) => row.nodes.length <= 5), "no generated workflow backbone row exceeds five execution nodes");
+  const nodeById = new Map(def.childshapes.filter((shape) => shape.stencil?.id !== "SequenceFlow").map((shape) => [shape.id, shape]));
+  const backwardRejected = def.childshapes.filter((shape) => {
+    if (shape.stencil?.id !== "SequenceFlow" || shape.properties?.name !== "Rejected") return false;
+    const source = nodeById.get(shape.source?.resourceid);
+    const target = nodeById.get(shape.target?.resourceid);
+    return source?.position && target?.position && target.position.x < source.position.x;
+  });
+  assert.ok(backwardRejected.length > 0, "fixture exercises a backward rejected route");
+  assert.ok(backwardRejected.every((flow) => Array.isArray(flow.vertices) && flow.vertices.length >= 2), "backward rejected routes include explicit safe vertices");
+}
+
+function decodeDefResource(value) {
+  const raw = Buffer.from(String(value || ""), "base64");
+  const prefix = Buffer.from("::brotli::", "utf8");
+  const payload = raw.subarray(0, prefix.length).equals(prefix) ? raw.subarray(prefix.length) : raw;
+  return JSON.parse(zlib.brotliDecompressSync(payload).toString("utf8"));
 }
 
 function approvalPlanMarkdown() {
   return [
     "# Yeeflow App Plan: Workflow Layout Test",
+    "",
+    "Application icon: `fa-solid fa-diagram-project`",
     "",
     "## Plan Status",
     "",
@@ -624,6 +685,20 @@ function approvalPlanMarkdown() {
     "| --- | --- | --- | --- | --- | --- | --- |",
     "| 1 | Vendor Name | VendorName | Text | input | Yes | Generated-final validation |",
     "",
+    "#### Approval Form Layout Template Selection",
+    "",
+    "| Approval Form | Form Page | Page Role | Selected Approval Form Layout Template | Business Sections Needed | Related Data Needed | Selection Reason | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Vendor Approval | Submission form | Submission | approval_form_layout_submission_v1_1 | Page title and vendor request fields | Current request only | Submission captures the vendor request before review | Generated-final validation |",
+    "| Vendor Approval | Review task form | Task | approval_form_layout_task_v1_1 | Readonly request context and action/history section | Workflow context | Reviewers need the approved task layout | Generated-final validation |",
+    "",
+    "#### Approval Form Fields Layout Template Selection",
+    "",
+    "| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Vendor Approval | Submission form | Vendor request fields | approval_form_fields_grid_2col_v1_1 | Submission fields | 2 | 2 | 1 | None | None | Generated-final validation |",
+    "| Vendor Approval | Review task form | Review fields | approval_form_fields_grid_2col_v1_1 | Task fields | 2 | 2 | 1 | None | None | Generated-final validation |",
+    "",
     "#### Approval Workflow Nodes",
     "",
     "| Step | Node Name | Node Type | Description | Assignee/Role | Assignment Strategy | Outcomes | Condition/Branch | Data Read/Write | Proof Boundary |",
@@ -641,6 +716,22 @@ function approvalPlanMarkdown() {
     "| Workflow Host | Workflow Name | Node Name | Target Mode | Target Resource | Target Resource Type | Operation | Mappings JSON | Filters JSON | Workflow Variable Declarations JSON | Batch Source Type | Batch Source | Batch Source Fields JSON | Parent Loop | Proof Boundary | Notes |",
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     "| Approval Form | Vendor Approval | Create Vendor Master | select | Vendor Master | Data List | add | `[{\"Columns\":\"VendorName\",\"TargetType\":\"text\",\"Per\":\"0\",\"Data\":[{\"exprType\":\"variable\",\"valueType\":\"text\",\"id\":\"VendorName\",\"type\":\"expr\",\"name\":\"Workflow Variables:Vendor Name\"}]}]` | `[]` | `[{\"id\":\"VendorName\",\"type\":\"text\",\"valueType\":\"text\",\"name\":\"Vendor Name\",\"expressionName\":\"Workflow Variables:Vendor Name\"}]` |  |  | `[]` |  | export-proven | Create the approved vendor. |",
+    "",
+    "## 10. Custom Data List Forms Plan",
+    "",
+    "### 10.1 Vendor Requests",
+    "",
+    "| Form Name | Form Type | Selected Data List Form Layout Template | Open In | Selection Reason |",
+    "| --- | --- | --- | --- | --- |",
+    "| Vendor Requests New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Pop-up window | Request capture needs editable current fields |",
+    "| Vendor Requests View | View | data_list_form_layout_view_item_v1_1 | Slide panel | Request review needs current item context |",
+    "",
+    "### 10.2 Vendor Master",
+    "",
+    "| Form Name | Form Type | Selected Data List Form Layout Template | Open In | Selection Reason |",
+    "| --- | --- | --- | --- | --- |",
+    "| Vendor Master New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Pop-up window | Vendor records need editable current fields |",
+    "| Vendor Master View | View | data_list_form_layout_view_item_v1_1 | Slide panel | Vendor review needs current item context |",
   ].join("\n");
 }
 

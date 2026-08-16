@@ -344,6 +344,16 @@ function validateOneWorkflow(resource, reference, findings) {
     const sameRow = sourceNode?.position && targetNode?.position && dy <= Number(spacing.workflowRowToleranceY);
     const directAdjacentForward = sameRow && signedDx > 0 && dx <= Number(spacing.mainColumnGap || 335) + 120;
     const sourceStencil = stencilId(sourceNode?.shape);
+    const remoteRejectEndpointRoute = requiresExplicitRejectEndpointRoute({
+      flow: flow.shape,
+      sourceNode,
+      targetNode,
+      targetStencil,
+      signedDx,
+      dx,
+      dy,
+      spacing,
+    });
     if (sourceStencil === "StartNoneEvent" && directAdjacentForward && isSubmittedFlow(flow.shape) && vertices.length) {
       findings.push(issue("WORKFLOW_LAYOUT_SUBMITTED_VERTICES_UNNECESSARY", "Direct Start-to-first-task Submitted connectors must use clean rounded auto-routing with empty or absent vertices.", {
         source: resource.source,
@@ -376,6 +386,7 @@ function validateOneWorkflow(resource, reference, findings) {
       vertices,
       spacing,
       findings,
+      validateEndRejectRoute: remoteRejectEndpointRoute,
     });
     validateFlowRouteX({
       resource,
@@ -387,6 +398,7 @@ function validateOneWorkflow(resource, reference, findings) {
       vertices,
       spacing,
       findings,
+      validateEndRejectRoute: remoteRejectEndpointRoute,
     });
     if (sourceNode?.position && targetNode?.position && signedDx > 0 && sameRow && nodes.length >= 5 && targetStencil !== "EndRejectEvent" && dx < Number(spacing.minimumForwardFlowDeltaX)) {
       findings.push(issue("WORKFLOW_LAYOUT_FORWARD_FLOW_TOO_CLOSE", "Forward SequenceFlow edges should reserve enough horizontal space between workflow action nodes.", {
@@ -400,6 +412,17 @@ function validateOneWorkflow(resource, reference, findings) {
       }));
     }
     const isLongBackwardFlow = signedDx < 0 && dx >= Number(spacing.longFlowVertexRequiredDeltaX);
+    if (remoteRejectEndpointRoute && !vertices.length) {
+      findings.push(issue("WORKFLOW_LAYOUT_REJECT_ENDPOINT_VERTICES_MISSING", "A rejected or return connector to a non-local End with Rejection endpoint must use explicit vertices; split the endpoint locally when a safe route cannot be produced.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.vertices`,
+        flowId: flow.id,
+        sourceId,
+        targetId,
+        delta: { x: dx, y: dy, signedX: signedDx },
+      }));
+    }
     if (sourceNode?.position && targetNode?.position && signedDx < 0 && nodes.length >= 3 && targetStencil !== "EndRejectEvent" && (isReturnFlow(flow.shape) || isLongBackwardFlow || dy < Number(spacing.laneGap || 155)) && !vertices.length) {
       findings.push(issue("WORKFLOW_LAYOUT_BACKWARD_FLOW_VERTICES_MISSING", "Backward or return SequenceFlow edges must use explicit vertices so the return path does not cut through the main workflow lane.", {
         source: resource.source,
@@ -437,6 +460,14 @@ function validateOneWorkflow(resource, reference, findings) {
   }
 
   validateConnectorReadability(resource, nodes, flows, spacing, findings);
+}
+
+function requiresExplicitRejectEndpointRoute({ flow, sourceNode, targetNode, targetStencil, signedDx, dx, dy, spacing }) {
+  if (!sourceNode?.position || !targetNode?.position || targetStencil !== "EndRejectEvent") return false;
+  if (!isRejectedFlow(flow) && !isReturnFlow(flow)) return false;
+  const maxDeltaX = Number(spacing.localRejectVertexMaxDeltaX || 760);
+  const maxDeltaY = Number(spacing.localRejectVertexMaxDeltaY || 260);
+  return signedDx < 0 || dx > maxDeltaX || dy > maxDeltaY;
 }
 
 function validateWorkflowActionNames(resource, nodes, spacing, findings) {
@@ -597,9 +628,9 @@ function validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, line
   }
 }
 
-function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, nodes, vertices, spacing, findings }) {
+function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, nodes, vertices, spacing, findings, validateEndRejectRoute = false }) {
   if (!sourceNode?.position || !targetNode?.position || !vertices.length) return;
-  if (stencilId(targetNode.shape) === "EndRejectEvent" || stencilId(sourceNode.shape) === "EndRejectEvent") return;
+  if ((stencilId(targetNode.shape) === "EndRejectEvent" || stencilId(sourceNode.shape) === "EndRejectEvent") && !validateEndRejectRoute) return;
   const sourceY = Number(sourceNode.position.y);
   const targetY = Number(targetNode.position.y);
   const rowDeltaY = Math.abs(sourceY - targetY);
@@ -685,9 +716,9 @@ function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, 
   }
 }
 
-function validateFlowRouteX({ resource, flow, flowPath, sourceNode, targetNode, nodes, vertices, spacing, findings }) {
+function validateFlowRouteX({ resource, flow, flowPath, sourceNode, targetNode, nodes, vertices, spacing, findings, validateEndRejectRoute = false }) {
   if (!sourceNode?.position || !targetNode?.position || !vertices.length) return;
-  if (stencilId(targetNode.shape) === "EndRejectEvent" || stencilId(sourceNode.shape) === "EndRejectEvent") return;
+  if ((stencilId(targetNode.shape) === "EndRejectEvent" || stencilId(sourceNode.shape) === "EndRejectEvent") && !validateEndRejectRoute) return;
   const vertical = longestVerticalVertexSegment(vertices);
   if (!vertical) return;
   const nodeHeight = Number(spacing.workflowNodeHeight || 86);
@@ -1353,7 +1384,8 @@ function validateLocalRejectVertexEconomy(resource, flows, nodeById, spacing, fi
     const targetCenter = nodeCenter(targetNode);
     const deltaX = Math.abs(targetCenter.x - sourceCenter.x);
     const deltaY = Math.abs(targetCenter.y - sourceCenter.y);
-    if (deltaX <= maxDeltaX && deltaY <= maxDeltaY) {
+    const isBackwardReject = targetCenter.x < sourceCenter.x;
+    if (deltaX <= maxDeltaX && deltaY <= maxDeltaY && !isBackwardReject) {
       findings.push(issue("WORKFLOW_LAYOUT_LOCAL_REJECT_VERTICES_UNNECESSARY", "Local rejected connectors to a nearby End with rejection node should use clean rounded auto-routing with no vertices, matching the golden reference.", {
         source: resource.source,
         workflowName: resource.workflowName,

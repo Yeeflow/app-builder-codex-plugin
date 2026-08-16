@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.12.5
+
+- Require Approval workflow final-layout closure: complete topology before layout, reroute/rebound after every graph change, and pre-save plus persisted-readback validation.
+- Fold generated sequential Approval workflows after five execution nodes, with explicit safe row-transition routing instead of a dense horizontal strip.
+- Reject non-local `EndRejectEvent` rejected/return connectors that omit explicit route vertices, while retaining clean rounded auto-routing for local rejection endpoints.
+- Apply route geometry checks to explicitly routed non-local rejection connectors and add positive/negative regression coverage.
+- Add workflow readiness training that keeps API acceptance, persisted readback, Workflow Designer open, and browser workflow runtime as distinct evidence levels.
+
 ## 1.12.4
 
 - Define a fail-closed Dashboard KPI/Summary/Text temp-variable contract: `tempVars[]` declarations are raw semantic IDs, while Summary and visible KPI expressions use exactly one `__temp_` runtime prefix.
