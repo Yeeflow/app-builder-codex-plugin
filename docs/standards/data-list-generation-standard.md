@@ -74,6 +74,22 @@ Signing readiness, install/import, upgrade, and runtime proof must remain blocke
 
 Every generated data list must configure the default data view with visible display fields.
 
+### Data View Contract Before Creation
+
+Fields alone are not a Data List deliverable. Before any MCP create or update call, every planned Data List — including a hidden support or lookup list — must have an explicit Data View contract containing:
+
+- the default Type `0` View name and its `IsDefault: true` designation;
+- visible field names in display order, with native `Title` first;
+- query/search fields that cover every visible column;
+- the default sort, or an explicit `No default sort` decision;
+- executable fixed filters in `LayoutView.filter[]`, or an explicit all-record/no-filter decision;
+- the New, Edit, and View Type `1` form targets that the list's `ListModel.LayoutView.add/edit/view` will resolve to; and
+- the business consumer or operating purpose of the View (navigation, Dashboard source, lookup maintenance, or support administration).
+
+`Hidden in navigation` means the list has no primary menu item. It never means `Layouts: []`, no Type `0` Data View, or missing form routing. Do not submit a list-only/fields-only MCP create request and plan to add views later.
+
+Immediately after the MCP save, re-read the persisted list and run `validate-data-list-completion-contract.mjs`. The readback must contain exactly one default Type `0` View with a meaningful title, `Ext1.Url = "default"`, parseable `LayoutView`, resolved visible columns, query coverage for those columns, and resolved Type `1` New/Edit/View form routes. `apiAccepted` and a fields-only readback are not completion evidence.
+
 Required:
 
 - Include `Title` or the primary name field.
@@ -110,6 +126,15 @@ Reviewer
 ```
 
 Generated-final validation must fail when a default data view has no display fields.
+
+Use the following evidence labels in the generation report:
+
+- `apiAccepted`: the create/update request was accepted;
+- `persistedReadback`: the list, view, and form IDs were returned and passed the completion contract;
+- `designerOpen`: the Data View opens with the expected columns, filter, sort, and form routes in Designer; and
+- `browserActionRuntime`: the rendered View opens and its New/Edit/View actions work.
+
+Do not call `apiAccepted` or `persistedReadback` a usable Data View.
 
 ## Data View Fixed Filters
 
@@ -395,6 +420,20 @@ For generated-final app-level `.yapk` packages:
 - Seed artifacts for `identity-picker`, `lookup`, and `file-upload` fields must be structured live-write instructions, not plain strings. Identity-picker sample values must declare `seedValueType: "identity-picker"` and `requiresLiveUserResolution: true` so the runtime seed step resolves an existing tenant user before writing. Lookup sample values must declare `seedValueType: "lookup"`, `requiresLookupListDataIDResolution: true`, `storedValueField: "ListDataID"`, the target list, and the display field; the live seed writer must create/read the target rows first and write the target record `ListDataID`, never the lookup display title, code, or other display text. File-upload sample values must declare `seedValueType: "file-upload"` and `requiresFileUploadReference: true` so the runtime seed step waits for an uploaded file reference or leaves the field empty. The generated YAPK field shape remains schema-safe `FieldType: "Text"` plus `Type: "identity-picker"`, `Type: "lookup"`, or `Type: "file-upload"`; do not invent unsupported `FieldType: "User"` storage.
 - Run live seed writes only after explicit approval, after install/materialization proof, and with before/after count reporting.
 - Use `TriggerFlow: false` by default for demo/test seed writes unless the user explicitly asks to exercise workflows.
+
+### Direct MCP Lookup Write Closure
+
+The structured seed artifact is not permission to substitute display text during a later live MCP create or update. For every direct record write to a Lookup field, the operator must:
+
+1. Read the host Lookup field metadata and identify its configured target `listid` and display field.
+2. Resolve exactly one target row in that target list and capture its returned `ListDataID`.
+3. Build a structured write intent with `seedValueType: "lookup"`, `requiresLookupListDataIDResolution: true`, `storedValueField: "ListDataID"`, `mustNotUseDisplayTextAsStoredValue: true`, the configured `targetListId`, and the resolved `ListDataID`.
+4. Write that resolved ID, not a title, number, code, label, or other display value.
+5. Re-read the host record and verify the persisted field equals the resolved target ID and resolves in the configured target list.
+
+Capture redacted target resolution, intended writes, and persisted readback in a closure-evidence JSON file and run `node scripts/validate-live-lookup-write-closure.mjs --input <evidence.json>`. It fails closed for an unstructured title write, a target-list mismatch, an unresolved target record, missing readback, or a persisted value different from the resolved ID. When the available MCP toolset cannot safely perform the target-row readback, stop and report the missing capability; never guess an ID or downgrade to display text.
+
+Report `apiAccepted`, `persistedReadback`, `lookupReferenceResolved`, and `browserActionRuntime` separately. The validator proves only supplied resolution/readback evidence; it does not prove form save, Designer rendering, or browser interaction. Only a focused browser runtime test establishes those user-facing behaviors.
 
 For app-level `.yap` packages or non-final local-only experiments where the target list and dependent list are packaged together:
 

@@ -197,7 +197,7 @@ function buildApprovalFormFieldControl({ field, index, formName, role, columns }
       common: {
         margin: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
       },
-      placeholder: `Enter ${field.displayName}`,
+      placeholder: approvalControlPlaceholder(field.displayName, type),
       data: {
         field: field.fieldName,
         fieldName: field.fieldName,
@@ -233,13 +233,18 @@ function materializeApprovalSubListControl(control, field, role) {
     control: {
       type: rowField.controlType,
       binding: rowField.id,
+      fieldName: rowField.id,
       label: rowField.columnTitle,
       label_var: null,
       displayLabel: [null, true],
+      approvalSubListFieldMaterializedFromPlan: true,
+      approvalPlannedFieldType: rowField.type,
+      approvalPlannedControlType: rowField.controlType,
       attrs: {
         list_field: true,
         list_field_binding: control.binding,
         list_control_id: control.id,
+        ...(role !== "task" && rowField.editable !== false ? { placeholder: approvalControlPlaceholder(rowField.columnTitle, rowField.controlType) } : {}),
         ...(rowField.lookupConfiguration ? { listid: rowField.lookupConfiguration.listId, appid: 41, listsetid: rowField.lookupConfiguration.listSetId, listfield: rowField.lookupConfiguration.listField } : {}),
         ...(role === "task" ? { readonly: true, readOnly: true } : {}),
       },
@@ -360,6 +365,14 @@ function normalizeApprovalRowFieldType(value) {
 
 function approvalRowControlType(type) {
   return projectApprovalFormStaticConfiguration({ kind: "sublist-row-control-type", value: type }).value;
+}
+
+function approvalControlPlaceholder(label, controlType) {
+  const text = firstNonEmpty(label, "value");
+  const type = String(controlType || "").trim().toLowerCase();
+  if (["select", "radio", "lookup", "identity-picker", "user-picker", "people", "location-picker", "datepicker", "date", "datetime"].includes(type)) return `Select ${text}`;
+  if (["file-upload", "image-upload", "icon-upload", "document-library"].includes(type)) return `Upload ${text}`;
+  return `Enter ${text}`;
 }
 
 function firstNonEmpty(...values) {

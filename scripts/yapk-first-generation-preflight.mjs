@@ -164,6 +164,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("approval-form-control-closure", [
+    "scripts/validate-approval-form-control-closure.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("approval-workflow-publish-readiness", [
     "scripts/validate-approval-workflow-publish-readiness.mjs",
     "--package",

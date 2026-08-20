@@ -243,6 +243,9 @@ Approval form field-layout rules:
 - Field-grid template selection is required in addition to the page-level Approval Form Layout Template Selection table.
 - When the form page uses Approval Form Layouts v1.1, place the selected field-grid wrapper only inside `content_card_wrapper > section_content_area`.
 - Every generated Approval form field control inside the selected field-grid wrapper must explicitly set margin to zero and must use a business-specific `nv_label` or `nav_label`.
+- Submission and Task form fields must be projected from one normalised field model. Only role properties such as readonly, required, and visibility may differ; fields with the same binding must retain the same Yeeflow control type on every page.
+- Only standard Yeeflow control types may be planned or materialized. `drop` is invalid. Choice controls must declare real options. Every editable Sub List row field must have a business placeholder: `Enter <field>`, `Select <field>`, or `Upload <field>` as appropriate.
+- The generated-final package and the persisted MCP readback must pass `scripts/validate-approval-form-control-closure.mjs`; it recursively scans `pageurls[].formdef` and Sub List row controls.
 - Multiple line, Rich text, and Sub list controls must span the full parent Grid width on every responsive breakpoint.
 - Tablet columns must not exceed PC/laptop columns; mobile columns must be one.
 - App Plan selection is a business/layout decision only. It must not include generated `ListID`, `FormID`, `ProcModelID`, `FlowKey`, field runtime IDs, JSON property paths, placeholder IDs, copied control JSON, or runtime payload fields.

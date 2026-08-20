@@ -99,6 +99,16 @@ const childTests = [
     ],
   },
   {
+    name: "Approval Form complete control-closure regression suite",
+    command: ["scripts/test-approval-form-control-closure.mjs"],
+    validators: [
+      "validate-approval-form-control-closure",
+      "unknown bound control types fail closed",
+      "shared Approval builder provenance",
+      "choice options, Submission/Task type parity, and editable Sub List placeholders",
+    ],
+  },
+  {
     name: "Approval workflow publish-readiness regression suite",
     command: ["scripts/test-approval-workflow-publish-readiness-gates.mjs"],
     validators: [

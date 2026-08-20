@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.12.7",
+  "version": "1.12.10",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
@@ -16,6 +16,8 @@
     "test:responsive-collection-default-routing": "node scripts/test-responsive-collection-default-routing.mjs",
     "test:retired-collection-template-migrations": "node scripts/test-retired-collection-template-migrations.mjs",
     "test:tab-gantt-golden-references": "node scripts/test-tab-gantt-golden-references.mjs",
+    "test:live-lookup-write-closure": "node scripts/test-live-lookup-write-closure.mjs",
+    "test:approval-form-control-closure": "node scripts/test-approval-form-control-closure.mjs",
     "test:formnewreport-physical-field-contract": "node scripts/test-formnewreport-physical-field-contract.mjs",
     "test:document-library-live": "node scripts/test-document-library-live-materializer.mjs",
     "validate:package-boundaries": "node scripts/validate-workspace-package-boundaries.mjs",

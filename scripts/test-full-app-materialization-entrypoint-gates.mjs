@@ -18,6 +18,7 @@ const ID_PROVENANCE_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-id-proven
 const NAVIGATION_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-navigation-runtime-metadata.mjs");
 const LIVE_INSTALL_READINESS_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-live-install-readiness.mjs");
 const DATA_LIST_SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-data-list-system-schema.mjs");
+const DATA_LIST_COMPLETION_VALIDATOR = path.join(ROOT, "scripts/validate-data-list-completion-contract.mjs");
 const BIT_FIELD_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-bit-field-controls.mjs");
 const EXPORT_SHAPE_VALIDATOR = path.join(ROOT, "scripts/validate-generated-yapk-export-shape.mjs");
 const APPROVAL_FORM_FIELDS_VALIDATOR = path.join(ROOT, "scripts/validate-approval-form-fields-template.mjs");
@@ -698,6 +699,10 @@ try {
     DATA_LIST_SCHEMA_VALIDATOR,
     resourceReport.outputs.package,
     "--strict-generated-list",
+  ]);
+  expectPass("nontrivial generated package passes data-list view and form completion validation", [
+    DATA_LIST_COMPLETION_VALIDATOR,
+    resourceReport.outputs.decodedResource,
   ]);
   expectPass("nontrivial generated package passes Bit/switch field control validation", [
     BIT_FIELD_VALIDATOR,

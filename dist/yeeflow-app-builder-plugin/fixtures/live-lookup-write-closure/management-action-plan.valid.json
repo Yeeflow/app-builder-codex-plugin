@@ -1,0 +1,71 @@
+{
+  "evidence": {
+    "apiAccepted": true,
+    "browserActionRuntime": false
+  },
+  "lookupFields": [
+    { "hostListId": "management-action-plans", "fieldName": "Text4", "targetListId": "engagements", "displayField": "Title" },
+    { "hostListId": "management-action-plans", "fieldName": "Text14", "targetListId": "evidence-submissions", "displayField": "Title" },
+    { "hostListId": "management-action-plans", "fieldName": "Text15", "targetListId": "follow-up-tests", "displayField": "Title" }
+  ],
+  "resolvedTargets": [
+    { "listId": "engagements", "ListDataID": "record-engagement-001", "Title": "ENG-001" },
+    { "listId": "evidence-submissions", "ListDataID": "record-evidence-001", "Title": "EVD-001" },
+    { "listId": "follow-up-tests", "ListDataID": "record-follow-up-001", "Title": "FUT-001" }
+  ],
+  "writeIntents": [
+    {
+      "hostListId": "management-action-plans",
+      "recordId": "record-map-001",
+      "fieldName": "Text4",
+      "value": {
+        "seedValueType": "lookup",
+        "requiresLookupListDataIDResolution": true,
+        "storedValueField": "ListDataID",
+        "mustNotUseDisplayTextAsStoredValue": true,
+        "targetListId": "engagements",
+        "resolvedListDataID": "record-engagement-001",
+        "displayValueHint": "ENG-001"
+      }
+    },
+    {
+      "hostListId": "management-action-plans",
+      "recordId": "record-map-001",
+      "fieldName": "Text14",
+      "value": {
+        "seedValueType": "lookup",
+        "requiresLookupListDataIDResolution": true,
+        "storedValueField": "ListDataID",
+        "mustNotUseDisplayTextAsStoredValue": true,
+        "targetListId": "evidence-submissions",
+        "resolvedListDataID": "record-evidence-001",
+        "displayValueHint": "EVD-001"
+      }
+    },
+    {
+      "hostListId": "management-action-plans",
+      "recordId": "record-map-001",
+      "fieldName": "Text15",
+      "value": {
+        "seedValueType": "lookup",
+        "requiresLookupListDataIDResolution": true,
+        "storedValueField": "ListDataID",
+        "mustNotUseDisplayTextAsStoredValue": true,
+        "targetListId": "follow-up-tests",
+        "resolvedListDataID": "record-follow-up-001",
+        "displayValueHint": "FUT-001"
+      }
+    }
+  ],
+  "persistedRows": [
+    {
+      "hostListId": "management-action-plans",
+      "recordId": "record-map-001",
+      "values": {
+        "Text4": "record-engagement-001",
+        "Text14": "record-evidence-001",
+        "Text15": "record-follow-up-001"
+      }
+    }
+  ]
+}

@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+## 1.12.10
+
+- Require shared-builder provenance for bound Approval Form controls and make unsupported types such as `drop` fail closed instead of being skipped by field validation.
+- Enforce Choice options, Submission/Task field-type parity, and business placeholders for editable Approval Sub List row controls.
+- Add a complete persisted `DefResource` control-closure validator to first-generation package preflight, including nested `list-fields` controls, with Sales Quotation Approval regression coverage.
+
+## 1.12.9
+
+- Add a fail-closed direct-MCP Lookup write closure gate: Lookup record mutations now require structured target `ListDataID` resolution, target-list validation, persisted readback, and target-reference closure rather than display-text writes.
+- Add synthetic three-field regression coverage for title/code-to-`ListDataID` failure, raw strings, target-list mismatches, stale persisted values, and missing readback.
+- Strengthen Data List generation/operator guidance with explicit stop conditions when MCP readback cannot resolve the target row, and separate API acceptance, persisted readback, reference resolution, and browser runtime evidence.
+
+## 1.12.8
+
+- Treat every Type `1` Data List, including hidden support resources, as incomplete until it has an explicit default Type `0` Data View and resolved New/Edit/View form routes; a fields-only MCP save is no longer acceptable.
+- Strengthen the Data List completion contract to require exactly one named default View, `Ext1.Url = "default"`, parseable View settings, field-resolving display columns, and query coverage for each visible column.
+- Add regressions for `Layouts: []`, empty or malformed default Views, incorrect default URL metadata, unresolved columns, and missing query coverage; include the completion gate in full-app materialization validation.
+- Add MCP-oriented Data View planning and persisted-readback guidance that keeps API acceptance, readback, Designer-open, and browser runtime evidence separate.
+
 ## 1.12.7
 
 - Strengthen Approval workflow route generation from the Audit Management `Engagement Closure Approval 2` and `Fieldword Gate Approval 2` Golden Reference: local rightward `Returned for Rework` branches use native rounded auto-routing rather than cosmetic vertices.

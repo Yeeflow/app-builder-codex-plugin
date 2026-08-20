@@ -56,6 +56,7 @@
         "validate-data-list-form-layout-template.mjs",
         "validate-data-list-form-fields-template.mjs",
         "validate-approval-form-fields-template.mjs",
+        "validate-approval-form-control-closure.mjs",
         "validate-dashboard-dataset-presentation-golden-references.mjs"
       ],
       "requiredGeneratedFinalGates": [
@@ -116,6 +117,7 @@
         "validate-data-list-form-layout-template.mjs",
         "validate-data-list-form-fields-template.mjs",
         "validate-approval-form-fields-template.mjs",
+        "validate-approval-form-control-closure.mjs",
         "validate-dashboard-dataset-presentation-golden-references.mjs"
       ],
       "requiredGeneratedFinalGates": [
@@ -173,6 +175,7 @@
         "validate-data-list-form-layout-template.mjs",
         "validate-data-list-form-fields-template.mjs",
         "validate-approval-form-fields-template.mjs",
+        "validate-approval-form-control-closure.mjs",
         "validate-dashboard-dataset-presentation-golden-references.mjs"
       ],
       "requiredGeneratedFinalGates": [
@@ -183,14 +186,6 @@
     }
   ],
   "nonFullAppEntrypoints": [
-    {
-      "path": "scripts/yeeflow-application-delivery-workflow.mjs",
-      "reason": "Delivery decision helper only; it does not generate resources or packages."
-    },
-    {
-      "path": "scripts/yeeflow-package-api-automation.mjs",
-      "reason": "Package API upload/import/install/upgrade helper only; it requires an existing package."
-    },
     {
       "pattern": "generate-*-runtime-proof.mjs",
       "reason": "Focused proof/demo generators only; they are not generic Functional Spec + App Plan to full-app YAPK generators."
