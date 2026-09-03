@@ -15,12 +15,22 @@ Changed bundled skill: `yeeflow-custom-code-generator`
 ## Validation
 
 - Attachment pattern structure, TypeScript compilation, and negative mutation gates: passed for source and distribution.
-- Full repository, archive, safety, and private Marketplace installation checks: pending until the release build completes.
+- TypeScript project check and the 21-case workspace skeleton suite: passed.
+- Skill reference, repository hygiene, Custom Code surface, App Plan, MCP integration, JS/MJS syntax, and 552-file JSON parsing checks: passed.
+- The 6.8 MB release archive passed ZIP integrity, installed-layout simulation, version readback, and the scoped release safety audit with zero blockers.
 
 ## Install Smoke
 
-Pending private Marketplace installation from the exact release-branch commit. The final tag will be created only after this passes.
+- Source: `https://github.com/Yeeflow/app-builder-codex-plugin.git`
+- Git ref tested: `codex/yeeflow-app-builder-plugin-v1.13.0`
+- Commit tested: `31a37c4`
+- Sparse paths: `.agents/plugins/marketplace.json`, `dist/yeeflow-app-builder-plugin`
+- Marketplace/plugin: `Yeeflow` / `Yeeflow App Builder`
+- Result: installed version `1.13.0`; installed-cache attachment gates and MCP integration passed.
+- Skill prompts: Application Builder lifecycle and Custom Code Attachment/AI-recognition boundaries both resolved correctly from the installed plugin.
+- Known behavior: unrelated installed plugins emitted pre-existing prompt/icon metadata warnings; Yeeflow installation and discovery were unaffected.
+- Release status: approved for the final `yeeflow-app-builder-plugin-v1.13.0` tag without an RC stage, per user direction.
 
 ## Proof Boundary
 
-This release validates the documented patterns, compile-time contracts, negative mutations, and source/distribution parity. It does not claim tenant-specific upload, AI service, Designer, persisted-definition, submission, workflow, or browser-runtime proof beyond the previously recorded read-only component evidence.
+This release validates the documented patterns, compile-time contracts, negative mutations, source/distribution parity, archive layout, installed-cache behavior, and skill discovery. It does not claim tenant-specific upload, AI service, Designer, persisted-definition, submission, workflow, or browser-runtime proof beyond the previously recorded read-only component evidence.
