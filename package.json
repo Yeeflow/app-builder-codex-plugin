@@ -1,11 +1,12 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.12.10",
+  "version": "1.13.0",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "typecheck": "tsc -b --pretty false",
     "test": "node scripts/test-workspace-skeleton.mjs",
+    "test:custom-code-attachment-patterns": "node skills/installed/yeeflow-custom-code-generator/scripts/test-attachment-pattern-gates.mjs && node dist/yeeflow-app-builder-plugin/skills/yeeflow-custom-code-generator/scripts/test-attachment-pattern-gates.mjs",
     "test:ydp-wrapper": "node scripts/test-ydp-wrapper-gates.mjs",
     "test:standalone-resource-release": "node scripts/test-standalone-resource-release-gates.mjs",
     "test:plugin-mcp-integration": "node scripts/test-plugin-mcp-integration.mjs",

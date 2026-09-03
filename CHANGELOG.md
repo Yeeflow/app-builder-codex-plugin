@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.13.0
+
+- Add an evidence-backed Golden Reference for Yeeflow Attachment metadata, direct SDK upload/content retrieval, and Approval Form AI-recognition orchestration.
+- Add compilable TypeScript patterns for an SCSK-style attachment uploader and quotation recognition flow, including writable target handling and fail-closed runtime boundaries.
+- Add positive and mutation-based regression gates for source and distributed Custom Code assets, while keeping API acceptance, persisted readback, Designer behavior, and browser runtime as separate proof levels.
+
 ## 1.12.10
 
 - Require shared-builder provenance for bound Approval Form controls and make unsupported types such as `drop` fail closed instead of being skipped by field validation.

@@ -1,0 +1,104 @@
+{
+  "key": "SalesQuotationApproval",
+  "pageurls": [
+    {
+      "type": 1,
+      "title": "Sales Quotation Approval Submission",
+      "formdef": {
+        "type": "page",
+        "children": [
+          {
+            "type": "select",
+            "binding": "ClosingPeriod",
+            "fieldName": "ClosingPeriod",
+            "approvalFieldMaterializedFromPlan": true,
+            "attrs": {
+              "placeholder": "Select Closing Period",
+              "choices": ["2026-08", "2026-09"]
+            }
+          },
+          {
+            "type": "list",
+            "binding": "QuotationLines",
+            "fieldName": "QuotationLines",
+            "approvalFieldMaterializedFromPlan": true,
+            "attrs": {
+              "list-fields": [
+                {
+                  "id": "Description",
+                  "editable": true,
+                  "control": {
+                    "type": "input",
+                    "binding": "Description",
+                    "fieldName": "Description",
+                    "approvalSubListFieldMaterializedFromPlan": true,
+                    "attrs": {
+                      "placeholder": "Enter description",
+                      "list_field": true,
+                      "list_field_binding": "QuotationLines"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": 2,
+      "title": "Sales Quotation Approval Task",
+      "formdef": {
+        "type": "page",
+        "children": [
+          {
+            "type": "select",
+            "binding": "ClosingPeriod",
+            "fieldName": "ClosingPeriod",
+            "approvalFieldMaterializedFromPlan": true,
+            "readonly": true,
+            "readOnly": true,
+            "attrs": {
+              "readonly": true,
+              "readOnly": true,
+              "placeholder": "Select Closing Period",
+              "choices": ["2026-08", "2026-09"]
+            }
+          },
+          {
+            "type": "list",
+            "binding": "QuotationLines",
+            "fieldName": "QuotationLines",
+            "approvalFieldMaterializedFromPlan": true,
+            "readonly": true,
+            "readOnly": true,
+            "attrs": {
+              "readonly": true,
+              "readOnly": true,
+              "list-fields": [
+                {
+                  "id": "Description",
+                  "editable": false,
+                  "control": {
+                    "type": "input",
+                    "binding": "Description",
+                    "fieldName": "Description",
+                    "approvalSubListFieldMaterializedFromPlan": true,
+                    "readonly": true,
+                    "readOnly": true,
+                    "attrs": {
+                      "readonly": true,
+                      "readOnly": true,
+                      "list_field": true,
+                      "list_field_binding": "QuotationLines"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

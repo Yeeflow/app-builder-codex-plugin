@@ -418,6 +418,7 @@ Avoid:
 - Yeeflow custom code structure: `references/yeeflow-custom-code-standard.md`
 - Yeeflow data and dashboard patterns: `references/yeeflow-data-and-dashboard-patterns.md`
 - Yeeflow parameter and save target rules: `references/yeeflow-parameter-and-save-target-rules.md`
+- Attachment upload and Approval AI-recognition controls: `references/attachment-and-ai-recognition-golden-reference.md`. Read this for Attachment metadata, direct SDK upload/content retrieval, upload UX, writable Approval-variable targets, Form Action button orchestration, DefResource placement, or the verification ladder. Use the focused compilable examples under `examples/` as patterns, not as proof of tenant runtime behavior.
 - Yeeflow code-to-guide rules: `references/yeeflow-code-to-guide-rules.md`
 - Yeeflow UI/UX guidelines: `references/yeeflow-uiux-guidelines.md`
 - Yeeflow product UI checklist: `references/yeeflow-product-ui-checklist.md`

@@ -3,13 +3,13 @@
   "contractVersion": "0.1.0",
   "protocolVersion": "app-builder.execution/1.0.0",
   "packageGraphVersion": "0.2.0",
-  "sourceCommit": "3923a5794d2a57cdddd1f775ffb15d8bfcb4547e",
+  "sourceCommit": "5f875b60a43543e1913174d8fdc81751d03408fc",
   "sourceTreeState": "dirty",
   "dependencyGraphSha256": "b99fafd3ed9d689ae58d3d578437198ed203a20c35efeb0089ffd5228bf9581a",
   "coreDependencies": [
     {
       "path": "core/yeeflow-app-builder-core-planning.v0.1.0.mjs",
-      "sha256": "b1040c4278065bdc8fbcb6807562272e2a4572d67907e91958f8c4e5616c9876"
+      "sha256": "5331bc3caecd1985125d56ad583e6f7bd2e49c96fbb095b21d9bb80f768f0b2a"
     },
     {
       "path": "core/yeeflow-app-builder-core-materializer.v0.1.0.mjs",
