@@ -38,4 +38,17 @@ Remaining online verification: exact host filter empty/select/intersection/apply
 4. `node scripts/build-plugin-archive.mjs --tracked-only --output dist/yeeflow-app-builder-plugin-1.13.1.zip`
 5. `node scripts/test-product-14.5-distribution.mjs`
 
-The installable-layout ZIP is `dist/yeeflow-app-builder-plugin-1.13.1.zip`. Marketplace install results are recorded separately before final promotion. Online runtime remains unverified.
+The installable-layout ZIP is `dist/yeeflow-app-builder-plugin-1.13.1.zip`. Marketplace installation passed. Online tenant runtime remains unverified.
+
+## Marketplace install smoke
+
+- Source: `https://github.com/Yeeflow/app-builder-codex-plugin.git`
+- Tested commit: `f65fb91` (the already-pushed `yeeflow-app-builder-plugin-v1.13.1-rc1` ref).
+- Sparse paths: `.agents/plugins/marketplace.json`, `dist/yeeflow-app-builder-plugin`.
+- Marketplace/plugin: `yeeflow` / `yeeflow-app-builder`.
+- Actual installed-cache version: `1.13.1`.
+- Installed-cache tests: all 68 Product 14.5 cases, Custom Code Attachment compile/mutation gates and four-service MCP integration passed.
+- Codex app-server `skills/list` discovered all 27 skills from the installed 1.13.1 cache. No model calls or generated prompt responses were used.
+- Package validation: 553 JSON files parsed, 511 JavaScript files passed syntax checks, ZIP integrity and 21 source/dist/archive mirrors passed; scoped safety scan reported zero blockers.
+- User directed immediate final release and stable promotion without further RC iterations. The existing RC tag is retained as history.
+- Final promotion changes only release documentation and its rebuilt ZIP; executable payload remains the install-tested payload.

@@ -6,7 +6,7 @@
 - Add Workflow Sublist editor/mapping/static patch checks without changing DataList lowering.
 - Project fixed Product 14.5 field/FormReport capabilities, preserve default strings and false flags, and check report completion dependencies.
 - Package tracked files plus reviewed additions; retain local duplicate files outside the archive.
-- Product rules and offline tests only; installation and online runtime remain unverified.
+- Marketplace installation, 27-skill discovery and installed contract/attachment/MCP gates passed; online tenant runtime remains unverified.
 
 ## Unreleased
 
