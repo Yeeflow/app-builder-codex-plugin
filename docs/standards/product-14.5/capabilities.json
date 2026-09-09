@@ -1,0 +1,2986 @@
+{
+  "profile": "product-14.5",
+  "commit": "41bdac08a55204bb033acea54cf3af8d7ca2f740",
+  "proof": "product-rule-supported; online-unverified",
+  "sources": [
+    {
+      "path": "resources/schemas/datalist/field/autonumber/schema.json",
+      "sha256": "20978bbb7d87036b5c4edfc9ec63c42b907e7095d08a957b754b4ca8a5b57eb8"
+    },
+    {
+      "path": "resources/schemas/datalist/field/calculated-column/schema.json",
+      "sha256": "8a8d6482e1960dd76f7c9024fd1c7b2936c9f39e3c38c87b4d1d5a410eeffb72"
+    },
+    {
+      "path": "resources/schemas/datalist/field/checkbox/schema.json",
+      "sha256": "5f4ee5846b43a36d844ff9ae95e82e455aaa2d792bfe8a0e1d09c7d700d015a8"
+    },
+    {
+      "path": "resources/schemas/datalist/field/cost-center-picker/schema.json",
+      "sha256": "7377a66ea875d6a00bd6a4d8e289bb25abfd312242cf044cb751b2bad36d07ce"
+    },
+    {
+      "path": "resources/schemas/datalist/field/currency/schema.json",
+      "sha256": "6ea59a94784237cad042a9637a068a9d2c30e9df1984f916c220e69702b41bd3"
+    },
+    {
+      "path": "resources/schemas/datalist/field/datepicker/schema.json",
+      "sha256": "2d794dfce786afe2268b062ab1f3b3cb8e0bc2e38390551648a90d0727349402"
+    },
+    {
+      "path": "resources/schemas/datalist/field/file-upload/schema.json",
+      "sha256": "84d139d6bb47b08df2c32454fefc4f956135deba110c9a8cf5518c7e35077e58"
+    },
+    {
+      "path": "resources/schemas/datalist/field/hyperlink/schema.json",
+      "sha256": "6bc7baa3ab695fe8e2b1604b252fa65c5cd2475b86c67e45da1c3d55eeae1991"
+    },
+    {
+      "path": "resources/schemas/datalist/field/icon-upload/schema.json",
+      "sha256": "4b4d8ef0bd9550f3475db3d0e190eff8048c6f2e8c4bf091130fd902760b6a31"
+    },
+    {
+      "path": "resources/schemas/datalist/field/identity-picker/schema.json",
+      "sha256": "d60c02a48942552fb1c1dabd99d5d56dd477f1de98a9cb25f6b3d5e7abec7646"
+    },
+    {
+      "path": "resources/schemas/datalist/field/input/schema.json",
+      "sha256": "b9790b2a97c2ef94b0d7c5ffd3342fc6d906333416fe1e82af99369eea62192e"
+    },
+    {
+      "path": "resources/schemas/datalist/field/input_number/schema.json",
+      "sha256": "a73f2e3e4505d6fbfe21cc205d9c8b939e3a60077152a6523eccc6833abea47a"
+    },
+    {
+      "path": "resources/schemas/datalist/field/list/schema.json",
+      "sha256": "bb285e473187043f528489b5a72396f071f7c9026e745c25b9ad8a8e85780a00"
+    },
+    {
+      "path": "resources/schemas/datalist/field/location-picker/schema.json",
+      "sha256": "8a43954634ac88540041820c6bd2cb83796fcf583adbf3a76bde6bb3f06911de"
+    },
+    {
+      "path": "resources/schemas/datalist/field/lookup/schema.json",
+      "sha256": "538854205acd6b89083b361e874f0f3fa374915303a1ee983070d40ef3e172c8"
+    },
+    {
+      "path": "resources/schemas/datalist/field/metadata/schema.json",
+      "sha256": "342a91959f817864fe774d60b2513c0b26132c18e9ccdf8d4e0e2a14b60cf1e7"
+    },
+    {
+      "path": "resources/schemas/datalist/field/mutiple-metadata/schema.json",
+      "sha256": "aa2c2000a99fe6411ce14e6b979d74d6f0fdf9cddd9472c48d4569230b8cba0a"
+    },
+    {
+      "path": "resources/schemas/datalist/field/organization-picker/schema.json",
+      "sha256": "3305b1fc6392b84b9849da5ea8601e67fdf32866e2212070c32f253bf1803327"
+    },
+    {
+      "path": "resources/schemas/datalist/field/percent/schema.json",
+      "sha256": "3aced9cd287e02e3156289ae012dc7cddaf71b92c84be33c90dd6620241ea634"
+    },
+    {
+      "path": "resources/schemas/datalist/field/radio/schema.json",
+      "sha256": "6cc05edaff7808846bef0d3f853021bbb3855737f6014cebc517927424f2b1bb"
+    },
+    {
+      "path": "resources/schemas/datalist/field/rate/schema.json",
+      "sha256": "19a603865abe890f30cb92c87b87ba85b74f374a97d5e001d438637de9bde6ef"
+    },
+    {
+      "path": "resources/schemas/datalist/field/richtext/schema.json",
+      "sha256": "59f0f7e16418b6e268fd34fb7c5c8260c63883ebc1f2bc53d8d1566cc77ccec7"
+    },
+    {
+      "path": "resources/schemas/datalist/field/signer/schema.json",
+      "sha256": "2ffdc7c2e5d79666510dd5cbcf488c652f00b8b25afc7f1a32329aa24c898c22"
+    },
+    {
+      "path": "resources/schemas/datalist/field/switch/schema.json",
+      "sha256": "c11a3e4928ce81eb4468a18e94457e447e8dd7872902297dc88767f70215e441"
+    },
+    {
+      "path": "resources/schemas/datalist/field/tag/schema.json",
+      "sha256": "a264155e5d47b346ddd1d148d91e560b1dceb113d2eeb4473b11bc98bc968337"
+    },
+    {
+      "path": "resources/schemas/datalist/field/textarea/schema.json",
+      "sha256": "66694f3ea03b6cefb6bd67bcbff00b94912f3b0a4faca5ac6fcd98570a1ff9fe"
+    },
+    {
+      "path": "resources/schemas/datalist/field/time/schema.json",
+      "sha256": "3e9bbf1fa355b4a6ea9e094ff795c7d676ba002b9da7b2a88c0e0725b7966306"
+    },
+    {
+      "path": "resources/best-practices/controls/filter-controls.md",
+      "sha256": "aaf1e92867ae9e1889b30018cf57a02963e1770420cea613ff06e11d70a32fa8"
+    },
+    {
+      "path": "resources/best-practices/controls/sublist-field-configuration.md",
+      "sha256": "89ff1d6888b957d8fe71f181ae17e4613a4593766cdfe8051096f2e36e84d71b"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.ResourceRegistry/FormReportCapabilityProjector.cs",
+      "sha256": "58ab5f5f989d05ba71ef3d4378f5a01576a912d62318648d119bf0461bcfafad"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/Workflow/SublistControlTools.cs",
+      "sha256": "4c4275253c1b295fdc03588285070c6622568f2943db5b7552f02d7ba57b1985"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/Workflow/SublistFieldPropertiesTool.cs",
+      "sha256": "21b3c056b58d37fd951e10219a0fd6f20406cb4bb4e252f7da38a1a234604840"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/Workflow/SublistFieldBehaviorTools.cs",
+      "sha256": "9d3159e2a3301d8935a7381ee75e5af69ba2b12e42e5c15e7cec6005d1b87163"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/FormReport/FormReportSetDefinitionTool.cs",
+      "sha256": "04cc22e21dccda2694ece0261504007afff8635cc9bc0cbc44e92f7be60d4b4c"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/FormReport/FormReportFinalizeDefinitionTool.cs",
+      "sha256": "72a276be4654dfa914de909513a9d554f7e51527bcf4dbde018e61fa979b23a4"
+    },
+    {
+      "path": "tests/Akmii.AIBuilder.UnitTest/FormReportFilterSchemaTests.cs",
+      "sha256": "c219056277b57f12abb9ae42dd37154f40021d1b1db7e6c7fbf8322c0bf214b9"
+    },
+    {
+      "path": "tests/Akmii.AIBuilder.UnitTest/SublistControlToolTests.cs",
+      "sha256": "e3a7c36e9ff348a70da012cd45230a488246aeabc95e8f4d0763892e133b7765"
+    },
+    {
+      "path": "resources/schemas/workflow/formreport/schema.json",
+      "sha256": "5778f95c0a68982efc4f92c851e5f5ed0e490beacce0e9d454bc01f589caba40"
+    },
+    {
+      "path": "resources/schemas/workflow/formreport/fields/schema.json",
+      "sha256": "3859e8af63e39b7f4a2aea72b890454a79f627710a4d1e8545957891ff0ed81d"
+    },
+    {
+      "path": "resources/schemas/workflow/formreport/filters/schema.json",
+      "sha256": "329d36e587ea457b5f9103261bbc82ab3c9a01a7695a184432aeac68f6f10d0a"
+    }
+  ],
+  "fields": {
+    "autonumber": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.prefix": {
+        "types": [
+          "object"
+        ]
+      },
+      "Rules.prefix.value": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.prefix.variable": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.suffix": {
+        "types": [
+          "object"
+        ]
+      },
+      "Rules.suffix.value": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.suffix.variable": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.minDigits": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.startNum": {
+        "types": [
+          "number"
+        ]
+      }
+    },
+    "calculated-column": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.calculated": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.calculated_result.type": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "input",
+          "text",
+          "number",
+          "currency",
+          "datetime",
+          "boolean"
+        ]
+      },
+      "Rules.calculated_result.attrs": {
+        "types": [
+          "object"
+        ]
+      }
+    },
+    "checkbox": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.displayStyle": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "dropdown",
+          "checkbox"
+        ]
+      },
+      "Rules.choices": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.choices.*": {
+        "types": [
+          "string"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "cost-center-picker": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.multiple": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.identity-maxselection": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "currency": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.displayThousandths": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "Rules.rounded-to": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.number_min": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.number_max": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.currencyCode": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.displayFormat": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "code",
+          "symbol"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "datepicker": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.displayLabel": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.readonly": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.date_picker": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "default",
+          "date",
+          "month"
+        ]
+      },
+      "Rules.showtime": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.disable_now_button": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.dateformat": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "0",
+          "1",
+          "2"
+        ]
+      },
+      "Rules.minuteStep": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "file-upload": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.displayLabel": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.readonly": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.isLabrary": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.PROP_MAXSIZE": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.ver": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.file_multiple": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.maxsize": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.file_maxcount": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.file_typeslimit": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.file_types.value": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.file_types.cusValue": {
+        "types": [
+          "string"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "hyperlink": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.hyperlink_open": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "_self",
+          "_blank"
+        ]
+      },
+      "Rules.hyperlink_buttonname": {
+        "types": [
+          "string"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "icon-upload": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.controlmultiple": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.maxselection": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.picture_size_limit": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "identity-picker": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.displayLabel": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.readonly": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.multiple": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.identity-maxselection": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "input": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.displayLabel": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.readonly": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.isNotInListFiles": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.input-maxlength": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.allowScan": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.encrypt": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "input_number": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.displayLabel": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.readonly": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.isNotInListFiles": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.displayThousandths": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "Rules.rounded-to": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.number_min": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.number_max": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.number_step": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "list": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.list-variables": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.list-variables.*": {
+        "types": [
+          "object"
+        ]
+      },
+      "Rules.list-variables.*.idx": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.list-variables.*.id": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.list-variables.*.name": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.list-variables.*.type": {
+        "types": [
+          "string"
+        ],
+        "values": [
+          "text",
+          "number",
+          "boolean",
+          "date",
+          "file",
+          "metadata",
+          "user",
+          "costcenter",
+          "groupselect",
+          "location",
+          "lookup",
+          "img",
+          "mutiple-metadata"
+        ]
+      },
+      "Rules.list-variables.*.editable": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.list-variables.*.value.$dynamic": {
+        "selector": "type",
+        "variants": [
+          "metadata",
+          "mutiple-metadata",
+          "lookup"
+        ]
+      }
+    },
+    "location-picker": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "lookup": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.multiple": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.max-selection": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.displayStyle": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "-1",
+          "dropdown",
+          "datapicker"
+        ]
+      },
+      "Rules.appid": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.listid": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.listsetid": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.listfield": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.list_tooltip_field": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.addition": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.addition.*": {
+        "types": [
+          "object"
+        ]
+      },
+      "Rules.addition.*.FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.addition.*.IsShow": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.addition.*.RelationName": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.search-scope": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "Rules.search-fields": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.listfilter": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.listfilter.*": {
+        "types": [
+          "object"
+        ]
+      },
+      "Rules.listfilter.*.key": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.listfilter.*.pre": {
+        "types": [
+          "string"
+        ],
+        "values": [
+          "and",
+          "or"
+        ]
+      },
+      "Rules.listfilter.*.left": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.listfilter.*.op": {
+        "types": [
+          "string"
+        ],
+        "values": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10"
+        ]
+      },
+      "Rules.listfilter.*.right": {
+        "types": [
+          "string",
+          "number",
+          "null"
+        ]
+      },
+      "Rules.listfilter.*.showCus": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.listfilter.*.conditions": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.sort-first.SortByDesc": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.sort-first.SortName": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.sort-second.SortByDesc": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.sort-second.SortName": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "metadata": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.source": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "0",
+          "app"
+        ]
+      },
+      "Rules.categoryId": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.parentId": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.metadata-treeselect": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "mutiple-metadata": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.source": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "0",
+          "app"
+        ]
+      },
+      "Rules.categoryId": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.parentId": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.metadata-treeselect": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.max-selection": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "organization-picker": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.multiple": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.identity-maxselection": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.parentId": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.metadata-treeselect": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.hierarchical-select": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "percent": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.rounded-to": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.number_min": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.number_max": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "radio": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.displayStyle": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "radio",
+          "dropdown"
+        ]
+      },
+      "Rules.choices": {
+        "types": [
+          "array"
+        ]
+      },
+      "Rules.choices.*": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.show_color": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.color_choices": {
+        "types": [
+          "array"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "rate": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.rate-type": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "star",
+          "heart",
+          "number",
+          "custom"
+        ]
+      },
+      "Rules.icon": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.rate-count": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.rate-allowHalf": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "richtext": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.richtext-type": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "all",
+          "simple",
+          "nobar"
+        ]
+      }
+    },
+    "signer": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      }
+    },
+    "switch": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.displayStyle": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "default",
+          "decision"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "tag": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.multiple": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.process-field-tag-maxcount": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.customTags": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.source": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "0",
+          "app"
+        ]
+      },
+      "Rules.category": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "textarea": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.input-maxlength": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    },
+    "time": {
+      "Type": {
+        "types": [
+          "string"
+        ]
+      },
+      "DisplayName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldID": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldName": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldType": {
+        "types": [
+          "string"
+        ]
+      },
+      "FieldIndex": {
+        "types": [
+          "number"
+        ]
+      },
+      "InternalName": {
+        "types": [
+          "string"
+        ]
+      },
+      "IsFilter": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsSystem": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "IsUnique": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Status": {
+        "types": [
+          "number"
+        ]
+      },
+      "Rules.required": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "Rules.placeholder": {
+        "types": [
+          "string"
+        ]
+      },
+      "Rules.dateformat": {
+        "types": [
+          "enum"
+        ],
+        "values": [
+          "0",
+          "1",
+          "2"
+        ]
+      },
+      "Rules.minuteStep": {
+        "types": [
+          "number"
+        ]
+      },
+      "DefaultValue": {
+        "types": [
+          "string"
+        ]
+      }
+    }
+  },
+  "defaultStringTypes": [
+    "checkbox",
+    "cost-center-picker",
+    "currency",
+    "datepicker",
+    "file-upload",
+    "hyperlink",
+    "icon-upload",
+    "identity-picker",
+    "input",
+    "input_number",
+    "location-picker",
+    "metadata",
+    "mutiple-metadata",
+    "organization-picker",
+    "percent",
+    "radio",
+    "rate",
+    "switch",
+    "textarea",
+    "time"
+  ],
+  "defaultUndeclaredTypes": [
+    "autonumber",
+    "calculated-column",
+    "list",
+    "lookup",
+    "richtext",
+    "signer",
+    "tag"
+  ],
+  "formReport": {
+    "compositeRequiredKeys": [
+      "listInfo",
+      "fields",
+      "views",
+      "formreport"
+    ],
+    "compositeViewTypes": [
+      0,
+      100,
+      102,
+      105,
+      998,
+      999
+    ],
+    "mappings": {
+      "text": [
+        "input",
+        "textarea",
+        "richtext",
+        "percent",
+        "switch",
+        "signer",
+        "input_number",
+        "currency",
+        "datepicker",
+        "time",
+        "identity-picker",
+        "organization-picker",
+        "location-picker",
+        "cost-center-picker",
+        "file-upload",
+        "icon-upload"
+      ],
+      "number": [
+        "input_number",
+        "currency",
+        "percent"
+      ],
+      "boolean": [
+        "switch"
+      ],
+      "date": [
+        "datepicker",
+        "time"
+      ],
+      "metadata": [
+        "metadata"
+      ],
+      "user": [
+        "identity-picker"
+      ],
+      "costcenter": [
+        "cost-center-picker"
+      ],
+      "groupselect": [
+        "organization-picker"
+      ],
+      "lookup": [
+        "lookup"
+      ],
+      "list": [
+        "textarea"
+      ],
+      "dict": [
+        "input",
+        "textarea",
+        "richtext"
+      ],
+      "file": [
+        "file-upload"
+      ],
+      "location": [
+        "location-picker"
+      ],
+      "img": [
+        "icon-upload"
+      ],
+      "mutiple-metadata": [
+        "mutiple-metadata"
+      ],
+      "signature": [
+        "signer"
+      ]
+    },
+    "systemFields": [
+      "Form ID",
+      "Tracking No.",
+      "Request title",
+      "Applicant",
+      "Submitter",
+      "Department",
+      "Submission Date",
+      "Modified Time",
+      "Flow status",
+      "Line Manager",
+      "Employee No."
+    ],
+    "operators": {
+      "generalCondition": [
+        "isNull",
+        "isNotNull"
+      ],
+      "textCondition": [
+        "s.=",
+        "s.!=",
+        "startWith",
+        "endWith",
+        "contains",
+        "notContains"
+      ],
+      "numberCondition": [
+        "n.=",
+        "n.!=",
+        "n.>",
+        "n.>=",
+        "n.<",
+        "n.<="
+      ],
+      "booleanValueCondition": [
+        "b.=",
+        "b.!="
+      ],
+      "booleanPredicateCondition": [
+        "b.isTrue",
+        "b.isFalse"
+      ],
+      "dateCondition": [
+        "dt.=",
+        "dt.!=",
+        "dt.>",
+        "dt.>=",
+        "dt.<",
+        "dt.<="
+      ],
+      "flowStatusCondition": [
+        "in"
+      ]
+    },
+    "group": {
+      "left": "FormID",
+      "op": "s.=",
+      "right": null,
+      "childProperty": "conditions",
+      "nestedGroupsAllowed": false
+    }
+  }
+}

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import productContracts from "./product-14.5-contracts.cjs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
@@ -35,6 +36,7 @@ export function validateDashboardSelectFilterRuntimeContract(options = {}) {
 }
 
 function validateResource({ title, resource, source }, findings) {
+  findings.push(...productContracts.validateFilterResource(resource).map(f => ({ ...f, page: title, source: safePath(source) })));
   const selectFilters = [];
   const collections = [];
   walk(resource, (node, pointer) => {

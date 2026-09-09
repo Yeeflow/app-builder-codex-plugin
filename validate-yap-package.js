@@ -5279,14 +5279,15 @@ function validateFormNewReports(data, report) {
       if (child.ListModel && child.ListModel.IsBreakInherit === true && child.ListModel.Perm === undefined) {
         issue(report, "warning", "FORM_REPORT_CUSTOM_PERMISSION_INCOMPLETE", "Custom Form Report permissions should include explicit permission metadata when inheritance is disabled.", { report: label });
       }
+      if (!asArray(child.Layouts).length) issue(report, generatorFinalSeverity(report), "FORM_REPORT_VIEWS_MISSING", "Completed Form Reports require backing views.", { report: label });
       for (const [viewIndex, layout] of asArray(child.Layouts).entries()) {
         const layoutView = tryParseJson(layout && layout.LayoutView) || {};
         if (layoutView.Attr_IsViewDetail !== undefined && typeof layoutView.Attr_IsViewDetail !== "boolean") {
           issue(report, "warning", "FORM_REPORT_VIEW_DETAIL_ACCESS_UNRECOGNIZED", "Form Report view detail-page access flag should be boolean when present.", { report: label, viewIndex });
         }
       }
-      if (asArray(child.Defs).length && asArray(settings.Fields).length && asArray(child.Defs).length !== asArray(settings.Fields).length) {
-        issue(report, "warning", "FORM_REPORT_FIELD_RESOURCE_COUNT_MISMATCH", "Form Report child resource fields should align with Settings.Fields.", { report: label, settingsFields: asArray(settings.Fields).length, childFields: asArray(child.Defs).length });
+      if (asArray(child.Defs).length !== asArray(settings.Fields).length) {
+        issue(report, generatorFinalSeverity(report), "FORM_REPORT_FIELD_RESOURCE_COUNT_MISMATCH", "Form Report child resource fields should align with Settings.Fields.", { report: label, settingsFields: asArray(settings.Fields).length, childFields: asArray(child.Defs).length });
       }
     }
 

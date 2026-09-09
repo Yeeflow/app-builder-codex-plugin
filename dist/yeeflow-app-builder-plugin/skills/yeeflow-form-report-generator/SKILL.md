@@ -155,3 +155,9 @@ Form Report packages must satisfy the same YAP schema-standard envelope as other
 
 Access app resource permission flags for Form Reports currently have a product conflict: `yap-schema.json` says `formReports` uses Read `8`, while the updated rules document says Submit `1`. Keep Form Report access-resource permission generation warning-level until product team clarifies. This does not resolve the separate Form Report field-source runtime diagnosis.
 <!-- yap-schema-standard-learning:end -->
+
+## Fixed Product 14.5 Incremental Contract
+
+Read `docs/standards/product-14.5/incremental-alignment.md` and its versioned `capabilities.json` for the fixed reviewed commit. Run `node scripts/validate-product-14.5.mjs <fields|filters|sublist|formreport> <local-contract.json>` for the applicable local validation input before completing generation. These are local planning/validation contracts, not new MCP save payloads. Product-supported and locally tested rules do not prove online behavior.
+
+Use validateReportClosure before completion and after custom views. Check source workflow, Type 32 backing resource, fields and view ownership/references together. Product-profile mappings and source filters are versioned capabilities; never translate them into unverified MCP/YAPK mappings. Boolean equality uses literal string true/false; predicate operators use null. Preserve false flags. Groups permit one child layer and consistent sibling connectors; nested groups fail. Export profile retains its own mapping boundary.

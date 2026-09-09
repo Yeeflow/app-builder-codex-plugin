@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.1
+
+- Add explicit filter modes, consuming dependencies, apply/reset references and runtime-distinct selection rules while retaining the known Collection runtime blocker.
+- Add Workflow Sublist editor/mapping/static patch checks without changing DataList lowering.
+- Project fixed Product 14.5 field/FormReport capabilities, preserve default strings and false flags, and check report completion dependencies.
+- Package tracked files plus reviewed additions; retain local duplicate files outside the archive.
+- Product rules and offline tests only; installation and online runtime remain unverified.
+
 ## Unreleased
 
 ## 1.13.0

@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "1.13.0",
-  "description": "Yeeflow App Builder skills with four scoped hosted MCP services and a separately published host-neutral Execution SDK 1.0.0 asset.",
+  "version": "1.13.1",
+  "description": "Yeeflow App Builder: four hosted MCP services and versioned Product 14.5 contract checks.",
   "keywords": [
     "yeeflow",
     "application-builder",

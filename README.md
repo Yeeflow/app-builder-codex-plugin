@@ -1,5 +1,7 @@
 # App Builder Codex Plugin
 
+Release **1.13.1**, based on released **v1.13.0** (`c4547f8`). Product 14.5 incremental checks are offline-only; see [release notes](docs/releases/yeeflow-app-builder-v1.13.1.md).
+
 Official Yeeflow App Builder Codex plugin repository.
 
 This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It preserves the useful scripts, schemas, validators, studies, generated skills, and plugin distribution assets while using a new non-colliding Codex plugin identity.

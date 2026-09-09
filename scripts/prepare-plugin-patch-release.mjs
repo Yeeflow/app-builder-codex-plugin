@@ -269,6 +269,11 @@ mirrors.push(
   ["skills/installed/yeeflow-data-report-generator/references/data-report-live-contract.md", "skills/yeeflow-data-report-generator/references/data-report-live-contract.md"],
 );
 
+// Explicit reviewed additions; never glob untracked files into a release.
+for (const entry of readJson("docs/standards/product-14.5/distribution-files.json").mirrors) {
+  mirrors.push([entry.source, entry.destination]);
+}
+
 for (const [sourcePath, destinationPath] of mirrors) {
   const destination = resolve(root, "dist/yeeflow-app-builder-plugin", destinationPath);
   mkdirSync(dirname(destination), { recursive: true });

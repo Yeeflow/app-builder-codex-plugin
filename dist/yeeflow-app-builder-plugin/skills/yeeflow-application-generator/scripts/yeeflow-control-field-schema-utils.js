@@ -2,6 +2,16 @@
 
 const fs = require("fs");
 const path = require("path");
+function loadProductContracts() {
+  let current = __dirname;
+  for (let i = 0; i < 6; i += 1) {
+    const candidate = path.join(current, "scripts/product-14.5-contracts.cjs");
+    if (fs.existsSync(candidate)) return require(candidate);
+    current = path.dirname(current);
+  }
+  throw new Error("PRODUCT_CONTRACT_MODULE_MISSING");
+}
+const { validateField: validateProductField } = loadProductContracts();
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -170,7 +180,8 @@ function validateFieldAgainstSchema(field, schemas, options = {}) {
       target.Rules = {};
     }
   }
-  return collectKnownPathIssues(target, `field ${type}`, entry, options);
+  return [...collectKnownPathIssues(target, `field ${type}`, entry, options),
+    ...validateProductField(field).map(item => ({ ...item, detail: { propertyPath: item.path, profile: "product-14.5", proof: "product-rule-supported; transport-unverified" } }))];
 }
 
 function isGeneratedValueControl(controlType) {

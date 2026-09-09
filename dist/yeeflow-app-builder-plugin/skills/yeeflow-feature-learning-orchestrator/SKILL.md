@@ -4,6 +4,9 @@ description: orchestrate end-to-end Yeeflow feature learning from real exports b
 ---
 
 # Yeeflow Feature Learning Orchestrator
++## Hosted MCP-Only Yeeflow Access
+
+For live Yeeflow work, use only the appropriate hosted MCP tool. Its service negotiates authentication; standalone OAuth, local REST/API helpers, API-key fallbacks, profile/environment configuration, and direct endpoint calls are retired and must not be used. `workspace_list` is the sole workspace-discovery route. Require explicit confirmation for writes, and treat MCP acceptance as distinct from materialization and runtime proof.
 
 ## UI Generation Hard-Gate Skill
 
@@ -505,3 +508,9 @@ Form Action Set Data List learning must extract host, trigger, operation, target
 Form Action Open Resource V1.7 learning must preserve the three exact types and their host constraints. `listitem` supports add/edit/view, selected Data List/Document Library targets, optional target-owned custom layouts, and current item only on Data List/Document Library custom forms. `openform` distinguishes new submission defaults/query parameters from submitted-form `formid`; submitted forms forbid both input blocks. `opendashboard` resolves a Type 103 page. All use the shared slide/modal/target/new presentation contract and the 0/1/2/3/9 size enum. Public Forms are forbidden. Require the App Plan table, shared builder/materializer, package target resolution, and signing gate before claiming generation support.
 
 For the v1.10 Query Data source baseline, treat Document Library (`ListType/listtype = 16`) and Form Report (`32`) as export-proven sources for Workflow Query Data and host-supported Form Actions. Keep source capability separate from host capability: Form Report cannot host an independent Form Action. Preserve the two-sort maximum and shared pagination rules. Defer Data Report until its dedicated focused export is supplied.
+
+## Fixed Product 14.5 Incremental Contract
+
+Read `docs/standards/product-14.5/incremental-alignment.md` and its versioned `capabilities.json` for the fixed reviewed commit. Run `node scripts/validate-product-14.5.mjs <fields|filters|sublist|formreport> <local-contract.json>` for the applicable local validation input before completing generation. These are local planning/validation contracts, not new MCP save payloads. Product-supported and locally tested rules do not prove online behavior.
+
+Reproduce the compact field/FormReport capability projection with scripts/project-product-14.5-capabilities.mjs against the read-only fixed snapshot and --check. Keep resource hashes and original summaries; never bundle upstream source or raw schemas. Confirm transport/host proof separately before promotion.

@@ -4,8 +4,8 @@ Proof boundary: dashboard Data Filter schema across `Sales_Management_AD.yap` an
 
 ## Source
 
-- Export path: `<downloads>/Sales_Management_AD.yap`
-- Follow-up export path: `<downloads>/CRM - Customer relationship management.yap`
+- Export path: `/Users/Renger/Downloads/Sales_Management_AD.yap`
+- Follow-up export path: `/Users/Renger/Downloads/CRM - Customer relationship management.yap`
 - Repository branch: `codex/data-filter-controls-learning`
 - Follow-up branch: `codex/data-filter-controls-crm-learning`
 - Target dashboard pages: `Dashboard`, `Data Report`
@@ -233,7 +233,7 @@ Each dynamic filter condition uses `right` as an expression-token array whose `i
 - Bind value-producing Data Filter controls with `binding: "__filter_" + filterVarId`.
 - Do not treat Apply button or Remove filters as value-producing filter controls.
 - Use `attrs.apply_t = "2"` only with a valid `attrs.apply_btn` pointing to an `apply-button`.
-- Use value-change/default mode for lightweight filters and click-apply mode when multiple or heavier filters should avoid repeated refreshes.
+- New plans must explicitly choose immediate or apply-button mode; retain unspecified mode only as historical export evidence. Declare reload dependents or the linked apply-button ID. Selection options come from runtime-distinct values of the bound field, without enumeration or default selection. Omitted remove-filter scope resets only apply-button variables; explicit scope resets exactly those variables. See `../standards/product-14.5/incremental-alignment.md` for the fixed product profile and preserved runtime conflicts.
 - Wire downstream `attrs.data.filter[]` or `exts[].attr.settings.Conditions[]` to filter variables through expression-token arrays.
 - Validate the condition left field against the consumer data source.
 - Generate only export-proven filter control types and settings. Sales proves Select, Checkbox, Range, Check range, Date, Relative period, Apply button, and Remove filters. CRM proves Search, Radio, Hierarchy, and Sorting. Keep any settings not seen in these exports as product-documented or unproven until later evidence.
@@ -274,7 +274,7 @@ The Sales export did not provide normalized refs for Search, Radio, Hierarchy, o
 
 ## CRM Dashboard Follow-up: Search, Radio, Hierarchy, and Sorting Filters
 
-Source export: `<downloads>/CRM - Customer relationship management.yap`
+Source export: `/Users/Renger/Downloads/CRM - Customer relationship management.yap`
 
 Target page: `Dashboard`
 

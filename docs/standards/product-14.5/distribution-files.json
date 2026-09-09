@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "mirrors": [
+    {
+      "source": "scripts/product-14.5-contracts.cjs",
+      "destination": "scripts/product-14.5-contracts.cjs"
+    },
+    {
+      "source": "scripts/project-product-14.5-capabilities.mjs",
+      "destination": "scripts/project-product-14.5-capabilities.mjs"
+    },
+    {
+      "source": "scripts/validate-product-14.5.mjs",
+      "destination": "scripts/validate-product-14.5.mjs"
+    },
+    {
+      "source": "scripts/test-product-14.5-contracts.mjs",
+      "destination": "scripts/test-product-14.5-contracts.mjs"
+    },
+    {
+      "source": "scripts/validate-dashboard-select-filter-runtime-contract.mjs",
+      "destination": "scripts/validate-dashboard-select-filter-runtime-contract.mjs"
+    },
+    {
+      "source": "yeeflow-control-field-schema-utils.js",
+      "destination": "yeeflow-control-field-schema-utils.js"
+    },
+    {
+      "source": "validate-yap-package.js",
+      "destination": "validate-yap-package.js"
+    },
+    {
+      "source": "docs/standards/product-14.5/incremental-alignment.md",
+      "destination": "docs/standards/product-14.5/incremental-alignment.md"
+    },
+    {
+      "source": "docs/standards/product-14.5/capabilities.json",
+      "destination": "docs/standards/product-14.5/capabilities.json"
+    },
+    {
+      "source": "docs/studies/data-filter-controls.md",
+      "destination": "docs/studies/data-filter-controls.md"
+    },
+    {
+      "source": "docs/standards/dashboard-filter-dependency-closure-standard.md",
+      "destination": "docs/standards/dashboard-filter-dependency-closure-standard.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-dashboard-generator/SKILL.md",
+      "destination": "skills/yeeflow-dashboard-generator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-approval-form-generator/SKILL.md",
+      "destination": "skills/yeeflow-approval-form-generator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-data-list-generator/SKILL.md",
+      "destination": "skills/yeeflow-data-list-generator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-form-report-generator/SKILL.md",
+      "destination": "skills/yeeflow-form-report-generator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-package-validator/SKILL.md",
+      "destination": "skills/yeeflow-package-validator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-feature-learning-orchestrator/SKILL.md",
+      "destination": "skills/yeeflow-feature-learning-orchestrator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-application-generator/scripts/yeeflow-control-field-schema-utils.js",
+      "destination": "skills/yeeflow-application-generator/scripts/yeeflow-control-field-schema-utils.js"
+    },
+    {
+      "source": "skills/installed/yeeflow-application-generator/scripts/validate-yap-package.js",
+      "destination": "skills/yeeflow-application-generator/scripts/validate-yap-package.js"
+    },
+    {
+      "source": "yeeflow-control-field-schema-utils.js",
+      "destination": "scripts/yeeflow-control-field-schema-utils.js"
+    },
+    {
+      "source": "docs/releases/yeeflow-app-builder-v1.13.1.md",
+      "destination": "docs/releases/yeeflow-app-builder-v1.13.1.md"
+    }
+  ]
+}

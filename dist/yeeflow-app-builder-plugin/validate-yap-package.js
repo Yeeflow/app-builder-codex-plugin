@@ -5279,14 +5279,15 @@ function validateFormNewReports(data, report) {
       if (child.ListModel && child.ListModel.IsBreakInherit === true && child.ListModel.Perm === undefined) {
         issue(report, "warning", "FORM_REPORT_CUSTOM_PERMISSION_INCOMPLETE", "Custom Form Report permissions should include explicit permission metadata when inheritance is disabled.", { report: label });
       }
+      if (!asArray(child.Layouts).length) issue(report, generatorFinalSeverity(report), "FORM_REPORT_VIEWS_MISSING", "Completed Form Reports require backing views.", { report: label });
       for (const [viewIndex, layout] of asArray(child.Layouts).entries()) {
         const layoutView = tryParseJson(layout && layout.LayoutView) || {};
         if (layoutView.Attr_IsViewDetail !== undefined && typeof layoutView.Attr_IsViewDetail !== "boolean") {
           issue(report, "warning", "FORM_REPORT_VIEW_DETAIL_ACCESS_UNRECOGNIZED", "Form Report view detail-page access flag should be boolean when present.", { report: label, viewIndex });
         }
       }
-      if (asArray(child.Defs).length && asArray(settings.Fields).length && asArray(child.Defs).length !== asArray(settings.Fields).length) {
-        issue(report, "warning", "FORM_REPORT_FIELD_RESOURCE_COUNT_MISMATCH", "Form Report child resource fields should align with Settings.Fields.", { report: label, settingsFields: asArray(settings.Fields).length, childFields: asArray(child.Defs).length });
+      if (asArray(child.Defs).length !== asArray(settings.Fields).length) {
+        issue(report, generatorFinalSeverity(report), "FORM_REPORT_FIELD_RESOURCE_COUNT_MISMATCH", "Form Report child resource fields should align with Settings.Fields.", { report: label, settingsFields: asArray(settings.Fields).length, childFields: asArray(child.Defs).length });
       }
     }
 
@@ -5486,9 +5487,27 @@ function validateAgentCopilotModules(data, listsById, report) {
   const connectionIds = new Set(connections.map((connection) => safeString(connection.ID)).filter(Boolean));
   const aiResourceIds = new Set(aiResources.map((resource) => safeString(resource.ID)).filter(Boolean));
   const knowledgeNames = new Set(knowledges.map((knowledge) => safeString(knowledge.Name)).filter(Boolean));
+  const knowledgeById = new Map();
   const rootListSetId = safeString(data && data.Item && data.Item.ListModel && data.Item.ListModel.ListID);
 
   connections.forEach((connection, index) => validateConnectionModuleEntry(connection, index, report));
+  knowledges.forEach((knowledge, index) => {
+    const knowledgeId = safeString(knowledge.ID);
+    const knowledgeName = safeString(knowledge.Name);
+    if (!knowledgeId) issue(report, generatorFinalSeverity(report), "KNOWLEDGE_ID_MISSING", "Knowledge source is missing ID.", { index, name: knowledgeName });
+    else if (knowledgeById.has(knowledgeId)) issue(report, generatorFinalSeverity(report), "KNOWLEDGE_ID_DUPLICATE", "Knowledge source ID is duplicated.", { index, id: knowledgeId, name: knowledgeName });
+    else knowledgeById.set(knowledgeId, knowledge);
+    if (!knowledgeName) issue(report, generatorFinalSeverity(report), "KNOWLEDGE_NAME_MISSING", "Knowledge source is missing Name.", { index, id: knowledgeId });
+    const knowledgeDatas = asArray(knowledge.Datas);
+    if (!knowledgeDatas.length) issue(report, generatorFinalSeverity(report), "KNOWLEDGE_DATAS_EMPTY", "Knowledge source must contain at least one Datas entry.", { id: knowledgeId, name: knowledgeName });
+    knowledgeDatas.forEach((knowledgeData, dataIndex) => {
+      if (!safeString(knowledgeData && knowledgeData.Source)) issue(report, generatorFinalSeverity(report), "KNOWLEDGE_DATA_SOURCE_MISSING", "Knowledge Datas entry is missing Source.", { knowledgeId, dataIndex });
+      if (!knowledgeData || knowledgeData.Type === undefined || knowledgeData.Type === null || knowledgeData.Type === "") issue(report, generatorFinalSeverity(report), "KNOWLEDGE_DATA_TYPE_MISSING", "Knowledge Datas entry is missing Type.", { knowledgeId, dataIndex });
+      if (knowledgeData && knowledgeData.Settings !== undefined && knowledgeData.Settings !== null && knowledgeData.Settings !== "" && !isObject(tryParseJson(knowledgeData.Settings))) {
+        issue(report, generatorFinalSeverity(report), "KNOWLEDGE_DATA_SETTINGS_INVALID", "Knowledge Datas Settings should be parseable JSON object when present.", { knowledgeId, dataIndex });
+      }
+    });
+  });
 
   report.summary.agents = aiResources.filter((resource) => Number(resource.Type) === 0).length;
   report.summary.copilots = aiResources.filter((resource) => Number(resource.Type) === 1).length;
@@ -5521,14 +5540,33 @@ function validateAgentCopilotModules(data, listsById, report) {
       issue(report, generatorFinalSeverity(report), "AI_RESOURCE_COMPONENTS_NOT_ARRAY", "AI Agent/Copilot Components should be an array of knowledge/tool bindings.", { name: resourceName, id: resourceId });
       return;
     }
+    const boundKnowledgeIds = new Set();
     aiResource.Components.forEach((component, componentIndex) => {
       const componentName = safeString(component.Name);
       const componentType = Number(component.Type);
       if (![1, 2].includes(componentType)) {
         issue(report, "warning", "AI_COMPONENT_TYPE_UNSTUDIED", "Studied AI resource Components use Type 1 for knowledge and Type 2 for tools.", { aiResource: resourceName, component: componentName, componentType });
       }
-      if (componentType === 1 && componentName && !knowledgeNames.has(componentName)) {
-        issue(report, "warning", "AI_KNOWLEDGE_COMPONENT_NAME_UNRESOLVED", "Knowledge component name does not match an included Knowledges module entry. Confirm import remapping before generation.", { aiResource: resourceName, component: componentName });
+      if (componentType === 1) {
+        const knowledgeComponentSettings = tryParseJson(component.Settings);
+        const knowledgeSourceId = safeString(component.Source) || safeString(knowledgeComponentSettings && knowledgeComponentSettings.Data && knowledgeComponentSettings.Data.Value);
+        if (!knowledgeSourceId) {
+          issue(report, generatorFinalSeverity(report), "AI_KNOWLEDGE_COMPONENT_SOURCE_MISSING", "Knowledge component must contain the exact Knowledge Source ID.", { aiResource: resourceName, component: componentName, componentIndex });
+        } else {
+          const knowledge = knowledgeById.get(knowledgeSourceId);
+          if (!knowledge) {
+            issue(report, generatorFinalSeverity(report), "AI_KNOWLEDGE_COMPONENT_SOURCE_UNRESOLVED", "Knowledge component Source does not resolve to an included Knowledges module entry.", { aiResource: resourceName, component: componentName, componentIndex, source: knowledgeSourceId });
+          } else {
+            const knowledgeName = safeString(knowledge.Name);
+            if (componentName && knowledgeName && componentName !== knowledgeName) {
+              issue(report, generatorFinalSeverity(report), "AI_KNOWLEDGE_COMPONENT_NAME_MISMATCH", "Knowledge component Name must match the referenced Knowledge resource.", { aiResource: resourceName, component: componentName, source: knowledgeSourceId, knowledgeName });
+            }
+            boundKnowledgeIds.add(knowledgeSourceId);
+          }
+        }
+        if (componentName && !knowledgeNames.has(componentName)) {
+          issue(report, "warning", "AI_KNOWLEDGE_COMPONENT_NAME_UNRESOLVED", "Knowledge component name does not match an included Knowledges module entry. Confirm import remapping before generation.", { aiResource: resourceName, component: componentName });
+        }
       }
       if (componentType !== 2) return;
       const componentSettings = tryParseJson(component.Settings);
@@ -5597,6 +5635,20 @@ function validateAgentCopilotModules(data, listsById, report) {
         issue(report, "dependency", "AI_TOOL_CONNECTED_AGENT_REFERENCE", "AI tool references another AI Agent resource. Generated packages must include and remap the target Agent/Copilot together or defer the binding.", { aiResource: resourceName, component: componentName, targetResourceId: value });
       } else {
         issue(report, report.mode === "generator" && report.stage === "final" ? "error" : "dependency", "AI_TOOL_DATA_REFERENCE_UNRESOLVED", "AI tool Settings.Data.Value does not resolve to an included list, connection, or current app/listset.", { aiResource: resourceName, component: componentName, value });
+      }
+    });
+    const promptInstructionText = [
+      isObject(settings) ? settings.Prompt : null,
+      isObject(settings) ? settings.Instructions : null,
+      isObject(draft) ? draft.Prompt : null,
+      isObject(draft) ? draft.Instructions : null,
+    ].filter((value) => typeof value === "string").join("\n").toLocaleLowerCase();
+    const claimsKnowledge = /\bknowledge(?:\s+(?:base|source|sources))?\b/i.test(promptInstructionText);
+    knowledgeById.forEach((knowledge, knowledgeId) => {
+      const aliases = [safeString(knowledge.Name), ...asArray(knowledge.Datas).map((entry) => safeString(entry && entry.Name))].filter((value) => value.length > 2);
+      const namesSource = aliases.some((alias) => promptInstructionText.includes(alias.toLocaleLowerCase()));
+      if ((namesSource || (claimsKnowledge && promptInstructionText.includes(safeString(knowledge.Name).toLocaleLowerCase()))) && !boundKnowledgeIds.has(knowledgeId)) {
+        issue(report, generatorFinalSeverity(report), "AI_KNOWLEDGE_CLAIM_UNBOUND", "AI Agent/Copilot prompt or instructions claim a Knowledge source that is not bound in Components.", { aiResource: resourceName, knowledgeId, knowledgeName: safeString(knowledge.Name) });
       }
     });
   });

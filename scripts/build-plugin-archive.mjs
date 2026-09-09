@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import { existsSync, rmSync } from "node:fs";
+import { existsSync, rmSync, readFileSync, mkdtempSync, mkdirSync, copyFileSync, lstatSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -22,27 +23,27 @@ if (!trackedOnly) {
   });
   execFileSync(process.execPath, [resolve(root, "scripts/build-execution-service-distribution.mjs")], { cwd: root, stdio: "inherit" });
 }
-rmSync(outputPath, { force: true });
-if (trackedOnly) {
-  const tracked = execFileSync("git", ["ls-files", "-z", "--", "dist/yeeflow-app-builder-plugin"], { cwd: root, encoding: "buffer" })
-    .toString("utf8")
-    .split("\0")
-    .filter(Boolean)
-    .map((path) => path.replace(/^dist\//, ""));
-  if (!tracked.length) throw new Error("PLUGIN_ARCHIVE_TRACKED_PAYLOAD_MISSING");
-  execFileSync("zip", ["-q", outputPath, "-@"], {
-    cwd: resolve(root, "dist"),
-    input: `${tracked.join("\n")}\n`,
-  });
-} else {
-  execFileSync("zip", [
-    "-qr",
-    outputPath,
-    "yeeflow-app-builder-plugin",
-    "-x",
-    "* 2.*",
-    "* 3.*",
-  ], { cwd: resolve(root, "dist") });
+// Package tracked payload files plus explicitly reviewed local additions only.
+const distRoot = resolve(root, "dist/yeeflow-app-builder-plugin");
+const tracked = execFileSync("git", ["ls-files", "-z", "--", "dist/yeeflow-app-builder-plugin"], { cwd: root, encoding: "utf8" }).split("\0").filter(Boolean);
+const manifest = JSON.parse(readFileSync(resolve(root, "docs/standards/product-14.5/distribution-files.json"), "utf8"));
+const files = new Set([...tracked.map(file => relative(distRoot, resolve(root, file))), ...manifest.mirrors.map(entry => entry.destination)]);
+const stage = mkdtempSync(resolve(tmpdir(), "yeeflow-plugin-archive-"));
+try {
+  for (const file of [...files].sort()) {
+    if (file.startsWith("..") || file.startsWith("/") || /(?:^|\/)\.env$|(?:^|\/)node_modules\/| [2-9]\./.test(file)) throw new Error(`PLUGIN_ARCHIVE_PATH_REJECTED: ${file}`);
+    const input = resolve(distRoot, file);
+    if (relative(distRoot, input).startsWith("..")) throw new Error(`PLUGIN_ARCHIVE_PATH_REJECTED: ${file}`);
+    if (!lstatSync(input).isFile()) throw new Error(`PLUGIN_ARCHIVE_FILE_INVALID: ${file}`);
+    const destination = resolve(stage, "yeeflow-app-builder-plugin", file);
+    mkdirSync(dirname(destination), { recursive: true });
+    copyFileSync(input, destination);
+  }
+  mkdirSync(dirname(outputPath), { recursive: true });
+  rmSync(outputPath, { force: true });
+  execFileSync("zip", ["-qr", outputPath, "yeeflow-app-builder-plugin"], { cwd: stage });
+} finally {
+  rmSync(stage, { recursive: true, force: true });
 }
 if (!existsSync(outputPath)) throw new Error("CORE_DISTRIBUTION_ARTIFACT_MISSING");
 console.log(`PLUGIN_ARCHIVE_BUILT ${outputPath} trackedOnly=${trackedOnly}`);
