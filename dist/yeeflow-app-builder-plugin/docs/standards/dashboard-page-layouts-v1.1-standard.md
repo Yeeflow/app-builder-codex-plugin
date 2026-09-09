@@ -266,3 +266,7 @@ node scripts/validate-dashboard-generation-hard-gates.mjs --package <app.yapk>
 ```
 
 The dashboard generation hard gate invokes Dashboard Page Layouts v1.1 validation together with Event Portfolio Golden Reference conformance. When a resource declares or matches Dashboard Page Layouts v1.1, validators treat v1.1 as the page shell and Event Portfolio as component/region content inside approved v1.1 slots. Event Portfolio root depth/order is not required at the page root, but a copied Event Portfolio root shell under v1.1 `Content`, invented modules, and business controls directly under root `Content` are hard failures.
+
+## Custom Code alternate page shell
+
+`dashboard-page-layouts-custom-code` is also registered. Its optional header/regions, stacked code modules and native filter/action host rules are defined in `dashboard-page-layouts-custom-code-standard.md`; v1.1-specific header, card and dataset requirements do not apply to that shell. The default template ID remains unchanged.

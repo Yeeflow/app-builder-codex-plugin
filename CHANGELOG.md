@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.14.0
+
+- Register the Custom Code Dashboard golden reference and usage rules.
+- Connect Functional Specification, App Plan and standalone Dashboard planning to shared generation.
+- Support optional regions, responsive panel ratios and separate functional Custom Code modules.
+- Validate complete module plans and reject unfilled template placeholders.
+
 ## 1.13.1
 
 - Add explicit filter modes, consuming dependencies, apply/reset references and runtime-distinct selection rules while retaining the known Collection runtime blocker.

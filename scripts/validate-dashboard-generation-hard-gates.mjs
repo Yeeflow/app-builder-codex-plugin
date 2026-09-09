@@ -31,6 +31,7 @@ const APPROVED_DATA_TABLE_TEMPLATE_IDS = new Set([
 const APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
   "dashboard-page-layouts-v1.1",
   "dashboard-page-layouts-workbench",
+  "dashboard-page-layouts-custom-code",
   "dashboard-page-layouts-two-panel-workspace",
   "dashboard-page-layouts-three-panel-workspace",
 ]);

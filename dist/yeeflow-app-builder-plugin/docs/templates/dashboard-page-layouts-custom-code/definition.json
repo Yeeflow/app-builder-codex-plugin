@@ -1,0 +1,1071 @@
+{
+  "schemaVersion": 1,
+  "schemaScope": "Documentation-only candidate definition; not a generator registry schema.",
+  "id": "dashboard-page-layouts-custom-code",
+  "version": "1.0.0",
+  "name": "Custom Code Dashboard",
+  "status": "registered-export-backed",
+  "registeredForGeneration": true,
+  "pluginTrainingStarted": true,
+  "surface": {
+    "type": 103,
+    "exportFormat": "ydp",
+    "layoutField": "LayoutView",
+    "layoutVersion": 2
+  },
+  "purpose": "Responsive Dashboard page shell with replaceable Custom Code slots for deliberately customized business interfaces.",
+  "selection": {
+    "explicitPageTemplateSelectionRequired": true,
+    "defaultForAllDashboards": false,
+    "suitableFor": [
+      "Explicitly requested primarily Custom Code Dashboard",
+      "Image-guided Dashboard with complex business presentation or interactions",
+      "Custom operational overview with specialized business cards and visual summaries",
+      "Custom information workspace with independently planned left, primary and supporting regions",
+      "Custom visual presentation that standard native Dashboard layouts do not adequately express"
+    ],
+    "preferExistingTemplateFor": [
+      "Standard native reporting dashboards",
+      "Native dataset master-detail pages requiring built-in selected-record behavior",
+      "Approval submission or workflow-driven forms"
+    ],
+    "priorityRules": [
+      {
+        "priority": 1,
+        "condition": "User explicitly asks for main Dashboard functionality through Custom Code",
+        "decision": "Prefer this template; the user request is sufficient selection rationale."
+      },
+      {
+        "priority": 2,
+        "condition": "Customer supplies an image/mockup together with complex business layout or interactions",
+        "decision": "Consider this template after mapping visual regions and stated business requirements; image alone does not imply behavior."
+      },
+      {
+        "priority": 3,
+        "condition": "Custom business presentation benefits from a reusable native shell",
+        "decision": "Select when appropriate to the planned page functions."
+      }
+    ],
+    "nativeSupportingControlsAllowed": true
+  },
+  "source": {
+    "filename": "Custom Code Dashboard.ydp",
+    "localPath": "/Users/Renger/Downloads/Custom Code Dashboard.ydp",
+    "sha256": "7dd8b0457834de06969d3c542935419786e1ea19bc50fb4d733a14c82d97389d",
+    "title": "Custom Code Dashboard",
+    "reviewedOn": "2026-09-09",
+    "rawExportUnchanged": true,
+    "outerInstanceIdsExcludedFromTemplate": true
+  },
+  "artifacts": {
+    "guide": "README.md",
+    "normalizedLayout": "template.normalized.json",
+    "normalizationReport": "normalization-report.json",
+    "canonicalStandard": "../../standards/dashboard-page-layouts-custom-code-standard.md",
+    "registeredReference": "../../reference/dashboard-page-layout-custom-code.template.json"
+  },
+  "normalizedLayoutSha256": "b0dd503cfc8b7ba04e9e2bda81ca2ab190fc3ee272c08fb24f8184b14d7de91c",
+  "requiredStructure": [
+    "main",
+    "main/content",
+    "main/content/main_content_area",
+    "main/content/main_content_area/main_content_wrapper",
+    "main/content/main_content_area/main_content_wrapper/primary_content_area"
+  ],
+  "pageStyle": {
+    "hideHeaderAll": true,
+    "background": "#f4f7fb",
+    "rootPadding": "zero",
+    "contentPadding": "Preserve exported responsive content padding; do not zero it."
+  },
+  "placeholder": {
+    "type": "codein",
+    "nvLabel": "custom_code_placeholder",
+    "sourceCount": 24,
+    "selectorMode": "type AND nv_label; enumerate all matches",
+    "instanceLocator": [
+      "parent path",
+      "control id"
+    ],
+    "generatedFinalCount": 0,
+    "renameAfterMaterialization": true,
+    "duplicateWithNewIds": true
+  },
+  "slots": [
+    {
+      "nvLabel": "page_title_header",
+      "path": "/main/content/page_title_header",
+      "type": "container",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 0
+    },
+    {
+      "nvLabel": "page_title_content",
+      "path": "/main/content/page_title_header/page_title_content",
+      "type": "container",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 0
+    },
+    {
+      "nvLabel": "page_title_text",
+      "path": "/main/content/page_title_header/page_title_content/page_title_text",
+      "type": "heading",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 0
+    },
+    {
+      "nvLabel": "page_title_description",
+      "path": "/main/content/page_title_header/page_title_content/page_title_description",
+      "type": "heading",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 0
+    },
+    {
+      "nvLabel": "Operations",
+      "path": "/main/content/page_title_header/Operations",
+      "type": "container",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 0
+    },
+    {
+      "nvLabel": "top_content_area",
+      "path": "/main/content/top_content_area",
+      "type": "container",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 1
+    },
+    {
+      "nvLabel": "left_side_panel",
+      "path": "/main/content/main_content_area/main_content_wrapper/left_side_panel",
+      "type": "container",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 6
+    },
+    {
+      "nvLabel": "primary_content_area",
+      "path": "/main/content/main_content_area/main_content_wrapper/primary_content_area",
+      "type": "container",
+      "requiredInGeneratedPage": true,
+      "sourcePlaceholderCount": 10
+    },
+    {
+      "nvLabel": "right_side_panel",
+      "path": "/main/content/main_content_area/main_content_wrapper/right_side_panel",
+      "type": "container",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 6
+    },
+    {
+      "nvLabel": "bottom_content_area",
+      "path": "/main/content/bottom_content_area",
+      "type": "container",
+      "requiredInGeneratedPage": false,
+      "sourcePlaceholderCount": 1
+    }
+  ],
+  "gridModules": [
+    {
+      "nvLabel": "main_content_wrapper",
+      "path": "/main/content/main_content_area/main_content_wrapper",
+      "controlType": "flex_grid",
+      "columnsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 2.5,
+              "unit": "fr"
+            },
+            {
+              "value": 1.5,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 3,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rowsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "displayLabel": [
+        null,
+        false
+      ],
+      "placeholderCount": 0
+    },
+    {
+      "nvLabel": "left_side_2_columns_grid",
+      "path": "/main/content/main_content_area/main_content_wrapper/left_side_panel/left_side_2_columns_grid",
+      "controlType": "flex_grid",
+      "columnsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rowsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "displayLabel": [
+        null,
+        false
+      ],
+      "placeholderCount": 2
+    },
+    {
+      "nvLabel": "left_side_3_columns_grid",
+      "path": "/main/content/main_content_area/main_content_wrapper/left_side_panel/left_side_3_columns_grid",
+      "controlType": "flex_grid",
+      "columnsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rowsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "displayLabel": [
+        null,
+        false
+      ],
+      "placeholderCount": 3
+    },
+    {
+      "nvLabel": "primary_content_2_columns_grid",
+      "path": "/main/content/main_content_area/main_content_wrapper/primary_content_area/primary_content_2_columns_grid",
+      "controlType": "flex_grid",
+      "columnsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rowsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "displayLabel": [
+        null,
+        false
+      ],
+      "placeholderCount": 2
+    },
+    {
+      "nvLabel": "primary_content_3_columns_grid",
+      "path": "/main/content/main_content_area/main_content_wrapper/primary_content_area/primary_content_3_columns_grid",
+      "controlType": "flex_grid",
+      "columnsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rowsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "displayLabel": [
+        null,
+        false
+      ],
+      "placeholderCount": 3
+    },
+    {
+      "nvLabel": "primary_content_4_columns_grid",
+      "path": "/main/content/main_content_area/main_content_wrapper/primary_content_area/primary_content_4_columns_grid",
+      "controlType": "flex_grid",
+      "columnsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rowsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "displayLabel": [
+        null,
+        false
+      ],
+      "placeholderCount": 4
+    },
+    {
+      "nvLabel": "right_side_2_columns_grid",
+      "path": "/main/content/main_content_area/main_content_wrapper/right_side_panel/right_side_2_columns_grid",
+      "controlType": "flex_grid",
+      "columnsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rowsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "displayLabel": [
+        null,
+        false
+      ],
+      "placeholderCount": 2
+    },
+    {
+      "nvLabel": "right_side_3_columns_grid",
+      "path": "/main/content/main_content_area/main_content_wrapper/right_side_panel/right_side_3_columns_grid",
+      "controlType": "flex_grid",
+      "columnsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rowsByBreakpoint": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "displayLabel": [
+        null,
+        false
+      ],
+      "placeholderCount": 3
+    }
+  ],
+  "responsive": {
+    "breakpointKeys": {
+      "1": "desktop/laptop",
+      "2": "tablet",
+      "3": "mobile"
+    },
+    "desktopMainColumnsFr": [
+      1,
+      2.5,
+      1.5
+    ],
+    "tabletMainColumnsFr": [
+      1,
+      3
+    ],
+    "mobileMainColumnsFr": [
+      1
+    ],
+    "tabletRightPanelColumnSpan": 2,
+    "sourceMobileRightPanelColumnSpan": 1,
+    "sourceMobileRightPanelColumnSpanExplicit": true,
+    "layoutChangesApplied": false,
+    "sourceLayoutChangedSincePriorRevision": true,
+    "tabletLeftThreeColumnModuleCount": 2,
+    "tabletLeftDensityDecision": "accepted-by-user"
+  },
+  "normalization": {
+    "legacyNamePolicy": "Remove only enumerated legacy business names; do not synthesize name from nv_label.",
+    "legacyLabelPolicy": "Restore affected container labels to Container; preserve generic type labels.",
+    "filterPolicy": "Remove exact unused filter_1 through filter_4 top-level filter records after reference check.",
+    "unknownAttributesPolicy": "Preserve; no blanket cleanup of width remnants, visualIntent, defaults, actions, or nested filters.",
+    "preserveSourceControlIdsInReference": true,
+    "reinstantiateControlIdsForNewPage": true,
+    "preserveExistingIdsOnPageUpdate": true
+  },
+  "generatedPageRules": {
+    "primaryContentRequired": true,
+    "optionalPanelsMayBeRemoved": true,
+    "panelRemovalRequiresGridTrackAndSpanRecalculation": true,
+    "unusedModulesMustBeRemoved": true,
+    "nativeReplacementRequiresSeparateComponentContract": true,
+    "headerOperationsRequireRealActionOrRemoval": true,
+    "customCodePayloadSchemaDefinedHere": false,
+    "visibleHeaderRequired": false,
+    "visibleTitleRequired": false,
+    "descriptionRequired": false,
+    "topAndBottomRegionsOptional": true,
+    "headerCanBeRemovedEntirely": true,
+    "directSlotsMayBeDuplicatedAsFullWidthSiblings": true,
+    "internalMultiColumnGridsRequired": false,
+    "referencedNativeTriggersSurviveCleanup": true,
+    "customCodeMustPreferFunctionalDecomposition": true,
+    "nativeFiltersAndButtonsExplicitlyAllowed": true
+  },
+  "pendingReview": [
+    {
+      "id": "right-panel-defaults",
+      "severity": "runtime-check",
+      "observed": "right_side_panel relies on default direction/alignment.",
+      "next": "Verify vertical stacking with populated Custom Code modules; use Designer-exported explicit settings if needed."
+    },
+    {
+      "id": "header-mobile-fit",
+      "severity": "runtime-check",
+      "observed": "Operations keeps a horizontal row at mobile breakpoint.",
+      "next": "Test real action captions at narrow widths and remove unused actions."
+    }
+  ],
+  "proof": {
+    "exportParsed": true,
+    "normalizationRoundTripChecked": true,
+    "layoutAttributesPreserved": true,
+    "designerOpenVerifiedForNormalizedCopy": false,
+    "responsiveRuntimeVerified": false,
+    "customCodeRuntimeVerified": false,
+    "businessDataRoundTripVerified": false,
+    "activeRegistryUpdated": true,
+    "localSharedBuilderVerified": true,
+    "standaloneWrapperFixtureVerified": true
+  },
+  "futureRegistration": {
+    "registry": "docs/reference/dashboard-page-layout-templates.json",
+    "templateId": "dashboard-page-layouts-custom-code",
+    "defaultTemplateChange": false,
+    "requires": [
+      "Verify populated responsive runtime; preserve accepted tablet density and explicit mobile span",
+      "Publish reviewed normalized source and provenance",
+      "Add explicit selection, slot/module, normalization and cleanup contracts to shared standalone/full-app paths",
+      "Implement optional header/regions, full-width stacked slots, and native filter/action additions without dropping referenced triggers",
+      "Validate temporary-variable producer/consumer wiring, native filter inputs, unique action CSS IDs and action context ordering",
+      "Add focused validation and run relevant checks",
+      "Verify Designer and populated responsive runtime"
+    ],
+    "executionStatus": "implemented-locally; live runtime and publication not performed"
+  },
+  "revisionHistory": [
+    {
+      "version": "1.0.0-draft.1",
+      "sourceSha256": "9c809d0a7aafe52a178b1d9c85ed64f6294057cc0cda1d01472956c0981cd925",
+      "normalizedLayoutSha256": "e58575851e986dd03952b917404a9ffab1d714bf2608b069a6cbf4dc556340b3"
+    },
+    {
+      "version": "1.0.0-draft.2",
+      "sourceSha256": "7dd8b0457834de06969d3c542935419786e1ea19bc50fb4d733a14c82d97389d",
+      "changes": [
+        "Adopt user-exported mobile right-panel span 1",
+        "Accept existing tablet left-module density",
+        "Add explicit selection, optional-header, stacked-module, communication, native action and filter principles"
+      ],
+      "activeRegistrationChanged": false
+    }
+  ],
+  "optionalHeader": {
+    "root": "page_title_header",
+    "visibleTitleRequired": false,
+    "descriptionRequired": false,
+    "operationsRequired": false,
+    "removeUnusedOperationWithChildren": true,
+    "removeTitleGroupWhenTitleAndDescriptionUnused": true,
+    "removeEntireHeaderWhenUnused": true,
+    "operationsOnlyHeaderAllowed": true,
+    "dashboardMetadataTitleStillRequired": true,
+    "preserveRequiredModuleActionTriggersElsewhere": true
+  },
+  "moduleComposition": {
+    "selectionBeforeMaterialization": true,
+    "sourceIsOptionLibrary": true,
+    "requiredModuleCount": null,
+    "directSlotRepeatable": true,
+    "fullWidthStackedSiblingsAllowed": true,
+    "multiColumnGridsOptional": true,
+    "allPanelsFollowSameSelectionRules": true,
+    "preferIndependentFunctionalModules": true,
+    "monolithicPageControlDefault": false,
+    "singleCohesiveFunctionMayUseOneControl": true,
+    "emptyWrappersRemovedRecursively": true,
+    "referencedActionHostsPreserved": true,
+    "requiredContainers": [
+      "main",
+      "content",
+      "main_content_area",
+      "main_content_wrapper",
+      "primary_content_area"
+    ]
+  },
+  "allowedBusinessRegionAdditions": [
+    {
+      "type": "native-filter-region",
+      "placement": [
+        "top_content_area",
+        "retained panel"
+      ],
+      "contents": "Supported native Search/Select/Radio Data Filters and optional supported filter-group wrapper",
+      "contract": "Declare filter variables and map them to consuming Custom Code input parameters."
+    },
+    {
+      "type": "native-action-region",
+      "placement": [
+        "Operations when retained",
+        "retained business region associated with the module"
+      ],
+      "contents": "Supported native Button(s), optional action-host wrapper, configured CSS IDs and bound Form Actions",
+      "contract": "Preserve all referenced triggers and action dependencies during pruning; no loose root controls."
+    }
+  ],
+  "panelVariants": [
+    {
+      "panels": [
+        "left_side_panel",
+        "primary_content_area",
+        "right_side_panel"
+      ],
+      "desktopFr": [
+        1,
+        2.5,
+        1.5
+      ],
+      "tabletFr": [
+        1,
+        3
+      ],
+      "tabletRightSpan": 2,
+      "mobileFr": [
+        1
+      ],
+      "mobileSpan": 1
+    },
+    {
+      "panels": [
+        "left_side_panel",
+        "primary_content_area"
+      ],
+      "desktopFr": [
+        1,
+        2.5
+      ],
+      "tabletFr": [
+        1,
+        3
+      ],
+      "mobileFr": [
+        1
+      ],
+      "mobileSpan": 1
+    },
+    {
+      "panels": [
+        "primary_content_area",
+        "right_side_panel"
+      ],
+      "desktopFr": [
+        2.5,
+        1
+      ],
+      "tabletFr": [
+        1
+      ],
+      "tabletRightSpan": 1,
+      "mobileFr": [
+        1
+      ],
+      "mobileSpan": 1
+    },
+    {
+      "panels": [
+        "primary_content_area"
+      ],
+      "desktopFr": [
+        1
+      ],
+      "tabletFr": [
+        1
+      ],
+      "mobileFr": [
+        1
+      ],
+      "mobileSpan": 1
+    }
+  ],
+  "panelVariantProof": {
+    "desktopTwoPanelRatios": "user-confirmed: either retained side panel uses 1fr; primary content uses 2.5fr",
+    "prunedTabletMobileVariants": "proposed defaults; runtime verification pending",
+    "implementationAdded": false
+  },
+  "communication": {
+    "preferredChannel": "Dashboard page temporary variables",
+    "flow": [
+      "producer Custom Code output parameter",
+      "declared page temporary variable",
+      "consumer Custom Code input parameter",
+      "consumer update or data refresh"
+    ],
+    "outputTargetIdentityDistinctFromInputValue": true,
+    "requiredPlanningFields": [
+      "variable id",
+      "value type",
+      "initial/empty value",
+      "producer output target",
+      "consumer input parameters",
+      "change trigger",
+      "refresh/query behavior",
+      "reset behavior"
+    ],
+    "consumerMustRespondToInputChanges": true,
+    "avoidFeedbackLoopsAndStaleAsyncResults": true,
+    "unrelatedVariablesNamespaced": true,
+    "sharedVariableRequiresIntentionalBusinessRelationship": true,
+    "newSetterApiDefinedHere": false,
+    "runtimeVerified": false
+  },
+  "nativeActionIntegration": {
+    "preferredPattern": "Custom Code interaction -> native Button identified by configured CSS ID -> bound Form Action",
+    "sourceHeaderOperationType": "container with heading child; not a native Button",
+    "nativeButtonsMayBeAdded": true,
+    "cssIdMustBeUniqueInRenderedScope": true,
+    "cssIdDistinctFromNvLabelAndControlUuid": true,
+    "contextChannel": "Declared page temporary variables",
+    "contextMustBeAvailableBeforeTrigger": true,
+    "recordOpenInputs": [
+      "actual target resource",
+      "record or submission identity",
+      "target detail form",
+      "open mode"
+    ],
+    "resolveDataListAndFormReportTargetsThroughSupportedContract": true,
+    "preserveProgrammaticallyReferencedButtons": true,
+    "headerRemovalMustNotRemoveRequiredModuleActions": true,
+    "concealedTriggerMustRemainRenderedAndInvocable": true,
+    "lookupByCaptionForbidden": true,
+    "runtimeVerified": false
+  },
+  "filterIntegration": {
+    "nativeFirst": true,
+    "preferredControls": [
+      "Search Data Filter",
+      "Select Data Filter",
+      "Radio Data Filter"
+    ],
+    "dedicatedRegionAllowed": true,
+    "topRegionRequired": false,
+    "alternativePlacement": "Suitable retained panel",
+    "flow": [
+      "native Data Filter",
+      "its Dashboard filter variable",
+      "Custom Code input parameter",
+      "consumer filters or re-queries content"
+    ],
+    "filterVariablesDistinctFromTemporaryVariables": true,
+    "requiredPlanningFields": [
+      "owning filter control",
+      "filter variable",
+      "value type",
+      "option source when applicable",
+      "consumer parameter",
+      "empty/reset behavior",
+      "query or presentation effect",
+      "change/refresh behavior"
+    ],
+    "sharedFilterMayHaveMultipleConsumers": true,
+    "customFilterWhenNativeDoesNotMeetComplexRequirements": true,
+    "customFilterSharedStateChannel": "Declared temporary variables via Custom Code input/output parameters",
+    "runtimeVerified": false
+  },
+  "resolvedReview": [
+    {
+      "id": "mobile-right-span",
+      "resolution": "User updated the source export with explicit mobile cSpan 1.",
+      "proof": "static-export-confirmed; populated runtime pending"
+    },
+    {
+      "id": "tablet-left-density",
+      "resolution": "User accepted existing two-column tablet density of left_side_3_columns_grid.",
+      "proof": "user design decision; no layout modification"
+    }
+  ]
+}

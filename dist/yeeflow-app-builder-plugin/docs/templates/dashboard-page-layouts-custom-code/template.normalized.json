@@ -1,0 +1,1728 @@
+{
+  "children": [
+    {
+      "id": "394ab351-b167-4b16-a85d-70b508953e7b",
+      "type": "container",
+      "label": "Container",
+      "attrs": {
+        "style": {
+          "direction": [
+            null,
+            "column"
+          ],
+          "align_items": [
+            null,
+            "center"
+          ],
+          "justify_content": [
+            null,
+            "flex-start"
+          ],
+          "gap": [
+            null,
+            "--sp--s0"
+          ]
+        }
+      },
+      "children": [
+        {
+          "id": "68dc1668-a276-4148-9c99-2afa7e171f26",
+          "type": "container",
+          "label": "Content",
+          "name": "Content",
+          "attrs": {
+            "style": {
+              "gap": [
+                null,
+                "--sp--s250"
+              ],
+              "direction": [
+                null,
+                "column"
+              ],
+              "widthtype": [
+                null,
+                "1"
+              ],
+              "align_items": [
+                null,
+                "stretch"
+              ],
+              "justify_content": [
+                null,
+                "flex-start"
+              ]
+            },
+            "common": {
+              "padding": [
+                null,
+                {
+                  "top": 24,
+                  "right": 28,
+                  "bottom": 24,
+                  "left": 28
+                },
+                null,
+                {
+                  "top": "--sp--s200",
+                  "right": "--sp--s150",
+                  "bottom": "--sp--s200",
+                  "left": "--sp--s150"
+                }
+              ],
+              "background": {
+                "normal": {
+                  "type": null,
+                  "classic": {
+                    "color": "#f4f7fb"
+                  }
+                }
+              }
+            },
+            "visualIntent": "page-content-padding-left-right-breathing-room-Content"
+          },
+          "children": [
+            {
+              "id": "44e11a26-77bc-4dd5-9d43-652857f6cb13",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "gap": [
+                    null,
+                    "--sp--s150"
+                  ],
+                  "direction": [
+                    null,
+                    "row",
+                    null,
+                    "column"
+                  ],
+                  "align_items": [
+                    null,
+                    "center",
+                    null,
+                    "flex-start"
+                  ],
+                  "justify_content": [
+                    null,
+                    "space-between",
+                    null,
+                    "flex-start"
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "id": "0773b0ff-9416-4672-8097-bb75677be90a",
+                  "type": "container",
+                  "label": "Container",
+                  "attrs": {
+                    "container": {
+                      "padding": {
+                        "top": 0,
+                        "right": 0,
+                        "bottom": 0,
+                        "left": 0
+                      },
+                      "gap": "--sp--s050"
+                    },
+                    "common": {},
+                    "style": {
+                      "widthtype": [
+                        null,
+                        "2",
+                        null,
+                        "1"
+                      ],
+                      "direction": [
+                        null,
+                        "column"
+                      ],
+                      "gap": [
+                        null,
+                        0
+                      ],
+                      "align_items": [
+                        null,
+                        "stretch"
+                      ],
+                      "justify_content": [
+                        null,
+                        "flex-start"
+                      ]
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "b90f9602-24d3-427c-a572-1551161957a7",
+                      "type": "heading",
+                      "label": "Text",
+                      "attrs": {
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        },
+                        "heads": {
+                          "ty": [
+                            null,
+                            "h3-medium"
+                          ],
+                          "color": "#111827"
+                        },
+                        "headc": {
+                          "title": {
+                            "value": "Page title",
+                            "variable": null
+                          }
+                        }
+                      },
+                      "nv_label": "page_title_text"
+                    },
+                    {
+                      "id": "0f293f41-26a9-4b1e-8504-9c54c4ce49ec",
+                      "type": "heading",
+                      "label": "Text",
+                      "attrs": {
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        },
+                        "headc": {
+                          "title": {
+                            "value": "Page description",
+                            "variable": null
+                          }
+                        },
+                        "heads": {
+                          "ty": [
+                            null,
+                            "body-medium"
+                          ],
+                          "color": "#667085"
+                        }
+                      },
+                      "width": "inline",
+                      "nv_label": "page_title_description"
+                    }
+                  ],
+                  "nv_label": "page_title_content"
+                },
+                {
+                  "id": "3d4f3650-4748-46f4-8eda-054b0648a1ed",
+                  "type": "container",
+                  "label": "Container",
+                  "attrs": {
+                    "style": {
+                      "widthtype": [
+                        null,
+                        "2",
+                        null,
+                        "1"
+                      ],
+                      "gap": [
+                        null,
+                        "--sp--s100"
+                      ],
+                      "direction": [
+                        null,
+                        "row",
+                        null,
+                        "row"
+                      ],
+                      "align_items": [
+                        null,
+                        "center",
+                        null,
+                        "flex-start"
+                      ],
+                      "justify_content": [
+                        null,
+                        null,
+                        null,
+                        "flex-start"
+                      ]
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "e3726511-587f-44a0-a6bc-c8c74c9cea30",
+                      "type": "container",
+                      "label": "Container",
+                      "attrs": {
+                        "style": {
+                          "gap": [
+                            null,
+                            "--sp--s050"
+                          ],
+                          "direction": [
+                            null,
+                            "column"
+                          ],
+                          "widthtype": [
+                            null,
+                            "2"
+                          ],
+                          "align_items": [
+                            null,
+                            "stretch"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ]
+                        },
+                        "common": {
+                          "padding": [
+                            null,
+                            {
+                              "top": "--sp--s100",
+                              "right": "--sp--s150",
+                              "bottom": "--sp--s100",
+                              "left": "--sp--s150"
+                            }
+                          ],
+                          "background": {
+                            "normal": {
+                              "type": "classic",
+                              "classic": {
+                                "color": "#ffffff"
+                              }
+                            }
+                          },
+                          "border": {
+                            "normal": {
+                              "type": "1",
+                              "width": [
+                                null,
+                                {
+                                  "top": 1,
+                                  "right": 1,
+                                  "bottom": 1,
+                                  "left": 1
+                                }
+                              ],
+                              "color": "#d6e0ee",
+                              "radius": [
+                                null,
+                                {
+                                  "top": 8,
+                                  "right": 8,
+                                  "bottom": 8,
+                                  "left": 8
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "3b7404ca-dad2-4b53-b69b-4015c784f745",
+                          "type": "heading",
+                          "label": "Text",
+                          "attrs": {
+                            "common": {
+                              "positioning": {
+                                "widthtype": [
+                                  null,
+                                  "2"
+                                ]
+                              }
+                            },
+                            "headc": {
+                              "title": {
+                                "value": "Button 1",
+                                "variable": null
+                              }
+                            },
+                            "heads": {
+                              "ty": [
+                                null,
+                                "body-medium"
+                              ],
+                              "color": "#263241"
+                            }
+                          },
+                          "width": "inline",
+                          "nv_label": "btn_operation_normal_text"
+                        }
+                      ],
+                      "nv_label": "btn_operation_normal"
+                    },
+                    {
+                      "id": "58e73fc7-44ec-49c6-85a7-f2350bf1caa9",
+                      "type": "container",
+                      "label": "Container",
+                      "attrs": {
+                        "style": {
+                          "gap": [
+                            null,
+                            "--sp--s050"
+                          ],
+                          "direction": [
+                            null,
+                            "column"
+                          ],
+                          "widthtype": [
+                            null,
+                            "2"
+                          ],
+                          "align_items": [
+                            null,
+                            "stretch"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ]
+                        },
+                        "common": {
+                          "padding": [
+                            null,
+                            {
+                              "top": "--sp--s100",
+                              "right": "--sp--s150",
+                              "bottom": "--sp--s100",
+                              "left": "--sp--s150"
+                            }
+                          ],
+                          "background": {
+                            "normal": {
+                              "type": "classic",
+                              "classic": {
+                                "color": "#ffffff"
+                              }
+                            }
+                          },
+                          "border": {
+                            "normal": {
+                              "type": "1",
+                              "width": [
+                                null,
+                                {
+                                  "top": 1,
+                                  "right": 1,
+                                  "bottom": 1,
+                                  "left": 1
+                                }
+                              ],
+                              "color": "#d6e0ee",
+                              "radius": [
+                                null,
+                                {
+                                  "top": 8,
+                                  "right": 8,
+                                  "bottom": 8,
+                                  "left": 8
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "3c2c827d-5916-44cd-9b5e-0d3be916fac8",
+                          "type": "heading",
+                          "label": "Text",
+                          "attrs": {
+                            "common": {
+                              "positioning": {
+                                "widthtype": [
+                                  null,
+                                  "2"
+                                ]
+                              }
+                            },
+                            "headc": {
+                              "title": {
+                                "value": "Button 2",
+                                "variable": null
+                              }
+                            },
+                            "heads": {
+                              "ty": [
+                                null,
+                                "body-medium"
+                              ],
+                              "color": "#263241"
+                            }
+                          },
+                          "width": "inline",
+                          "nv_label": "btn_operation_normal_text"
+                        }
+                      ],
+                      "nv_label": "btn_operation_normal"
+                    },
+                    {
+                      "id": "f3fe7294-27dd-4798-ae76-c818242a6a41",
+                      "type": "container",
+                      "label": "Container",
+                      "attrs": {
+                        "style": {
+                          "gap": [
+                            null,
+                            "--sp--s050"
+                          ],
+                          "direction": [
+                            null,
+                            "column"
+                          ],
+                          "widthtype": [
+                            null,
+                            "2"
+                          ],
+                          "align_items": [
+                            null,
+                            "stretch"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ]
+                        },
+                        "common": {
+                          "padding": [
+                            null,
+                            {
+                              "top": "--sp--s100",
+                              "right": "--sp--s150",
+                              "bottom": "--sp--s100",
+                              "left": "--sp--s150"
+                            }
+                          ],
+                          "background": {
+                            "normal": {
+                              "type": "classic",
+                              "classic": {
+                                "color": "#e8f2ff"
+                              }
+                            }
+                          },
+                          "border": {
+                            "normal": {
+                              "type": "1",
+                              "width": [
+                                null,
+                                {
+                                  "top": 1,
+                                  "right": 1,
+                                  "bottom": 1,
+                                  "left": 1
+                                }
+                              ],
+                              "color": "#b7d4ff",
+                              "radius": [
+                                null,
+                                {
+                                  "top": 8,
+                                  "right": 8,
+                                  "bottom": 8,
+                                  "left": 8
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "b735fbec-0b5b-49bb-8e97-6382150755d9",
+                          "type": "heading",
+                          "label": "Text",
+                          "attrs": {
+                            "common": {
+                              "positioning": {
+                                "widthtype": [
+                                  null,
+                                  "2"
+                                ]
+                              }
+                            },
+                            "headc": {
+                              "title": {
+                                "value": "Button 3",
+                                "variable": null
+                              }
+                            },
+                            "heads": {
+                              "ty": [
+                                null,
+                                "body-medium"
+                              ],
+                              "color": "#164c9f"
+                            }
+                          },
+                          "width": "inline",
+                          "nv_label": "btn_operation_primary_text"
+                        }
+                      ],
+                      "nv_label": "btn_operation_primary"
+                    }
+                  ],
+                  "nv_label": "Operations"
+                }
+              ],
+              "nv_label": "page_title_header"
+            },
+            {
+              "id": "97c7a9b3-62ac-4a72-bc8b-c3a04c7eed98",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "direction": [
+                    null,
+                    "column"
+                  ],
+                  "gap": [
+                    null,
+                    "--sp--s0"
+                  ],
+                  "justify_content": [
+                    null,
+                    "flex-start"
+                  ],
+                  "align_items": [
+                    null,
+                    "flex-start"
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "id": "9c6690a0-f587-4f64-9a7d-4c42e14602aa",
+                  "type": "codein",
+                  "label": "Custom code",
+                  "attrs": {},
+                  "nv_label": "custom_code_placeholder"
+                }
+              ],
+              "nv_label": "top_content_area"
+            },
+            {
+              "id": "d4e9580c-25e3-4875-93ad-e86fd40e1c66",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "gap": [
+                    null,
+                    "--sp--s200"
+                  ],
+                  "direction": [
+                    null,
+                    "row",
+                    null,
+                    "column"
+                  ],
+                  "align_items": [
+                    null,
+                    "flex-start",
+                    null,
+                    "flex-start"
+                  ],
+                  "justify_content": [
+                    null,
+                    "flex-start",
+                    null,
+                    "flex-start"
+                  ],
+                  "wrap": [
+                    null,
+                    null,
+                    null
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "id": "994f7180-57d1-4000-a397-bde93d0b5442",
+                  "type": "flex_grid",
+                  "label": "Grid",
+                  "attrs": {
+                    "cgap": {
+                      "1": 20,
+                      "3": 16
+                    },
+                    "cgapU": {
+                      "1": "px",
+                      "3": "px"
+                    },
+                    "rgap": [
+                      null,
+                      20,
+                      null,
+                      16
+                    ],
+                    "rgapU": [
+                      null,
+                      "px",
+                      null,
+                      "px"
+                    ],
+                    "ver": 1,
+                    "columns": {
+                      "1": {
+                        "list": [
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          },
+                          {
+                            "value": 2.5,
+                            "unit": "fr"
+                          },
+                          {
+                            "value": 1.5,
+                            "unit": "fr"
+                          }
+                        ],
+                        "last": {
+                          "value": 1,
+                          "unit": "fr"
+                        }
+                      },
+                      "2": {
+                        "list": [
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          },
+                          {
+                            "value": 3,
+                            "unit": "fr"
+                          }
+                        ],
+                        "last": {
+                          "value": 1,
+                          "unit": "fr"
+                        }
+                      },
+                      "3": {
+                        "list": [
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          }
+                        ],
+                        "last": {
+                          "value": 1,
+                          "unit": "fr"
+                        }
+                      }
+                    },
+                    "rows": {
+                      "1": {
+                        "list": [
+                          {
+                            "unit": "auto"
+                          }
+                        ],
+                        "last": {
+                          "unit": "auto"
+                        }
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "fbc54ba0-64f6-41c4-9a26-ed1191b41f0a",
+                      "type": "container",
+                      "label": "Container",
+                      "attrs": {
+                        "style": {
+                          "gap": [
+                            null,
+                            "--sp--s200"
+                          ],
+                          "widthtype": [
+                            null,
+                            "1"
+                          ],
+                          "width": [
+                            null,
+                            20,
+                            30
+                          ],
+                          "widthu": [
+                            null,
+                            "%"
+                          ],
+                          "direction": [
+                            null,
+                            "column"
+                          ],
+                          "align_items": [
+                            null,
+                            "flex-start"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "392b8b5d-e9fc-4265-b075-2181147b3678",
+                          "type": "codein",
+                          "label": "Custom code",
+                          "attrs": {},
+                          "nv_label": "custom_code_placeholder"
+                        },
+                        {
+                          "id": "238411fb-450e-4eee-b17c-f158eb38bd48",
+                          "type": "flex_grid",
+                          "label": "Grid",
+                          "attrs": {
+                            "ver": 1,
+                            "columns": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "2": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "3": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              }
+                            },
+                            "rows": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "unit": "auto"
+                                  }
+                                ],
+                                "last": {
+                                  "unit": "auto"
+                                }
+                              }
+                            },
+                            "cgap": {
+                              "1": 16
+                            },
+                            "cgapU": {
+                              "1": "px"
+                            },
+                            "rgap": [
+                              null,
+                              16
+                            ],
+                            "rgapU": [
+                              null,
+                              "px"
+                            ]
+                          },
+                          "children": [
+                            {
+                              "id": "260a2c2d-356c-4912-a962-ec078981d2bc",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "86d38545-62a7-4813-a864-544969fa349b",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            }
+                          ],
+                          "nv_label": "left_side_2_columns_grid",
+                          "displayLabel": [
+                            null,
+                            false
+                          ]
+                        },
+                        {
+                          "id": "cf665c18-599f-4526-8caa-786b036de7dd",
+                          "type": "flex_grid",
+                          "label": "Grid",
+                          "attrs": {
+                            "ver": 1,
+                            "columns": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "2": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "3": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              }
+                            },
+                            "rows": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "unit": "auto"
+                                  }
+                                ],
+                                "last": {
+                                  "unit": "auto"
+                                }
+                              }
+                            },
+                            "cgap": {
+                              "1": 16
+                            },
+                            "cgapU": {
+                              "1": "px"
+                            },
+                            "rgap": [
+                              null,
+                              16
+                            ],
+                            "rgapU": [
+                              null,
+                              "px"
+                            ]
+                          },
+                          "children": [
+                            {
+                              "id": "aaaa1b44-44db-45c2-aa1e-90fb651d6fda",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "1693e848-55b3-4f29-8b1b-c536b37e5bb9",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "7284aa4c-e6d2-4ffb-bcbc-aaed3f448df0",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            }
+                          ],
+                          "nv_label": "left_side_3_columns_grid",
+                          "displayLabel": [
+                            null,
+                            false
+                          ]
+                        }
+                      ],
+                      "nv_label": "left_side_panel"
+                    },
+                    {
+                      "id": "3129f007-ad8c-4f87-9766-7a44390555c7",
+                      "type": "container",
+                      "label": "Container",
+                      "attrs": {
+                        "style": {
+                          "gap": [
+                            null,
+                            "--sp--s200"
+                          ],
+                          "widthtype": [
+                            null,
+                            "1"
+                          ],
+                          "width": [
+                            null,
+                            50,
+                            70
+                          ],
+                          "widthu": [
+                            null,
+                            "%"
+                          ],
+                          "direction": [
+                            null,
+                            "column"
+                          ],
+                          "align_items": [
+                            null,
+                            "flex-start"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "1674060c-5c1d-4d87-a122-e883d5699ca4",
+                          "type": "codein",
+                          "label": "Custom code",
+                          "attrs": {},
+                          "nv_label": "custom_code_placeholder"
+                        },
+                        {
+                          "id": "30b4006e-9284-4a10-a4ae-4a748e0520c5",
+                          "type": "flex_grid",
+                          "label": "Grid",
+                          "attrs": {
+                            "ver": 1,
+                            "columns": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "2": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "3": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              }
+                            },
+                            "rows": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "unit": "auto"
+                                  }
+                                ],
+                                "last": {
+                                  "unit": "auto"
+                                }
+                              }
+                            },
+                            "cgap": {
+                              "1": 16
+                            },
+                            "cgapU": {
+                              "1": "px"
+                            },
+                            "rgap": [
+                              null,
+                              16
+                            ],
+                            "rgapU": [
+                              null,
+                              "px"
+                            ]
+                          },
+                          "children": [
+                            {
+                              "id": "ca7df562-09b6-493c-950d-29794e76dd58",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "a4003b29-47a2-47fe-9dd1-c92be73dbb18",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            }
+                          ],
+                          "nv_label": "primary_content_2_columns_grid",
+                          "displayLabel": [
+                            null,
+                            false
+                          ]
+                        },
+                        {
+                          "id": "e3f91f09-8a61-49f5-b7e7-3082b7a24a30",
+                          "type": "flex_grid",
+                          "label": "Grid",
+                          "attrs": {
+                            "ver": 1,
+                            "columns": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "2": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "3": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              }
+                            },
+                            "rows": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "unit": "auto"
+                                  }
+                                ],
+                                "last": {
+                                  "unit": "auto"
+                                }
+                              }
+                            },
+                            "cgap": {
+                              "1": 16
+                            },
+                            "cgapU": {
+                              "1": "px"
+                            },
+                            "rgap": [
+                              null,
+                              16
+                            ],
+                            "rgapU": [
+                              null,
+                              "px"
+                            ]
+                          },
+                          "children": [
+                            {
+                              "id": "1d93f6dc-4b2b-4d5f-af47-53d241efa396",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "f1b73194-f21c-4575-9861-aa36554c31f0",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "25397c44-fc0f-4779-b91f-eebfc703b2f4",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            }
+                          ],
+                          "nv_label": "primary_content_3_columns_grid",
+                          "displayLabel": [
+                            null,
+                            false
+                          ]
+                        },
+                        {
+                          "id": "ffa2a4db-4879-44de-98c3-78a0e93ccfb3",
+                          "type": "flex_grid",
+                          "label": "Grid",
+                          "attrs": {
+                            "ver": 1,
+                            "columns": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "2": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "3": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              }
+                            },
+                            "rows": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "unit": "auto"
+                                  }
+                                ],
+                                "last": {
+                                  "unit": "auto"
+                                }
+                              }
+                            },
+                            "cgap": {
+                              "1": 16
+                            },
+                            "cgapU": {
+                              "1": "px"
+                            },
+                            "rgap": [
+                              null,
+                              16
+                            ],
+                            "rgapU": [
+                              null,
+                              "px"
+                            ]
+                          },
+                          "children": [
+                            {
+                              "id": "6bd4f962-acb2-4b7c-adc3-3d4a8beed101",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "c2cf22d7-2940-4a95-b4d6-10e18c4bbf7e",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "215548e9-6bd9-472b-a292-088e0abfc272",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "0cc09ae3-1023-4e78-bd4a-424c80cd95b1",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            }
+                          ],
+                          "nv_label": "primary_content_4_columns_grid",
+                          "displayLabel": [
+                            null,
+                            false
+                          ]
+                        }
+                      ],
+                      "nv_label": "primary_content_area"
+                    },
+                    {
+                      "id": "f6534756-d42b-4d7d-a4b5-e3a15970b905",
+                      "type": "container",
+                      "label": "Container",
+                      "attrs": {
+                        "style": {
+                          "gap": [
+                            null,
+                            "--sp--s200"
+                          ],
+                          "widthtype": [
+                            null,
+                            "1"
+                          ],
+                          "width": [
+                            null,
+                            30,
+                            100
+                          ],
+                          "widthu": [
+                            null,
+                            "%"
+                          ],
+                          "wrap": [
+                            null,
+                            null,
+                            null
+                          ]
+                        },
+                        "common": {
+                          "grid": {
+                            "position": [
+                              null,
+                              null,
+                              {
+                                "cSpan": 2
+                              },
+                              {
+                                "cSpan": 1
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "84e36963-cbb3-4f24-bc00-4439415ab885",
+                          "type": "codein",
+                          "label": "Custom code",
+                          "attrs": {},
+                          "nv_label": "custom_code_placeholder"
+                        },
+                        {
+                          "id": "a9ddf017-8002-4ddf-ad3a-3dd145372c17",
+                          "type": "flex_grid",
+                          "label": "Grid",
+                          "attrs": {
+                            "ver": 1,
+                            "columns": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "2": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "3": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              }
+                            },
+                            "rows": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "unit": "auto"
+                                  }
+                                ],
+                                "last": {
+                                  "unit": "auto"
+                                }
+                              }
+                            },
+                            "cgap": {
+                              "1": 16
+                            },
+                            "cgapU": {
+                              "1": "px"
+                            },
+                            "rgap": [
+                              null,
+                              16
+                            ],
+                            "rgapU": [
+                              null,
+                              "px"
+                            ]
+                          },
+                          "children": [
+                            {
+                              "id": "6c1b9a6c-2154-412c-889d-5922649a96ae",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "59039d6d-0e38-4fb3-b664-48ed7f8d7e76",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            }
+                          ],
+                          "nv_label": "right_side_2_columns_grid",
+                          "displayLabel": [
+                            null,
+                            false
+                          ]
+                        },
+                        {
+                          "id": "2abd555e-d4e2-4891-b912-7a0ae031e154",
+                          "type": "flex_grid",
+                          "label": "Grid",
+                          "attrs": {
+                            "ver": 1,
+                            "columns": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "2": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "3": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              }
+                            },
+                            "rows": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "unit": "auto"
+                                  }
+                                ],
+                                "last": {
+                                  "unit": "auto"
+                                }
+                              }
+                            },
+                            "cgap": {
+                              "1": 16
+                            },
+                            "cgapU": {
+                              "1": "px"
+                            },
+                            "rgap": [
+                              null,
+                              16
+                            ],
+                            "rgapU": [
+                              null,
+                              "px"
+                            ]
+                          },
+                          "children": [
+                            {
+                              "id": "50a32c17-8e05-4621-8b48-42dbeb7c75c1",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "1530a333-1c77-4e3c-a946-fd9ba6fe8010",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            },
+                            {
+                              "id": "e17111df-5ce3-4244-8ea4-4d92c47e5c8d",
+                              "type": "codein",
+                              "label": "Custom code",
+                              "attrs": {},
+                              "nv_label": "custom_code_placeholder"
+                            }
+                          ],
+                          "nv_label": "right_side_3_columns_grid",
+                          "displayLabel": [
+                            null,
+                            false
+                          ]
+                        }
+                      ],
+                      "nv_label": "right_side_panel"
+                    }
+                  ],
+                  "nv_label": "main_content_wrapper",
+                  "displayLabel": [
+                    null,
+                    false
+                  ]
+                }
+              ],
+              "nv_label": "main_content_area"
+            },
+            {
+              "id": "31d3d547-934d-40df-a5f7-688c61f52d9c",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "direction": [
+                    null,
+                    "column"
+                  ],
+                  "gap": [
+                    null,
+                    "--sp--s0"
+                  ],
+                  "justify_content": [
+                    null,
+                    "flex-start"
+                  ],
+                  "align_items": [
+                    null,
+                    "flex-start"
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "id": "ffb950ae-c076-4b70-b4c3-2da8dea7eeb4",
+                  "type": "codein",
+                  "label": "Custom code",
+                  "attrs": {},
+                  "nv_label": "custom_code_placeholder"
+                }
+              ],
+              "nv_label": "bottom_content_area"
+            }
+          ],
+          "nv_label": "content"
+        }
+      ],
+      "nv_label": "main"
+    }
+  ],
+  "attrs": {
+    "hideHeaderAll": true,
+    "container": {
+      "padding": [
+        null,
+        {
+          "top": "--sp--s0",
+          "right": "--sp--s0",
+          "bottom": "--sp--s0",
+          "left": "--sp--s0"
+        }
+      ]
+    },
+    "background": {
+      "type": "classic",
+      "classic": {
+        "color": "#f4f7fb"
+      }
+    }
+  },
+  "title": "Custom Code Dashboard",
+  "ver": 2,
+  "filterVars": [],
+  "tempVars": [],
+  "exts": []
+}

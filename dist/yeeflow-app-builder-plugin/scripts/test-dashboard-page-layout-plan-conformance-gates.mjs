@@ -211,8 +211,9 @@ function appPlan(rows) {
     "",
     "| Dashboard Page | Dataset Region | Source List | Selected Collection Template | Display Fields | Selection Reason |",
     "| --- | --- | --- | --- | --- | --- |",
-    ...rows.map((row) => `| ${row.page} | ${row.page} records | Loan Transactions | collection_control_responsive | ${row.displayFields || "Title"} | Dense record queue. |`),
+    ...rows.filter(row => row.templateId !== "dashboard-page-layouts-custom-code").map((row) => `| ${row.page} | ${row.page} records | Loan Transactions | collection_control_responsive | ${row.displayFields || "Title"} | Dense record queue. |`),
     "",
+    ...((rows.some(row => row.templateId === "dashboard-page-layouts-custom-code")) ? ["### Custom Code Dashboard Composition", "Custom Operations: primary_content_area only; no header/top/bottom.", "### Custom Code Module Plan", "Custom Operations: summary module, stack, static content.", "### Custom Code Communication and Native Integration", "None — static module; no variables, filters or actions.", ""] : []),
     "## 15. Application Navigation Plan",
     "",
     "| Group | Item | Resource Type |",
@@ -390,15 +391,19 @@ try {
 
   const specPath = path.join(tempDir, "functional-specification.md");
   const materializerPlan = writePlan(tempDir, [
+    { page: "Custom Operations", templateId: "dashboard-page-layouts-custom-code", right: "No", charts: "No" },
     { page: "Asset Loan Operations Dashboard", templateId: "dashboard-page-layouts-workbench", right: "Yes", charts: "Yes" },
     { page: "Overdue Monitor", templateId: "dashboard-page-layouts-two-panel-workspace", right: "No", charts: "Yes" },
     { page: "Template Coverage Analytics Dashboard", templateId: "dashboard-page-layouts-three-panel-workspace", right: "Yes", charts: "Yes" },
   ], "materializer-plan.md");
   fs.writeFileSync(specPath, `${spec()}\n`);
+  const customContext = path.join(tempDir, "custom-code-dashboards.json");
+  fs.writeFileSync(customContext, JSON.stringify({ "Custom Operations": { panels: ["primary_content_area"], modules: [{ region: "primary_content_area", layout: "stack", controls: [{ type: "codein", label: "Custom code", nv_label: "operations_summary", attrs: { "codein-script": "({ render: function () { return null; } })" } }] }] } }));
   const materialized = expectPass("materializer preserves App Plan selected Dashboard page layout templates", MATERIALIZER, [
     "--functional-spec", specPath,
     "--app-plan", materializerPlan,
     "--out-dir", path.join(tempDir, "materialized"),
+    "--custom-code-dashboards", customContext,
     "--allow-fixture-api-ids-for-tests",
     "--json",
   ]);
@@ -408,6 +413,11 @@ try {
     const resource = JSON.parse(page.LayoutInResources[0].Resource);
     return [page.Title, resource.derivedFromDashboardPageLayoutTemplate || resource.attrs?.dashboardPageLayoutTemplateId || ""];
   }));
+  assert.equal(actualByPage.get("Custom Operations"), "dashboard-page-layouts-custom-code");
+  const customBody = JSON.parse(decoded.Pages.find(p => p.Title === "Custom Operations").LayoutInResources[0].Resource);
+  assert.equal(findAll(customBody, "operations_summary").length, 1);
+  assert.equal(findAll(customBody, "page_title_header").length, 0);
+  assert.equal(findAll(customBody, "custom_code_placeholder").length, 0);
   assert.equal(actualByPage.get("Asset Loan Operations Dashboard"), "dashboard-page-layouts-workbench");
   assert.equal(actualByPage.get("Overdue Monitor"), "dashboard-page-layouts-two-panel-workspace");
   assert.equal(actualByPage.get("Template Coverage Analytics Dashboard"), "dashboard-page-layouts-three-panel-workspace");

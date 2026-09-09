@@ -37,6 +37,7 @@ Summarize what the user provided.
 - Sample data:
 - User corrections or constraints:
 - Explicit exclusions:
+- Dashboard custom implementation preference: preserve an explicit request for primarily Custom Code delivery, supplied reference images, functional regions, interactions and device expectations as user constraints; retain their requirement markers in the App Plan. Record business intent here; defer template IDs and input/output/filter/action wiring to planning.
 
 ## 3. Requirement Interpretation Method
 

@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "1.13.1",
+  "version": "1.14.0",
   "description": "Yeeflow App Builder: four hosted MCP services and versioned Product 14.5 contract checks.",
   "keywords": [
     "yeeflow",

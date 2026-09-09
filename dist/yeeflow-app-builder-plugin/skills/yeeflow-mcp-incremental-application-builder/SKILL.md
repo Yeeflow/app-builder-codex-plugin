@@ -140,3 +140,11 @@ Do not save a consumer with guessed IDs, unresolved references, or missing prere
 ## Completion Report
 
 Report the ledger as a concise matrix: planned resource, live ID (redacted), operation, dependencies, bootstrap identity/icon/theme strategy where applicable, API result, persisted-readback result, and remaining Designer/runtime proof. State every deferred or blocked item and why. Never claim application completion merely because the API accepted a save.
+
+## Custom Code Dashboard Golden Reference
+
+`dashboard-page-layouts-custom-code` is a registered alternate page-level Dashboard template. Use `docs/standards/dashboard-page-layouts-custom-code-standard.md` and the matching page-layout registry entry. Prefer it for explicit primarily Custom Code requests; consider it for image-backed complex business pages. Preserve user intent in Functional Specification and explicitly select it in App Plan section 14 or the standalone Dashboard Plan. Require Custom Code Dashboard Composition, Custom Code Module Plan, and Custom Code Communication and Native Integration sections.
+
+For this template, header/title/description/operations, top/bottom regions, side panels and internal Grids are optional. Duplicate full-width slots for vertically stacked modules. Desktop two-panel ratios are left + primary 1fr/2.5fr and primary + right 2.5fr/1fr; three-panel remains 1fr/2.5fr/1.5fr. Preserve explicit mobile right span 1 and accepted tablet left density. These template-specific rules take precedence over generic mandatory-header and native-dataset shell defaults. Do not inject an unplanned Collection or KPI.
+
+Prefer functional Custom Code modules, declared temporary-variable output/input exchange, native Data Filters passed through filter-variable inputs, and native Button/Form Action integration through unique CSS IDs. Preserve programmatic action triggers even when removing the visible header. Bind and verify context before invoking actions. Empty placeholders are allowed only in the reference. Use the shared page body builder and concrete module/dependency build context; preserve standalone Core provenance and wrapper gates. Training proof is export-backed and locally validated; rendering, reactive data and actions remain runtime-proof-required.

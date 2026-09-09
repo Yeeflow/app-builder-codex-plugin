@@ -264,3 +264,7 @@ packages/**/lib/
 !docs/templates/**
 !examples/managed-app-connector/
 !examples/managed-app-connector/.app.example.json
+
+# Custom Code Dashboard golden reference
+!docs/reference/dashboard-page-layout-custom-code.template.json
+!dist/yeeflow-app-builder-plugin/docs/reference/dashboard-page-layout-custom-code.template.json

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { validateCustomCodeDashboardPlan } from "./lib/dashboard-custom-code-template.mjs";
 
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -163,6 +164,9 @@ function validateDataListTrace(value) {
 
 function validateDashboardTrace(value) {
   const dashboard = value.dashboard;
+  if (dashboard?.pageLayoutTemplateId === "dashboard-page-layouts-custom-code") {
+    for (const finding of validateCustomCodeDashboardPlan(`dashboard-page-layouts-custom-code\n${planText}`)) addError(finding.code, finding.message);
+  }
   if (!dashboard || typeof dashboard !== "object") {
     addError("STANDALONE_YDP_TRACE_DASHBOARD_MISSING", "Dashboard trace must include dashboard metadata.");
     return;

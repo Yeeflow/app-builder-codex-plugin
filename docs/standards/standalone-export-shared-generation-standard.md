@@ -200,3 +200,7 @@ Use these classifications in validation reports:
 ## Proof Boundary
 
 Passing standalone export gates proves only that the exported resource body follows the current generation standard. It does not prove signing, install, Version Management success, live data seed, browser runtime, Designer open behavior, or cross-resource application navigation unless those stages are executed separately.
+
+## Custom Code Dashboard template selection
+
+`dashboard-page-layouts-custom-code` is an explicit alternate Dashboard template. Preserve the Functional Specification requirement marker and use the Composition, Module Plan, and Communication and Native Integration tables from `docs/standards/dashboard-page-layouts-custom-code-standard.md` for both App Plan and standalone Dashboard Plan. Materialize through the shared Custom Code page builder with populated control artifacts; no generic dataset/header fallback. Keep the existing Core issued-ID, source-binding and standalone wrapper gates.

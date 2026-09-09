@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { buildCustomCodeDashboard, validateCustomCodeDashboardPlan } from "./lib/dashboard-custom-code-template.mjs";
 
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -208,6 +209,7 @@ const DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = Object.freeze([
   PAGE_LAYOUT_TEMPLATE_ID,
   DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID,
   "dashboard-page-layouts-workbench",
+  "dashboard-page-layouts-custom-code",
   "dashboard-page-layouts-two-panel-workspace",
   "dashboard-page-layouts-three-panel-workspace",
 ]);
@@ -290,6 +292,9 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 
   const specText = fs.readFileSync(specPath, "utf8");
   const planText = fs.readFileSync(planPath, "utf8");
+  const customPlanErrors = validateCustomCodeDashboardPlan(planText);
+  if (customPlanErrors.length) throw new Error(customPlanErrors.map(x => `${x.code}: ${x.message}`).join("; "));
+  const customCodeDashboards = typeof options.customCodeDashboards === "string" ? JSON.parse(fs.readFileSync(path.resolve(cwd, options.customCodeDashboards), "utf8")) : (options.customCodeDashboards || {});
   const workflowSetDataListPlan = validateWorkflowSetDataListPlan(planText);
   for (const finding of workflowSetDataListPlan.findings) {
     if (finding.severity !== "error") continue;
@@ -321,7 +326,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   }
 
   const decoded = planDemand.hasMaterialResources
-    ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl, appPlanText: planText, findings })
+    ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl, appPlanText: planText, customCodeDashboards, findings })
     : buildDecodedPackage({
       appTitle,
       rootListId: numberId(ids["decoded.ListSet.ListID"]),
@@ -5475,7 +5480,7 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
   };
 }
 
-function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl, appPlanText = "", findings = [] }) {
+function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl, appPlanText = "", customCodeDashboards = {}, findings = [] }) {
   const embeddedSublistDescriptorHostContext = createDataListEmbeddedSublistDescriptorHostContext();
   try {
   const childResourceRecords = plannedChildResources(planDemand, planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`]);
@@ -5739,6 +5744,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       name,
       layoutId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
       pageLayoutTemplateId: dashboardPageLayoutTemplateId,
+      customCodeComposition: customCodeDashboards[name],
       rootListSetId: rootListId,
       listName: firstListName,
       listId: firstListId,
@@ -6053,7 +6059,8 @@ export function buildPrintDashboardResource({ name, layoutId, rootListSetId, lis
   return resource;
 }
 
-function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId = PAGE_LAYOUT_TEMPLATE_ID, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecords = [], dashboardFilters, dashboardAnalytics, dashboardDataTables = [], dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
+export function buildMaterialDashboardResource({ name, layoutId, customCodeComposition, pageLayoutTemplateId = PAGE_LAYOUT_TEMPLATE_ID, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecords = [], dashboardFilters, dashboardAnalytics, dashboardDataTables = [], dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
+  if (pageLayoutTemplateId === "dashboard-page-layouts-custom-code") return buildCustomCodeDashboard({ name, composition: customCodeComposition });
   if (pageLayoutTemplateId === DASHBOARD_PRINT_MULTI_RECORD_TEMPLATE_ID) {
     const record = (datasetRecords || [])[0] || {};
     const sourceMeta = listMetaByName?.get(normKey(record.sourceResource)) || listMeta;
@@ -11739,6 +11746,7 @@ function parseArgs(argv) {
     else if (token === "--out-dir") args.outDir = argv[++i];
     else if (token === "--api-id-manifest") args.apiIdManifest = argv[++i];
     else if (token === "--tenant-id") args.tenantId = argv[++i];
+    else if (token === "--custom-code-dashboards") args.customCodeDashboards = argv[++i];
     else if (token === "--title") args.title = argv[++i];
     else throw new Error(`Unexpected argument: ${token}`);
   }

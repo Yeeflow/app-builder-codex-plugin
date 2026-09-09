@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "scope": "custom-code-dashboard-training",
+  "mirrors": [
+    {
+      "source": "docs/app-plan-generation-contract.md",
+      "destination": "docs/app-plan-generation-contract.md"
+    },
+    {
+      "source": "docs/reference/dashboard-page-layout-custom-code.template.json",
+      "destination": "docs/reference/dashboard-page-layout-custom-code.template.json"
+    },
+    {
+      "source": "docs/reference/dashboard-page-layout-templates.json",
+      "destination": "docs/reference/dashboard-page-layout-templates.json"
+    },
+    {
+      "source": "docs/standards/app-plan-standard-template.md",
+      "destination": "docs/standards/app-plan-standard-template.md"
+    },
+    {
+      "source": "docs/standards/dashboard-page-layouts-custom-code-standard.md",
+      "destination": "docs/standards/dashboard-page-layouts-custom-code-standard.md"
+    },
+    {
+      "source": "docs/standards/dashboard-page-layouts-v1.1-standard.md",
+      "destination": "docs/standards/dashboard-page-layouts-v1.1-standard.md"
+    },
+    {
+      "source": "docs/standards/functional-specification-standard-template.md",
+      "destination": "docs/standards/functional-specification-standard-template.md"
+    },
+    {
+      "source": "docs/standards/standalone-export-shared-generation-standard.md",
+      "destination": "docs/standards/standalone-export-shared-generation-standard.md"
+    },
+    {
+      "source": "docs/templates/dashboard-page-layouts-custom-code/README.md",
+      "destination": "docs/templates/dashboard-page-layouts-custom-code/README.md"
+    },
+    {
+      "source": "docs/templates/dashboard-page-layouts-custom-code/definition.json",
+      "destination": "docs/templates/dashboard-page-layouts-custom-code/definition.json"
+    },
+    {
+      "source": "docs/templates/dashboard-page-layouts-custom-code/distribution-files.json",
+      "destination": "docs/templates/dashboard-page-layouts-custom-code/distribution-files.json"
+    },
+    {
+      "source": "docs/templates/dashboard-page-layouts-custom-code/normalization-report.json",
+      "destination": "docs/templates/dashboard-page-layouts-custom-code/normalization-report.json"
+    },
+    {
+      "source": "docs/templates/dashboard-page-layouts-custom-code/template.normalized.json",
+      "destination": "docs/templates/dashboard-page-layouts-custom-code/template.normalized.json"
+    },
+    {
+      "source": "docs/training/dashboard-custom-code-golden-reference-training-report.md",
+      "destination": "docs/training/dashboard-custom-code-golden-reference-training-report.md"
+    },
+    {
+      "source": "scripts/build-plugin-archive.mjs",
+      "destination": "scripts/build-plugin-archive.mjs"
+    },
+    {
+      "source": "scripts/lib/dashboard-custom-code-template.mjs",
+      "destination": "scripts/lib/dashboard-custom-code-template.mjs"
+    },
+    {
+      "source": "scripts/materialize-full-app-generated-final.mjs",
+      "destination": "scripts/materialize-full-app-generated-final.mjs"
+    },
+    {
+      "source": "scripts/prepare-plugin-patch-release.mjs",
+      "destination": "scripts/prepare-plugin-patch-release.mjs"
+    },
+    {
+      "source": "scripts/test-dashboard-custom-code-template.mjs",
+      "destination": "scripts/test-dashboard-custom-code-template.mjs"
+    },
+    {
+      "source": "scripts/test-dashboard-page-layout-plan-conformance-gates.mjs",
+      "destination": "scripts/test-dashboard-page-layout-plan-conformance-gates.mjs"
+    },
+    {
+      "source": "scripts/test-ydp-wrapper-gates.mjs",
+      "destination": "scripts/test-ydp-wrapper-gates.mjs"
+    },
+    {
+      "source": "scripts/validate-app-plan-resource-order.mjs",
+      "destination": "scripts/validate-app-plan-resource-order.mjs"
+    },
+    {
+      "source": "scripts/validate-dashboard-generation-hard-gates.mjs",
+      "destination": "scripts/validate-dashboard-generation-hard-gates.mjs"
+    },
+    {
+      "source": "scripts/validate-dashboard-golden-reference-conformance.mjs",
+      "destination": "scripts/validate-dashboard-golden-reference-conformance.mjs"
+    },
+    {
+      "source": "scripts/validate-dashboard-page-layout-template.mjs",
+      "destination": "scripts/validate-dashboard-page-layout-template.mjs"
+    },
+    {
+      "source": "scripts/validate-standalone-artifact-plan-trace.mjs",
+      "destination": "scripts/validate-standalone-artifact-plan-trace.mjs"
+    },
+    {
+      "source": "skills/installed/yeeflow-application-builder/SKILL.md",
+      "destination": "skills/yeeflow-application-builder/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-application-generator/SKILL.md",
+      "destination": "skills/yeeflow-application-generator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-custom-code-generator/SKILL.md",
+      "destination": "skills/yeeflow-custom-code-generator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-dashboard-generator/SKILL.md",
+      "destination": "skills/yeeflow-dashboard-generator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-feature-learning-orchestrator/SKILL.md",
+      "destination": "skills/yeeflow-feature-learning-orchestrator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-mcp-incremental-application-builder/SKILL.md",
+      "destination": "skills/yeeflow-mcp-incremental-application-builder/SKILL.md"
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "status": "static-normalization-verified",
+  "sourceSha256": "7dd8b0457834de06969d3c542935419786e1ea19bc50fb4d733a14c82d97389d",
+  "normalizedLayoutSha256": "b0dd503cfc8b7ba04e9e2bda81ca2ab190fc3ee272c08fb24f8184b14d7de91c",
+  "changes": [
+    {
+      "path": "/main/content/page_title_header/page_title_content",
+      "controlId": "0773b0ff-9416-4672-8097-bb75677be90a",
+      "field": "name",
+      "before": "Active Loan Pipeline Title Group",
+      "operation": "remove"
+    },
+    {
+      "path": "/main/content/page_title_header/page_title_content",
+      "controlId": "0773b0ff-9416-4672-8097-bb75677be90a",
+      "field": "label",
+      "before": "Active Loan Pipeline Title Group",
+      "after": "Container",
+      "operation": "replace"
+    },
+    {
+      "path": "/main/content/page_title_header/page_title_content/page_title_description",
+      "controlId": "0f293f41-26a9-4b1e-8504-9c54c4ce49ec",
+      "field": "name",
+      "before": "Asset Loan Operations Page Subtitle",
+      "operation": "remove"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_normal",
+      "controlId": "e3726511-587f-44a0-a6bc-c8c74c9cea30",
+      "field": "name",
+      "before": "Pipeline View Selector",
+      "operation": "remove"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_normal",
+      "controlId": "e3726511-587f-44a0-a6bc-c8c74c9cea30",
+      "field": "label",
+      "before": "Pipeline View Selector",
+      "after": "Container",
+      "operation": "replace"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_normal/btn_operation_normal_text",
+      "controlId": "3b7404ca-dad2-4b53-b69b-4015c784f745",
+      "field": "name",
+      "before": "Pipeline View Selector Text",
+      "operation": "remove"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_normal",
+      "controlId": "58e73fc7-44ec-49c6-85a7-f2350bf1caa9",
+      "field": "name",
+      "before": "Loan Status Filter",
+      "operation": "remove"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_normal",
+      "controlId": "58e73fc7-44ec-49c6-85a7-f2350bf1caa9",
+      "field": "label",
+      "before": "Loan Status Filter",
+      "after": "Container",
+      "operation": "replace"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_normal/btn_operation_normal_text",
+      "controlId": "3c2c827d-5916-44cd-9b5e-0d3be916fac8",
+      "field": "name",
+      "before": "Loan Status Filter Text",
+      "operation": "remove"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_primary",
+      "controlId": "f3fe7294-27dd-4798-ae76-c818242a6a41",
+      "field": "name",
+      "before": "Export Action",
+      "operation": "remove"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_primary",
+      "controlId": "f3fe7294-27dd-4798-ae76-c818242a6a41",
+      "field": "label",
+      "before": "Export Action",
+      "after": "Container",
+      "operation": "replace"
+    },
+    {
+      "path": "/main/content/page_title_header/Operations/btn_operation_primary/btn_operation_primary_text",
+      "controlId": "b735fbec-0b5b-49bb-8e97-6382150755d9",
+      "field": "name",
+      "before": "Export Action Text",
+      "operation": "remove"
+    },
+    {
+      "path": "/",
+      "field": "filter",
+      "before": [
+        {
+          "idx": "c730d9b2-d1c4-441a-8cb6-c3e359a84b96",
+          "id": "filter_1"
+        },
+        {
+          "idx": "489ca083-fb72-4f90-8d99-65b4ab09cf25",
+          "id": "filter_2"
+        },
+        {
+          "idx": "b09bbf83-5c7f-4d97-909d-12463b70c2ca",
+          "id": "filter_3"
+        },
+        {
+          "idx": "21365da5-b07c-417e-bb6e-8bf9823d873c",
+          "id": "filter_4"
+        }
+      ],
+      "operation": "remove",
+      "evidence": "All four names absent from the remainder of LayoutView; filterVars is empty."
+    }
+  ],
+  "changeCounts": {
+    "name": 8,
+    "label": 4,
+    "filter": 1
+  },
+  "controlCounts": {
+    "container": 14,
+    "heading": 5,
+    "codein": 24,
+    "flex_grid": 8
+  },
+  "controlCount": 51,
+  "placeholderCount": 24,
+  "sourceLayoutChangesApplied": false,
+  "checks": {
+    "uniqueControlIds": true,
+    "allPlaceholdersEmpty": true,
+    "allCodeControlsHavePlaceholderLabel": true,
+    "removedFiltersUnreferenced": true,
+    "outerSourceInstanceIdsExcluded": true,
+    "exactReverseNormalizationEqualsSourceLayout": true,
+    "originalFileUnchanged": true,
+    "explicitMobileRightSpanOne": true,
+    "sourceRefreshHasOnlyExpectedSpanChange": true,
+    "acceptedTabletLeftDensityPreserved": true
+  },
+  "runtimeVerified": false,
+  "candidateVersion": "1.0.0",
+  "sourceRefresh": {
+    "previousSourceSha256": "9c809d0a7aafe52a178b1d9c85ed64f6294057cc0cda1d01472956c0981cd925",
+    "previousNormalizedLayoutSha256": "e58575851e986dd03952b917404a9ffab1d714bf2608b069a6cbf4dc556340b3",
+    "onlySourceLayoutChange": {
+      "nvLabel": "right_side_panel",
+      "field": "attrs.common.grid.position",
+      "before": [
+        null,
+        null,
+        {
+          "cSpan": 2
+        }
+      ],
+      "after": [
+        null,
+        null,
+        {
+          "cSpan": 2
+        },
+        {
+          "cSpan": 1
+        }
+      ]
+    },
+    "sourceAuthor": "user",
+    "normalizationAddedLayoutChanges": false
+  }
+}

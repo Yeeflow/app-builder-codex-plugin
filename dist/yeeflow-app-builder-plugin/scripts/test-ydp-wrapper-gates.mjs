@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { buildCustomCodeDashboard, CUSTOM_CODE_PLAN_HEADINGS } from "./lib/dashboard-custom-code-template.mjs";
 
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -10,6 +11,7 @@ import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const SKILLS_ROOT = fs.existsSync(path.join(ROOT, "skills/installed")) ? "skills/installed" : "skills";
 const require = createRequire(import.meta.url);
 const codec = require("./lib/standalone-ydp-codec.cjs");
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), "ydp-wrapper-gates-"));
@@ -27,7 +29,7 @@ try {
   fs.writeFileSync(plan, "# Dashboard Artifact Plan\n\nArtifact Type: dashboard\nGeneration Contract: standalone YDP\nShared Builder: canonical full YAPK Dashboard builder\nProof Boundary: static wrapper validation only.\n");
   const trace = tracePath = writeJson("dashboard-plan.trace.json", { artifactType: "dashboard", name: "Fixture Dashboard", plan: { path: plan, sha256: fileSha(plan) }, sharedBuilder: { required: true, builderFamily: "canonical-full-yapk-dashboard-page-resource" }, validators: ["validate-ydp", "dashboard-hard-gates"], conformance: { planToActualRequired: true, requiredChecks: ["layout", "dependencies"] }, dashboard: { pageLayoutTemplateId: "dashboard-page-layouts-v1.1", sections: [{ id: "overview" }] } });
   const applicationPlan = applicationPlanPath = path.join(temp, "core-application-plan.md");
-  fs.writeFileSync(applicationPlan, "# Core Application Plan\n\nDashboard: Fixture Dashboard\nPage layout: dashboard-page-layouts-v1.1\n");
+  fs.writeFileSync(applicationPlan, "# Core Application Plan\n\n## 14. Dashboard Pages Plan\n\n#### Dashboard Page Layout Template Selection\n\n| Dashboard Page | Selected Dashboard Page Layout Template |\n| --- | --- |\n| Fixture Dashboard | dashboard-page-layouts-v1.1 |\n");
   const valid = buildResult(applicationPlan);
   const fixtureMinimum = Object.fromEntries(Object.entries(valid.outer).filter(([key]) => !["Ext1", "Ext2", "Ext3", "IsDefault", "IsItemPerm"].includes(key)));
   assert.equal(codec.decode(codec.encode(fixtureMinimum)).profile, "fixture-minimum", "six-field historical fixture must remain readable");
@@ -82,21 +84,41 @@ try {
   expectFailure("invalid UTF-8 rejected", path.join(ROOT, "validate-ydp.js"), [invalidUtf8, "--build-result", input, "--plan", plan, "--trace", trace, "--application-plan", applicationPlan], "YDP_UTF8_INVALID");
 
   for (const entry of [
-    "skills/installed/yeeflow-dashboard-generator/scripts/validate-ydp.js",
-    "skills/installed/yeeflow-application-generator/scripts/validate-ydp.js",
+    `${SKILLS_ROOT}/yeeflow-dashboard-generator/scripts/validate-ydp.js`,
+    `${SKILLS_ROOT}/yeeflow-application-generator/scripts/validate-ydp.js`,
   ]) {
     const result = run(path.join(ROOT, entry), [output, "--build-result", input, "--plan", plan, "--trace", trace, "--application-plan", applicationPlan]);
     assert.equal(result.status, 0, `${entry}\n${result.stdout}\n${result.stderr}`);
   }
   for (const [index, entry] of [
-    "skills/installed/yeeflow-dashboard-generator/scripts/build-ydp-wrapper.js",
-    "skills/installed/yeeflow-application-generator/scripts/build-ydp-wrapper.js",
+    `${SKILLS_ROOT}/yeeflow-dashboard-generator/scripts/build-ydp-wrapper.js`,
+    `${SKILLS_ROOT}/yeeflow-application-generator/scripts/build-ydp-wrapper.js`,
   ].entries()) {
     const skillOutput = path.join(temp, `skill-${index}.ydp`);
     const result = run(path.join(ROOT, entry), wrapperArgs(input, skillOutput));
     assert.equal(result.status, 0, `${entry}\n${result.stdout}\n${result.stderr}`);
     assert.ok(fs.readFileSync(skillOutput).equals(fs.readFileSync(output)), `${entry} must preserve canonical root-wrapper bytes`);
   }
+  // Synthetic provenance is confined to this offline wrapper fixture; it is not live Core proof.
+  const customTemplateId = "dashboard-page-layouts-custom-code";
+  fs.writeFileSync(applicationPlan, fs.readFileSync(applicationPlan, "utf8").replace("dashboard-page-layouts-v1.1", customTemplateId));
+  fs.appendFileSync(plan, `\nSelected template: ${customTemplateId}\n${CUSTOM_CODE_PLAN_HEADINGS.map(h => `### ${h}\nFixture Dashboard: static primary module; no shared data or actions.`).join("\n")}\n`);
+  fs.appendFileSync(applicationPlan, `\n${CUSTOM_CODE_PLAN_HEADINGS.map(h => `### ${h}\nFixture Dashboard: static primary module; no shared data or actions.`).join("\n")}\n`);
+  const customTrace = JSON.parse(fs.readFileSync(trace, "utf8"));
+  customTrace.dashboard.pageLayoutTemplateId = customTemplateId;
+  customTrace.plan.sha256 = fileSha(plan);
+  fs.writeFileSync(trace, JSON.stringify(customTrace));
+  const custom = buildResult(applicationPlan);
+  custom.body = buildCustomCodeDashboard({ name: "Fixture Dashboard", composition: { panels: ["primary_content_area"], modules: [{ region: "primary_content_area", layout: "stack", controls: [{ type: "codein", label: "Custom code", nv_label: "fixture_summary", attrs: { "codein-script": "({ render: function () { return null; } })" } }] }] } });
+  rebind(custom);
+  const customInput = writeJson("custom-build-result.json", custom);
+  const customOutput = path.join(temp, "custom.ydp");
+  const customSuccess = run(path.join(ROOT, "build-ydp-wrapper.js"), wrapperArgs(customInput, customOutput));
+  assert.equal(customSuccess.status, 0, customSuccess.stderr || customSuccess.stdout);
+  assert.deepEqual(codec.decode(fs.readFileSync(customOutput)).body, custom.body);
+  fs.writeFileSync(plan, fs.readFileSync(plan, "utf8").replace("### Custom Code Module Plan", "### Missing Module Plan"));
+  customTrace.plan.sha256 = fileSha(plan); fs.writeFileSync(trace, JSON.stringify(customTrace));
+  expectFailure("Custom Code standalone module plan required", path.join(ROOT, "build-ydp-wrapper.js"), wrapperArgs(customInput, path.join(temp, "missing-custom-plan.ydp")), "YDP_PLAN_TRACE_VALIDATION_FAILED");
   console.log("YDP_WRAPPER_GATES_PASSED");
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });

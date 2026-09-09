@@ -5,6 +5,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { asArray, isObject, parseJsonMaybe, readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 
+import { CUSTOM_CODE_DASHBOARD_TEMPLATE_ID, validateCustomCodeDashboard } from "./lib/dashboard-custom-code-template.mjs";
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json");
 const TEMPLATE_ID = "dashboard-page-layouts-v1.1";
@@ -12,6 +14,7 @@ const WORKBENCH_TEMPLATE_ID = "dashboard-page-layouts-workbench";
 const TWO_PANEL_WORKSPACE_TEMPLATE_ID = "dashboard-page-layouts-two-panel-workspace";
 const THREE_PANEL_WORKSPACE_TEMPLATE_ID = "dashboard-page-layouts-three-panel-workspace";
 const REQUIRED_TEMPLATE_IDS = [
+  CUSTOM_CODE_DASHBOARD_TEMPLATE_ID,
   TEMPLATE_ID,
   WORKBENCH_TEMPLATE_ID,
   TWO_PANEL_WORKSPACE_TEMPLATE_ID,
@@ -286,6 +289,7 @@ function validateRegistryControlledSlotLists(template, findings) {
 }
 
 function requiredSectionTypes(template) {
+  if (template?.id === CUSTOM_CODE_DASHBOARD_TEMPLATE_ID) return ["optional header", "responsive panel grid", "stacked Custom Code modules"];
   if (template?.id === WORKBENCH_TEMPLATE_ID) {
     return [
       "page title/header",
@@ -341,6 +345,7 @@ function requiredSectionTypes(template) {
 }
 
 function requiredCleanupRules(template) {
+  if (template?.id === CUSTOM_CODE_DASHBOARD_TEMPLATE_ID) return ["unusedCopiedModulesMustBeRemoved", "operationsWithoutConfiguredActionsMustBeRemoved", "emptyRegionsMustBeRemoved", "placeholdersMustBeMaterializedOrRemoved", "optionalHeaderMayBeRemoved", "panelTracksAndSpansMustMatch"];
   const common = ["unusedCopiedModulesMustBeRemoved", "operationsWithoutConfiguredActionsMustBeRemoved", "emptySectionContentAreaForbidden", "titleOnlyCopiedSectionsForbidden", "emptyKpiMetricsWrapperForbidden", "kpiCardsMustMatchPlannedMetrics", "repeatableModulesMayBeReordered"];
   if (template?.id === WORKBENCH_TEMPLATE_ID) return [...common, "emptyChartCardsSectionForbidden", "emptyRightSidePanelMustBeRemoved"];
   if (MASTER_DETAIL_WORKSPACE_TEMPLATE_IDS.has(template?.id)) {
@@ -403,6 +408,16 @@ function validatePageShell(resource, findings, context) {
   }
   if (!isZeroPadding(resource?.attrs?.container?.padding)) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_ROOT_PADDING_NONZERO`, "Dashboard page root container padding must be zero.", { page: context.page, actual: resource?.attrs?.container?.padding ?? null }));
+  }
+  if (rules.id === CUSTOM_CODE_DASHBOARD_TEMPLATE_ID) {
+    findings.push(...validateCustomCodeDashboard(resource, { template: context.template?.template?.parsedResource, reference: context.allowTemplateOperations }));
+    const content = findFirstByIdentity(resource, "content");
+    if (content) validateContentPaddingContract(content, findings, context);
+    if (!context.allowTemplateOperations) {
+      validateControlActionResolution(resource, findings, context);
+      validateOperations(resource, findings, context.page);
+    }
+    return;
   }
   const main = findFirstByIdentity(resource, "main") || findFirstByIdentity(resource, "Main");
   if (!main) {
@@ -1045,7 +1060,7 @@ function validateBusinessMapping(resource, findings, page) {
     findings.push(error("DASH_LAYOUT_TEMPLATE_LABEL_LEAKAGE", "Generated dashboard must replace unrelated template/domain labels with current app domain text.", { page, term }));
   }
   const visibleTextCount = countVisibleText(resource);
-  if (visibleTextCount < 2) {
+  if (visibleTextCount < 2 && !identityCandidates(resource).includes(CUSTOM_CODE_DASHBOARD_TEMPLATE_ID)) {
     findings.push(error("DASH_LAYOUT_GENERIC_PLACEHOLDER_CONTENT", "Generated dashboard must include domain-mapped business content, not empty or generic placeholder content.", { page, visibleTextCount }));
   }
 }

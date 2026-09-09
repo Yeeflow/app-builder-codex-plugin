@@ -714,12 +714,13 @@ Required for every generated Dashboard page.
 
 | Dashboard Page | Selected Dashboard Page Layout Template | Business Layout Need | Primary Regions Needed | Right Side Panel Needed | Chart Cards Section Needed | Selection Reason | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Dashboard> | dashboard-page-layouts-v1.1 / dashboard-page-layouts-workbench / dashboard-page-layouts-two-panel-workspace / dashboard-page-layouts-three-panel-workspace / dashboard-print-multi-record-table-v1 | General overview / operational workbench / master-detail workspace / multi-record print page | <Sections/regions> | Yes/No | Yes/No | <Reason using template guidance> | Generated-final validation |
+| <Dashboard> | dashboard-page-layouts-v1.1 / dashboard-page-layouts-custom-code / dashboard-page-layouts-workbench / dashboard-page-layouts-two-panel-workspace / dashboard-page-layouts-three-panel-workspace / dashboard-print-multi-record-table-v1 | General overview / operational workbench / master-detail workspace / multi-record print page | <Sections/regions> | Yes/No | Yes/No | <Reason using template guidance> | Generated-final validation |
 
 Rules:
 
 - Select exactly one Dashboard page layout template per Dashboard page from `docs/reference/dashboard-page-layout-templates.json`.
 - This selection is mandatory even for the standard `dashboard-page-layouts-v1.1` template. The generated Dashboard must be cloned from the selected template and retain its dashboard page-layout marker; no missing row may fall back to the default.
+- Use `dashboard-page-layouts-custom-code` for an explicit primarily Custom Code Dashboard request, or consider it for an image-backed complex business page. Include **Custom Code Dashboard Composition**, **Custom Code Module Plan**, and **Custom Code Communication and Native Integration** using `docs/standards/dashboard-page-layouts-custom-code-standard.md`. Plan optional header/regions, functional modules, temp-variable exchange, native filter inputs, and CSS-ID native Button/Form Action triggers. No default dataset or header is mandatory for this template.
 - Use `dashboard-page-layouts-v1.1` for general overview dashboards, report-style dashboards, and section-first pages.
 - Use `dashboard-page-layouts-workbench` for operational workbench pages that need a primary working area, optional right-side panel, top filters, KPI cards, grouped analytics, and queue/list regions.
 - Use `dashboard-print-multi-record-table-v1` only for a Dashboard selected as a Print page target. It provides one-record-per-Collection-item Table layout, merged row/column support, and a current-Collection-item QR region.

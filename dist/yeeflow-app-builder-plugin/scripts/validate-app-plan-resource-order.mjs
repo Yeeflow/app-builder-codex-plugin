@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { validateCustomCodeDashboardPlan } from "./lib/dashboard-custom-code-template.mjs";
 
 import fs from "node:fs";
 import path from "node:path";
@@ -202,6 +203,7 @@ const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = new Set([
 const APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
   "dashboard-page-layouts-v1.1",
   "dashboard-page-layouts-workbench",
+  "dashboard-page-layouts-custom-code",
   "dashboard-page-layouts-two-panel-workspace",
   "dashboard-page-layouts-three-panel-workspace",
   "dashboard-page-layout-templates",
@@ -924,6 +926,7 @@ export function validate(file) {
   validateDataListFormFieldsTemplateSelection(text, findings);
   validateApplicationLayoutTemplateSelection(text, findings);
   validateDashboardPagesPlan(text, findings);
+  findings.push(...validateCustomCodeDashboardPlan(text));
   validateRequiredTableSchemas(extractSections(text), findings);
 
   for (const [code, pattern] of REQUIRED_PATTERNS) {

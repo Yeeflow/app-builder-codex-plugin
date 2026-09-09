@@ -218,6 +218,7 @@ function validatePackage(packagePath, context) {
   }
   const unrelatedToMarketing = !/event|marketing|campaign/i.test(`${decoded?.ListSet?.Title || ""} ${decoded?.Title || ""}`);
   for (const page of collectDashboardPages(decoded)) {
+    if (page.resource?.derivedFromDashboardPageLayoutTemplate === "dashboard-page-layouts-custom-code") continue; // Validated by its dedicated page-layout contract.
     if (String(page.resource?.derivedFromGoldenReference || page.resource?.attrs?.derivedFromGoldenReference || "") !== context.defaultId) {
       context.findings.push(error("DASH_GOLDEN_RESOURCE_DERIVED_FROM_MISSING", "Generated dashboard resource must include derivedFromGoldenReference.", { page: page.title, expected: context.defaultId }));
     }
