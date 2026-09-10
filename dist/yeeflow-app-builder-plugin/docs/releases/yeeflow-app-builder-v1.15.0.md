@@ -12,4 +12,11 @@ General product-to-native graph creation, human approval/task pages, control act
 
 ## Release validation
 
-Candidate validation and Marketplace installation results will be recorded before stable promotion. The user requested a direct final release without RC tags; the installation gate remains required.
+- Candidate commit `7789cef19af655776858a56699151513eb51aec5` was installed through the private Yeeflow Git Marketplace using `.agents/plugins/marketplace.json` and `dist/yeeflow-app-builder-plugin` sparse paths. No RC tag was created, as requested by the user.
+- Installed version: 1.15.0. All 1,820 plugin files matched the candidate distribution byte for byte.
+- Codex app-server `skills/list` discovered all 27 installed skills with zero plugin skill errors. This was actual discovery; no model-generated smoke answers were substituted.
+- Source and installed Schema/Product suites each passed 96 tests (28 new schema/native-adapter tests plus 68 existing Product 14.5 tests). Installed Dashboard, hosted-MCP integration and relative skill-reference gates passed.
+- Package validation parsed 564 JSON files, syntax-checked 524 JavaScript files, checked all 27 skill UI metadata files, and verified archive integrity and byte parity. Source/archive checks covered 71 declared mirrors, including the existing documented Custom Code skill relative-link normalization.
+- Fixed snapshot catalog comparison and all six semantic-source hashes matched. The release safety audit reported zero blocking and zero historical findings. No raw upstream source, live tenant resource or synthetic test record was included in the plugin.
+- Fixed the distribution check's historical hardcoded version and supplied missing incremental-builder UI metadata.
+- Final promotion changes only this release record and scoped proof-status documents, their mirrors and the rebuilt archive/checksum. Tested executable payloads remain unchanged. Local Marketplace configuration returns to the stable ref after promotion.

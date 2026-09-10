@@ -25,4 +25,4 @@ Validated on 2026-09-10 against the user-authorized dedicated test application i
 
 ## Remaining gates
 
-Human approval/task pages, control actions and their steps, non-text expressions, complex variable categories, broader controls, and general product-to-native graph creation have not passed this live batch. The initial runtime result must not be generalized to all 159 priority definitions. Plugin release and installation are separate and have not been performed for this batch.
+Human approval/task pages, control actions and their steps, non-text expressions, complex variable categories, broader controls, and general product-to-native graph creation have not passed this live batch. The initial runtime result must not be generalized to all 159 priority definitions. Plugin release and installation are separate gates; their 1.15.0 results are recorded in the versioned release notes.

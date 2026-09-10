@@ -50,7 +50,7 @@
   "transport": "outer contracts plus bounded existing-native input label and current-workflow text-assignment adapter; general compilation unresolved",
   "persistedReadback": "exact definition match for bounded native changes",
   "runtime": "passed: one synthetic Start -> SetVariableTask -> End submission completed and expected text persisted",
-  "release": "1.15.0 candidate; installation verification pending",
+  "release": "1.15.0; candidate Marketplace installation and installed gates verified",
   "liveEvidence": "native-workflow-validation.md",
   "remainingLiveGates": [
     "human approval and task pages",
