@@ -16,4 +16,8 @@ These are bounded synthetic regression results. The complete 48-case procurement
 
 ## Release checks
 
-Candidate validation and exact-ref Marketplace installation must pass before stable promotion. No RC tag is used.
+- Candidate commit `aeb292191408c11e2bf7731be941c0b5d327483e` installed through the private Yeeflow Git Marketplace, using `.agents/plugins/marketplace.json` and `dist/yeeflow-app-builder-plugin` sparse paths. No RC tag was used.
+- All 1,825 installed files matched the distribution byte for byte. Codex app-server discovered 27 skills with zero plugin skill errors.
+- Source, distribution and installed Schema/Product suites each passed 105 tests. Approval publish-readiness, workflow Set Data List materialization, QueryData, Document Library, Dashboard, hosted MCP and skill-reference gates passed. Typecheck and workspace checks passed.
+- Parsed 564 JSON files and syntax-checked 528 JavaScript files. Archive integrity and 71 declared distribution mirrors passed. Release safety reported zero blocking or historical findings.
+- Stable promotion adds only this release evidence and its mirror; tested executable payloads remain unchanged. Marketplace configuration returns to stable after promotion.
