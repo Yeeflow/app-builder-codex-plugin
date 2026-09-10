@@ -1,0 +1,29 @@
+{
+  "baselineCommit": "41bdac08a55204bb033acea54cf3af8d7ca2f740",
+  "sources": [
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/Workflow/Form/ControlTreeTools.cs",
+      "sha256": "baa526a4e8df6da6a5bc43b4baa6e3bda752e128ac8c85353d63df6470aa6f12"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/Workflow/Form/WorkflowFormDefinitionValidator.cs",
+      "sha256": "cdb9677f9a0bc4477d4151b0da957c43655a7df4f33f218d4e034ce8f36994fd"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/Workflow/Action/WorkflowActionTools.cs",
+      "sha256": "5917f6f46ca80d27a3017c43eda57d43376b3e13fa71f63fecebb89743a64e05"
+    },
+    {
+      "path": "src/Akmii.AIBuilder.Engine/Tools/BuiltIn/Workflow/Node/WorkflowNodeGraphTools.cs",
+      "sha256": "ca73bd281c845e1134a90d2921d5891ea71ceaa817ec7ffe1d5a5562d8babcfc"
+    },
+    {
+      "path": "resources/schemas/workflow/variables/schema.json",
+      "sha256": "71a3a84a0d7b8f54c26dc49eef83224113c9efae1e0d06d30e980748c4d6f3e2"
+    },
+    {
+      "path": "resources/schemas/workflow/expression/schema.json",
+      "sha256": "49b4d756391f3a63109cd10c4f76dd8dd5e28f3eb3695e63a65cf94b06cc9077"
+    }
+  ]
+}

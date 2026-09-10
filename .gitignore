@@ -268,3 +268,11 @@ packages/**/lib/
 # Custom Code Dashboard golden reference
 !docs/reference/dashboard-page-layout-custom-code.template.json
 !dist/yeeflow-app-builder-plugin/docs/reference/dashboard-page-layout-custom-code.template.json
+
+# Reviewed fixed product schema projections (no upstream source)
+!docs/standards/product-schema/inventory.json
+!docs/standards/product-schema/contracts.json
+!docs/standards/product-schema/batch-status.json
+!docs/standards/product-schema/distribution-files.json
+!docs/standards/product-schema/mcp-envelopes.json
+!docs/standards/product-schema/adapter-evidence.json

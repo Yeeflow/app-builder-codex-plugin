@@ -1,0 +1,863 @@
+{
+  "formatVersion": 1,
+  "source": "appbuilder_component_contract (read-only hosted MCP)",
+  "checkedOn": "2026-09-10",
+  "proof": "static-envelope-contract; no component saved",
+  "components": {
+    "ApprovalForm": {
+      "Type": "ApprovalForm",
+      "PayloadProperty": "detail",
+      "PayloadType": "ProcessFormInfo",
+      "Schema": {
+        "Type": "object",
+        "Properties": {
+          "Category": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Name": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Key": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "IsItemPerm": {
+            "Type": "boolean"
+          },
+          "AppID": {
+            "Type": "number",
+            "Format": "Int32"
+          },
+          "ListID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "ProcModelID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "Ext": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "DefResourceID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "DefResource": {
+            "Type": "string",
+            "Format": "byte",
+            "ContentEncoding": "base64",
+            "ContentMediaType": "application/octet-stream"
+          },
+          "Status": {
+            "Type": "number",
+            "Format": "Int32"
+          },
+          "DeployedDefID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "WorkflowType": {
+            "Type": "number",
+            "Format": "Int32"
+          },
+          "Settings": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Deployed": {
+            "Type": "boolean"
+          },
+          "NoRule": {
+            "Type": "object",
+            "Properties": {
+              "Prefix": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "StartIndex": {
+                "Type": "number",
+                "Format": "Int32"
+              },
+              "CustomLength": {
+                "Type": "number",
+                "Format": "Int32"
+              },
+              "AutoIncrement": {
+                "Type": "number",
+                "Format": "Int32"
+              }
+            }
+          },
+          "Perms": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "Perm": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "PermType": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "PermObjID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ScheduleForm": {
+      "Type": "ScheduleForm",
+      "PayloadProperty": "detail",
+      "PayloadType": "ProcessFormInfo",
+      "Schema": {
+        "Type": "object",
+        "Properties": {
+          "Category": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Name": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Key": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "IsItemPerm": {
+            "Type": "boolean"
+          },
+          "AppID": {
+            "Type": "number",
+            "Format": "Int32"
+          },
+          "ListID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "ProcModelID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "Ext": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "DefResourceID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "DefResource": {
+            "Type": "string",
+            "Format": "byte",
+            "ContentEncoding": "base64",
+            "ContentMediaType": "application/octet-stream"
+          },
+          "Status": {
+            "Type": "number",
+            "Format": "Int32"
+          },
+          "DeployedDefID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "WorkflowType": {
+            "Type": "number",
+            "Format": "Int32"
+          },
+          "Settings": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Deployed": {
+            "Type": "boolean"
+          },
+          "NoRule": {
+            "Type": "object",
+            "Properties": {
+              "Prefix": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "StartIndex": {
+                "Type": "number",
+                "Format": "Int32"
+              },
+              "CustomLength": {
+                "Type": "number",
+                "Format": "Int32"
+              },
+              "AutoIncrement": {
+                "Type": "number",
+                "Format": "Int32"
+              }
+            }
+          },
+          "Perms": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "Perm": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "PermType": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "PermObjID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Dashboard": {
+      "Type": "Dashboard",
+      "PayloadProperty": "detail",
+      "PayloadType": "ListLayoutInfo",
+      "Schema": {
+        "Type": "object",
+        "Properties": {
+          "ListID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "LayoutID": {
+            "Type": "string",
+            "Format": "Int64"
+          },
+          "Type": {
+            "Type": "number",
+            "Format": "Int32"
+          },
+          "Title": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "LayoutView": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Ext1": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Ext2": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "Ext3": {
+            "Type": "string",
+            "Format": "String"
+          },
+          "IsDefault": {
+            "Type": "boolean"
+          },
+          "IsItemPerm": {
+            "Type": "boolean"
+          },
+          "Perms": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "Perm": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "PermType": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "PermObjID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                }
+              }
+            }
+          },
+          "LayoutInResources": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "ID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "RefId": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "Resource": {
+                  "Type": "string",
+                  "Format": "String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "DataList": {
+      "Type": "DataList",
+      "PayloadProperty": "detail",
+      "PayloadType": "DataListPackageInfo",
+      "Schema": {
+        "Type": "object",
+        "Properties": {
+          "PublicForms": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "ListID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "ID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "Type": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "Name": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Desc": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Status": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "Code": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "RefId": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "Resource": {
+                  "Type": "string",
+                  "Format": "String"
+                }
+              }
+            }
+          },
+          "List": {
+            "Type": "object",
+            "Properties": {
+              "ListID": {
+                "Type": "string",
+                "Format": "Int64"
+              },
+              "Title": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "Status": {
+                "Type": "number",
+                "Format": "Int32"
+              },
+              "IsItemPerm": {
+                "Type": "boolean"
+              },
+              "IsVerRecord": {
+                "Type": "boolean"
+              },
+              "HasComment": {
+                "Type": "boolean"
+              },
+              "IconUrl": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "TableCode": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "Ext1": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "Ext2": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "Ext3": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "Type": {
+                "Type": "number",
+                "Format": "Int32"
+              },
+              "Flags": {
+                "Type": "number",
+                "Format": "Int32"
+              },
+              "LayoutView": {
+                "Type": "string",
+                "Format": "String"
+              },
+              "Perms": {
+                "Type": "array",
+                "Items": {
+                  "Type": "object",
+                  "Properties": {
+                    "Perm": {
+                      "Type": "number",
+                      "Format": "Int32"
+                    },
+                    "PermType": {
+                      "Type": "number",
+                      "Format": "Int32"
+                    },
+                    "PermObjID": {
+                      "Type": "string",
+                      "Format": "Int64"
+                    }
+                  }
+                }
+              },
+              "AdvancePerms": {
+                "Type": "array",
+                "Items": {
+                  "Type": "object",
+                  "Properties": {
+                    "Perm": {
+                      "Type": "number",
+                      "Format": "Int32"
+                    },
+                    "PermType": {
+                      "Type": "number",
+                      "Format": "Int32"
+                    },
+                    "PermObjID": {
+                      "Type": "string",
+                      "Format": "String"
+                    }
+                  }
+                }
+              },
+              "Items": {
+                "Type": "object",
+                "AdditionalProperties": {
+                  "Type": "object",
+                  "AdditionalProperties": {
+                    "Type": "string",
+                    "Format": "String"
+                  }
+                }
+              }
+            }
+          },
+          "Fields": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "ListID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "FieldID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "FieldName": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "FieldType": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "FieldIndex": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "DisplayName": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "InternalName": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Type": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Status": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "Category": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "DefaultValue": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Rules": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "IsSort": {
+                  "Type": "boolean"
+                },
+                "IsSystem": {
+                  "Type": "boolean"
+                },
+                "IsUnique": {
+                  "Type": "boolean"
+                },
+                "Ext1": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext2": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext3": {
+                  "Type": "string",
+                  "Format": "String"
+                }
+              }
+            }
+          },
+          "Layouts": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "ListID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "LayoutID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "Type": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "Title": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "LayoutView": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext1": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext2": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext3": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "IsDefault": {
+                  "Type": "boolean"
+                },
+                "IsItemPerm": {
+                  "Type": "boolean"
+                },
+                "Perms": {
+                  "Type": "array",
+                  "Items": {
+                    "Type": "object",
+                    "Properties": {
+                      "Perm": {
+                        "Type": "number",
+                        "Format": "Int32"
+                      },
+                      "PermType": {
+                        "Type": "number",
+                        "Format": "Int32"
+                      },
+                      "PermObjID": {
+                        "Type": "string",
+                        "Format": "Int64"
+                      }
+                    }
+                  }
+                },
+                "LayoutInResources": {
+                  "Type": "array",
+                  "Items": {
+                    "Type": "object",
+                    "Properties": {
+                      "ID": {
+                        "Type": "string",
+                        "Format": "Int64"
+                      },
+                      "RefId": {
+                        "Type": "string",
+                        "Format": "Int64"
+                      },
+                      "Resource": {
+                        "Type": "string",
+                        "Format": "String"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "RemindRules": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "ID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "CategoryID": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "ListID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "Title": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "SendType": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "Type": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "From": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Subject": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Content": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Rules": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Receiver": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Status": {
+                  "Type": "number",
+                  "Format": "Int32"
+                }
+              }
+            }
+          },
+          "FlowMappings": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "ID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "ListID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "Method": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "Setting": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Title": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "DefKey": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "FieldName": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext1": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext2": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Ext3": {
+                  "Type": "string",
+                  "Format": "String"
+                }
+              }
+            }
+          },
+          "Workflows": {
+            "Type": "array",
+            "Items": {
+              "Type": "object",
+              "Properties": {
+                "Category": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Name": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Key": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "IsItemPerm": {
+                  "Type": "boolean"
+                },
+                "AppID": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "ListID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "ProcModelID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "Ext": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "DefResourceID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "DefResource": {
+                  "Type": "string",
+                  "Format": "byte",
+                  "ContentEncoding": "base64",
+                  "ContentMediaType": "application/octet-stream"
+                },
+                "Status": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "DeployedDefID": {
+                  "Type": "string",
+                  "Format": "Int64"
+                },
+                "WorkflowType": {
+                  "Type": "number",
+                  "Format": "Int32"
+                },
+                "Settings": {
+                  "Type": "string",
+                  "Format": "String"
+                },
+                "Deployed": {
+                  "Type": "boolean"
+                },
+                "NoRule": {
+                  "Type": "object",
+                  "Properties": {
+                    "Prefix": {
+                      "Type": "string",
+                      "Format": "String"
+                    },
+                    "StartIndex": {
+                      "Type": "number",
+                      "Format": "Int32"
+                    },
+                    "CustomLength": {
+                      "Type": "number",
+                      "Format": "Int32"
+                    },
+                    "AutoIncrement": {
+                      "Type": "number",
+                      "Format": "Int32"
+                    }
+                  }
+                },
+                "Perms": {
+                  "Type": "array",
+                  "Items": {
+                    "Type": "object",
+                    "Properties": {
+                      "Perm": {
+                        "Type": "number",
+                        "Format": "Int32"
+                      },
+                      "PermType": {
+                        "Type": "number",
+                        "Format": "Int32"
+                      },
+                      "PermObjID": {
+                        "Type": "string",
+                        "Format": "Int64"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Required": [
+          "Fields"
+        ]
+      }
+    }
+  }
+}

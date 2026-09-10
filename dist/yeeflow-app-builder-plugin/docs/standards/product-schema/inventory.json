@@ -1,0 +1,5064 @@
+{
+  "formatVersion": 1,
+  "baseline": {
+    "commit": "41bdac08a55204bb033acea54cf3af8d7ca2f740",
+    "sourceRoot": "resources/schemas",
+    "mode": "fixed-reviewed-snapshot"
+  },
+  "summary": {
+    "files": 289,
+    "json": 284,
+    "contracts": 159,
+    "families": {
+      "README.md": {
+        "files": 1,
+        "json": 0,
+        "contracts": 0
+      },
+      "dashboard/form": {
+        "files": 1,
+        "json": 1,
+        "contracts": 0
+      },
+      "datalist/field": {
+        "files": 27,
+        "json": 27,
+        "contracts": 0
+      },
+      "datalist/form": {
+        "files": 1,
+        "json": 1,
+        "contracts": 0
+      },
+      "datalist/layout": {
+        "files": 1,
+        "json": 1,
+        "contracts": 0
+      },
+      "datalist/listinfo": {
+        "files": 1,
+        "json": 1,
+        "contracts": 0
+      },
+      "datalist/notification": {
+        "files": 1,
+        "json": 1,
+        "contracts": 0
+      },
+      "orchestration/agent-outcome.schema.json": {
+        "files": 1,
+        "json": 1,
+        "contracts": 0
+      },
+      "orchestration/agent-tools": {
+        "files": 1,
+        "json": 1,
+        "contracts": 0
+      },
+      "orchestration/task-declaration.schema.json": {
+        "files": 1,
+        "json": 1,
+        "contracts": 0
+      },
+      "workflow/action": {
+        "files": 1,
+        "json": 1,
+        "contracts": 1
+      },
+      "workflow/control": {
+        "files": 95,
+        "json": 94,
+        "contracts": 93
+      },
+      "workflow/definition": {
+        "files": 1,
+        "json": 1,
+        "contracts": 1
+      },
+      "workflow/expression": {
+        "files": 1,
+        "json": 1,
+        "contracts": 1
+      },
+      "workflow/form": {
+        "files": 1,
+        "json": 1,
+        "contracts": 1
+      },
+      "workflow/formreport": {
+        "files": 3,
+        "json": 3,
+        "contracts": 0
+      },
+      "workflow/formula": {
+        "files": 2,
+        "json": 2,
+        "contracts": 0
+      },
+      "workflow/function": {
+        "files": 83,
+        "json": 83,
+        "contracts": 0
+      },
+      "workflow/node": {
+        "files": 32,
+        "json": 31,
+        "contracts": 31
+      },
+      "workflow/step": {
+        "files": 30,
+        "json": 30,
+        "contracts": 30
+      },
+      "workflow/tracking-number": {
+        "files": 2,
+        "json": 1,
+        "contracts": 0
+      },
+      "workflow/variables": {
+        "files": 2,
+        "json": 1,
+        "contracts": 1
+      }
+    }
+  },
+  "resources": [
+    {
+      "id": "README.md",
+      "family": "README.md",
+      "sha256": "2d0b9ba1e2103bdd5dabf44308f6165c81140ee5c6b6f9b387eed55adef06e12",
+      "bytes": 749,
+      "priority": 2,
+      "kind": "reference-document",
+      "proof": {
+        "parsed": false,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      }
+    },
+    {
+      "id": "dashboard/form/schema.json",
+      "family": "dashboard/form",
+      "sha256": "7776c88f29f8968ddce74355927c0d481edb877cce9ed567ce4b74bf33988fab",
+      "bytes": 21863,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/autonumber/schema.json",
+      "family": "datalist/field",
+      "sha256": "20978bbb7d87036b5c4edfc9ec63c42b907e7095d08a957b754b4ca8a5b57eb8",
+      "bytes": 3638,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/calculated-column/schema.json",
+      "family": "datalist/field",
+      "sha256": "8a8d6482e1960dd76f7c9024fd1c7b2936c9f39e3c38c87b4d1d5a410eeffb72",
+      "bytes": 5311,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/checkbox/schema.json",
+      "family": "datalist/field",
+      "sha256": "5f4ee5846b43a36d844ff9ae95e82e455aaa2d792bfe8a0e1d09c7d700d015a8",
+      "bytes": 2964,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/cost-center-picker/schema.json",
+      "family": "datalist/field",
+      "sha256": "7377a66ea875d6a00bd6a4d8e289bb25abfd312242cf044cb751b2bad36d07ce",
+      "bytes": 2777,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/currency/schema.json",
+      "family": "datalist/field",
+      "sha256": "6ea59a94784237cad042a9637a068a9d2c30e9df1984f916c220e69702b41bd3",
+      "bytes": 3859,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/datepicker/schema.json",
+      "family": "datalist/field",
+      "sha256": "2d794dfce786afe2268b062ab1f3b3cb8e0bc2e38390551648a90d0727349402",
+      "bytes": 3968,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/file-upload/schema.json",
+      "family": "datalist/field",
+      "sha256": "84d139d6bb47b08df2c32454fefc4f956135deba110c9a8cf5518c7e35077e58",
+      "bytes": 4868,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/hyperlink/schema.json",
+      "family": "datalist/field",
+      "sha256": "6bc7baa3ab695fe8e2b1604b252fa65c5cd2475b86c67e45da1c3d55eeae1991",
+      "bytes": 2810,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/icon-upload/schema.json",
+      "family": "datalist/field",
+      "sha256": "4b4d8ef0bd9550f3475db3d0e190eff8048c6f2e8c4bf091130fd902760b6a31",
+      "bytes": 2768,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/identity-picker/schema.json",
+      "family": "datalist/field",
+      "sha256": "d60c02a48942552fb1c1dabd99d5d56dd477f1de98a9cb25f6b3d5e7abec7646",
+      "bytes": 3097,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/input/schema.json",
+      "family": "datalist/field",
+      "sha256": "b9790b2a97c2ef94b0d7c5ffd3342fc6d906333416fe1e82af99369eea62192e",
+      "bytes": 3500,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/input_number/schema.json",
+      "family": "datalist/field",
+      "sha256": "a73f2e3e4505d6fbfe21cc205d9c8b939e3a60077152a6523eccc6833abea47a",
+      "bytes": 4198,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/list/schema.json",
+      "family": "datalist/field",
+      "sha256": "bb285e473187043f528489b5a72396f071f7c9026e745c25b9ad8a8e85780a00",
+      "bytes": 3910,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/location-picker/schema.json",
+      "family": "datalist/field",
+      "sha256": "8a43954634ac88540041820c6bd2cb83796fcf583adbf3a76bde6bb3f06911de",
+      "bytes": 2358,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/lookup/schema.json",
+      "family": "datalist/field",
+      "sha256": "538854205acd6b89083b361e874f0f3fa374915303a1ee983070d40ef3e172c8",
+      "bytes": 8699,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/metadata/schema.json",
+      "family": "datalist/field",
+      "sha256": "342a91959f817864fe774d60b2513c0b26132c18e9ccdf8d4e0e2a14b60cf1e7",
+      "bytes": 3374,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/mutiple-metadata/schema.json",
+      "family": "datalist/field",
+      "sha256": "aa2c2000a99fe6411ce14e6b979d74d6f0fdf9cddd9472c48d4569230b8cba0a",
+      "bytes": 3569,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/organization-picker/schema.json",
+      "family": "datalist/field",
+      "sha256": "3305b1fc6392b84b9849da5ea8601e67fdf32866e2212070c32f253bf1803327",
+      "bytes": 3833,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/percent/schema.json",
+      "family": "datalist/field",
+      "sha256": "3aced9cd287e02e3156289ae012dc7cddaf71b92c84be33c90dd6620241ea634",
+      "bytes": 2975,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/radio/schema.json",
+      "family": "datalist/field",
+      "sha256": "6cc05edaff7808846bef0d3f853021bbb3855737f6014cebc517927424f2b1bb",
+      "bytes": 3518,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/rate/schema.json",
+      "family": "datalist/field",
+      "sha256": "19a603865abe890f30cb92c87b87ba85b74f374a97d5e001d438637de9bde6ef",
+      "bytes": 3249,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/richtext/schema.json",
+      "family": "datalist/field",
+      "sha256": "59f0f7e16418b6e268fd34fb7c5c8260c63883ebc1f2bc53d8d1566cc77ccec7",
+      "bytes": 2503,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/signer/schema.json",
+      "family": "datalist/field",
+      "sha256": "2ffdc7c2e5d79666510dd5cbcf488c652f00b8b25afc7f1a32329aa24c898c22",
+      "bytes": 2045,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/switch/schema.json",
+      "family": "datalist/field",
+      "sha256": "c11a3e4928ce81eb4468a18e94457e447e8dd7872902297dc88767f70215e441",
+      "bytes": 2335,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/tag/schema.json",
+      "family": "datalist/field",
+      "sha256": "a264155e5d47b346ddd1d148d91e560b1dceb113d2eeb4473b11bc98bc968337",
+      "bytes": 3315,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/textarea/schema.json",
+      "family": "datalist/field",
+      "sha256": "66694f3ea03b6cefb6bd67bcbff00b94912f3b0a4faca5ac6fcd98570a1ff9fe",
+      "bytes": 2503,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/field/time/schema.json",
+      "family": "datalist/field",
+      "sha256": "3e9bbf1fa355b4a6ea9e094ff795c7d676ba002b9da7b2a88c0e0725b7966306",
+      "bytes": 2887,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/form/schema.json",
+      "family": "datalist/form",
+      "sha256": "36890f4eea4fab959b414a82522616de4be3f57e730e64568a8438983768f838",
+      "bytes": 22433,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/layout/schema.json",
+      "family": "datalist/layout",
+      "sha256": "49b615e793a9e57c73b7397d68270a731f47a08c62ecd4afa76e39a577e9885f",
+      "bytes": 21746,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/listinfo/schema.json",
+      "family": "datalist/listinfo",
+      "sha256": "0cd9981d77f7738f098fc01ab93c7a12b1144370fa5a5a2a6fc15f1f49281ea7",
+      "bytes": 4948,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "datalist/notification/schema.json",
+      "family": "datalist/notification",
+      "sha256": "cf6fe6adef6f4210d8c98301a7a87bc0393183f5f2efb8fee113bc37b268d399",
+      "bytes": 12846,
+      "priority": 2,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "orchestration/agent-outcome.schema.json",
+      "family": "orchestration/agent-outcome.schema.json",
+      "sha256": "6248e662bf6dab9f9a2ae340814d2758216e752c7510016b736790031922fbe3",
+      "bytes": 4509,
+      "priority": 2,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": "https://schemas.yeeflow.com/ai-builder/orchestration/agent-outcome"
+    },
+    {
+      "id": "orchestration/agent-tools/agent-delegation.schema.json",
+      "family": "orchestration/agent-tools",
+      "sha256": "d2fab3c815dda4f37642caa9306d929095ae3cd37986936cc2ec7d3c088561e8",
+      "bytes": 966,
+      "priority": 2,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": "https://schemas.yeeflow.com/ai-builder/orchestration/agent-tools/agent-delegation"
+    },
+    {
+      "id": "orchestration/task-declaration.schema.json",
+      "family": "orchestration/task-declaration.schema.json",
+      "sha256": "66a70d44d63ea6e7128500f97b28dc0dc14422e51347b15932e0dab7a8478f91",
+      "bytes": 744,
+      "priority": 2,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": "https://schemas.yeeflow.com/ai-builder/orchestration/task-declaration"
+    },
+    {
+      "id": "workflow/action/schema.json",
+      "family": "workflow/action",
+      "sha256": "c7af9e2081ac3cf7abd37aec9c129b3f4e0823ee6122f7977a2dc9659fc7f766",
+      "bytes": 1316,
+      "priority": 1,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/.gitkeep",
+      "family": "workflow/control",
+      "sha256": "04219654e44e5f138d9d58c4a0982e2120af6d3f7d0da32b7936423ad48e54be",
+      "bytes": 33,
+      "priority": 1,
+      "kind": "reference-document",
+      "proof": {
+        "parsed": false,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      }
+    },
+    {
+      "id": "workflow/control/action_button/schema.json",
+      "family": "workflow/control",
+      "sha256": "5aa0dfb08d1514e94c2caa9732370d9065ca797901c9be179f8478b0aa741243",
+      "bytes": 11345,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/ak-tabs-tab/schema.json",
+      "family": "workflow/control",
+      "sha256": "44d961da668ec3d332e818e67257ab034a97d4bb15b25ca9d5d35118054b514a",
+      "bytes": 2578,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/aktabs/schema.json",
+      "family": "workflow/control",
+      "sha256": "2a5b8e8bf824ef6be916225a65c88f73282fd685f07f716e02dc29e0b34b94a0",
+      "bytes": 2579,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/alert/schema.json",
+      "family": "workflow/control",
+      "sha256": "d409f28ce2b5450485349a3965be71cb7cd1c464638a0085d5ff2dd1c37c9b48",
+      "bytes": 2722,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/applicantInfo/schema.json",
+      "family": "workflow/control",
+      "sha256": "e76785b9abd357606584e1d7aa0ebbb23b751dd3548f9bce314df2512f7adaab",
+      "bytes": 5880,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/apply-button/schema.json",
+      "family": "workflow/control",
+      "sha256": "2ac33a87c03272b12515f0018df754a384c879f7ea75783e66942d1ed8273476",
+      "bytes": 9058,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/bar-chart/schema.json",
+      "family": "workflow/control",
+      "sha256": "00ceeeeaccaef795305ee34fab9ec42285ceca0df9c5db2ca57361230841ecd2",
+      "bytes": 16928,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/barcode/schema.json",
+      "family": "workflow/control",
+      "sha256": "c4140ad2de7f54873b88f40095f9b4c1f577b8c5b91479b0e653f763e787c287",
+      "bytes": 2933,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/calculated/schema.json",
+      "family": "workflow/control",
+      "sha256": "1cfce3ff5a9c296fcd6f47d8d0b3d0f5ed61cdcfb6a5ed05b056adfd722f5573",
+      "bytes": 5940,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/check-filter/schema.json",
+      "family": "workflow/control",
+      "sha256": "70d5ec09f06da7b3623f7a1e488dbcaf7cb304ff14fd9eeb8e978cd8020917a8",
+      "bytes": 11237,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/check-range/schema.json",
+      "family": "workflow/control",
+      "sha256": "a625ec504cd25b9814fe175a3acb60c23e666e16f4cb89bbb071984ce3b07009",
+      "bytes": 9814,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/checkbox/schema.json",
+      "family": "workflow/control",
+      "sha256": "95b9c9b7d7e1028d96e52ef40b6e01f146cfd604e14ce44032ea1ba513fac702",
+      "bytes": 7485,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/codein/schema.json",
+      "family": "workflow/control",
+      "sha256": "045d7b49cfc8989188933cf5bb311cbeecc039572adac58047ed825b58a0f566",
+      "bytes": 437,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/collection/schema.json",
+      "family": "workflow/control",
+      "sha256": "d39985b101d060d61932ca877f2685ea7457a59132b67ed90f4b9b044123dcd1",
+      "bytes": 12665,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/colorblock-chart/schema.json",
+      "family": "workflow/control",
+      "sha256": "2f911f601cf855f9303af81da4b3d5510269d3857993ed20a4f02d4b762aac6d",
+      "bytes": 12220,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/comments/schema.json",
+      "family": "workflow/control",
+      "sha256": "82c4fbd7652a8a304fc89c3e422e8a2ac35d14987dd2f94ae5e23e8bc60d5d88",
+      "bytes": 2181,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/container/schema.json",
+      "family": "workflow/control",
+      "sha256": "f9cf0d1a67f67a6d3094c93b4c71b5e6dbe2872f7b0ca5ea8c110447428fb7c1",
+      "bytes": 16553,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/cost-center-picker/schema.json",
+      "family": "workflow/control",
+      "sha256": "e46a8f9766759fe436ac26fc518f7d933d03eae5b8737a38c991595d85b0123f",
+      "bytes": 6508,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/currency/schema.json",
+      "family": "workflow/control",
+      "sha256": "cb7eddebdd55e5c584e44135cf16ac768b24e1c2be106aa8506d0d00d53cd769",
+      "bytes": 8017,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/dashboard-chart/schema.json",
+      "family": "workflow/control",
+      "sha256": "526c52397f9b6583587eae73c8181b0dfd9cbb4e3b1043effc93dfd54f40900c",
+      "bytes": 5021,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/data-list/schema.json",
+      "family": "workflow/control",
+      "sha256": "eb5b4387ba16a5c6944b5c352842d00eaeb4cab51f53278923c614efcf51f5de",
+      "bytes": 18412,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/date-filter/schema.json",
+      "family": "workflow/control",
+      "sha256": "5fcff2667af6ef5c8c6a34bf038ea3fce2844ba01edd555ac774f23d8494951e",
+      "bytes": 5675,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/datepicker/schema.json",
+      "family": "workflow/control",
+      "sha256": "dc057a2596bf6db981fd400add40cd342433fb5bdc41dc9733326f0052d3182b",
+      "bytes": 7753,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/daterange/schema.json",
+      "family": "workflow/control",
+      "sha256": "776a1ee40ce9887d3bd1033ceeb0d0b5a7c6800f38a53387a1ed9a2dec953502",
+      "bytes": 8732,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/document-embed/schema.json",
+      "family": "workflow/control",
+      "sha256": "672c665c3ce4b4788ffb3232fcbc8f14b6671a12a860c7950696bf383a8de1cb",
+      "bytes": 2186,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/document-library/schema.json",
+      "family": "workflow/control",
+      "sha256": "f9538bea160bab675b4b65e47a5cfe283b99f6d3d0c9499e174f9dd6d88f359f",
+      "bytes": 18110,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/dropbar/schema.json",
+      "family": "workflow/control",
+      "sha256": "a81431699c17cd4e22b0a62262f8c013859c8c558697434cfc94710fcd8687b5",
+      "bytes": 14127,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/dynamic-field/schema.json",
+      "family": "workflow/control",
+      "sha256": "1dee99ea413e3b7121375730d10f4419ed5bbd118ce4f5391780fd73a92ac66f",
+      "bytes": 6316,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/dynamic-file/schema.json",
+      "family": "workflow/control",
+      "sha256": "163d0c1a06b11e7de4d2228b84e28a40f717a5d513d476705e493c5f280825f0",
+      "bytes": 2368,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/dynamic-image/schema.json",
+      "family": "workflow/control",
+      "sha256": "4d7610798b20a1d69feedf47e538866e4ad90d3e5a1cee255118511011a0d177",
+      "bytes": 12589,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/dynamic-user/schema.json",
+      "family": "workflow/control",
+      "sha256": "fb7a04bb80a524da778aa39f7cdb965855022043f15400b72a2cadfb0daa936b",
+      "bytes": 4798,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/embed/schema.json",
+      "family": "workflow/control",
+      "sha256": "3992acf9852b498d6bbad094926eb7755f386e9acb3fa4b3c8105e7d6120957d",
+      "bytes": 1825,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/file-upload/schema.json",
+      "family": "workflow/control",
+      "sha256": "488570c433028fff2640a184df40239be8ab5c54cb14ac234ab7854b5807abc2",
+      "bytes": 8131,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/flex_grid/schema.json",
+      "family": "workflow/control",
+      "sha256": "c59b7501ef488b21d286c4db25e283b5bd3f44335411fcfe364eb4c6a6dd1c20",
+      "bytes": 8425,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/funnel-chart/schema.json",
+      "family": "workflow/control",
+      "sha256": "997555a414ab831420a73cca412f410062fe4177a0013ab35dc2bb8c918b8671",
+      "bytes": 10180,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/gallery/schema.json",
+      "family": "workflow/control",
+      "sha256": "479d076094acb94a00efb218a632c3078aa3442ae2e866a4d65d046a5c422d39",
+      "bytes": 14137,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/gantt/schema.json",
+      "family": "workflow/control",
+      "sha256": "cb30bf1fe4092c23236fabd20ff26ff30b37489ff410d74de40b905f38d36a77",
+      "bytes": 16372,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/gap/schema.json",
+      "family": "workflow/control",
+      "sha256": "69cb71c4cfb629c338b3f31a04daa6662009de42b171a7d344ca495178d29f48",
+      "bytes": 1139,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/heading/schema.json",
+      "family": "workflow/control",
+      "sha256": "c3a3679efdbef97387fc5bc4961ca6d9251302633de0075f3b171b2953ad0360",
+      "bytes": 3333,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/hierarchy-filter/schema.json",
+      "family": "workflow/control",
+      "sha256": "1b055b15624699d831763a5d857807e61d56ea6d4124c78ad518dc1229e83bdb",
+      "bytes": 13192,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/hyperlink/schema.json",
+      "family": "workflow/control",
+      "sha256": "1d4a521550f154088c896d06d471d79b0ddbcb9f4479d6a78ad6975c9a09eb83",
+      "bytes": 6723,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/icon/schema.json",
+      "family": "workflow/control",
+      "sha256": "33fe6297b481753b3f58d14009d2301cf3b5579296143e59c4adebcc5e3c7d03",
+      "bytes": 2725,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/icon-upload/schema.json",
+      "family": "workflow/control",
+      "sha256": "c57f5968d5cbaada1c665005336022620281215e950e5d14e0ed5964cc8347aa",
+      "bytes": 6418,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/icon_list/schema.json",
+      "family": "workflow/control",
+      "sha256": "c127ec935defe794bece90f6c55615f6db3c567239d6ec454c58557c26426959",
+      "bytes": 2202,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/identity-picker/schema.json",
+      "family": "workflow/control",
+      "sha256": "b5a904556a6f502fd61f9a93908ef442535ef7715105ccbb71607fc6a93c4db9",
+      "bytes": 7726,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/input/schema.json",
+      "family": "workflow/control",
+      "sha256": "77aca73bc7a4a59dbab398e0307a2a25682873907224defe37e9ea1994a9ab7e",
+      "bytes": 6958,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/input_number/schema.json",
+      "family": "workflow/control",
+      "sha256": "ad3b2c477167f1778faf7794b47bc99fa5f0ad5d68854c52918029c2841d7935",
+      "bytes": 7331,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/kanban/schema.json",
+      "family": "workflow/control",
+      "sha256": "0851a0c27aea496cfc424c99fd9069c0192faab96bca5586d644b59cf02264ee",
+      "bytes": 16248,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/key-controls.json",
+      "family": "workflow/control",
+      "sha256": "e3ea3095a89f5b546e7207ca3766b0ff608b3c189f050d8c96fa5f7085ebeb0b",
+      "bytes": 402,
+      "priority": 1,
+      "kind": "resource-index",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/control/line/schema.json",
+      "family": "workflow/control",
+      "sha256": "82894a1657bebc38c3c912fad2b78069db3a09bf2b86811544070dfbe5fec5cf",
+      "bytes": 2893,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/line-chart/schema.json",
+      "family": "workflow/control",
+      "sha256": "faba5ac2300d53fb71b76d5af3ff683f3bfabeb4c939a28974538ddfc4789c79",
+      "bytes": 14098,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/list/schema.json",
+      "family": "workflow/control",
+      "sha256": "dcf2e80c523cd6e6a6002ee6d4da1c88265d6283b75027c31ff65fa1d417688a",
+      "bytes": 15110,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/list-qrcode/schema.json",
+      "family": "workflow/control",
+      "sha256": "953ff38a04d4eb9c86db2ba53eb9581ff9c8dc30eda1a17e2b68e47da9aad4bf",
+      "bytes": 2451,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/location-picker/schema.json",
+      "family": "workflow/control",
+      "sha256": "73467d1e173f437ae4ea7ee0a97d55c2650e520e68c628661114a8e5b4230e8e",
+      "bytes": 6021,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/lookup/schema.json",
+      "family": "workflow/control",
+      "sha256": "ce2fbc763a44d4e833efdbddc19496d3901db3d66eabea9c2930e92e2da7076f",
+      "bytes": 14238,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/lookup-list/schema.json",
+      "family": "workflow/control",
+      "sha256": "3d9d35313c66560f2a0e38a29b717741dd5328a23d00392a49bbdd82006e0428",
+      "bytes": 13815,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/metadata/schema.json",
+      "family": "workflow/control",
+      "sha256": "739055345cf3eb4ecf4d6144d0ba2c2593e3ee4049db893cf5ee1c28f5e8a9b2",
+      "bytes": 7234,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/mutiple-metadata/schema.json",
+      "family": "workflow/control",
+      "sha256": "f1445252952f8e3550930a01e9028ebd3b9cd33fa9aac1aaa9517fb3c32527d8",
+      "bytes": 7250,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/organization-picker/schema.json",
+      "family": "workflow/control",
+      "sha256": "6e65615f76a76f590377d389a0b0ee0807b2393d9d95d65aa47e16ff91079014",
+      "bytes": 7589,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/percent/schema.json",
+      "family": "workflow/control",
+      "sha256": "34acbe8761a3bdf3bf392c37a96d2fe2762c934055fbd0790c27a80c4e72e65c",
+      "bytes": 6740,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/picture/schema.json",
+      "family": "workflow/control",
+      "sha256": "3869723dffbd3948fdfc3c389fa34a1d2b30478f2c7d40ec67cc8218b7a592e2",
+      "bytes": 5962,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/pie-chart/schema.json",
+      "family": "workflow/control",
+      "sha256": "d0e432c1bfc798413cbfd30f43c58213f3796196b8ea4647f69e33f9fe451d85",
+      "bytes": 14965,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/pivot-table/schema.json",
+      "family": "workflow/control",
+      "sha256": "0e5a62758b2bd57b82746cadb22df8d371369c022369ee417b4deabdf6393178",
+      "bytes": 14030,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/print/schema.json",
+      "family": "workflow/control",
+      "sha256": "6f98f31ceeb6c20fc4c36e0e4afb9e62542b3b5af723816540ba9975ef4b0cac",
+      "bytes": 4372,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/progress/schema.json",
+      "family": "workflow/control",
+      "sha256": "486eaa0bb1645b838e68d63c89d597d75f678c1fc1ec2e56a4510a9ba5551878",
+      "bytes": 2974,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/progress-circle/schema.json",
+      "family": "workflow/control",
+      "sha256": "c354f13436b58b713361469e2bbd8d424c688d3950e6915933f0c8e0579b368f",
+      "bytes": 4926,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/radio/schema.json",
+      "family": "workflow/control",
+      "sha256": "057c34d2868cb713dfa303a695451ab195613e99debd46040a409e06e515dafa",
+      "bytes": 7469,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/radio-filter/schema.json",
+      "family": "workflow/control",
+      "sha256": "4323d848b93a7432299083aa794617a9006acc649a5214dda6a8b6b47c3251cb",
+      "bytes": 11233,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/range-filter/schema.json",
+      "family": "workflow/control",
+      "sha256": "2eb927a05abe9278854b7b5767255ee724f7a6ca8dab74d4b7e5c2510c6ba558",
+      "bytes": 11375,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/rate/schema.json",
+      "family": "workflow/control",
+      "sha256": "46fc406bf5f733bff2057307966c26657d615f1d445a3551616d86433f8a9f03",
+      "bytes": 8554,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/relative-period/schema.json",
+      "family": "workflow/control",
+      "sha256": "5007bf8dc1be5c168e793056367a56ca80848d11f15f571216808490f7f0e43a",
+      "bytes": 8551,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/remove-filters/schema.json",
+      "family": "workflow/control",
+      "sha256": "02c28bed9bd6968fc2f627e787af6828a745ec729b23ed3945bee5d335c51a72",
+      "bytes": 4574,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/richtext/schema.json",
+      "family": "workflow/control",
+      "sha256": "a905b1e6315669d102a20b380325bd20e1b57eecdd22a6a1718c25d1ee1fba6e",
+      "bytes": 7034,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/search-filter/schema.json",
+      "family": "workflow/control",
+      "sha256": "272b6902dbdca5779ffd5884062dc5dd59513c8140826707b445f8e8809dd327",
+      "bytes": 5350,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/section/schema.json",
+      "family": "workflow/control",
+      "sha256": "df92a2860a403e9472a0a16cced5cde1eb3a47374f45dc501fa92a5666503794",
+      "bytes": 6245,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/section-column/schema.json",
+      "family": "workflow/control",
+      "sha256": "66b05b1133541c4b557105ba7974868f942633120b5a34d633f1762414f4172a",
+      "bytes": 2623,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/select-filter/schema.json",
+      "family": "workflow/control",
+      "sha256": "1bcefaa88264d7dd4b2e778323354089c2f4fbcfcc93b57047c8ce69643a2403",
+      "bytes": 8826,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/signer/schema.json",
+      "family": "workflow/control",
+      "sha256": "aa5527f3af5c7fdd65e9f5affdca56d14a3008e19b4b084c94ca143a9d943487",
+      "bytes": 6003,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/sorting-filters/schema.json",
+      "family": "workflow/control",
+      "sha256": "aa8fe1f9c1b5aa4ed703640ef88a54fdbad260a42796fba3253ba225b9216c0e",
+      "bytes": 6387,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/steps-bar/schema.json",
+      "family": "workflow/control",
+      "sha256": "6f48c508ab6031b78807df174ab9555d6c4d70b4785bd4575f84b64254327214",
+      "bytes": 4161,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/summary/schema.json",
+      "family": "workflow/control",
+      "sha256": "39620d63280dbcbe5933682ca552817ded15e2d8bee39e221413f4834eb111bf",
+      "bytes": 13038,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/switch/schema.json",
+      "family": "workflow/control",
+      "sha256": "5a84805a202a2df9b905eefde9fee40dcf220cbf5b0c66e544876e658b0c51f8",
+      "bytes": 6686,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/table-v2/schema.json",
+      "family": "workflow/control",
+      "sha256": "38c6a1a6a632bed4e945ba66969fd33fb7439a15e100ff88f8c502facce70aaa",
+      "bytes": 4755,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/tag/schema.json",
+      "family": "workflow/control",
+      "sha256": "be67ec52e4c69222358e261bc07cc119c2c9a483cc0ebf79e8f4e96b5a8a65c7",
+      "bytes": 6944,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/text-editor/schema.json",
+      "family": "workflow/control",
+      "sha256": "834159f8a42cd2eab26b2a8ecb1035d37745e577b2c57c09d07e83f554f99521",
+      "bytes": 2099,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/textarea/schema.json",
+      "family": "workflow/control",
+      "sha256": "03e6e89712384a3e171ce80511775333203a796b51baab623a6153846ab506a0",
+      "bytes": 6234,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/time/schema.json",
+      "family": "workflow/control",
+      "sha256": "ab7f2af99ae34f863f7c85b6f29ff33f161159d94e2f03d14fade9114e8443b3",
+      "bytes": 6584,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/timeline-h/schema.json",
+      "family": "workflow/control",
+      "sha256": "077a95239c8cb896f3b74cd837252b8538efe42ed0ca45893c827285136337db",
+      "bytes": 13109,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/timeline-v/schema.json",
+      "family": "workflow/control",
+      "sha256": "fb0cff2098cdd75c4701f72e754808d4f62c0f19138717acba90374b0ecc0b4b",
+      "bytes": 12340,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/timer/schema.json",
+      "family": "workflow/control",
+      "sha256": "2564339b8b8b6dfe9b53b8a50156e916edc84692bbbce36f97b8d7ba464033ea",
+      "bytes": 8376,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/toggle/schema.json",
+      "family": "workflow/control",
+      "sha256": "a9877d227750ab1acd96f722d9bc03bf0328cda1c86ddd36c696aa49921b6813",
+      "bytes": 3590,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/wflog/schema.json",
+      "family": "workflow/control",
+      "sha256": "6fa9e7383da77188042328bdf0e829b7869561d06ead427c38217d682034bb46",
+      "bytes": 2433,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/workflowControlPanel/schema.json",
+      "family": "workflow/control",
+      "sha256": "c4de609859f93d1ebfb5ee09ea0f57f42567bfb33f0cdff5a07cda18b6529799",
+      "bytes": 1174,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/control/workflowHistory/schema.json",
+      "family": "workflow/control",
+      "sha256": "91b4cf2207a4683d8258b2155fd69e577701052e118801a37e435f87ca09484f",
+      "bytes": 1575,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/definition/schema.json",
+      "family": "workflow/definition",
+      "sha256": "8739fb3ed15cdb6f326f14f08b2d578a9e065433b37d03ecbe0721273b2a55a8",
+      "bytes": 2410,
+      "priority": 1,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": "https://schemas.yeeflow.com/ai-builder/workflow/definition",
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/expression/schema.json",
+      "family": "workflow/expression",
+      "sha256": "49b4d756391f3a63109cd10c4f76dd8dd5e28f3eb3695e63a65cf94b06cc9077",
+      "bytes": 23620,
+      "priority": 1,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": "https://schemas.yeeflow.com/ai-builder/workflow/expression",
+      "contract": true,
+      "adapterIssueCount": 2
+    },
+    {
+      "id": "workflow/form/schema.json",
+      "family": "workflow/form",
+      "sha256": "0f0491df6f83331d85d42f338cb732fe9e7f739d478527a839f4c7092c6b8363",
+      "bytes": 35775,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/formreport/fields/schema.json",
+      "family": "workflow/formreport",
+      "sha256": "3859e8af63e39b7f4a2aea72b890454a79f627710a4d1e8545957891ff0ed81d",
+      "bytes": 30017,
+      "priority": 2,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/formreport/filters/schema.json",
+      "family": "workflow/formreport",
+      "sha256": "329d36e587ea457b5f9103261bbc82ab3c9a01a7695a184432aeac68f6f10d0a",
+      "bytes": 6224,
+      "priority": 2,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/formreport/schema.json",
+      "family": "workflow/formreport",
+      "sha256": "5778f95c0a68982efc4f92c851e5f5ed0e490beacce0e9d454bc01f589caba40",
+      "bytes": 5072,
+      "priority": 2,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/formula/expression/schema.json",
+      "family": "workflow/formula",
+      "sha256": "030929480973f3804cdc182f5832347f73fe8f2728ee85d963d31dd773189a25",
+      "bytes": 4359,
+      "priority": 2,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": "https://schemas.yeeflow.com/ai-builder/workflow/formula/expression"
+    },
+    {
+      "id": "workflow/formula/schema.json",
+      "family": "workflow/formula",
+      "sha256": "150edcd43c2fda3d3c12a2a57d83ca02a9552ecb9bd15116e78060ff11cc5196",
+      "bytes": 32598,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/JSONParse/schema.json",
+      "family": "workflow/function",
+      "sha256": "3d2bd399de3b505ca229e4e78a608d0bb7f7fc11247f0c8dd3e7a63713b3c7ca",
+      "bytes": 407,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/JSONStringfy/schema.json",
+      "family": "workflow/function",
+      "sha256": "86037b2f66eab21326361045b8391e9fb556fe2b0fbdfadc56beea430cb549c3",
+      "bytes": 402,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/UniqueID/schema.json",
+      "family": "workflow/function",
+      "sha256": "1d08a647057b19474acbdf6c7463d15fb8e21787c2a0bd1add00aab416a24dd4",
+      "bytes": 283,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/abs/schema.json",
+      "family": "workflow/function",
+      "sha256": "57e9bb1d2b60f43ae1176f74f805d808ab4379ee9fcda5cbeb0ee3e829d1e45f",
+      "bytes": 385,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/addWorkDays/schema.json",
+      "family": "workflow/function",
+      "sha256": "0b5e1d410fa8b6afed06eb79734aa8e978cb6f8f994e0521c9222c9cc504e18d",
+      "bytes": 490,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/addWorkHours/schema.json",
+      "family": "workflow/function",
+      "sha256": "3906f545d725db9012e53e60e1390f8793a47f3c696d66ede513b996d38dfd6b",
+      "bytes": 494,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/arrayAverage/schema.json",
+      "family": "workflow/function",
+      "sha256": "1f65967ddcbb98d09380d74682e36eb5e596667f05afa673db78a0d9155341be",
+      "bytes": 1204,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/arrayConcat/schema.json",
+      "family": "workflow/function",
+      "sha256": "05ff65c0784c3c1a6343406bdd2000b7adddd16278d988d8e93811dbf08eaec5",
+      "bytes": 481,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/arrayCount/schema.json",
+      "family": "workflow/function",
+      "sha256": "29d839245fff1849fd62a0937e2283fffa2b09c5ee8315b44ffef4ec0654e692",
+      "bytes": 1185,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/arrayIndex/schema.json",
+      "family": "workflow/function",
+      "sha256": "68b56423f3fb8d3fab3560373010d81a9f14f8c601c810aeb2c1cf1af0da6010",
+      "bytes": 540,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/arrayMax/schema.json",
+      "family": "workflow/function",
+      "sha256": "5aef5584cbe115d8b91fb9f38d4529b40d013edefc2acb5d8252b10dc3957754",
+      "bytes": 1194,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/arrayMin/schema.json",
+      "family": "workflow/function",
+      "sha256": "5a6e3c70052ec4d4fa98206eed678da32c5936390a4d33ef774a3e31a8406aa2",
+      "bytes": 1194,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/arraySum/schema.json",
+      "family": "workflow/function",
+      "sha256": "8a850d719b1d3e290dbcb80f230cda6379f8895d5d19a7e49432e29fa650aae1",
+      "bytes": 1188,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/ceil/schema.json",
+      "family": "workflow/function",
+      "sha256": "2d4d7d0f02a03a54ba71891598f8e3abbcea7743f407be69de1768bf5d0ed4ef",
+      "bytes": 412,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/clientType/schema.json",
+      "family": "workflow/function",
+      "sha256": "0a0438338ead9941a5f74722d0c4543c6aec6a90fffee70795f01e0b4694e99e",
+      "bytes": 270,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/concat/schema.json",
+      "family": "workflow/function",
+      "sha256": "fcfe7582ea8e9a22f2a80610486313f1a38c9cb45979afe7eed6c4cf227a8882",
+      "bytes": 635,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/currentUser/schema.json",
+      "family": "workflow/function",
+      "sha256": "a06df28c8f1e0557b0697ee68cd3db27fc83d920e355e8da4c5d5d09838295da",
+      "bytes": 297,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/date/schema.json",
+      "family": "workflow/function",
+      "sha256": "a3c53b8fdcc17bd89c68aefe5ae98821863bb3dc1dcfe8150d34d541b8f22fca",
+      "bytes": 809,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/dateAdd/schema.json",
+      "family": "workflow/function",
+      "sha256": "68c6b05005f9c7c786f746ab1fca4a1910ea5fd17843fbb75dd9b43b4251cb8c",
+      "bytes": 684,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/dateDiff/schema.json",
+      "family": "workflow/function",
+      "sha256": "70a2d9eb4490bac2367974d454d28eaaf8cc586c2475b671d54a5ca290b45b52",
+      "bytes": 795,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/dateFormat/schema.json",
+      "family": "workflow/function",
+      "sha256": "f88bbd1dac33bea785830a0382cf887edcf4fb0181ebba880dce0c6d80ed9b55",
+      "bytes": 492,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/datePart/schema.json",
+      "family": "workflow/function",
+      "sha256": "e7b2d68798f75a934ec116fc19dee8529b2bd9c7d5851f77bffe09ffe4d08b96",
+      "bytes": 587,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/datePicker/schema.json",
+      "family": "workflow/function",
+      "sha256": "b5ebed32714b0ee1dfe6aa00f3b6802cdd19818872867d603c2c079777948fe3",
+      "bytes": 636,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/day/schema.json",
+      "family": "workflow/function",
+      "sha256": "567fc5de70db5c6d33599c7f38299ba46d230f408e6231b60a4e64669e48542a",
+      "bytes": 382,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/fixed/schema.json",
+      "family": "workflow/function",
+      "sha256": "607ee57225ab849e2ec961766f9b9079899a489cfb34fa4f3a6e7c082a6c7683",
+      "bytes": 511,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/floor/schema.json",
+      "family": "workflow/function",
+      "sha256": "33c799f66220afe2e73da8f413e5cdded141ec3cdae7973d9f851ad572e277ac",
+      "bytes": 418,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/formatNumber/schema.json",
+      "family": "workflow/function",
+      "sha256": "7c4f57979e9970659548b53948702d27990aa72eb9b74326b80f66e8dedec8f6",
+      "bytes": 805,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getAttr/schema.json",
+      "family": "workflow/function",
+      "sha256": "74bfb538ca8cf3a270f9b8889342d86dd2c387474512c34d0c23e6e6a54e6d71",
+      "bytes": 680,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getCostCenterAttr/schema.json",
+      "family": "workflow/function",
+      "sha256": "dbdbf4b99e93d19dcbc992b85dfdbc90e147d64483310a4e680ad620a6128381",
+      "bytes": 988,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getDirectReports/schema.json",
+      "family": "workflow/function",
+      "sha256": "c3994f2d93e96809e0ea0a9b029a2628f8acbb0b4e68d04e59fe3e1841473910",
+      "bytes": 771,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getGeoLocation/schema.json",
+      "family": "workflow/function",
+      "sha256": "5d9fe20dc59f15f4cb1e2e489b4546dea303bd062732131385ffa522da81b256",
+      "bytes": 344,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getLocAttr/schema.json",
+      "family": "workflow/function",
+      "sha256": "eb23d7dd6a23117da245fdd5aaeb468555648339f7367c080122aef299b9c2ef",
+      "bytes": 950,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getMetadataAttr/schema.json",
+      "family": "workflow/function",
+      "sha256": "e8ad8a6d2f8adbced0867fbdeda64e1b69127ae17ad05fce22a96dbf1562f0b8",
+      "bytes": 925,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getOrgAttr/schema.json",
+      "family": "workflow/function",
+      "sha256": "15125fdeeec065731f4b754ad0af7cf828d0cffb7b5b41b536cafc236ae0edc3",
+      "bytes": 1065,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getOrgByParent/schema.json",
+      "family": "workflow/function",
+      "sha256": "d2e3085602b83db12b653c1a806a362b074eb1bd9c66d035243017226d9fc90d",
+      "bytes": 698,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getQueryString/schema.json",
+      "family": "workflow/function",
+      "sha256": "5231e88faf71c6054c7636321e035138e53ef77dcd09a7254cf23d6e7f973af4",
+      "bytes": 524,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getUserAttr/schema.json",
+      "family": "workflow/function",
+      "sha256": "c4473677af322a92a34004f2bd04c335194492c8cd466de002adb7bf725319ff",
+      "bytes": 1106,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getWindowMode/schema.json",
+      "family": "workflow/function",
+      "sha256": "922b8b7c53def9180510a6f873f5fcd2595b3c6cb4b9f914cec3a0bb98e5d066",
+      "bytes": 288,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/getWorkHours/schema.json",
+      "family": "workflow/function",
+      "sha256": "63025c93d99712b1110b4beed3c090e749ccc58d4aad871fea931061151b2358",
+      "bytes": 436,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/hour/schema.json",
+      "family": "workflow/function",
+      "sha256": "c994595fc672f67e83c4fbd19e65dfff7bd44d5765f4ede2fcc653311f55dc3f",
+      "bytes": 389,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/iif/schema.json",
+      "family": "workflow/function",
+      "sha256": "0a24812325fff5f6d067afde7996b54b62e7d82a161ebf88fc82da1f60d13795",
+      "bytes": 632,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/index.json",
+      "family": "workflow/function",
+      "sha256": "b0fb475b5ee8e2e1453b617a5ef2cc19215744df6d872560151572515c8023bd",
+      "bytes": 23494,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/isFalse/schema.json",
+      "family": "workflow/function",
+      "sha256": "173da638de68cacfefcdb56192b850d4a295a47c7c8959fccff0842048d27c0c",
+      "bytes": 370,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/isInGroup/schema.json",
+      "family": "workflow/function",
+      "sha256": "d588d71a8bd9aa787c714b31939b026e695b40817a2ed476a5a5ed37c48bf5d0",
+      "bytes": 532,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/isNullOrEmpty/schema.json",
+      "family": "workflow/function",
+      "sha256": "0b49e76c9763dfe3d215aa457807219b3456187ff99494e577f054b0fa95486a",
+      "bytes": 402,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/isSubsidaryDept/schema.json",
+      "family": "workflow/function",
+      "sha256": "d0622f6641af14ef953694fd45146564306b6de353b34790259c60fedebfc749",
+      "bytes": 541,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/isTrue/schema.json",
+      "family": "workflow/function",
+      "sha256": "9b4abf4a16915a8b9d99ffff0ab2708277e770ca602217e350825f8191ae5bb9",
+      "bytes": 367,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/join/schema.json",
+      "family": "workflow/function",
+      "sha256": "a705a97b017aadb263e18346f99ce38e62c43e862bc6d8787cf72057295f20e9",
+      "bytes": 545,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/left/schema.json",
+      "family": "workflow/function",
+      "sha256": "e47f42a05ab664c12f9837366343c8a2b27c4e91ef50120b2a4c11db9943190a",
+      "bytes": 510,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/len/schema.json",
+      "family": "workflow/function",
+      "sha256": "a3a51a0f6953b2c733c2305e15674f7710bf0d0503207bb9a33af7e160408ae6",
+      "bytes": 377,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/listLookup/schema.json",
+      "family": "workflow/function",
+      "sha256": "7e3a7d0d4fab8bca16d4423efb254c7a10071757b1c3c3719b2733396c4a44b3",
+      "bytes": 1278,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/log/schema.json",
+      "family": "workflow/function",
+      "sha256": "8ec5568753e58524ae76367aed5e21704bc1e57d6131bf05db4450a7c231e783",
+      "bytes": 553,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/lower/schema.json",
+      "family": "workflow/function",
+      "sha256": "8025d6b6e581c36330647de70ce6d1cba3f865c23035aa58cec13170b15d029a",
+      "bytes": 371,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/max/schema.json",
+      "family": "workflow/function",
+      "sha256": "98ff218f00a1a0a6aed69b3f23ec1654eb71c631452eb8d43965a811ff6269ff",
+      "bytes": 639,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/min/schema.json",
+      "family": "workflow/function",
+      "sha256": "e8c936d7175032819b47e384db7dfaaaf6192d0a426486fe6fd540986c2de532",
+      "bytes": 639,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/minute/schema.json",
+      "family": "workflow/function",
+      "sha256": "65c5931c102b0acdaff49dc54f6dc3d0b9ff38515ffa4245f2e9005663c82add",
+      "bytes": 397,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/month/schema.json",
+      "family": "workflow/function",
+      "sha256": "b419c6fb69660425dac0d36eecf6097231f2717787217a183615d9761ecac565",
+      "bytes": 377,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/not/schema.json",
+      "family": "workflow/function",
+      "sha256": "f89ed8cfa43427a8a6e422e6abefcb8fd1471661e6064abcade84421594eb4e3",
+      "bytes": 402,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/now/schema.json",
+      "family": "workflow/function",
+      "sha256": "9405b3b3603cc02c8f891f7d3d0bcab4d1912e82a340b59e35845c2eb3a2cf11",
+      "bytes": 270,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/number/schema.json",
+      "family": "workflow/function",
+      "sha256": "5b49796f46882065a8d6239a842ada0c60566b99bd7c8894aaafb523b097a055",
+      "bytes": 369,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/positionLookup/schema.json",
+      "family": "workflow/function",
+      "sha256": "801df62d7f79263fb25d0038de5fbe31e0d690010c236735ff96cd1c05fe6c4c",
+      "bytes": 1261,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/pow/schema.json",
+      "family": "workflow/function",
+      "sha256": "d854424424747bafe4a7e39f42465bfc54c9cd4fedd1e8aa436a634afb758c13",
+      "bytes": 456,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/rand/schema.json",
+      "family": "workflow/function",
+      "sha256": "63508dc34fb8b3731c29aee9ff8e61aa4ab4e0434b180e3d30eb2945b3206486",
+      "bytes": 302,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/regExpTest/schema.json",
+      "family": "workflow/function",
+      "sha256": "65b05525556fe502fb348c810f4947f1f71a425994a2a732e4e2f6e31894ba2f",
+      "bytes": 517,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/removeDuplicates/schema.json",
+      "family": "workflow/function",
+      "sha256": "dce5ddf774fcdcc785685c7cd08c899bcca0634cb8d4253d7ff0d72aa957619b",
+      "bytes": 500,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/repeat/schema.json",
+      "family": "workflow/function",
+      "sha256": "41ec8c702b243d4ec882f43044f1478cbfee73ce64c97d066016c5c69940603e",
+      "bytes": 468,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/replace/schema.json",
+      "family": "workflow/function",
+      "sha256": "aabeb05b31711d0fe492afc88f41fb45695025e0f4585103983f1d83c0675ac0",
+      "bytes": 798,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/replaceAll/schema.json",
+      "family": "workflow/function",
+      "sha256": "d9a8080cf5bdccc4f9488c37f8dd02f4341f4c97c395d2847ce30936eff09f0d",
+      "bytes": 574,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/right/schema.json",
+      "family": "workflow/function",
+      "sha256": "47e6675ed4455f7009aeb8944478d29c7ea350b4d951e15ce1006d1f2c57f81e",
+      "bytes": 514,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/round/schema.json",
+      "family": "workflow/function",
+      "sha256": "818a0c202fbefab133dff74380a4c1057ee2ca3329b7e1ee0772e3d42401ab3d",
+      "bytes": 524,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/second/schema.json",
+      "family": "workflow/function",
+      "sha256": "f76d1e58e1983785627f28a6510e459a0a67f2138b21ec2af93dfc714e2534a1",
+      "bytes": 397,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/split/schema.json",
+      "family": "workflow/function",
+      "sha256": "4e4991ef13e6b30304fe87956726b15771f261a6ad153a01e61c809aa17fc5c7",
+      "bytes": 490,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/sqrt/schema.json",
+      "family": "workflow/function",
+      "sha256": "8c99464cea06c42c40bcdc6db228193efe301afa97afc2d951175e4cdbc748d2",
+      "bytes": 382,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/strIndex/schema.json",
+      "family": "workflow/function",
+      "sha256": "56649d912c12669d16e574a978ed672b35035d49e78d6a0dcdd474d9e9fe7e85",
+      "bytes": 674,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/subString/schema.json",
+      "family": "workflow/function",
+      "sha256": "802ac3fdc278837361a1540e8d8063da7ff77ae2c55905eef9fd632977c22f26",
+      "bytes": 629,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/text/schema.json",
+      "family": "workflow/function",
+      "sha256": "465307c08683d7d7afaf3c5f94c6f5c209aaa4e3bc347c419248dbdeca27e004",
+      "bytes": 368,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/toServerTime/schema.json",
+      "family": "workflow/function",
+      "sha256": "37a3110a6d1f39633299c566969795a6f75a0ba5fd99ff17745563e00d4d1541",
+      "bytes": 392,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/toUserTime/schema.json",
+      "family": "workflow/function",
+      "sha256": "04ae1fc159a9a54c6a1ee770cbcd7113333c0dd8b41944cd60c18e7d91ad3450",
+      "bytes": 388,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/trim/schema.json",
+      "family": "workflow/function",
+      "sha256": "718b7a07f0ef2d3628589eb7a75c9be20ea4017801fbefb6aaeee3e42cb2580c",
+      "bytes": 376,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/upper/schema.json",
+      "family": "workflow/function",
+      "sha256": "f3b2d7554ca1c7e264225039e6468b9d086e80195f925fd4bbbda3cf8d89f99b",
+      "bytes": 371,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/vLookup/schema.json",
+      "family": "workflow/function",
+      "sha256": "a11f14457cfc4f681f1e664d450ed8895c854dc44005d18f22b51abfdc569c59",
+      "bytes": 1302,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/weekNum/schema.json",
+      "family": "workflow/function",
+      "sha256": "d8bef127c2fea9d4f96d064f3fb971ee33bf34e456a36fd6f5c3b8b93b8664b0",
+      "bytes": 887,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/function/year/schema.json",
+      "family": "workflow/function",
+      "sha256": "4d665b1e44db7ff9cd1b5285055c9dae7e43c1282d83e4ec28897a57029cd5e0",
+      "bytes": 366,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/node/.gitkeep",
+      "family": "workflow/node",
+      "sha256": "04219654e44e5f138d9d58c4a0982e2120af6d3f7d0da32b7936423ad48e54be",
+      "bytes": 33,
+      "priority": 1,
+      "kind": "reference-document",
+      "proof": {
+        "parsed": false,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      }
+    },
+    {
+      "id": "workflow/node/AI/schema.json",
+      "family": "workflow/node",
+      "sha256": "a72defcd76733a4c873306390a24af1003898ceb7e736dff4b3d9a7e6b9fd2c1",
+      "bytes": 11230,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/AcrobatSign/schema.json",
+      "family": "workflow/node",
+      "sha256": "bb130a79c947492bb40a5a9103cc4d74b3ec8d0340a0e02205a08f685f50e897",
+      "bytes": 4932,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/AddWatermark/schema.json",
+      "family": "workflow/node",
+      "sha256": "ef59009a9f4accd83c026b8f4389563c18d30abf185f19a36eecee1a618a2be0",
+      "bytes": 7982,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/AzureOpenAI/schema.json",
+      "family": "workflow/node",
+      "sha256": "25065acdeae2e313469de307eb5e23936e4790c751884d7c124428fdc10f8d85",
+      "bytes": 7566,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/CandidateTask/schema.json",
+      "family": "workflow/node",
+      "sha256": "7fb563e046523a06ba2ea85de0ef6bec8ad61e847b8f8b2df9de255eab99cc7f",
+      "bytes": 10312,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/Connector/schema.json",
+      "family": "workflow/node",
+      "sha256": "89cfbf46d3b0285a25193a044e6e3fb2d2c689ac43dc34972d7657d951962733",
+      "bytes": 2432,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/ContentList/schema.json",
+      "family": "workflow/node",
+      "sha256": "7716801b377fecaefdc10e4f31043fe6f6c9a921bf10a4f21f2b8de33d6ec6e2",
+      "bytes": 8475,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/ConvertToPdf/schema.json",
+      "family": "workflow/node",
+      "sha256": "e51261b1452318f587f25ff0d4b3ef4d310133eb8445c52d16cbaac90b0c2617",
+      "bytes": 4404,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/Delay/schema.json",
+      "family": "workflow/node",
+      "sha256": "619fe61cf45bbb62b8f5f49380926409e83c835d21853beee904a3e3e419babf",
+      "bytes": 9080,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/DocuSign/schema.json",
+      "family": "workflow/node",
+      "sha256": "86c0258b878759f2addcc0ca34daaeaee50d67937c0e016fc0b54388507ef77b",
+      "bytes": 8863,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/DocumentRecognition/schema.json",
+      "family": "workflow/node",
+      "sha256": "f5a90279d81eb8f868fb95257b9e4e6b9efd33f9e7a5a928a424713ce136a706",
+      "bytes": 6441,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/EndNoneEvent/schema.json",
+      "family": "workflow/node",
+      "sha256": "74af4a3ae47544d541ce16413c87a4171a19a3e75d5694f6ec5ee84c4d3fef35",
+      "bytes": 4391,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/EndRejectEvent/schema.json",
+      "family": "workflow/node",
+      "sha256": "993588a97a824ba1ff24fa34ec4fb231fb04b718e68ee50dc8aacee02ea89444",
+      "bytes": 4397,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/GenerateDocument/schema.json",
+      "family": "workflow/node",
+      "sha256": "9e8e37f2a07fae8cdfec8de0bcf3e9ccf5ef30774cd2aeb5a3bbf5ead01d44ef",
+      "bytes": 6205,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/HttpRequest/schema.json",
+      "family": "workflow/node",
+      "sha256": "2ce8c7d9aa7304adceffd2184377c6c713aa1a96de9dcb75412dfe4ba0fb52cc",
+      "bytes": 6367,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/InclusiveGateway/schema.json",
+      "family": "workflow/node",
+      "sha256": "b4bda4aa80b687eae1d5d1f19c5018e0c66eec297885f11d7e687ba20f18f990",
+      "bytes": 2453,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/InvokeCode/schema.json",
+      "family": "workflow/node",
+      "sha256": "20e243ea5001b1c5930dfe9a83d1745371cd62c0674069b7cf06997737eccbb4",
+      "bytes": 6023,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/Loop/schema.json",
+      "family": "workflow/node",
+      "sha256": "1d1748336865ff1ac697847f89686e2deb790cd6ecbdf275aa71932bc6391a96",
+      "bytes": 11623,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/LoopBody/schema.json",
+      "family": "workflow/node",
+      "sha256": "b99fd4fd5db38b97e23cecc306a195182951185d9f02845e9911e11effb69db4",
+      "bytes": 3052,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/LoopBreak/schema.json",
+      "family": "workflow/node",
+      "sha256": "a806a97d4d174fe00b041fbffa48860baf904195dd43cacc10c0f77b5f02797b",
+      "bytes": 2432,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/MailTask/schema.json",
+      "family": "workflow/node",
+      "sha256": "85cc1cfe0f5549a276fdbe2deb7a22af4dabc927dd179992aa9f7a0978796abd",
+      "bytes": 4211,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/MultiAssignmentTask/schema.json",
+      "family": "workflow/node",
+      "sha256": "852af5f3201bebdb6f6051c0ff5b317cfe191d19c6358d92ae1ef494e0760d61",
+      "bytes": 14997,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/PandaDoc/schema.json",
+      "family": "workflow/node",
+      "sha256": "209eaf64a80daf122c468bc5e1e998d047ed2ffc3ec7f40f954ee9223962d16d",
+      "bytes": 8769,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/QueryData/schema.json",
+      "family": "workflow/node",
+      "sha256": "01bfe9c7a42960484325006b7e2b007c021dfd32be2417eba2925f757daf4e9c",
+      "bytes": 14305,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/ResponseTo/schema.json",
+      "family": "workflow/node",
+      "sha256": "82919d0f1acdb582b31e4670194c0536e1ed25a1994c5af71c44b1deb8ef6009",
+      "bytes": 2435,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/SequenceFlow/schema.json",
+      "family": "workflow/node",
+      "sha256": "90b9592cf6262f88894c96db6b78a9d7677cf839d4f4dccabd91e81b628702a2",
+      "bytes": 11605,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/SetVariableTask/schema.json",
+      "family": "workflow/node",
+      "sha256": "21e63003c40bc574e41556ab8bf1b62c0e1a9f550f264714d5dbae4914973f2b",
+      "bytes": 4729,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/SignalEvent/schema.json",
+      "family": "workflow/node",
+      "sha256": "1d11546cabe56138022f56a1ec32894e339beb4537157114d4cf9628f083163f",
+      "bytes": 2395,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/StartNoneEvent/schema.json",
+      "family": "workflow/node",
+      "sha256": "8c171bf9a9c8c0a526fdd4d64c2b6555b8981fd6b694f1f52344f06ec3b1ea4f",
+      "bytes": 12228,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/StartWorkflowTask/schema.json",
+      "family": "workflow/node",
+      "sha256": "2f8ba58cfe7530311e2c28f6b45d6c18b71f3825a781610787a688c623a01923",
+      "bytes": 6588,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/node/definition/schema.json",
+      "family": "workflow/node",
+      "sha256": "364b51ad513b3a80b3fb6ff72d33013a9f29981561bf3b68e61959e2f75a8ffd",
+      "bytes": 2666,
+      "priority": 1,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": "https://schemas.yeeflow.com/ai-builder/workflow/node/definition",
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/ai/schema.json",
+      "family": "workflow/step",
+      "sha256": "ce25dceeeaa0be9989f293f7e0bd541d70b5e0a41f21b577c63b424a66257807",
+      "bytes": 10360,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/barcode/schema.json",
+      "family": "workflow/step",
+      "sha256": "07a6e581afd5c038349edb5af6335c4f33dcb8dcbcc44bee11a8682e68968f9e",
+      "bytes": 3480,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/closeW/schema.json",
+      "family": "workflow/step",
+      "sha256": "577c77755e56605de649bad76543dd48bb9b11cd5f1b6173b4ca2cb3a85ac571",
+      "bytes": 667,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/confirm/schema.json",
+      "family": "workflow/step",
+      "sha256": "8627c0ea3d4e299c3c7f09d29a6b463abc40c701fc2286b37faedf39646b3435",
+      "bytes": 1390,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/deleteitem/schema.json",
+      "family": "workflow/step",
+      "sha256": "f2a4c3b64080442aa06fcc280f4880687c7fc288cf7b14a62cb0c4efdfc4a290",
+      "bytes": 966,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/edititem/schema.json",
+      "family": "workflow/step",
+      "sha256": "6873935a0f583cbd8b17763d1d87e31d87224be592ebb2fb7de812f0ac4a6a20",
+      "bytes": 4136,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/http/schema.json",
+      "family": "workflow/step",
+      "sha256": "9e500b424d2bfca48ac5125d9a991996856c00848ecd5920ba6eb66d59d78a81",
+      "bytes": 8585,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/invokeservice/schema.json",
+      "family": "workflow/step",
+      "sha256": "6d5942773fa76c680b3222087f8fd755d3e909fc34f58e9292c276c3d66ea865",
+      "bytes": 5243,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/list_del/schema.json",
+      "family": "workflow/step",
+      "sha256": "ac926a646f66c14c4b03f70c562e2f0f57928d981b5b6bcb71a5980371292a94",
+      "bytes": 1714,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/list_dup/schema.json",
+      "family": "workflow/step",
+      "sha256": "33540831a5e0248c4893327999c19810165ab5981d64327f7eae667fb544819f",
+      "bytes": 703,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/list_import/schema.json",
+      "family": "workflow/step",
+      "sha256": "b66ef88dff80f1da728aca7eff5101cb212330e03415229b5f65b75095641849",
+      "bytes": 709,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/list_move/schema.json",
+      "family": "workflow/step",
+      "sha256": "691cad4600eb7bd0a98101cb1da3e086ee0ccc91e4d7ae7a61efac8020290a7c",
+      "bytes": 2040,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/list_new/schema.json",
+      "family": "workflow/step",
+      "sha256": "acaab6e5e8174e51f8520efa989b72a001a1d0d7d1242a7929b3d5719d25b41b",
+      "bytes": 1777,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/list_update/schema.json",
+      "family": "workflow/step",
+      "sha256": "a9adfd2e64563908bc7d5af14b5516cc1981af81a9cffe8b7f851b78ff949e81",
+      "bytes": 2283,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/listitem/schema.json",
+      "family": "workflow/step",
+      "sha256": "3c1b1447ae4fd4d55f16f2f7595791a45caf361487eea70261f1a38787dcc30f",
+      "bytes": 6726,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/nfc/schema.json",
+      "family": "workflow/step",
+      "sha256": "16e1ae01b3cdd860aeff9c50d308bad7ec128b385da7198b2e1aa04d695e2f9c",
+      "bytes": 3597,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/opendashboard/schema.json",
+      "family": "workflow/step",
+      "sha256": "46f725bc384dd5dfaa84d47815c455dbca326138467be87af30cee0d199001da",
+      "bytes": 4132,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/openform/schema.json",
+      "family": "workflow/step",
+      "sha256": "e1df119e9c573e2814e8eee15d735351a60a4b6e5ef5011e0c34d0702e4770bc",
+      "bytes": 5832,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/otheraction/schema.json",
+      "family": "workflow/step",
+      "sha256": "271d8f0060da4aa73554c48d874d354d9929729f8b6b4b3ee0e18fa7ae704ab9",
+      "bytes": 897,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/print/schema.json",
+      "family": "workflow/step",
+      "sha256": "16adfc0ec504f22fa301df3c817ad445d3ff0bf77a820dbdc8a35a5060ecadd9",
+      "bytes": 6291,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/querydata/schema.json",
+      "family": "workflow/step",
+      "sha256": "813f8937c5b1833bd46811609ca71eab5a693325bbeccb00c6ff6ab1d102fc94",
+      "bytes": 9703,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/redirect/schema.json",
+      "family": "workflow/step",
+      "sha256": "54947af9f4711fccd90863a72e75a7edb7efd363d2abc36c4e0d0297552d2653",
+      "bytes": 1403,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/script/schema.json",
+      "family": "workflow/step",
+      "sha256": "a17cd09b553dc8b755c29b482c7837c59b7fc92555bc66fac5bfa8a2473436ba",
+      "bytes": 1415,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/setdatalist/schema.json",
+      "family": "workflow/step",
+      "sha256": "9300f4ac3e4856d2c96d4c6075fd2aa9bfcfd220d566b0424fdb6b47a30e4a9f",
+      "bytes": 6692,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/setvar/schema.json",
+      "family": "workflow/step",
+      "sha256": "13eb509386ddbac76c64ce6241e7d8a31f0ba0d8e8333b31d81cc49abb37afa7",
+      "bytes": 1922,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/submit/schema.json",
+      "family": "workflow/step",
+      "sha256": "3b2139ddfaebabb4fb6990a5212161180537f8cbc11ddb2a5e5777960d57d2f4",
+      "bytes": 4063,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/triggerlistwf/schema.json",
+      "family": "workflow/step",
+      "sha256": "59be6650879aa9b5b710cf4af977c75cdce33a101586255d5348d38d5183e7bf",
+      "bytes": 1932,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/updatefields/schema.json",
+      "family": "workflow/step",
+      "sha256": "2ed08f175f8f0c6d7b302b230d6611fe4c1c9c33e4195f654f722af002b2ae47",
+      "bytes": 2272,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/viewitem/schema.json",
+      "family": "workflow/step",
+      "sha256": "537ab9f3e6df6ac30e670949e76be1abfc0509aed9bc329cb4155cf14017dc6f",
+      "bytes": 3582,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/step/wf/schema.json",
+      "family": "workflow/step",
+      "sha256": "fe3eedb9f9661221b792e65aaa278bdc5d0e789655c205b28200a0dc90ed2909",
+      "bytes": 4935,
+      "priority": 1,
+      "kind": "product-configurations",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    },
+    {
+      "id": "workflow/tracking-number/.gitkeep",
+      "family": "workflow/tracking-number",
+      "sha256": "04219654e44e5f138d9d58c4a0982e2120af6d3f7d0da32b7936423ad48e54be",
+      "bytes": 33,
+      "priority": 2,
+      "kind": "reference-document",
+      "proof": {
+        "parsed": false,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      }
+    },
+    {
+      "id": "workflow/tracking-number/schema.json",
+      "family": "workflow/tracking-number",
+      "sha256": "88718f0a525c79b960b974af97b7bf1c97de6cb5c63f92149c34e0b075e87aaa",
+      "bytes": 3560,
+      "priority": 2,
+      "kind": "semantic-dictionary",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null
+    },
+    {
+      "id": "workflow/variables/.gitkeep",
+      "family": "workflow/variables",
+      "sha256": "04219654e44e5f138d9d58c4a0982e2120af6d3f7d0da32b7936423ad48e54be",
+      "bytes": 33,
+      "priority": 1,
+      "kind": "reference-document",
+      "proof": {
+        "parsed": false,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      }
+    },
+    {
+      "id": "workflow/variables/schema.json",
+      "family": "workflow/variables",
+      "sha256": "71a3a84a0d7b8f54c26dc49eef83224113c9efae1e0d06d30e980748c4d6f3e2",
+      "bytes": 7801,
+      "priority": 1,
+      "kind": "json-schema",
+      "proof": {
+        "parsed": true,
+        "localValidation": false,
+        "transportMapped": false,
+        "persistedReadback": false,
+        "runtime": false
+      },
+      "sourceSchemaId": null,
+      "contract": true,
+      "adapterIssueCount": 0
+    }
+  ]
+}

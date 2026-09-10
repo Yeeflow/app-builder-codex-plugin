@@ -29,6 +29,7 @@ const tracked = execFileSync("git", ["ls-files", "-z", "--", "dist/yeeflow-app-b
 const manifest = JSON.parse(readFileSync(resolve(root, "docs/standards/product-14.5/distribution-files.json"), "utf8"));
 const customDashboardManifest = JSON.parse(readFileSync(resolve(root, "docs/templates/dashboard-page-layouts-custom-code/distribution-files.json"), "utf8"));
 manifest.mirrors.push(...customDashboardManifest.mirrors);
+manifest.mirrors.push(...JSON.parse(readFileSync(resolve(root, "docs/standards/product-schema/distribution-files.json"), "utf8")).mirrors);
 const files = new Set([...tracked.map(file => relative(distRoot, resolve(root, file))), ...manifest.mirrors.map(entry => entry.destination)]);
 const stage = mkdtempSync(resolve(tmpdir(), "yeeflow-plugin-archive-"));
 try {

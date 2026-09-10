@@ -18,6 +18,7 @@ pluginManifest.version = packageManifest.version;
 writeFileSync(resolve(root, pluginManifestPath), `${JSON.stringify(pluginManifest, null, 2)}\n`);
 
 const mirrors = [
+  "docs/releases/yeeflow-app-builder-v1.15.0.md",
   "docs/releases/yeeflow-app-builder-v1.14.0.md",
   "README.md",
   "CHANGELOG.md",
@@ -256,6 +257,7 @@ mirrors.push(
   ["skills/installed/yeeflow-application-generator/scripts/validate-ydp.js", "skills/yeeflow-application-generator/scripts/validate-ydp.js"],
   ["skills/installed/yeeflow-application-builder/SKILL.md", "skills/yeeflow-application-builder/SKILL.md"],
   ["skills/installed/yeeflow-mcp-incremental-application-builder/SKILL.md", "skills/yeeflow-mcp-incremental-application-builder/SKILL.md"],
+  ["skills/installed/yeeflow-mcp-incremental-application-builder/agents/openai.yaml", "skills/yeeflow-mcp-incremental-application-builder/agents/openai.yaml"],
   ["skills/installed/yeeflow-form-report-generator/SKILL.md", "skills/yeeflow-form-report-generator/SKILL.md"],
   ["skills/installed/yeeflow-application-generator/SKILL.md", "skills/yeeflow-application-generator/SKILL.md"],
   ["skills/installed/yeeflow-data-list-generator/SKILL.md", "skills/yeeflow-data-list-generator/SKILL.md"],
@@ -271,6 +273,9 @@ mirrors.push(
 );
 
 // Explicit reviewed additions; never glob untracked files into a release.
+for (const entry of readJson("docs/standards/product-schema/distribution-files.json").mirrors) {
+  mirrors.push([entry.source, entry.destination]);
+}
 for (const entry of readJson("docs/templates/dashboard-page-layouts-custom-code/distribution-files.json").mirrors) {
   mirrors.push([entry.source, entry.destination]);
 }

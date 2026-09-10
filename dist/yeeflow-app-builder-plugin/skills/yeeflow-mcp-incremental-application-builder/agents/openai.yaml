@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Incremental Application Builder"
+  short_description: "Build Yeeflow apps through hosted MCP."
+  default_prompt: "Use $yeeflow-mcp-incremental-application-builder to plan an authorized incremental application change, verify live contracts, preserve existing resources, and check persisted readback."

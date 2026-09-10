@@ -6,11 +6,14 @@ import os from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const archive=path.resolve(root,process.argv[2] || 'dist/yeeflow-app-builder-plugin-1.13.1.zip');
+const version=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8')).version;
+const archive=path.resolve(root,process.argv[2] || `dist/yeeflow-app-builder-plugin-${version}.zip`);
 const dist=path.join(root,'dist/yeeflow-app-builder-plugin');
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs/standards/product-14.5/distribution-files.json'),'utf8'));
+for(const extra of ['docs/templates/dashboard-page-layouts-custom-code/distribution-files.json','docs/standards/product-schema/distribution-files.json']) manifest.mirrors.push(...JSON.parse(fs.readFileSync(path.join(root,extra),'utf8')).mirrors);
 for(const {source,destination} of manifest.mirrors){
- const bytes=fs.readFileSync(path.join(root,source));
+ let bytes=fs.readFileSync(path.join(root,source));
+ if(source==='skills/installed/yeeflow-custom-code-generator/SKILL.md') bytes=Buffer.from(bytes.toString('utf8').replaceAll('../../../docs/','../../docs/'));
  assert.deepEqual(fs.readFileSync(path.join(dist,destination)),bytes,`source/dist ${destination}`);
  assert.deepEqual(execFileSync('unzip',['-p',archive,`yeeflow-app-builder-plugin/${destination}`],{maxBuffer:32*1024*1024}),bytes,`archive ${destination}`);
 }
@@ -29,9 +32,11 @@ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'yeeflow-145-extract-'));
 try{
  execFileSync('unzip',['-q',archive,'-d',temp]);
  const payload=path.join(temp,'yeeflow-app-builder-plugin');
+ const nativeTests=fs.readdirSync(path.join(payload,'scripts/product-schema')).filter(p=>p.endsWith('.test.mjs')).map(p=>'scripts/product-schema/'+p);
+ execFileSync(process.execPath,['--test',...nativeTests],{cwd:payload,stdio:'pipe'});
  execFileSync(process.execPath,['--test','scripts/test-product-14.5-contracts.mjs'],{cwd:payload,stdio:'pipe'});
  for(const module of ['./yeeflow-control-field-schema-utils.js','./scripts/yeeflow-control-field-schema-utils.js','./skills/yeeflow-application-generator/scripts/yeeflow-control-field-schema-utils.js'])
   execFileSync(process.execPath,['-e',`require(${JSON.stringify(module)})`],{cwd:payload,stdio:'pipe'});
- assert.equal(JSON.parse(fs.readFileSync(path.join(payload,'.codex-plugin/plugin.json'),'utf8')).version,'1.13.1');
+ assert.equal(JSON.parse(fs.readFileSync(path.join(payload,'.codex-plugin/plugin.json'),'utf8')).version,version);
 }finally{fs.rmSync(temp,{recursive:true,force:true});}
 console.log(`PRODUCT_145_DISTRIBUTION_OK mirrors=${manifest.mirrors.length}; extracted-module tests only; no plugin installation`);

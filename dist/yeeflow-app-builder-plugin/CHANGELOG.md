@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.15.0
+
+- Inventory all 289 files from the fixed reviewed product schema baseline and package 159 first-priority constraint projections.
+- Add bounded structural and product semantic validators with explicit unsupported-context gates.
+- Add native input-label and text-assignment patches; verify MCP save, exact readback and a completed synthetic workflow runtime.
+- Preserve native identities and check reciprocal graph references; retain the 1.14.0 Dashboard capabilities.
+- General graph compilation, human approval and complex expressions remain outside this batch of live proof.
+
 ## 1.14.0
 
 - Register the Custom Code Dashboard golden reference and usage rules.

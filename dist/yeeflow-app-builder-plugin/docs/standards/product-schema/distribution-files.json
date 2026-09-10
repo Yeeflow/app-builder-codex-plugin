@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "mirrors": [
+    {
+      "source": "scripts/product-schema/catalog.mjs",
+      "destination": "scripts/product-schema/catalog.mjs"
+    },
+    {
+      "source": "scripts/product-schema/runtime.mjs",
+      "destination": "scripts/product-schema/runtime.mjs"
+    },
+    {
+      "source": "scripts/product-schema/cli.mjs",
+      "destination": "scripts/product-schema/cli.mjs"
+    },
+    {
+      "source": "scripts/product-schema/runtime.test.mjs",
+      "destination": "scripts/product-schema/runtime.test.mjs"
+    },
+    {
+      "source": "docs/standards/product-schema/inventory.json",
+      "destination": "docs/standards/product-schema/inventory.json"
+    },
+    {
+      "source": "docs/standards/product-schema/contracts.json",
+      "destination": "docs/standards/product-schema/contracts.json"
+    },
+    {
+      "source": "docs/standards/product-schema/README.md",
+      "destination": "docs/standards/product-schema/README.md"
+    },
+    {
+      "source": "docs/standards/product-schema/batch-status.json",
+      "destination": "docs/standards/product-schema/batch-status.json"
+    },
+    {
+      "source": "docs/standards/product-schema/distribution-files.json",
+      "destination": "docs/standards/product-schema/distribution-files.json"
+    },
+    {
+      "source": "scripts/product-schema/semantics.mjs",
+      "destination": "scripts/product-schema/semantics.mjs"
+    },
+    {
+      "source": "scripts/product-schema/transport.mjs",
+      "destination": "scripts/product-schema/transport.mjs"
+    },
+    {
+      "source": "scripts/product-schema/adapters.test.mjs",
+      "destination": "scripts/product-schema/adapters.test.mjs"
+    },
+    {
+      "source": "docs/standards/product-schema/mcp-envelopes.json",
+      "destination": "docs/standards/product-schema/mcp-envelopes.json"
+    },
+    {
+      "source": "docs/standards/product-schema/adapter-mapping-review.md",
+      "destination": "docs/standards/product-schema/adapter-mapping-review.md"
+    },
+    {
+      "source": "docs/standards/product-schema/adapter-evidence.json",
+      "destination": "docs/standards/product-schema/adapter-evidence.json"
+    },
+    {
+      "source": "scripts/product-schema/native-workflow.mjs",
+      "destination": "scripts/product-schema/native-workflow.mjs"
+    },
+    {
+      "source": "scripts/product-schema/native-workflow.test.mjs",
+      "destination": "scripts/product-schema/native-workflow.test.mjs"
+    },
+    {
+      "source": "docs/standards/product-schema/native-workflow-validation.md",
+      "destination": "docs/standards/product-schema/native-workflow-validation.md"
+    }
+  ]
+}

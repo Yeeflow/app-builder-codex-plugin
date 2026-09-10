@@ -1,0 +1,63 @@
+{
+  "baselineCommit": "41bdac08a55204bb033acea54cf3af8d7ca2f740",
+  "state": "bounded-native-live-batch-1-verified",
+  "families": {
+    "workflow/action": {
+      "resources": 1,
+      "withoutProjectionIssues": 1,
+      "adapterIssues": {}
+    },
+    "workflow/control": {
+      "resources": 93,
+      "withoutProjectionIssues": 93,
+      "adapterIssues": {}
+    },
+    "workflow/definition": {
+      "resources": 1,
+      "withoutProjectionIssues": 1,
+      "adapterIssues": {}
+    },
+    "workflow/expression": {
+      "resources": 1,
+      "withoutProjectionIssues": 0,
+      "adapterIssues": {
+        "referenceTemplates": 1,
+        "variableSources": 1
+      }
+    },
+    "workflow/form": {
+      "resources": 1,
+      "withoutProjectionIssues": 1,
+      "adapterIssues": {}
+    },
+    "workflow/node": {
+      "resources": 31,
+      "withoutProjectionIssues": 31,
+      "adapterIssues": {}
+    },
+    "workflow/step": {
+      "resources": 30,
+      "withoutProjectionIssues": 30,
+      "adapterIssues": {}
+    },
+    "workflow/variables": {
+      "resources": 1,
+      "withoutProjectionIssues": 1,
+      "adapterIssues": {}
+    }
+  },
+  "caution": "withoutProjectionIssues is not semantic or transport readiness; x-product flags are checked against supplied values and may block",
+  "transport": "outer contracts plus bounded existing-native input label and current-workflow text-assignment adapter; general compilation unresolved",
+  "persistedReadback": "exact definition match for bounded native changes",
+  "runtime": "passed: one synthetic Start -> SetVariableTask -> End submission completed and expected text persisted",
+  "release": "1.15.0 candidate; installation verification pending",
+  "liveEvidence": "native-workflow-validation.md",
+  "remainingLiveGates": [
+    "human approval and task pages",
+    "control actions and steps",
+    "non-text expressions",
+    "complex variables",
+    "broader controls",
+    "general graph generation"
+  ]
+}
