@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.15.1
+
+- Preserve Unicode resource names, all planned fields, explicit required/unique/default metadata and currency controls.
+- Prefer explicit internal field names over display labels; preserve native library Title sorting.
+- Generate conditional InclusiveGateway branches and native Approval Loop bodies with start-port entry connections. Reject unsupported or underspecified nodes.
+- Validate generated plan conformance, numeric expression variable types and loop entry references.
+- Live synthetic regression proved low/high amount paths, self-assigned approvals, rejection, and two-iteration writes. This does not certify the full procurement acceptance matrix.
+
 ## 1.15.0
 
 - Inventory all 289 files from the fixed reviewed product schema baseline and package 159 first-priority constraint projections.

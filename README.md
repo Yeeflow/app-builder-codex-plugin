@@ -1,6 +1,6 @@
 # App Builder Codex Plugin
 
-Release **1.15.0**, based on released **v1.14.0**. Adds fixed product schema inventory, validation and bounded native workflow adapters; see [release notes](docs/releases/yeeflow-app-builder-v1.15.0.md).
+Release **1.15.1**, based on stable **v1.15.0**. Repairs Unicode resource generation, explicit field constraints, conditional approval branches and native loop entry flows; see [release notes](docs/releases/yeeflow-app-builder-v1.15.1.md).
 
 Official Yeeflow App Builder Codex plugin repository.
 
@@ -12,7 +12,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.15.0`
+- Version: `1.15.1`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
 Version `1.10.6` previously removed stale OAuth/REST references from the bundled skills and adds an OpenAI plugin submission packet. Live Yeeflow work uses the four scoped hosted MCP services, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.

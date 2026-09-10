@@ -272,6 +272,18 @@ mirrors.push(
   ["skills/installed/yeeflow-data-report-generator/references/data-report-live-contract.md", "skills/yeeflow-data-report-generator/references/data-report-live-contract.md"],
 );
 
+mirrors.push(
+  ["docs/releases/yeeflow-app-builder-v1.15.1.md", "docs/releases/yeeflow-app-builder-v1.15.1.md"],
+  ["scripts/lib/planned-field-constraints.mjs", "scripts/lib/planned-field-constraints.mjs"],
+  ["scripts/lib/approval-planned-branches.mjs", "scripts/lib/approval-planned-branches.mjs"],
+  ["scripts/lib/generated-plan-conformance.mjs", "scripts/lib/generated-plan-conformance.mjs"],
+  ["scripts/test-schema-coverage-repairs.mjs", "scripts/test-schema-coverage-repairs.mjs"],
+  ["scripts/test-workflow-set-data-list-materialization-gates.mjs", "scripts/test-workflow-set-data-list-materialization-gates.mjs"],
+  ["scripts/test-workflow-query-data-golden-reference-gates.mjs", "scripts/test-workflow-query-data-golden-reference-gates.mjs"],
+  ["scripts/lib/document-library-materializer.mjs", "scripts/lib/document-library-materializer.mjs"],
+  ["validate-ywf-def.js", "validate-ywf-def.js"],
+);
+
 // Explicit reviewed additions; never glob untracked files into a release.
 for (const entry of readJson("docs/standards/product-schema/distribution-files.json").mirrors) {
   mirrors.push([entry.source, entry.destination]);

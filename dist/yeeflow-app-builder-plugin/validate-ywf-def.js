@@ -15,6 +15,7 @@ const {
 } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
 const {
   validateWorkflowAssigneeExpression,
+  parseWorkflowExpressionButton,
 } = require("./scripts/lib/workflow-assignee-expression-utils.cjs");
 const {
   classifyFormActionQueryDataStep,
@@ -2099,7 +2100,11 @@ function validateDecodedDef(def, options = {}) {
           if (!NUMERIC_OPS.has(condition.op)) addIssue(errors, "NUMERIC_CONDITION_BAD_OP", "Numeric threshold condition has unsupported operator", `${p}.op`);
           const leftValue = condition.left && (condition.left.value || condition.left);
           const rightValue = condition.right && (condition.right.value !== undefined ? condition.right.value : condition.right);
-          if (!leftValue || leftValue.valueType !== "number" || !variableById.has(leftValue.id)) {
+          const htmlVariable = typeof leftValue === "string" ? parseWorkflowExpressionButton(leftValue)?.data : null;
+          const numericToken = Array.isArray(leftValue) && leftValue.length === 1 ? leftValue[0] : leftValue;
+          const leftId = htmlVariable?.type === "variable" ? htmlVariable.param?.id : numericToken?.id;
+          const leftIsNumber = htmlVariable?.type === "variable" || numericToken?.valueType === "number";
+          if (!leftIsNumber || !leftId || variableById.get(leftId)?.type !== "number") {
             addIssue(errors, "NUMERIC_CONDITION_BAD_LEFT", "Numeric threshold left value must reference an existing number variable", `${p}.left`);
           }
           const rightToken = Array.isArray(rightValue) && rightValue.length === 1 ? rightValue[0] : null;
@@ -2231,6 +2236,15 @@ function validateDecodedDef(def, options = {}) {
       const body = workflowShapes.find((candidate) => (candidate.resourceid || candidate.id) === shape.bodyRef);
       if (!shape.bodyRef || !nodeIds.has(shape.bodyRef) || body?.stencil?.id !== "LoopBody") {
         addIssue(errors, "WORKFLOW_LOOP_BODYREF_UNRESOLVED", "Every Loop must have bodyRef resolving to a LoopBody node.", `${p}.bodyRef`);
+      } else {
+        const children = body.children || [];
+        const entry = children.find(child => child?.stencil?.id === "SequenceFlow" && (child.source?.resourceid || child.source?.id) === (body.resourceid || body.id) && child.source?.port === "start");
+        const entryId = entry?.resourceid || entry?.id;
+        const target = children.find(child => (child.resourceid || child.id) === (entry?.target?.resourceid || entry?.target?.id));
+        const references = (refs, id) => (refs || []).some(ref => (ref.resourceid || ref.id) === id);
+        if (!entry || !target || !references(body.outgoing, entryId) || !references(target.incoming, entryId)) {
+          addIssue(errors, "WORKFLOW_LOOP_BODY_ENTRY_MISSING", "LoopBody requires a start-port SequenceFlow to its first action, with reciprocal outgoing/incoming references.", `${p}.bodyRef`);
+        }
       }
     });
   }

@@ -186,6 +186,7 @@ const nestedLoopReport = validateDecodedDef({
   ],
 }, { mode: "final" });
 assert.equal(nestedLoopReport.summary.contentListNodes, 1);
+assert.ok(nestedLoopReport.errors.some(entry => entry.code === "WORKFLOW_LOOP_BODY_ENTRY_MISSING"));
 assert.ok(nestedLoopReport.errors.some((entry) => entry.code === "CONTENTLIST_MISSING_LISTDATAS" && entry.path.includes("children")));
 assert.ok(!nestedLoopReport.errors.some((entry) => ["WORKFLOW_LOOP_EXPRESSION_VALUE_INVALID", "WORKFLOW_LOOP_BODYREF_UNRESOLVED"].includes(entry.code)));
 cases.push({ case: "YWF validator recursively inspects LoopBody children", status: "pass" });
@@ -253,6 +254,7 @@ try {
   fs.writeFileSync(specPath, "# Workflow Host Materializer Gate\n");
   fs.writeFileSync(planPath, [
     "# Workflow Host Materializer Gate",
+    "Application icon selection: fa-solid fa-flask",
     "## 4. Data Lists and Document Libraries Plan",
     "| List Name | Resource Type |",
     "| --- | --- |",
@@ -261,6 +263,15 @@ try {
     "| Workflow Name | Notes |",
     "| --- | --- |",
     "| Event Reminder | Planned |",
+    "## 10. Custom Data List Forms Plan",
+    "",
+    "### 10.1 Campaign",
+    "",
+    "| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template |",
+    "| --- | --- | --- | --- |",
+    "| Campaign | New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 |",
+    "| Campaign | View | View | data_list_form_layout_view_item_v1_1 |",
+    "",
     "## 11. Data List Workflows Plan",
     "| Workflow Name | Host Data List |",
     "| --- | --- |",
@@ -269,7 +280,7 @@ try {
   const materializerReport = materializeFullAppGeneratedFinal({ cwd: materializerTemp, functionalSpec: specPath, appPlan: planPath, outDir: path.join(materializerTemp, "dist"), allowFixtureApiIdsForTests: true });
   assert.equal(materializerReport.status, "fail");
   const materializerCodes = new Set(materializerReport.findings.map((finding) => finding.code));
-  assert.ok(materializerCodes.has("FULL_APP_WORKFLOW_SET_DATALIST_CONFIG_REQUIRED"));
+  assert.ok(materializerCodes.has("FULL_APP_WORKFLOW_SET_DATALIST_CONFIG_REQUIRED"), JSON.stringify(materializerReport.findings));
 } finally {
   fs.rmSync(materializerTemp, { recursive: true, force: true });
 }

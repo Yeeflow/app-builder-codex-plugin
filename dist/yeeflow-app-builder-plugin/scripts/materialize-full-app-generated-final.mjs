@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import { buildCustomCodeDashboard, validateCustomCodeDashboardPlan } from "./lib/dashboard-custom-code-template.mjs";
 
+import { planningIdentity, plannedBoolean, applyPlannedFieldConstraints } from "./lib/planned-field-constraints.mjs";
+import { resolveApprovalBranches } from "./lib/approval-planned-branches.mjs";
+import { validateGeneratedPlanConformance } from "./lib/generated-plan-conformance.mjs";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -336,6 +339,8 @@ export function materializeFullAppGeneratedFinal(options = {}) {
       iconUrl: appIconUrl,
       appPlanText: planText,
     });
+  if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
+  findings.push(...validateGeneratedPlanConformance(decoded, planDemand));
   if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
   completeGeneratedDataListSourceIdentity(decoded, { rootListSetId: ids["decoded.ListSet.ListID"] });
   const resource = encodeYapkResourceOfficial(decoded);
@@ -1948,9 +1953,13 @@ function collectDataListFieldSpecs(planText) {
     const normalizedHeaders = headers.map((header) => normKey(header));
     const listColumn = findHeaderIndex(normalizedHeaders, ["list", "data list", "data list name", "list name", "document library", "source list"]);
     const displayColumn = findHeaderIndex(normalizedHeaders, ["field label", "display name", "field display name", "business field", "business label", "label", "name", "field name"]);
-    const keyColumn = findHeaderIndex(normalizedHeaders, ["field name", "internal id field key", "field key", "internal id", "internal name", "internal field", "field id", "fieldname", "storage name", "storage field", "storage field name"]);
+    const explicitKeyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "internal name", "internal field name", "internal field", "field id", "fieldname", "storage name", "storage field", "storage field name"]);
+    const keyColumn = explicitKeyColumn !== -1 ? explicitKeyColumn : findHeaderIndex(normalizedHeaders, ["field name"]);
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "yeeflow field type", "field type", "business type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "yeeflow type", "control type", "control"]);
+    const requiredColumn = findHeaderIndex(normalizedHeaders, ["required"]);
+    const uniqueColumn = findHeaderIndex(normalizedHeaders, ["unique"]);
+    const defaultColumn = findHeaderIndex(normalizedHeaders, ["default value"]);
     const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "values"]);
     const lookupTargetColumn = findHeaderIndex(normalizedHeaders, ["lookup target", "target list", "lookup data list", "lookup list", "related list"]);
     const subListFieldsColumn = findHeaderIndex(normalizedHeaders, ["sub list row fields", "sublist row fields", "sub list columns", "sublist columns", "row fields"]);
@@ -1987,6 +1996,9 @@ function collectDataListFieldSpecs(planText) {
         fieldType,
         controlType,
         choiceValues,
+        required: requiredColumn === -1 ? undefined : plannedBoolean(cells[requiredColumn], displayName),
+        unique: uniqueColumn === -1 ? undefined : plannedBoolean(cells[uniqueColumn], displayName),
+        defaultValue: defaultColumn === -1 ? undefined : cleanResourceName(cells[defaultColumn]),
         lookupTarget: lookupTargetColumn === -1 ? lookupTargetFromPurpose(purpose) : cleanResourceName(cells[lookupTargetColumn]) || lookupTargetFromPurpose(purpose),
         listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn], { surface: "data-list" }),
         listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cells[subListSummariesColumn], { surface: "data-list" }),
@@ -2325,6 +2337,7 @@ function collectApprovalWorkflowNodeSpecs(planText) {
     const jobPositionAdminConfirmedColumn = findHeaderIndex(normalizedHeaders, ["job position admin confirmed", "system admin confirmed", "admin permission confirmed"]);
     const outcomesColumn = findHeaderIndex(normalizedHeaders, ["outcomes", "outcome"]);
     const conditionColumn = findHeaderIndex(normalizedHeaders, ["condition/branch", "condition", "branch"]);
+    const branchesColumn = findHeaderIndex(normalizedHeaders, ["branches json"]);
     const dataColumn = findHeaderIndex(normalizedHeaders, ["data read/write", "data read write", "data source", "read/write", "read write"]);
     const proofColumn = findHeaderIndex(normalizedHeaders, ["proof boundary", "proof"]);
     const queryModeColumn = findHeaderIndex(normalizedHeaders, ["workflow query mode", "query mode"]);
@@ -2370,6 +2383,7 @@ function collectApprovalWorkflowNodeSpecs(planText) {
         jobPositionCreationConfirmed: jobPositionCreationConfirmedColumn === -1 ? "" : cleanResourceName(cells[jobPositionCreationConfirmedColumn]),
         jobPositionAdminConfirmed: jobPositionAdminConfirmedColumn === -1 ? "" : cleanResourceName(cells[jobPositionAdminConfirmedColumn]),
         outcomes: outcomesColumn === -1 ? "" : cleanResourceName(cells[outcomesColumn]),
+        branches: branchesColumn === -1 ? null : parseJsonMaybe(cleanStructuredPlanCell(rawCells[branchesColumn])),
         conditionBranch: conditionColumn === -1 ? "" : cleanResourceName(cells[conditionColumn]),
         dataReadWrite: dataColumn === -1 ? "" : cleanResourceName(cells[dataColumn]),
         proofBoundary: proofColumn === -1 ? "" : cleanResourceName(cells[proofColumn]),
@@ -3098,13 +3112,21 @@ function fieldSpecsForList(planDemand, listName) {
     const displayName = cleanResourceName(field.displayName || explicitFieldName);
     if (!displayName) return;
     const displayKey = normKey(displayName);
-    if (seen.has(displayKey)) return;
+    if (seen.has(displayKey)) {
+      const existing = normalized.find((item) => normKey(item.fieldName) === "title");
+      if (normKey(explicitFieldName) === "title" && existing) {
+        Object.assign(existing, { required: field.required, unique: field.unique, defaultValue: field.defaultValue });
+        return;
+      }
+      throw new Error(`FIELD_PLAN_DUPLICATE_LABEL: ${listName} / ${displayName}`);
+    }
     const fieldType = cleanResourceName(field.fieldType) || "Text";
     let fieldName = explicitFieldName || inferFieldKey(displayName, fieldType, normalized.length);
     if (normKey(fieldName) === "title") {
       const existingTitle = normalized.find((item) => normKey(item.fieldName) === "title");
       if (existingTitle) {
         if (displayKey !== "title" && normKey(existingTitle.displayName) === "title") {
+          Object.assign(existingTitle, { required: field.required, unique: field.unique, defaultValue: field.defaultValue });
           existingTitle.displayName = displayName;
           existingTitle.fieldType = "Text";
           existingTitle.controlType = cleanResourceName(field.controlType) || "input";
@@ -3122,6 +3144,9 @@ function fieldSpecsForList(planDemand, listName) {
     seen.add(displayKey);
     usedFieldNames.add(normKey(fieldName));
     normalized.push({
+      required: field.required,
+      unique: field.unique,
+      defaultValue: field.defaultValue,
       displayName,
       fieldName,
       fieldType,
@@ -3135,7 +3160,7 @@ function fieldSpecsForList(planDemand, listName) {
   };
   add({ displayName: "Title", fieldName: "Title", fieldType: "Text", controlType: "input" });
   for (const spec of specs) add(spec);
-  return normalized.slice(0, 16);
+  return normalized;
 }
 
 function nextAvailableFieldName(fieldType, usedFieldNames, reservedFieldNames = new Set()) {
@@ -3472,7 +3497,11 @@ function isWorkbenchCustomForm(record) {
   return coreProjectApplicationPlanStaticFoundation({ kind: "is-workbench-custom-form", value: record || {} }).value;
 }
 
-function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetListId = "", lookupTargetIdentityMap = null, sourceResourceKey = "", embeddedSublistDescriptorHostContext = null }) {
+function buildFieldRecord(options) {
+  return applyPlannedFieldConstraints(buildBaseFieldRecord(options), options.field);
+}
+
+function buildBaseFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetListId = "", lookupTargetIdentityMap = null, sourceResourceKey = "", embeddedSublistDescriptorHostContext = null }) {
   // DATA_LIST_SCALAR_FIELD_PROJECTION_CORE_ROUTE_START
   if (shouldRouteDataListScalarFieldProjection(field)) {
     const result = coreProjectDataListScalarField(Object.freeze({
@@ -3635,7 +3664,7 @@ function buildDataListScalarFieldRecordFromProjection({ projection, listId, fiel
 }
 
 function buildDocumentLibraryFieldRecords({ listId, ids, childIndex }) {
-  return coreProjectDocumentLibraryStaticConfiguration({ kind: "field-records", value: { listId, ids, childIndex, defaultFields: DOCUMENT_LIBRARY_DEFAULT_FIELDS } }).value;
+  return coreProjectDocumentLibraryStaticConfiguration({ kind: "field-records", value: { listId, ids, childIndex, defaultFields: DOCUMENT_LIBRARY_DEFAULT_FIELDS } }).value.map(field => field.FieldName === "Title" ? { ...field, IsSort: true } : field);
 }
 
 function buildDataListViewLayoutView({ fields, viewRecord = null }) {
@@ -5648,6 +5677,12 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const defId = stringId(ids[`decoded.Forms[${index}].DefResourceID`]);
     const approvalFieldSpecs = approvalFieldSpecsForForm(planDemand, name);
     const approvalWorkflowNodes = approvalWorkflowNodeSpecsForForm(planDemand, name).map((node) => {
+      if (node.nodeType === "Loop") {
+        const loopRecord = (planDemand.workflowLoopRecords || []).find((record) => normKey(record.workflowName) === normKey(name) && normKey(record.nodeName) === normKey(node.nodeName));
+        const loopActions = (planDemand.workflowSetDataListRecords || []).filter((record) => normKey(record.workflowName) === normKey(name) && normKey(record.host) === "approval form" && normKey(record.parentLoop) === normKey(node.nodeName));
+        if (!loopRecord || !loopActions.length) throw new Error(`APPROVAL_LOOP_PLAN_REQUIRED: ${node.nodeName}`);
+        return { ...node, loopRecord, loopActions };
+      }
       if (node.nodeType !== "ContentList") return node;
       const setDataListRecord = (planDemand.workflowSetDataListRecords || []).find((record) => (
         normKey(record.host) === "approval form"
@@ -5658,7 +5693,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         findings.push(error("FULL_APP_APPROVAL_WORKFLOW_SET_DATALIST_CONFIG_REQUIRED", "Every Approval Form ContentList node must have one exact Workflow Set Data List Action Plan row; fallback mappings are not generation-ready.", { approvalForm: name, node: node.nodeName }));
       }
       return { ...node, setDataListRecord };
-    });
+    }).filter((node) => !node.setDataListRecord?.parentLoop);
     const pageIds = approvalWorkflowIds(defId, key);
     return {
       Category: "",
@@ -10397,6 +10432,7 @@ function buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSet
         expression: segment.loop.expression,
       });
       const internalFlowIds = segment.nodes.slice(0, -1).map((node, nodeIndex) => deterministicUuid(`${seed}:loop:${index + 1}:flow:${nodeIndex + 1}`));
+      const entryFlowId = deterministicUuid(`${seed}:loop:${index + 1}:entry`);
       const bodyChildren = [];
       for (const [nodeIndex, node] of segment.nodes.entries()) {
         bodyChildren.push({
@@ -10404,12 +10440,15 @@ function buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSet
           resourceid: node.id,
           stencil: { id: "ContentList" },
           position: { x: 80 + nodeIndex * 320, y: 70 },
-          incoming: nodeIndex === 0 ? [] : [flowRef(internalFlowIds[nodeIndex - 1])],
+          incoming: [flowRef(nodeIndex === 0 ? entryFlowId : internalFlowIds[nodeIndex - 1])],
           outgoing: nodeIndex === segment.nodes.length - 1 ? [] : [flowRef(internalFlowIds[nodeIndex])],
           properties: buildWorkflowSetDataListProperties({ record: node.record, target: node.target, rootListSetId, hostListId, workflowType }),
         });
       }
       for (const [nodeIndex, flowId] of internalFlowIds.entries()) bodyChildren.push(flow(flowId, segment.nodes[nodeIndex].id, segment.nodes[nodeIndex + 1].id, "Next"));
+      const entryFlow = flow(entryFlowId, bodyId, segment.nodes[0].id, "Start iteration");
+      entryFlow.source.port = "start";
+      bodyChildren.push(entryFlow);
       shapes.push({
         id: pureEdgeId,
         resourceid: pureEdgeId,
@@ -10436,7 +10475,7 @@ function buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSet
         stencil: { id: "LoopBody" },
         position: { x: 500 + index * 340, y: 340 },
         incoming: [flowRef(pureEdgeId)],
-        outgoing: [],
+        outgoing: [flowRef(entryFlowId)],
         properties: { name: "Loop body" },
         children: bodyChildren,
       });
@@ -10550,7 +10589,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
   addApprovalWorkflowActionVariables(variables, childshapes);
   mergeWorkflowVariableProjection(
     variables,
-    buildWorkflowVariablesFromSetDataListRecords(approvalWorkflowNodes.map((node) => node.setDataListRecord).filter(Boolean)),
+    buildWorkflowVariablesFromSetDataListRecords(approvalWorkflowNodes.flatMap((node) => node.loopActions || [node.setDataListRecord]).filter(Boolean)),
   );
   const submissionFormDef = approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || [], approvalPageLayoutTemplateSelections.submission);
   const taskFormDef = approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs), approvalPageLayoutTemplateSelections.task);
@@ -10680,7 +10719,7 @@ function approvalWorkflowExecutionSteps(nodes) {
   return uniqueApprovalWorkflowNodes(nodes).filter((node) => !["StartNoneEvent", "EndNoneEvent", "EndRejectEvent", "SequenceFlow"].includes(node.nodeType));
 }
 
-function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submissionPageId, taskPageId, startId, endId, rejectEndId, workflowSteps, dataListMetas = [] }) {
+export function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submissionPageId, taskPageId, startId, endId, rejectEndId, workflowSteps, dataListMetas = [] }) {
   const seed = `${defId}:${formKey}:workflow`;
   const layout = workflowLayoutForSteps(workflowSteps);
   const rejectGroups = layout.rejectGroups.map((group, index) => ({
@@ -10776,6 +10815,13 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       node.outgoing = [approvedRef, rejectedRef];
       if (!nextNode) endIncoming.push(approvedRef);
       rejectGroup.incoming.push(rejectedRef);
+    } else if (["ExclusiveGateway", "InclusiveGateway"].includes(node.stencil.id)) {
+      node.outgoing = resolveApprovalBranches(workflowSteps[index].branches, stepNodes, endId).map((branch, branchIndex) => {
+        if (branch.targetId === node.id) throw new Error("APPROVAL_GATEWAY_SELF_TARGET");
+        const edge = addFlow({ id: deterministicUuid(`${seed}:flow:${index + 1}:branch:${branchIndex + 1}`), sourceId: node.id, ...branch });
+        if (branch.targetId === endId) endIncoming.push(edge);
+        return edge;
+      });
     } else {
       const completeFlowId = deterministicUuid(`${seed}:flow:${index + 1}:complete`);
       const targetId = nextNode?.id || endId;
@@ -10787,7 +10833,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
         name: "Completed",
         vertices: workflowVerticesBetween(node.position, targetPosition, { routeNodes: layout.routeNodes }),
       });
-      node.outgoing = [completeRef];
+      node.outgoing = [completeRef, ...(node.auxiliaryShapes || []).filter((shape) => shape.pureEdge).map((shape) => flowRef(shape.id))];
       if (!nextNode) endIncoming.push(completeRef);
     }
   }
@@ -10800,6 +10846,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
     startShape,
     ...flowShapes,
     ...stepNodes,
+    ...stepNodes.flatMap((node) => node.auxiliaryShapes || []),
     {
       id: endId,
       resourceid: endId,
@@ -10836,16 +10883,17 @@ function summarizeWorkflowCondition(conditioninfo) {
 }
 
 function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas = [], position = null }) {
-  const stencil = [
+  const supported = [
+    "MultiAssignmentTask",
+    "Loop",
     "CandidateTask",
     "ContentList",
-    "ExclusiveGateway",
     "InclusiveGateway",
     "QueryData",
     "SetVariableTask",
-  ].includes(step.nodeType)
-    ? step.nodeType
-    : "MultiAssignmentTask";
+  ];
+  if (!supported.includes(step.nodeType)) throw new Error(`APPROVAL_NODE_TYPE_UNSUPPORTED: ${step.nodeType}`);
+  const stencil = step.nodeType;
   const base = {
     id,
     resourceid: id,
@@ -10870,6 +10918,26 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     },
   };
   if (stencil === "InclusiveGateway" || stencil === "ExclusiveGateway") {
+    if (!Array.isArray(step.branches) || step.branches.length < 2) throw new Error(`APPROVAL_GATEWAY_BRANCHES_REQUIRED: ${step.nodeName}`);
+    return base;
+  }
+  if (stencil === "Loop") {
+    if (!step.loopRecord || !step.loopActions?.length) throw new Error(`APPROVAL_LOOP_PLAN_REQUIRED: ${step.nodeName}`);
+    const findings = [];
+    const graph = buildWorkflowSetDataListShapes({ name: step.nodeName, defId: id, workflowType: 2, rootListSetId, hostListId: "", actionRecords: step.loopActions, loopRecords: [step.loopRecord], listMetaByName: new Map(dataListMetas.map((meta) => [normKey(meta.listName), meta])), findings });
+    if (!graph || findings.length) throw new Error(`APPROVAL_LOOP_MATERIALIZATION_FAILED: ${JSON.stringify(findings)}`);
+    const loop = graph.find((shape) => shape.stencil.id === "Loop");
+    if (!loop) throw new Error("APPROVAL_LOOP_BODY_MISSING");
+    const auxiliary = graph.filter((shape) => shape.stencil.id === "LoopBody" || shape.pureEdge);
+    for (const edge of auxiliary.filter((shape) => shape.pureEdge)) {
+      edge.source = flowRef(id);
+      edge.incoming = [flowRef(id)];
+      edge.outgoing = [flowRef(edge.target.id || edge.target.resourceid)];
+      edge.properties.name = "Loop body";
+      edge.properties.documentation = "Loop body";
+    }
+    Object.assign(base, { properties: { ...base.properties, ...loop.properties }, bodyRef: loop.bodyRef });
+    Object.defineProperty(base, "auxiliaryShapes", { value: auxiliary, enumerable: false });
     return base;
   }
   if (stencil === "QueryData") {
@@ -11714,7 +11782,7 @@ function numberId(id) {
 }
 
 function normKey(value) {
-  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return planningIdentity(value);
 }
 
 function summarizePath(file) {

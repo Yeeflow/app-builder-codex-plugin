@@ -97,8 +97,8 @@ try {
   ], { encoding: "utf8" });
   assert.notEqual(preflight.status, 0);
   const preflightReport = JSON.parse(preflight.stdout);
-  assert.equal(preflightReport.gates.find((gate) => gate.gate === "generated-yapk-export-shape-materialization")?.ok, true);
-  assert.equal(preflightReport.gates.find((gate) => gate.gate === "approval-workflow-publish-readiness")?.ok, true);
+  assert.equal(preflightReport.gates.find((gate) => gate.gate === "generated-yapk-export-shape-materialization")?.ok, true, JSON.stringify(preflightReport.gates));
+  assert.equal(preflightReport.gates.find((gate) => gate.gate === "approval-workflow-publish-readiness")?.ok, true, JSON.stringify(preflightReport.gates));
   console.log("workflow Set Data List materialization gates: pass (Markdown projection + Type 1/3 + list variable child expressions + decoded ContentList)");
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
@@ -144,6 +144,8 @@ function plan() {
     "| --- | --- | --- | --- |",
     "| Used Days | Decimal5 | Number | Track used days. |",
     "",
+    "### 4.2 Travel request documents",
+    "",
     "| Document Library Name | Type | Purpose |",
     "| --- | --- | --- |",
     "| Travel request documents | Document Library | Store uploaded leave-request documents. |",
@@ -154,6 +156,17 @@ function plan() {
     "| --- | --- | --- |",
     `| Daily usage update | \`${JSON.stringify(scheduleSettings())}\` | Add a daily usage record. |`,
     `| Store additional documents | \`${JSON.stringify(scheduleSettings())}\` | Store each uploaded document. |`,
+    "",
+    "## 10. Custom Data List Forms Plan",
+    "",
+    "### 10.1 Leave Usage Statistics",
+    "",
+    "| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template |",
+    "| --- | --- | --- | --- |",
+    "| Leave Usage Statistics | New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 |",
+    "| Leave Usage Statistics | View | View | data_list_form_layout_view_item_v1_1 |",
+    "| Travel request documents | New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 |",
+    "| Travel request documents | View | View | data_list_form_layout_view_item_v1_1 |",
     "",
     "## 11. Data List Workflows Plan",
     "",

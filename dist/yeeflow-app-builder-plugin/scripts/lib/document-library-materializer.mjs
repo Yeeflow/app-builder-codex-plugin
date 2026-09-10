@@ -51,7 +51,7 @@ export function materializeDocumentLibraryNativeFields({ listId, fieldIds } = {}
     Category: 0,
     DefaultValue: "",
     Rules: JSON.stringify(spec.Rules),
-    IsSort: false,
+    IsSort: spec.FieldName === "Title",
     IsSystem: spec.IsSystem,
     IsUnique: false,
     IsIndex: spec.IsIndex,
