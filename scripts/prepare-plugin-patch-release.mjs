@@ -18,6 +18,8 @@ pluginManifest.version = packageManifest.version;
 writeFileSync(resolve(root, pluginManifestPath), `${JSON.stringify(pluginManifest, null, 2)}\n`);
 
 const mirrors = [
+  "scripts/test-set-variable-golden-reference-gates.mjs",
+  "docs/releases/yeeflow-app-builder-v1.15.2.md",
   "docs/releases/yeeflow-app-builder-v1.15.0.md",
   "docs/releases/yeeflow-app-builder-v1.14.0.md",
   "README.md",

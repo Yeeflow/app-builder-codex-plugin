@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.15.2
+
+- Preserve structured approval sublist row fields and Required metadata through generation.
+- Bind implicit loop-item expressions to the owning loop and use native canvas coordinates for loop children.
+- Enforce local LoopBody entry references and reciprocal child connections.
+- Keep generated layout checks strict; explicit Designer readback mode treats content-span differences as warnings.
+- Accept list-valued workflow variables in expressions such as arrayCount, while rejecting unsupported types.
+- Repair the Set Variable integration test fixture to declare required approval layouts.
+- Bounded live tests verified empty-list rejection, one/three-row writes, authoritative pre-approval totals and matching ledger counts. Discount/tax, real business linkage, idempotent retries and receipt acceptance remain unverified.
+
 ## 1.15.1
 
 - Preserve Unicode resource names, all planned fields, explicit required/unique/default metadata and currency controls.
