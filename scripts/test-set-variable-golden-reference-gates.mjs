@@ -139,6 +139,12 @@ try {
 
 ## 5. Approval Forms Plan
 ### 5.1 Travel Approval
+#### Approval Form Layout Template Selection
+| Approval Form | Form Page | Page Role | Selected Approval Form Layout Template |
+| --- | --- | --- | --- |
+| Travel Approval | Submission form | Submission | approval_form_layout_submission_v1_1 |
+| Travel Approval | Task form | Task | approval_form_layout_task_v1_1 |
+
 #### Submission Form Fields
 | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type |
 | --- | --- | --- | --- |
