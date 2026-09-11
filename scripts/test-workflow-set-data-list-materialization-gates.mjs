@@ -80,6 +80,7 @@ try {
   const loopMutation = loopBody.children.find((shape) => shape?.stencil?.id === "ContentList");
   assert.equal(loopMutation.properties.listtype, "select");
   assert.equal(loopMutation.properties.listdatas.find((entry) => entry.Columns === "Text4").Data[0].exprType, "loop_ctx");
+  assert.equal(loopMutation.properties.listdatas.find((entry) => entry.Columns === "Text4").Data[0].id, loop.id);
   assert.equal(decoded.Childs[0].FlowMappings.length, 1);
   assert.equal(decoded.Childs[0].FlowMappings[0].DefKey, dataListWorkflow.Key);
   assert.deepEqual(JSON.parse(decoded.Childs[0].FlowMappings[0].Setting), { NewTrigger: true });

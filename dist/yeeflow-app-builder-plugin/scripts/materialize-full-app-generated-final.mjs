@@ -2181,7 +2181,8 @@ function collectApprovalFormFieldSpecs(planText) {
     if (displayColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
-      const cells = splitTableLine(lines[rowIndex]);
+      const rawCells = splitRawTableLine(lines[rowIndex]);
+      const cells = rawCells.map((cell) => cleanResourceName(cell));
       const displayName = cleanResourceName(cells[displayColumn]);
       if (!displayName || isNonFieldName(displayName)) {
         rowIndex += 1;
@@ -2195,9 +2196,9 @@ function collectApprovalFormFieldSpecs(planText) {
         controlType: cleanResourceName(cells[controlTypeColumn]),
         choiceValues: choiceValuesColumn === -1 ? "" : cleanResourceName(cells[choiceValuesColumn]),
         readOnly: readOnlyColumn !== -1 && /^(?:yes|true|read.?only)$/i.test(cleanResourceName(cells[readOnlyColumn])),
-        dynamicDisplay: dynamicDisplayColumn === -1 ? "" : cleanStructuredPlanCell(cells[dynamicDisplayColumn]),
-        listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn]),
-        listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cells[subListSummariesColumn]),
+        dynamicDisplay: dynamicDisplayColumn === -1 ? "" : cleanStructuredPlanCell(rawCells[dynamicDisplayColumn]),
+        listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cleanStructuredPlanCell(rawCells[subListFieldsColumn])),
+        listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cleanStructuredPlanCell(rawCells[subListSummariesColumn])),
       });
       byForm[normKey(currentApprovalForm)][currentRole] = uniqueApprovalFieldSpecs(list);
       rowIndex += 1;
@@ -10439,10 +10440,10 @@ function buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSet
           id: node.id,
           resourceid: node.id,
           stencil: { id: "ContentList" },
-          position: { x: 80 + nodeIndex * 320, y: 70 },
+          position: { x: 560 + index * 340 + nodeIndex * 320, y: 410 },
           incoming: [flowRef(nodeIndex === 0 ? entryFlowId : internalFlowIds[nodeIndex - 1])],
           outgoing: nodeIndex === segment.nodes.length - 1 ? [] : [flowRef(internalFlowIds[nodeIndex])],
-          properties: buildWorkflowSetDataListProperties({ record: node.record, target: node.target, rootListSetId, hostListId, workflowType }),
+          properties: bindCurrentLoopExpressions(buildWorkflowSetDataListProperties({ record: node.record, target: node.target, rootListSetId, hostListId, workflowType }), loopId),
         });
       }
       for (const [nodeIndex, flowId] of internalFlowIds.entries()) bodyChildren.push(flow(flowId, segment.nodes[nodeIndex].id, segment.nodes[nodeIndex + 1].id, "Next"));
@@ -10474,6 +10475,8 @@ function buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSet
         resourceid: bodyId,
         stencil: { id: "LoopBody" },
         position: { x: 500 + index * 340, y: 340 },
+        size: { width: Math.max(340, segment.nodes.length * 320), height: 200 },
+        bounds: { upperLeft: { x: 500 + index * 340, y: 340 }, lowerRight: { x: 500 + index * 340 + Math.max(340, segment.nodes.length * 320), y: 540 } },
         incoming: [flowRef(pureEdgeId)],
         outgoing: [flowRef(entryFlowId)],
         properties: { name: "Loop body" },
@@ -10502,6 +10505,16 @@ function buildWorkflowSetDataListShapes({ name, defId, workflowType, rootListSet
     properties: { name: "End", isenabledemail: false, subject: "", to: "", html: "" },
   });
   return shapes.map(withApprovalWorkflowDesignerBounds);
+}
+
+// Resolve implicit current-loop tokens only inside their owning loop body.
+// Explicit references to other loops must retain their identity.
+function bindCurrentLoopExpressions(value, loopId, replacedLoopId) {
+  if (Array.isArray(value)) return value.map((item) => bindCurrentLoopExpressions(item, loopId, replacedLoopId));
+  if (!value || typeof value !== "object") return value;
+  const result = Object.fromEntries(Object.entries(value).map(([key, item]) => [key, bindCurrentLoopExpressions(item, loopId, replacedLoopId)]));
+  if (result.exprType === "loop_ctx" && (!result.id || result.id === replacedLoopId)) result.id = loopId;
+  return result;
 }
 
 function buildWorkflowSetDataListProperties({ record, target, rootListSetId, hostListId, workflowType }) {
@@ -10928,7 +10941,8 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     if (!graph || findings.length) throw new Error(`APPROVAL_LOOP_MATERIALIZATION_FAILED: ${JSON.stringify(findings)}`);
     const loop = graph.find((shape) => shape.stencil.id === "Loop");
     if (!loop) throw new Error("APPROVAL_LOOP_BODY_MISSING");
-    const auxiliary = graph.filter((shape) => shape.stencil.id === "LoopBody" || shape.pureEdge);
+    const auxiliary = graph.filter((shape) => shape.stencil.id === "LoopBody" || shape.pureEdge)
+      .map((shape) => bindCurrentLoopExpressions(shape, id, loop.id));
     for (const edge of auxiliary.filter((shape) => shape.pureEdge)) {
       edge.source = flowRef(id);
       edge.incoming = [flowRef(id)];

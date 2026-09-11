@@ -117,3 +117,9 @@ Generated-final blockers include:
 - workflow assignee expression serialization errors
 
 Passing local validators proves structural Designer readiness only. Designer open/edit/publish remains a distinct runtime proof layer.
+
+## Persisted Designer Readback
+
+Generated input remains strict by default. When validating an actual persisted Designer response, use `node validate-ywf-def.js <decoded-def.json> --mode final --input-origin designer-readback`. Only the canvas content-span difference becomes a warning in this mode; positive dimensions, origin, node geometry and connector references remain blocking checks. Record a separate Designer visual inspection before claiming runtime readiness. Never use this option to waive generated-input failures.
+
+LoopBody entry flows reside inside that body's `children`. Its outgoing entry reference must resolve there, originate at the same body's start port, and be reciprocated by its child target. An unrelated container's flow cannot satisfy this reference.

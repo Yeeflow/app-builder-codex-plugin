@@ -108,3 +108,7 @@ When `Parent Loop` is present, generated-final materializes the node as `Loop ->
 `scripts/test-workflow-set-data-list-plan-gates.mjs` additionally covers Approval, Scheduled, and Data List workflow source-token semantics. It requires hard failures for illegal token kinds, missing declarations, and mismatched `id`, `key`, `valueType`, or expression names.
 
 `scripts/test-workflow-set-data-list-materialization-gates.mjs` proves the complete Markdown-to-package path for Scheduled List-variable children: Markdown declaration, shared projection, `variables.basic`, `variables.listref`, generated ResourceGraph, and decoded `ContentList` token parity.
+
+### Generated current-loop identity
+
+Inside a planned `Parent Loop`, implicit `exprType: "loop_ctx"` tokens receive the actual owning Loop ID, including tokens nested in function parameters. When composing an Approval workflow from the shared loop builder, rebind that helper's Loop ID to the final Approval Loop ID. Preserve explicit references to other loops. Child actions use canvas coordinates inside the LoopBody bounds; relative offsets alone render the action outside the container.

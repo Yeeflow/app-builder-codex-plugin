@@ -75,7 +75,7 @@ const ROOT_STYLE_TOKEN_HEX = new Map([
 function usage(exitCode = 1) {
   const out = [
     "Usage:",
-    "  node validate-ywf-def.js <decoded-def.json> --mode <draft|final> [--dependency-map <mapping.json>]",
+    "  node validate-ywf-def.js <decoded-def.json> --mode <draft|final> [--input-origin <generated|designer-readback>] [--dependency-map <mapping.json>]",
     "",
     "Examples:",
     "  node validate-ywf-def.js ./travel-request-def.json --mode draft",
@@ -86,12 +86,14 @@ function usage(exitCode = 1) {
 }
 
 function parseArgs(argv) {
-  const args = { input: null, mode: "draft", dependencyMap: null };
+  const args = { input: null, mode: "draft", dependencyMap: null, inputOrigin: "generated" };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--help" || arg === "-h") usage(0);
     if (arg === "--mode") {
       args.mode = argv[++i];
+    } else if (arg === "--input-origin") {
+      args.inputOrigin = argv[++i];
     } else if (arg === "--dependency-map") {
       args.dependencyMap = argv[++i];
     } else if (!args.input) {
@@ -100,7 +102,7 @@ function parseArgs(argv) {
       usage();
     }
   }
-  if (!args.input || !["draft", "final"].includes(args.mode)) usage();
+  if (!args.input || !["draft", "final"].includes(args.mode) || !["generated", "designer-readback"].includes(args.inputOrigin)) usage();
   return args;
 }
 
@@ -226,6 +228,8 @@ function collectPlaceholders(value) {
 
 function validateDecodedDef(def, options = {}) {
   const mode = options.mode || "draft";
+  const inputOrigin = options.inputOrigin || "generated";
+  if (!["generated", "designer-readback"].includes(inputOrigin)) throw new Error("INVALID_INPUT_ORIGIN");
   const dependencyMap = options.dependencyMap || null;
   const errors = [];
   const warnings = [];
@@ -301,6 +305,7 @@ function validateDecodedDef(def, options = {}) {
     return {
       status,
       mode,
+      inputOrigin,
       errors,
       warnings,
       placeholders,
@@ -1761,7 +1766,8 @@ function validateDecodedDef(def, options = {}) {
       }
       for (const outgoing of asArray(shape.outgoing)) {
         const id = refId(outgoing);
-        if (!seqById.has(id)) addIssue(errors, "OUTGOING_SEQUENCE_MISSING", `Outgoing SequenceFlow ${id} does not exist`, `$.childshapes[${index}].outgoing`);
+        const bodyEntry = stencil === "LoopBody" && asArray(shape.children).find(child => isSequenceFlow(child) && shapeId(child) === id && refId(child.source) === shapeId(shape) && child.source.port === "start" && asArray(shape.children).some(target => !isSequenceFlow(target) && shapeId(target) === refId(child.target) && asArray(target.incoming).some(ref => refId(ref) === id)));
+        if (!seqById.has(id) && !bodyEntry) addIssue(errors, "OUTGOING_SEQUENCE_MISSING", `Outgoing SequenceFlow ${id} does not exist in this graph scope`, `$.childshapes[${index}].outgoing`);
         else sourceBySeqId.set(id, shapeId(shape));
         if (!outgoing || outgoing.id !== outgoing.resourceid) {
           addIssue(errors, "OUTGOING_SEQUENCE_REF_INCOMPLETE", "Outgoing SequenceFlow reference should include matching id and resourceid", `$.childshapes[${index}].outgoing`);
@@ -1932,7 +1938,7 @@ function validateDecodedDef(def, options = {}) {
         });
       }
       if (graphContract && !graphContract.dimensionsMatch) {
-        addIssue(errors, "APPROVAL_WORKFLOW_GRAPHPOSITION_CONTENT_SPAN_MISMATCH", "Workflow graphposition.width/height must match the workflow content span.", "$.graphposition", {
+        addIssue(inputOrigin === "designer-readback" ? warnings : errors, "APPROVAL_WORKFLOW_GRAPHPOSITION_CONTENT_SPAN_MISMATCH", "Generated graphposition dimensions must match the content span; Designer readback can retain resized canvas dimensions and requires separate visual verification.", "$.graphposition", {
           graphposition: graph,
           contentBounds: graphContract.content,
           expectedGraphposition: graphContract.expected,
@@ -2454,7 +2460,7 @@ function main() {
     }
   }
 
-  const report = validateDecodedDef(def, { mode: args.mode, dependencyMap });
+  const report = validateDecodedDef(def, { mode: args.mode, dependencyMap, inputOrigin: args.inputOrigin });
   console.log(JSON.stringify(report, null, 2));
   process.exit(report.status === "fail" ? 1 : 0);
 }
