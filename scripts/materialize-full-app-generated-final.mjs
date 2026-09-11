@@ -2174,6 +2174,7 @@ function collectApprovalFormFieldSpecs(planText) {
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow variable type", "exact yeeflow field type", "field type", "variable type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "control type", "control"]);
     const choiceValuesColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "option values"]);
+    const requiredColumn = findHeaderIndex(normalizedHeaders, ["required", "is required"]);
     const readOnlyColumn = findHeaderIndex(normalizedHeaders, ["read only", "readonly"]);
     const dynamicDisplayColumn = findHeaderIndex(normalizedHeaders, ["dynamic display", "dynamic display rules"]);
     const subListFieldsColumn = findHeaderIndex(normalizedHeaders, ["sub list row fields", "sublist row fields", "sub list columns", "sublist columns", "row fields"]);
@@ -2195,6 +2196,7 @@ function collectApprovalFormFieldSpecs(planText) {
         fieldType: cleanResourceName(cells[fieldTypeColumn]) || "Text",
         controlType: cleanResourceName(cells[controlTypeColumn]),
         choiceValues: choiceValuesColumn === -1 ? "" : cleanResourceName(cells[choiceValuesColumn]),
+        required: requiredColumn === -1 ? undefined : /^(?:yes|true|required)$/i.test(cleanResourceName(cells[requiredColumn])),
         readOnly: readOnlyColumn !== -1 && /^(?:yes|true|read.?only)$/i.test(cleanResourceName(cells[readOnlyColumn])),
         dynamicDisplay: dynamicDisplayColumn === -1 ? "" : cleanStructuredPlanCell(rawCells[dynamicDisplayColumn]),
         listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cleanStructuredPlanCell(rawCells[subListFieldsColumn])),
@@ -3200,7 +3202,7 @@ function uniqueApprovalFieldSpecs(fields) {
   const sourceByIdentity = new Map(source.map((field) => [normKey(field?.fieldName || field?.displayName), field]));
   return Object.freeze(projected.map((field) => {
     const original = sourceByIdentity.get(normKey(field?.fieldName || field?.displayName)) || {};
-    return Object.freeze({ ...field, choiceValues: cleanResourceName(original.choiceValues || field.choiceValues) });
+    return Object.freeze({ ...field, ...(typeof original.required === "boolean" ? { required: original.required } : {}), choiceValues: cleanResourceName(original.choiceValues || field.choiceValues) });
   }));
 }
 

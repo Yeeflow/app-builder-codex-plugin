@@ -206,6 +206,7 @@ function buildApprovalFormFieldControl({ field, index, formName, role, columns }
       },
     },
   };
+  if (typeof field.required === "boolean") control.attrs.required = field.required;
   if (role === "task") {
     control.readonly = true;
     control.readOnly = true;
@@ -289,6 +290,7 @@ function uniqueApprovalFieldSpecs(fields) {
       fieldName,
       fieldType: cleanResourceName(field?.fieldType) || "Text",
       controlType: cleanResourceName(field?.controlType) || inferControlType(field?.fieldType || ""),
+      ...(typeof field?.required === "boolean" ? { required: field.required } : {}),
       choiceValues: cleanResourceName(field?.choiceValues),
       listRefId: cleanResourceName(field?.listRefId || field?.complexTypeId),
       listFields: normalizeApprovalSubListRowFields(field),
