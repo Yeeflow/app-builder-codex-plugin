@@ -50,7 +50,7 @@ Supported section patterns:
 - 60/40 2-column section
 - KPI metrics wrapper
 
-Each business section card must preserve:
+Each standard titled business section card must preserve the following slots. The registered `dataset-caption-v1` variant omits only `section_title_area` under the eligibility rules in `dashboard-dataset-composition-standard.md`:
 
 - `content_card_wrapper`
 - `section_title_area`
@@ -270,3 +270,8 @@ The dashboard generation hard gate invokes Dashboard Page Layouts v1.1 validatio
 ## Custom Code alternate page shell
 
 `dashboard-page-layouts-custom-code` is also registered. Its optional header/regions, stacked code modules and native filter/action host rules are defined in `dashboard-page-layouts-custom-code-standard.md`; v1.1-specific header, card and dataset requirements do not apply to that shell. The default template ID remains unchanged.
+
+
+## Dataset caption card composition (1.15.4)
+
+Use `dashboard-dataset-composition-standard.md` and the shared `scripts/lib/dashboard-dataset-composition.mjs` normalizer/validator for Dashboard generation and incremental repairs. The registered `dataset-caption-v1` content-card variant omits `section_title_area` only for a single caption-bearing Collection/Kanban with no independent outer description or action; preserve `content_card_wrapper > section_content_area` and the complete dataset template. This conditional rule overrides generic mandatory outer-title guidance. Keep grouping titles for multiple datasets and outer titles for captionless controls. Remove unused empty `kpi_cards_kpi_row` and empty ancestor modules, never a bound dataset merely because it has no records. Preserve Search before Add and all responsive template slots, filter/action dependencies and record bindings. Run `scripts/test-dashboard-dataset-composition.mjs` and final Dashboard/standalone gates. Updating a plugin is not a live application repair or runtime visual proof.

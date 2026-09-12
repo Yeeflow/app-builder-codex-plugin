@@ -199,3 +199,8 @@ Generated-final/import-qualified validation should hard-fail:
 - `COLLECTION_PATTERN_UNPROVEN`
 - `COLLECTION_NON_CARD_PATTERN_UNPROVEN`
 - `COLLECTION_GRID_TABLE_PATTERN_UNPROVEN`
+
+
+## Dataset caption card composition (1.15.4)
+
+Use `dashboard-dataset-composition-standard.md` and the shared `scripts/lib/dashboard-dataset-composition.mjs` normalizer/validator for Dashboard generation and incremental repairs. The registered `dataset-caption-v1` content-card variant omits `section_title_area` only for a single caption-bearing Collection/Kanban with no independent outer description or action; preserve `content_card_wrapper > section_content_area` and the complete dataset template. This conditional rule overrides generic mandatory outer-title guidance. Keep grouping titles for multiple datasets and outer titles for captionless controls. Remove unused empty `kpi_cards_kpi_row` and empty ancestor modules, never a bound dataset merely because it has no records. Preserve Search before Add and all responsive template slots, filter/action dependencies and record bindings. Run `scripts/test-dashboard-dataset-composition.mjs` and final Dashboard/standalone gates. Updating a plugin is not a live application repair or runtime visual proof.

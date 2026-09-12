@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { validateDashboardDatasetComposition } from "./lib/dashboard-dataset-composition.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -145,6 +146,7 @@ export function validateDashboardGenerationHardGates(options = {}) {
 function validateDecodedDashboards(decoded, findings) {
   const listIndex = buildListIndex(decoded);
   for (const page of collectDashboardPages(decoded)) {
+    findings.push(...validateDashboardDatasetComposition(page.resource).map(f => ({ ...f, page: page.title })));
     for (const entry of page.controls) {
       validateDesignerNavigatorLabel(entry, page, findings);
       validateVisibleTextExpression(entry, page, findings);

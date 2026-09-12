@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.15.4
+
+- Register conditional dataset-caption cards for Collection/Kanban composition without duplicate outer headings.
+- Remove empty KPI/layout modules and enforce Search-before-Add order through shared generation and final gates.
+- Preserve independent descriptions/actions and bound empty datasets; include reference-based and shared-builder regressions in the plugin payload.
+
 ## 1.15.3
 
 - Fix task-specific publish-readiness outcomes: Completed for Complete tasks, Approved/Rejected for approval tasks.

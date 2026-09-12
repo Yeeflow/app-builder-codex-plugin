@@ -305,6 +305,9 @@ for (const entry of readJson("docs/standards/product-14.5/distribution-files.jso
   mirrors.push([entry.source, entry.destination]);
 }
 
+for (const file of ["scripts/lib/dashboard-dataset-composition.mjs", "scripts/test-dashboard-dataset-composition.mjs", "docs/standards/dashboard-dataset-composition-standard.md", "docs/releases/yeeflow-app-builder-v1.15.4.md", "scripts/test-dashboard-master-detail-workspace-page-layout-template-gates.mjs", "docs/standards/collection-grid-table-generation-standard.md"]) mirrors.push([file, file]);
+mirrors.push(["skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md", "skills/yeeflow-ui-generation-hard-gates/SKILL.md"]);
+
 for (const [sourcePath, destinationPath] of mirrors) {
   const destination = resolve(root, "dist/yeeflow-app-builder-plugin", destinationPath);
   mkdirSync(dirname(destination), { recursive: true });

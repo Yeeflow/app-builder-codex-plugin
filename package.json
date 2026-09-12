@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.15.3",
+  "version": "1.15.4",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
@@ -244,7 +244,8 @@
     "create:phase9l-data-list-sublist-public-contract-readiness": "node scripts/create-phase9l-data-list-sublist-public-contract-readiness.mjs",
     "validate:phase9l-data-list-sublist-public-contract-readiness": "node scripts/validate-phase9l-data-list-sublist-public-contract-readiness.mjs",
     "test:phase9l-data-list-sublist-public-contract-readiness": "node scripts/test-phase9l-data-list-sublist-public-contract-readiness.mjs",
-    "test:product-14.5": "node --test scripts/test-product-14.5-contracts.mjs"
+    "test:product-14.5": "node --test scripts/test-product-14.5-contracts.mjs",
+    "test:dashboard-dataset-composition": "node scripts/test-dashboard-dataset-composition.mjs"
   },
   "devDependencies": {
     "typescript": "5.7.3"

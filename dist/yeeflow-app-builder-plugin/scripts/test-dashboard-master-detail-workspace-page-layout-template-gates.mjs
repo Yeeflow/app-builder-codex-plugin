@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { normalizeDashboardDatasetComposition } from "./lib/dashboard-dataset-composition.mjs";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -31,6 +32,7 @@ function workspaceTemplate(templateId) {
   ensureChartSections(resource);
   adaptWorkspaceDomain(resource);
   bindCurrentItemFields(resource);
+  normalizeDashboardDatasetComposition(resource);
   return resource;
 }
 

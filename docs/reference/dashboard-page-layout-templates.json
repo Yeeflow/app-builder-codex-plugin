@@ -63340,5 +63340,26 @@
     "dashboard-page-layouts-workbench": "Use for operational workbench dashboards that need a primary working area, optional right-side context panel, filters, KPI cards, data analytics cards, and queue/list regions.",
     "dashboard-page-layouts-two-panel-workspace": "Use for an Outlook-style master-detail Dashboard focused on one primary source dataset, with a left record list and a right selected-record detail/work area.",
     "dashboard-page-layouts-three-panel-workspace": "Use for an Outlook-style master-detail Dashboard focused on one primary source dataset where the selected record needs both a central detail/work area and a separate right-side additional information panel."
-  }
+  },
+  "contentCardVariants": [
+    {
+      "id": "dataset-caption-v1",
+      "baseModule": "content_card_wrapper",
+      "applicableBaseModules": [
+        "content_card_wrapper",
+        "content_card_60_wrapper",
+        "content_card_40_wrapper"
+      ],
+      "marker": "attrs.dashboardCardVariant",
+      "requiredChildren": [
+        "section_content_area"
+      ],
+      "omittedChildren": [
+        "section_title_area"
+      ],
+      "eligibility": "Exactly one Collection or Kanban with its own nonempty section caption; no mixed content, independent description or outer action. Preserve shell styles, content slot and component structure.",
+      "titleOwner": "dataset",
+      "normalizer": "scripts/lib/dashboard-dataset-composition.mjs"
+    }
+  ]
 }

@@ -463,3 +463,8 @@ Validation and proof boundaries:
 - Do not claim QR scan behavior, Barcode scan behavior, external iframe content loading, non-empty document preview, dynamic value changes, or Approval Form/Public Form host behavior unless those exact behaviors are tested.
 - Keep generated .yap files, decoded payloads, screenshots, and private data out of commits.
 <!-- advanced-controls-runtime-proof:end -->
+
+
+## Dataset caption card composition (1.15.4)
+
+Use `docs/standards/dashboard-dataset-composition-standard.md` and the shared `scripts/lib/dashboard-dataset-composition.mjs` normalizer/validator for Dashboard generation and incremental repairs. The registered `dataset-caption-v1` content-card variant omits `section_title_area` only for a single caption-bearing Collection/Kanban with no independent outer description or action; preserve `content_card_wrapper > section_content_area` and the complete dataset template. This conditional rule overrides generic mandatory outer-title guidance. Keep grouping titles for multiple datasets and outer titles for captionless controls. Remove unused empty `kpi_cards_kpi_row` and empty ancestor modules, never a bound dataset merely because it has no records. Preserve Search before Add and all responsive template slots, filter/action dependencies and record bindings. Run `scripts/test-dashboard-dataset-composition.mjs` and final Dashboard/standalone gates. Updating a plugin is not a live application repair or runtime visual proof.

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { isDatasetCaptionCard, validateDashboardDatasetComposition } from "./lib/dashboard-dataset-composition.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -452,7 +453,7 @@ function validatePageShell(resource, findings, context) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_EMPTY`, "Dashboard content must contain selected business section containers, not an empty shell.", { page: context.page }));
   }
   for (const section of findAllByIdentity(resource, "content_card_wrapper")) {
-    if (rules.id === TEMPLATE_ID && !findFirstByIdentity(section, "section_title_area")) {
+    if (rules.id === TEMPLATE_ID && !isDatasetCaptionCard(section) && !findFirstByIdentity(section, "section_title_area")) {
       findings.push(error(`DASH_LAYOUT_${context.layer}_SECTION_TITLE_AREA_MISSING`, "Each copied v1.1 business section card must preserve section_title_area; use a separate approved no-title module instead of mutating content_card_wrapper.", { page: context.page }));
     }
     if (!findFirstByIdentity(section, "section_content_area")) {
@@ -460,7 +461,10 @@ function validatePageShell(resource, findings, context) {
     }
   }
   if (!context.allowTemplateOperations) validateOperations(resource, findings, context.page);
-  if (!context.allowTemplateOperations) validateGeneratedSectionCleanup(resource, findings, context.page, context);
+  if (!context.allowTemplateOperations) {
+    validateGeneratedSectionCleanup(resource, findings, context.page, context);
+    findings.push(...validateDashboardDatasetComposition(resource).map(f => ({ ...f, page: context.page })));
+  }
   validateWorkbenchSpecificContracts(resource, findings, context, rules);
   validateControlledSlotsAndRepeatableModules(resource, findings, context);
 }
@@ -917,7 +921,7 @@ function validateTemplateRootStructure(control, templateIndex, findings, page) {
 
 function validateSpecialModuleChildren(control, findings, page, template = null) {
   if (hasIdentity(control, "content_card_wrapper")) {
-    const requiredChildren = template?.id === TEMPLATE_ID ? ["section_title_area", "section_content_area"] : ["section_content_area"];
+    const requiredChildren = template?.id === TEMPLATE_ID && !isDatasetCaptionCard(control) ? ["section_title_area", "section_content_area"] : ["section_content_area"];
     for (const required of requiredChildren) {
       if (!findFirstByIdentity(control, required)) {
         findings.push(error("DASH_LAYOUT_REPEATABLE_MODULE_REQUIRED_CHILD_MISSING", template?.id === TEMPLATE_ID ? "Copied v1.1 content_card_wrapper modules must preserve section_title_area and section_content_area children. Use a separate approved no-title module instead of weakening the v1.1 content_card_wrapper contract." : "Copied content_card_wrapper modules must preserve section_content_area children for their selected Dashboard page layout template.", { page, module: firstIdentity(control), requiredChild: required }));

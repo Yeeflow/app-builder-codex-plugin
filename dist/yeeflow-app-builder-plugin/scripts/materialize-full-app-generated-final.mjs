@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { normalizeDashboardDatasetComposition, isDatasetCaptionCard } from "./lib/dashboard-dataset-composition.mjs";
 import { buildCustomCodeDashboard, validateCustomCodeDashboardPlan } from "./lib/dashboard-custom-code-template.mjs";
 
 import { planningIdentity, plannedBoolean, applyPlannedFieldConstraints } from "./lib/planned-field-constraints.mjs";
@@ -5837,6 +5838,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     });
     ensureDashboardContentCardRequiredSlots(dashboardResource);
     removeEmptySectionTitleAreas(dashboardResource);
+    normalizeDashboardDatasetComposition(dashboardResource);
     const dashboardResourceJson = JSON.stringify(dashboardResource);
     return {
       ListID: rootListId,
@@ -6328,6 +6330,7 @@ export function buildMaterialDashboardResource({ name, layoutId, customCodeCompo
   normalizeAndPruneDashboardTempVars(resource);
   reconcilePageTempVariableReferences(resource);
   completeGeneratedDataListSourceIdentity(resource, { rootListSetId });
+  normalizeDashboardDatasetComposition(resource);
   return resource;
 }
 
@@ -9100,6 +9103,7 @@ function ensureDashboardContentCardRequiredSlots(root) {
   const titleAreaPrototype = findFirstByIdentity(root, "section_title_area");
   const headerPrototype = findFirstByIdentity(root, "section_title_header");
   for (const wrapper of wrappers) {
+    if (isDatasetCaptionCard(wrapper)) continue;
     if (!Array.isArray(wrapper.children)) wrapper.children = [];
     const existingTitleArea = findFirstByIdentity(wrapper, "section_title_area");
     if (existingTitleArea) {
