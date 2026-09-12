@@ -1,6 +1,6 @@
 # App Builder Codex Plugin
 
-Release candidate **1.15.4**, based on stable **v1.15.3**. Adds conditional dataset-caption cards, empty layout cleanup and Search-before-Add enforcement; see [release notes](docs/releases/yeeflow-app-builder-v1.15.4.md).
+Release **1.15.4**, based on stable **v1.15.3**. Adds conditional dataset-caption cards, empty layout cleanup and Search-before-Add enforcement; see [release notes](docs/releases/yeeflow-app-builder-v1.15.4.md).
 
 Official Yeeflow App Builder Codex plugin repository.
 
