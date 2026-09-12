@@ -7,6 +7,14 @@ import { validateDashboardPageLayoutTemplate } from './validate-dashboard-page-l
 import { validateDashboardGenerationHardGates } from './validate-dashboard-generation-hard-gates.mjs';
 
 const root = new URL('../', import.meta.url);
+const registry = JSON.parse(fs.readFileSync(new URL('docs/reference/dashboard-page-layout-templates.json', root), 'utf8'));
+const registeredIds = registry.templates.map(t => t.id);
+const availableIds = registry.availableDashboardPageLayoutTemplateIds;
+assert.equal(new Set(availableIds).size, availableIds.length, 'available template IDs must be unique');
+assert.deepEqual([...availableIds].sort(), [...registeredIds].sort(), 'registered and selectable Dashboard templates must agree');
+assert(availableIds.includes(ID), 'Custom Code Dashboard must be selectable');
+assert(availableIds.includes(registry.defaultDashboardPageLayoutTemplateId), 'default template must be selectable');
+assert.deepEqual(Object.keys(registry.selectionRules).sort(), [...registeredIds].sort(), 'each registered template must have a selection rule');
 const template = JSON.parse(fs.readFileSync(new URL('docs/reference/dashboard-page-layout-custom-code.template.json', root), 'utf8')).parsedResource;
 const code = label => ({ type: 'codein', label: 'Custom code', nv_label: label, attrs: { 'codein-script': '({ render: function () { return null; } })', 'codein-script-param': {} } });
 const find = (r, label) => customDashboardNodes(r).find(n => n.nv_label === label);

@@ -63333,13 +63333,15 @@
     "dashboard-page-layouts-v1.1",
     "dashboard-page-layouts-workbench",
     "dashboard-page-layouts-two-panel-workspace",
-    "dashboard-page-layouts-three-panel-workspace"
+    "dashboard-page-layouts-three-panel-workspace",
+    "dashboard-page-layouts-custom-code"
   ],
   "selectionRules": {
     "dashboard-page-layouts-v1.1": "Use for general overview, monitoring, reporting, and section-oriented dashboard pages.",
     "dashboard-page-layouts-workbench": "Use for operational workbench dashboards that need a primary working area, optional right-side context panel, filters, KPI cards, data analytics cards, and queue/list regions.",
     "dashboard-page-layouts-two-panel-workspace": "Use for an Outlook-style master-detail Dashboard focused on one primary source dataset, with a left record list and a right selected-record detail/work area.",
-    "dashboard-page-layouts-three-panel-workspace": "Use for an Outlook-style master-detail Dashboard focused on one primary source dataset where the selected record needs both a central detail/work area and a separate right-side additional information panel."
+    "dashboard-page-layouts-three-panel-workspace": "Use for an Outlook-style master-detail Dashboard focused on one primary source dataset where the selected record needs both a central detail/work area and a separate right-side additional information panel.",
+    "dashboard-page-layouts-custom-code": "Use for explicitly Custom Code-oriented Dashboard pages with replaceable modules and optional side panels; preserve the declared native filter and action integrations."
   },
   "contentCardVariants": [
     {

@@ -310,6 +310,8 @@ mirrors.push(["skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md", "ski
 
 for (const file of ["scripts/lib/normalize-filter-binding.mjs", "scripts/lib/collection-native-badge.mjs", "scripts/test-normalize-filter-binding.mjs", "scripts/test-collection-native-rich-training.mjs", "scripts/test-full-app-materialization-entrypoint-gates.mjs", "scripts/test-ui-hard-gates-all.mjs", "docs/reference/collection-control-responsive.template.json", "docs/standards/native-collection-rich-content-training.md", "docs/releases/yeeflow-app-builder-v1.15.5.md"]) mirrors.push([file, file]);
 
+mirrors.push(["docs/releases/yeeflow-app-builder-v1.15.6.md", "docs/releases/yeeflow-app-builder-v1.15.6.md"]);
+
 for (const [sourcePath, destinationPath] of mirrors) {
   const destination = resolve(root, "dist/yeeflow-app-builder-plugin", destinationPath);
   mkdirSync(dirname(destination), { recursive: true });

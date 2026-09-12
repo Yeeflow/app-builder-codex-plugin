@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.15.6
+
+- Include Custom Code Dashboard in selectable page template IDs and add its selection rule.
+- Test registry/selectable-ID/selection-rule consistency, duplicate IDs and default membership.
+
 ## 1.15.5
 
 - Normalize legacy Collection search bindings to the canonical control level; reject conflicting bindings and test page declarations and consumers.
