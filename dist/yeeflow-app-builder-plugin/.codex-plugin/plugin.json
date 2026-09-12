@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "1.15.2",
+  "version": "1.15.3",
   "description": "Yeeflow App Builder: hosted MCP services, fixed product schema validation and bounded native workflow adapters.",
   "keywords": [
     "yeeflow",

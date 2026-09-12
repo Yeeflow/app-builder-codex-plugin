@@ -293,7 +293,10 @@ function validateSequenceFlowOutcomeConditions(def, context) {
     const taskId = shapeId(task);
     const outgoingIds = new Set(asArray(task.outgoing).map(refId).filter(Boolean));
     const outgoingFlows = flows.filter((flow) => outgoingIds.has(shapeId(flow)) || refId(flow.source) === taskId);
-    for (const outcome of ["Approved", "Rejected"]) {
+    const requiredOutcomes = task.properties?.tasktype === "complete"
+      ? ["Completed"]
+      : ["Approved", "Rejected"];
+    for (const outcome of requiredOutcomes) {
       const flow = outgoingFlows.find((candidate) => flowMatchesOutcome(candidate, outcome));
       if (!flow) {
         context.findings.push(issue("APPROVAL_WORKFLOW_OUTCOME_FLOW_MISSING", `MultiAssignmentTask must have an outgoing ${outcome} SequenceFlow.`, {

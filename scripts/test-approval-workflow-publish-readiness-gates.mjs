@@ -91,6 +91,31 @@ try {
   cases.push({ case: "pass: package without Approval workflows is not blocked", status: "pass" });
 
   const validDef = decodeFirstApprovalDef(packagePath);
+
+  const completeDef = structuredClone(validDef);
+  const completeTask = completeDef.childshapes.find((shape) => shape?.stencil?.id === "MultiAssignmentTask");
+  completeTask.properties.tasktype = "complete";
+  const completeFlow = completeDef.childshapes.find((shape) => shape?.source?.id === completeTask.id && JSON.stringify(shape.properties?.conditioninfo).includes("Approved"));
+  completeFlow.properties = JSON.parse(JSON.stringify(completeFlow.properties).replaceAll("Approved", "Completed"));
+  const removedFlowIds = new Set(completeDef.childshapes
+    .filter((shape) => shape?.stencil?.id === "SequenceFlow" && shape?.source?.id === completeTask.id && shape.id !== completeFlow.id)
+    .map((shape) => shape.id));
+  completeDef.childshapes = completeDef.childshapes.filter((shape) => !removedFlowIds.has(shape.id));
+  for (const shape of completeDef.childshapes) {
+    for (const direction of ["incoming", "outgoing"]) {
+      if (Array.isArray(shape[direction])) shape[direction] = shape[direction].filter((ref) => !removedFlowIds.has(ref.id));
+    }
+  }
+  expectPass("Complete task accepts its Completed outcome without requiring Approved", ["--resource", mutateResource(completeDef, () => {})]);
+  expectCode("Complete task cannot omit its Completed outcome", mutateResource(completeDef, (def) => {
+    const flow = def.childshapes.find((shape) => shape.id === completeFlow.id);
+    flow.properties = JSON.parse(JSON.stringify(flow.properties).replaceAll("Completed", "Approved"));
+  }), "APPROVAL_WORKFLOW_OUTCOME_FLOW_MISSING");
+  expectCode("Approval task cannot substitute Completed for Approved", mutateResource(completeDef, (def) => {
+    delete def.childshapes.find((shape) => shape.id === completeTask.id).properties.tasktype;
+  }), "APPROVAL_WORKFLOW_OUTCOME_FLOW_MISSING");
+  cases.push({ case: "task-specific Completed and approval outcome gates", status: "pass" });
+
   expectCode("SequenceFlow source missing id fails with the real incident code", mutateResource(validDef, (def) => {
     const flow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow");
     flow.source = structuredClone(SOURCE_ID_MISSING_FIXTURE.sequenceFlow.source);

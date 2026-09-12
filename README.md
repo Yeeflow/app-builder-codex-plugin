@@ -1,6 +1,6 @@
 # App Builder Codex Plugin
 
-Release **1.15.2**, based on stable **v1.15.1**. Repairs approval loop scope and layout, structured sublist fields, required controls and list-valued expressions; see [release notes](docs/releases/yeeflow-app-builder-v1.15.2.md).
+Release **1.15.3**, based on stable **v1.15.2**. Corrects Complete task outcome validation and adds receipt lifecycle, date-validation and currency planning guidance; see [release notes](docs/releases/yeeflow-app-builder-v1.15.3.md).
 
 Official Yeeflow App Builder Codex plugin repository.
 
@@ -12,7 +12,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.15.2`
+- Version: `1.15.3`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
 Version `1.10.6` previously removed stale OAuth/REST references from the bundled skills and adds an OpenAI plugin submission packet. Live Yeeflow work uses the four scoped hosted MCP services, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.

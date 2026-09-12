@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.15.3
+
+- Fix task-specific publish-readiness outcomes: Completed for Complete tasks, Approved/Rejected for approval tasks.
+- Add receipt completion, single-owner cross-field date validation and explicit currency/zero-display generation guidance.
+- Preserve bounded evidence: broader runtime acceptance remains outside this patch.
+
 ## 1.15.2
 
 - Preserve structured approval sublist row fields and Required metadata through generation.
