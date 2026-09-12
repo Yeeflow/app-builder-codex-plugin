@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { normalizeFilterBinding } from "./lib/normalize-filter-binding.mjs";
 import { normalizeDashboardDatasetComposition, isDatasetCaptionCard } from "./lib/dashboard-dataset-composition.mjs";
 import { buildCustomCodeDashboard, validateCustomCodeDashboardPlan } from "./lib/dashboard-custom-code-template.mjs";
 
@@ -8189,7 +8190,7 @@ function wireTemplateSearchFiltersToCollection(root, { listMeta }) {
   collection.attrs.data = collection.attrs.data || {};
   collection.attrs.data.fulltext = Array.isArray(collection.attrs.data.fulltext) ? collection.attrs.data.fulltext : [];
   for (const search of searches) {
-    const binding = String(search?.binding || search?.attrs?.binding || "").trim();
+    const binding = String(normalizeFilterBinding(search) || "").trim();
     const variable = binding.startsWith("__filter_") ? binding.slice("__filter_".length) : "";
     if (!variable) continue;
     const fieldName = String(search?.attrs?.data?.field || primaryFieldName(listMeta) || "Title");

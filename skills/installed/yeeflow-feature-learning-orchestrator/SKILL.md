@@ -4,6 +4,11 @@ description: orchestrate end-to-end Yeeflow feature learning from real exports b
 ---
 
 # Yeeflow Feature Learning Orchestrator
+
+## Native Collection Rich Content Learning
+
+For image-driven native Collection restyling, use `docs/standards/native-collection-rich-content-training.md` and `scripts/lib/collection-native-badge.mjs`. Inventory real fields and actions; preserve native tablecols and mobile children, single-caption ownership, actual-value badge fallback, and current bindings. Audit both control trees. Column identity warnings are advisory for historical exports. Width mappings and exhaustive select-filter options remain unresolved; CSS fallback requires scoped runtime verification. Edit labels do not prove edit mode, hover does not prove selection, and desktop proof does not prove mobile fidelity. Run `scripts/test-collection-native-rich-training.mjs` and related Collection gates before promoting this pattern.
+
 +## Hosted MCP-Only Yeeflow Access
 
 For live Yeeflow work, use only the appropriate hosted MCP tool. Its service negotiates authentication; standalone OAuth, local REST/API helpers, API-key fallbacks, profile/environment configuration, and direct endpoint calls are retired and must not be used. `workspace_list` is the sole workspace-discovery route. Require explicit confirmation for writes, and treat MCP acceptance as distinct from materialization and runtime proof.

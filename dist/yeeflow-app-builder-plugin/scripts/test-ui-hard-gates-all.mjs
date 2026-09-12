@@ -10,6 +10,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const templatePath = path.join(ROOT, "docs", "examples", "runtime-evidence.redacted.example.json");
 
 const childTests = [
+  {name: "Native Collection rich content training", command: ["scripts/test-collection-native-rich-training.mjs"], validators: ["validate-dashboard-grid-table-collections"]},
+  {name: "Filter binding normalization", command: ["scripts/test-normalize-filter-binding.mjs"], validators: ["normalize-filter-binding"]},
   {
     name: "UI/Summary/KPI runtime hard-gate regression suite",
     command: ["scripts/test-ui-summary-kpi-runtime-hard-gates.mjs"],
@@ -96,6 +98,16 @@ const childTests = [
       "form_grid_fields_2col_wrapper and form_grid_fields_3col_wrapper field layout templates",
       "responsive Grid columns and column-span safety",
       "field-control zero-margin and content_card_wrapper section_content_area placement",
+    ],
+  },
+  {
+    name: "Approval Form complete control-closure regression suite",
+    command: ["scripts/test-approval-form-control-closure.mjs"],
+    validators: [
+      "validate-approval-form-control-closure",
+      "unknown bound control types fail closed",
+      "shared Approval builder provenance",
+      "choice options, Submission/Task type parity, and editable Sub List placeholders",
     ],
   },
   {

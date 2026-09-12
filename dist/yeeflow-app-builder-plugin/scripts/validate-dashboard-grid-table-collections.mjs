@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
+import { inspectNativeColumnIdentity } from "./lib/collection-native-badge.mjs";
 
 const GRID_TABLE_TEMPLATE_IDS = new Set([
   "collection_control_grid_table",
@@ -136,7 +137,10 @@ function validateDashboardCollection(entry, page, context) {
     validateCardCollection(entry, page, context, templateId);
     return;
   }
-  if (RESPONSIVE_TABLE_TEMPLATE_IDS.has(templateId)) return;
+  if (RESPONSIVE_TABLE_TEMPLATE_IDS.has(templateId)) {
+    context.findings.push(...inspectNativeColumnIdentity(entry.control).map(finding => ({...finding, page:page.title, path:entry.pointer, message:'Native column identity requires review; historical omission is not a proven invalid export.'})));
+    return;
+  }
   if (templateId && !GRID_TABLE_TEMPLATE_IDS.has(templateId)) return;
   validateGridTableCollection(entry, page, context, templateId || "implicit-grid-table");
 }

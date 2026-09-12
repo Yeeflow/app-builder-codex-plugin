@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.15.5
+
+- Normalize legacy Collection search bindings to the canonical control level; reject conflicting bindings and test page declarations and consumers.
+- Add reusable native Container/Text dynamic badges and advisory column identity checks; audit desktop tablecols as well as mobile children.
+- Train explicit runtime limits for widths, filter candidate completeness, edit routes, selection and mobile styling.
+
 ## 1.15.4
 
 - Register conditional dataset-caption cards for Collection/Kanban composition without duplicate outer headings.

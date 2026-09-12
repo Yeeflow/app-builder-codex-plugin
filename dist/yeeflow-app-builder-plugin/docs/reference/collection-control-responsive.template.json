@@ -210,9 +210,9 @@
                       "id": "db32b2f6-f8ed-4a7d-a4de-8ac6d83366f2",
                       "type": "search-filter",
                       "label": "Search",
+                      "binding": "__filter_filter_keywords",
                       "attrs": {
                         "value": "Search tasks",
-                        "binding": "__filter_filter_keywords",
                         "data": {
                           "field": "Title"
                         }

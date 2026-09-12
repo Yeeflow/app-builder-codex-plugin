@@ -53,6 +53,10 @@ function walkControls(control, visitor, pointer = "$") {
   for (const key of ["children", "columns"]) {
     if (Array.isArray(control[key])) control[key].forEach((child, index) => walkControls(child, visitor, `${pointer}.${key}[${index}]`));
   }
+  // Native desktop cells are a second control tree, distinct from mobile cards.
+  asArray(control.attrs && control.attrs.tablecols).forEach((column, index) => {
+    asArray(column.children).forEach((child, childIndex) => walkControls(child, visitor, `${pointer}.attrs.tablecols[${index}].children[${childIndex}]`));
+  });
 }
 
 function hasNativeTextValue(control) {

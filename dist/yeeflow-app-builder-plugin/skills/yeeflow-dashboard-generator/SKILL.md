@@ -5,6 +5,11 @@ description: generate, inspect, validate, package, debug, and improve Yeeflow da
 
 # Yeeflow Dashboard Generator
 
+## Native Collection Rich Content Learning
+
+For image-driven native Collection restyling, use `docs/standards/native-collection-rich-content-training.md` and `scripts/lib/collection-native-badge.mjs`. Inventory real fields and actions; preserve native tablecols and mobile children, single-caption ownership, actual-value badge fallback, and current bindings. Audit both control trees. Column identity warnings are advisory for historical exports. Width mappings and exhaustive select-filter options remain unresolved; CSS fallback requires scoped runtime verification. Edit labels do not prove edit mode, hover does not prove selection, and desktop proof does not prove mobile fidelity. Run `scripts/test-collection-native-rich-training.mjs` and related Collection gates before promoting this pattern.
+
+
 ## Dashboard Set Variable
 
 Dashboard Set Variable actions must materialize from `Form Action Set Variable Planning` through the shared page-action helper. Targets are declared Dashboard temp variables only; Page Load uses `formAction.onLoad`, while button/container/Collection triggers use resolvable `attrs.control_action` bindings.

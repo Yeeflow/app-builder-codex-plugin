@@ -643,6 +643,9 @@ try {
       assert.equal(consumedFilterVars.has(name), true, `${page.Title} filterVars[] entry ${name} must be consumed by a data/analytics control`);
     }
     for (const search of findNodes(parsedDashboard, (node) => String(node?.type || "") === "search-filter")) {
+      assert.match(search.binding || "", /^__filter_\S+$/, `${page.Title} search-filter must have canonical control.binding`);
+      assert.equal(search.attrs?.binding, undefined, "legacy attrs.binding must be removed");
+      assert.ok((parsedDashboard.filterVars || []).some(v => (v.id || v.name) === search.binding.slice(9)), "search variable must be declared");
       const binding = String(search?.binding || search?.attrs?.binding || "");
       if (!binding.startsWith("__filter_")) continue;
       const name = binding.slice("__filter_".length);

@@ -5,6 +5,11 @@ description: Enforce Yeeflow UI generation hard gates before package validation.
 
 # Yeeflow UI Generation Hard Gates
 
+## Native Collection Rich Content Learning
+
+For image-driven native Collection restyling, use `docs/standards/native-collection-rich-content-training.md` and `scripts/lib/collection-native-badge.mjs`. Inventory real fields and actions; preserve native tablecols and mobile children, single-caption ownership, actual-value badge fallback, and current bindings. Audit both control trees. Column identity warnings are advisory for historical exports. Width mappings and exhaustive select-filter options remain unresolved; CSS fallback requires scoped runtime verification. Edit labels do not prove edit mode, hover does not prove selection, and desktop proof does not prove mobile fidelity. Run `scripts/test-collection-native-rich-training.mjs` and related Collection gates before promoting this pattern.
+
+
 ## Purpose
 
 Use this skill before Codex modifies or claims quality for Yeeflow dashboard/UI pages. It turns the Marketing Event Management UI lessons into generation behavior so package validators become the backstop, not the first time Codex notices that a UI is only a scaffold.
