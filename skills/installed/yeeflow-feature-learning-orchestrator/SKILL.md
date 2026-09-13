@@ -5,6 +5,13 @@ description: orchestrate end-to-end Yeeflow feature learning from real exports b
 
 # Yeeflow Feature Learning Orchestrator
 
+## Scoped Toolbar Learning
+
+For choice badges and default page size, use `docs/standards/dashboard-collection-choice-pagination-standard.md`. Train single-choice equality separately from multi-choice exact membership; independent border/background/text, unknown fallback and conflict handling require explicit contracts. The shared Dashboard builder defaults new record Collections to 10 with user override and semantic exceptions. Run the actual materializer regressions; local shape tests do not prove multi-choice runtime behavior or pagination interaction.
+
+Use `docs/standards/collection-toolbar-style-standard.md` for the desktop live-update toolbar/menu baseline and its pending proof matrix. Scope CSS to the owner control; reuse classes and keep CSS IDs unique. Tests and helpers are in `scripts/lib/collection-toolbar-style.mjs` and `scripts/test-collection-toolbar-style.mjs`. Wait for asynchronous Collection query results before runtime measurements. Saved foreground does not prove computed foreground; CSS fallback is DOM-dependent. Keep hover/active, mobile, candidate completeness and Edit routing proof separate.
+
+
 ## Native Collection Rich Content Learning
 
 For image-driven native Collection restyling, use `docs/standards/native-collection-rich-content-training.md` and `scripts/lib/collection-native-badge.mjs`. Inventory real fields and actions; preserve native tablecols and mobile children, single-caption ownership, actual-value badge fallback, and current bindings. Audit both control trees. Column identity warnings are advisory for historical exports. Width mappings and exhaustive select-filter options remain unresolved; CSS fallback requires scoped runtime verification. Edit labels do not prove edit mode, hover does not prove selection, and desktop proof does not prove mobile fidelity. Run `scripts/test-collection-native-rich-training.mjs` and related Collection gates before promoting this pattern.

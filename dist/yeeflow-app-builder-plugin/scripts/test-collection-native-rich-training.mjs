@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import './test-collection-toolbar-style.mjs';
+import './test-dashboard-collection-presentation.mjs';
 import {createRequire} from 'node:module';
 import {buildCollectionNativeBadge,inspectNativeColumnIdentity} from './lib/collection-native-badge.mjs';
 const require=createRequire(import.meta.url);

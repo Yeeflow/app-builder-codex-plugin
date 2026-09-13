@@ -312,6 +312,9 @@ for (const file of ["scripts/lib/normalize-filter-binding.mjs", "scripts/lib/col
 
 mirrors.push(["docs/releases/yeeflow-app-builder-v1.15.6.md", "docs/releases/yeeflow-app-builder-v1.15.6.md"]);
 
+for (const file of ["scripts/lib/collection-toolbar-style.mjs", "scripts/test-collection-toolbar-style.mjs", "docs/standards/collection-toolbar-style-standard.md", "scripts/lib/dashboard-collection-presentation.mjs", "scripts/test-dashboard-collection-presentation.mjs", "docs/standards/dashboard-collection-choice-pagination-standard.md", "docs/training/collection-choice-pagination-toolbar-training-report.md", "docs/releases/yeeflow-app-builder-v1.15.7.md"]) mirrors.push([file, file]);
+mirrors.push(["skills/installed/yeeflow-feature-learning-orchestrator/SKILL.md", "skills/yeeflow-feature-learning-orchestrator/SKILL.md"]);
+
 for (const [sourcePath, destinationPath] of mirrors) {
   const destination = resolve(root, "dist/yeeflow-app-builder-plugin", destinationPath);
   mkdirSync(dirname(destination), { recursive: true });

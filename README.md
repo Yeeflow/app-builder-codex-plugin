@@ -1,6 +1,6 @@
 # App Builder Codex Plugin
 
-Release **1.15.6**, based on stable **v1.15.5**. Completes the Custom Code Dashboard selection registry; see [release notes](docs/releases/yeeflow-app-builder-v1.15.6.md).
+Release **1.15.7**, based on stable **v1.15.6**. Improves native Collection toolbar and row-menu styling, adds choice-field Dynamic style rules, and defaults new Dashboard record Collections to 10 records per page; see [release notes](docs/releases/yeeflow-app-builder-v1.15.7.md).
 
 Official Yeeflow App Builder Codex plugin repository.
 
@@ -12,7 +12,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.15.6`
+- Version: `1.15.7`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
 Version `1.10.6` previously removed stale OAuth/REST references from the bundled skills and adds an OpenAI plugin submission packet. Live Yeeflow work uses the four scoped hosted MCP services, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.
@@ -32,14 +32,23 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.10.6
+Version: 1.15.7
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.10.6
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.15.7
 ```
+
+## Collection generation rules
+
+- Scope Button and Select CSS to the owning control; reuse CSS classes and keep CSS IDs unique.
+- Enable row-menu auto positioning and apply readable foreground colors for known dark menus.
+- Use actual single/multiple-choice values for Container/Text Dynamic styles, with independent border, background and text colors and a neutral fallback. Multi-choice requires verified storage and exact membership conditions.
+- Default new ordinary Dashboard Collections to 10 records per page. Explicit page sizes win; existing configurations, selected-detail records, limited results and print layouts retain their semantics.
+
+See the [toolbar standard](docs/standards/collection-toolbar-style-standard.md) and [choice and pagination standard](docs/standards/dashboard-collection-choice-pagination-standard.md). Local generation checks do not establish runtime acceptance for every page or device.
 
 ## What Is Included
 
@@ -55,11 +64,7 @@ node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1
 
 Use the plugin to plan, incrementally build, generate, inspect, validate, and harden Yeeflow applications and packages. A normal requirement-to-live-application request defaults to the confirmation-gated MCP incremental path; package generation is an explicit delivery choice. The current package preserves support for:
 
-- Browser OAuth login, status, refresh, logout, and OAuth/API auth wrapper helpers.
 - Hosted Yeeflow MCP tools through the scoped App Builder (`/v1/mcp/app-builder`), Operations (`/v1/mcp/operations`), Admin (`/v1/mcp/admin`), and Service Portal (`/v1/mcp/service-portal`) endpoints, with OAuth negotiated by Codex and no credentials embedded in the Plugin.
-- Legacy API-key fallback for internal/package automation scenarios.
-- Documented REST API capability listing and guarded read-only capability calls.
-- Package API automation with dry-run defaults and explicit confirmation gates.
 - YAP/YAPK/YDL/YWF validators and wrapper helpers.
 - Application plan conformance, navigation checks, runtime-binding lessons, and release hygiene.
 - Generated-final YAPK hard gates for API-issued ID provenance, complete navigation runtime metadata, and App Plan resource completeness.

@@ -8,6 +8,8 @@ Preserve native `attrs.tablecols` for desktop/tablet and the separate mobile `ch
 
 ## Generation recipe
 
+Choice-field composition and new Dashboard 10-record pagination follow `dashboard-collection-choice-pagination-standard.md`. Existing single-choice badge helpers are reusable; multi-choice membership and visual composition have separate proof requirements. The materializer applies pagination only to eligible new datasets and respects explicit plan values.
+
 1. Inventory actual fields and existing functions before interpreting an image. A pictured field, upload, progress calculation, or selected-detail pane is not evidence that it exists. Compare the returned image against the approved toolbar order too.
 2. Keep the required content_card_wrapper under section_content_area. A Collection with its own caption does not need a repeated section_title_area. Preserve unique business descriptions if they carry information.
 3. For single-select badges, use `buildCollectionNativeBadge` from `scripts/lib/collection-native-badge.mjs`. Supply resolved field names, actual values, reviewed palettes, and a page-wide unique ID allocator. The helper is opt-in; do not convert ordinary text fields into badges automatically.
@@ -16,6 +18,8 @@ Preserve native `attrs.tablecols` for desktop/tablet and the separate mobile `ch
 6. Include both tablecols descendants and ordinary children in control ID/binding/action audits. Desktop success is not mobile success.
 
 ## Runtime-sensitive styling
+
+For toolbar height/alignment and row-menu clipping/contrast, follow `collection-toolbar-style-standard.md` in this directory and the opt-in `scripts/lib/collection-toolbar-style.mjs` helpers. Apply custom CSS to the owning Button or Select, not a broad card-level button selector. The native-rich training suite includes the focused toolbar regression.
 
 In the observed runtime, setting column attrs.width and attrs.minWidth alone still produced 200px col elements and a 1200px table. The exact native property mapping remains unresolved. Do not train those paths as a proven width solution.
 

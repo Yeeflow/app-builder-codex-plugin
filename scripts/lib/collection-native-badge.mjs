@@ -1,4 +1,5 @@
 // Export-shaped Container + Text badge. No business values or tenant IDs included.
+import {buildChoiceStyleCondition} from './dashboard-collection-presentation.mjs';
 export function buildCollectionNativeBadge({ field, label, values, allocateId }) {
   if (!field || !label || !Array.isArray(values) || typeof allocateId !== 'function') throw new Error('BADGE_CONTRACT_REQUIRED');
   const ids = new Set();
@@ -13,7 +14,7 @@ export function buildCollectionNativeBadge({ field, label, values, allocateId })
   const rules = values.map(({ value, background, color, border }) => {
     if (typeof value !== 'string' || seenValues.has(value) || ![background,color,border].every(v => /^#[0-9a-f]{6}$/i.test(v))) throw new Error('BADGE_VALUE_OR_PALETTE_INVALID');
     seenValues.add(value);
-    return { id:id(), controlId:containerId, formulas:[expression(),{type:'op',op:'=='},{type:'str',value}], actions:{id:id(),type:1,attrs:{style_regulation_action:'style_class',style_regulation_action_color:null,action_style:JSON.stringify({normal:{bgcolor:background,color,border:{type:'1',width:[null,{top:1,right:1,bottom:1,left:1}],color:border}}})}} };
+    return { id:id(), controlId:containerId, formulas:buildChoiceStyleCondition({field,label,value}), actions:{id:id(),type:1,attrs:{style_regulation_action:'style_class',style_regulation_action_color:null,action_style:JSON.stringify({normal:{bgcolor:background,color,border:{type:'1',width:[null,{top:1,right:1,bottom:1,left:1}],color:border}}})}} };
   });
   return {id:containerId,type:'container',label:'Container',name:`${label} badge`,attrs:{
     style:{direction:[null,'row'],align_items:[null,'center'],widthtype:[null,'2']},

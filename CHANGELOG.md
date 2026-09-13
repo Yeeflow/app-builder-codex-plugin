@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.15.7 — 2026-09-13
+
+- Scope Collection toolbar CSS to owner controls; configure row-menu auto positioning and known dark-menu foregrounds.
+- Add actual-value single/multiple-choice Dynamic style guidance and exact-membership helpers with independent border, background and text styles.
+- Default new Dashboard record Collections to 10 per page, respecting explicit plan values and detail/limited/print semantics.
+- Bundle materializer regressions and update README installation metadata and current hosted-MCP workflow descriptions.
+
+
 ## 1.15.6
 
 - Include Custom Code Dashboard in selectable page template IDs and add its selection rule.

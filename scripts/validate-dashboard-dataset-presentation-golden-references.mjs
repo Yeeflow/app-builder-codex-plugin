@@ -1194,7 +1194,11 @@ function validateResponsiveCollection(entry, page, findings, options = {}) {
     }));
   }
   const itemOpMenu = findDescendantByIdentity(wrapper, "grid_table_col_item_op_menu");
-  if (operationButtons.length && !deepEqual(itemOpMenu?.attrs?.settings?.position, [null, null, null, "bottomRight"])) {
+  const menuSettings = itemOpMenu?.attrs?.settings;
+  const templatePlacement = deepEqual(menuSettings?.position, [null, null, null, "bottomRight"]);
+  const scopedDesktopPlacement = menuSettings?.autoposition === true
+    && deepEqual(menuSettings?.position, [null, "bottomRight", null, "bottomRight"]);
+  if (operationButtons.length && !templatePlacement && !scopedDesktopPlacement) {
     findings.push(error("DASH_DATASET_RESPONSIVE_OP_MENU_POSITION_INVALID", "Responsive Collection Card item menu must preserve the mobile Button right popup placement.", {
       page: page.title,
       path: entry.pointer,

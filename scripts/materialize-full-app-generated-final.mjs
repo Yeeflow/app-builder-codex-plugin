@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { applyDashboardCollectionPagination } from "./lib/dashboard-collection-presentation.mjs";
+import {configureCollectionRowMenu, applyDarkMenuButtonStyle} from "./lib/collection-toolbar-style.mjs";
 import { normalizeFilterBinding } from "./lib/normalize-filter-binding.mjs";
 import { normalizeDashboardDatasetComposition, isDatasetCaptionCard } from "./lib/dashboard-dataset-composition.mjs";
 import { buildCustomCodeDashboard, validateCustomCodeDashboardPlan } from "./lib/dashboard-custom-code-template.mjs";
@@ -1855,6 +1857,7 @@ function collectDashboardDatasetRecords(planText) {
     const regionColumn = findHeaderIndex(normalizedHeaders, ["dataset region", "planned dashboard / region", "section", "section name", "region"]);
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source list", "source resource", "data source", "source data", "source"]);
     const displayFieldsColumn = findHeaderIndex(normalizedHeaders, ["display fields", "visible fields", "table columns", "collection fields", "item fields", "columns"]);
+    const recordsPerPageColumn = findHeaderIndex(normalizedHeaders, ["records per page", "page size"]);
     const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
     if (templateColumn === -1 || regionColumn === -1 || sourceColumn === -1) continue;
     let rowIndex = index + 2;
@@ -1869,6 +1872,7 @@ function collectDashboardDatasetRecords(planText) {
           datasetRegion: cleanResourceName(cells[regionColumn]),
           sourceResource: cleanResourceName(cells[sourceColumn]),
           displayFields: displayFieldsColumn === -1 ? "" : cleanResourceName(cells[displayFieldsColumn]),
+          recordsPerPage: recordsPerPageColumn === -1 ? undefined : cleanResourceName(cells[recordsPerPageColumn]),
           selectedTemplateId,
           retiredTemplateId,
           raw: raw.trim(),
@@ -6133,6 +6137,7 @@ export function buildMaterialDashboardResource({ name, layoutId, customCodeCompo
       datasetRegion: masterRecord.datasetRegion || datasetRegion,
       leftTemplateId: leftRecord.selectedTemplateId || masterRecord.selectedTemplateId || selectedTemplateId,
       currentTemplateId: currentRecord.selectedTemplateId || leftRecord.selectedTemplateId || masterRecord.selectedTemplateId || selectedTemplateId,
+      recordsPerPage: leftRecord.recordsPerPage,
       collectionId,
     });
   }
@@ -6152,6 +6157,7 @@ export function buildMaterialDashboardResource({ name, layoutId, customCodeCompo
       listId: recordListId,
       listMeta: recordListMeta,
       displayFields: record.displayFields,
+      recordsPerPage: record.recordsPerPage,
       detailLayoutId: recordListMeta.detailLayoutId,
       filterBindings: !isMasterDetailWorkspace && index === 0 ? normalizedFilters : [],
       collectionId: isMasterDetailWorkspace ? `${collectionId}_related_${index + 1}` : index === 0 ? collectionId : `${collectionId}_${index + 1}`,
@@ -6407,7 +6413,7 @@ function ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId)
   content.label ||= "content_panel";
 }
 
-function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, rootListSetId, listMeta, datasetRegion, leftTemplateId, currentTemplateId, collectionId }) {
+function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, rootListSetId, listMeta, datasetRegion, leftTemplateId, currentTemplateId, collectionId, recordsPerPage }) {
   const leftCollection = findFirstByIdentity(resource, "left_panel_data_items_wrapper");
   const currentCollection = findFirstByIdentity(resource, "current_item_wrapper");
   const leftPanelTitle = findFirstByIdentity(resource, "left_panel_caption_title");
@@ -6427,7 +6433,7 @@ function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, 
       id: `${collectionId}_left_panel`,
     });
     leftCollection.attrs.data.limit = false;
-    leftCollection.attrs.data.ps = leftCollection.attrs.data.ps || 20;
+    applyDashboardCollectionPagination(leftCollection, {recordsPerPage});
     leftCollection.attrs.data.filter = masterDetailLeftPanelFilters(resource, listMeta, rootListSetId);
     leftCollection.attrs.data.fulltext = masterDetailSearchFilters(resource, listMeta);
     leftCollection.attrs.data.sort = [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }];
@@ -6698,6 +6704,7 @@ function enforceCollectionTemplateStyleContracts(root) {
     applyCollectionDynamicUserItemPadding(control);
   }
   for (const opMenu of findDescendants(root, (node) => hasIdentity(node, "grid_table_col_item_op_menu"))) {
+    if (opMenu.type === "dropbar") configureCollectionRowMenu(opMenu);
     for (const button of findDescendants(opMenu, (node) => ["action_button", "button"].includes(String(node?.type || "")))) {
       button.attrs = button.attrs || {};
       button.attrs.button = button.attrs.button || {};
@@ -6705,6 +6712,7 @@ function enforceCollectionTemplateStyleContracts(root) {
         ...(button.attrs.button.normal || {}),
         bg: COLLECTION_OP_MENU_BUTTON_TRANSPARENT_BG,
       };
+      if (button.type === "action_button" && opMenu.attrs?.content?.normal?.bgColor === "var(--c--neutral-dark-active)") applyDarkMenuButtonStyle(button);
     }
   }
 }
@@ -7733,7 +7741,7 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId, rootListSet
   };
 }
 
-function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = "", dashboardName, datasetRegion, listName, rootListSetId, listId, listMeta, displayFields = "", detailLayoutId, filterBindings, collectionId }) {
+function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = "", dashboardName, datasetRegion, listName, rootListSetId, listId, listMeta, displayFields = "", detailLayoutId, filterBindings, collectionId, recordsPerPage }) {
   const template = loadCollectionTemplate(templateId);
   const root = clone(template?.templateResource?.rootContainer || {});
   reinstantiateTemplateUuidValues(root);
@@ -7886,6 +7894,7 @@ function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = 
     detailLayoutId,
   });
   enforceCollectionTemplateStyleContracts(root);
+  if (collection) applyDashboardCollectionPagination(collection, {recordsPerPage});
   root.pageLevelDependencies = scopedPageDependencies.dependencies;
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName, ...(migratedFromTemplateId ? { migratedFromTemplateId } : {}) };
   return root;
