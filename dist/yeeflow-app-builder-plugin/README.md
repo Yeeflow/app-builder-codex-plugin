@@ -1,6 +1,6 @@
 # App Builder Codex Plugin
 
-Release **1.15.7**, based on stable **v1.15.6**. Improves native Collection toolbar and row-menu styling, adds choice-field Dynamic style rules, and defaults new Dashboard record Collections to 10 records per page; see [release notes](docs/releases/yeeflow-app-builder-v1.15.7.md).
+Release **1.16.0**, based on stable **v1.15.7**. Adds field-aware native Collection column sizing and safe narrative text limits, with container-aware planning and generation validation; see [release notes](docs/releases/yeeflow-app-builder-v1.16.0.md).
 
 Official Yeeflow App Builder Codex plugin repository.
 
@@ -12,7 +12,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.15.7`
+- Version: `1.16.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
 Version `1.10.6` previously removed stale OAuth/REST references from the bundled skills and adds an OpenAI plugin submission packet. Live Yeeflow work uses the four scoped hosted MCP services, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.
@@ -32,23 +32,27 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.15.7
+Version: 1.16.0
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.15.7
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.16.0
 ```
 
 ## Collection generation rules
+
+- Plan native Column width after binding actual fields and placing the Collection: give titles and narratives more space, keep choices and operations compact, and preserve readable widths in narrow cards.
+- Use native Dynamic field Text length only for narrative content with an independent full-value route; keep titles and identifiers complete. Native tooltips do not guarantee full text.
+- Prefer native properties over Custom CSS. Explicit column widths, text limits and full-value access can be provided in App Plan.
 
 - Scope Button and Select CSS to the owning control; reuse CSS classes and keep CSS IDs unique.
 - Enable row-menu auto positioning and apply readable foreground colors for known dark menus.
 - Use actual single/multiple-choice values for Container/Text Dynamic styles, with independent border, background and text colors and a neutral fallback. Multi-choice requires verified storage and exact membership conditions.
 - Default new ordinary Dashboard Collections to 10 records per page. Explicit page sizes win; existing configurations, selected-detail records, limited results and print layouts retain their semantics.
 
-See the [toolbar standard](docs/standards/collection-toolbar-style-standard.md) and [choice and pagination standard](docs/standards/dashboard-collection-choice-pagination-standard.md). Local generation checks do not establish runtime acceptance for every page or device.
+See the [native column width and density standard](docs/standards/native-collection-density-standard.md), [toolbar standard](docs/standards/collection-toolbar-style-standard.md) and [choice and pagination standard](docs/standards/dashboard-collection-choice-pagination-standard.md). Local generation checks do not establish runtime acceptance for every page or device.
 
 ## What Is Included
 

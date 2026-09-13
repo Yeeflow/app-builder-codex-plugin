@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.16.0 — 2026-09-14
+
+- Allocate native Collection column widths from actual field roles, schema choices and full-width versus constrained placement.
+- Apply safe native narrative text limits only with a complete-value route; preserve titles, identifiers, device overrides and unrelated functions.
+- Parse explicit column-width, text-length and full-value-access plans through the real materializer and validate generated native attributes.
+- Add source, distribution and extracted-package regression coverage; retain scoped toolbar, Dynamic style and 10-record pagination rules.
+
 ## 1.15.7 — 2026-09-13
 
 - Scope Collection toolbar CSS to owner controls; configure row-menu auto positioning and known dark-menu foregrounds.
