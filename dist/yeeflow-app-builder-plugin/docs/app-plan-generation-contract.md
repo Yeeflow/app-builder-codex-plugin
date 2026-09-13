@@ -218,3 +218,7 @@ Business Clarification reports must distinguish raw findings from unique unresol
 ## Custom Code Dashboard template selection
 
 `dashboard-page-layouts-custom-code` is an explicit alternate Dashboard template. Preserve the Functional Specification requirement marker and use the Composition, Module Plan, and Communication and Native Integration tables from `docs/standards/dashboard-page-layouts-custom-code-standard.md` for both App Plan and standalone Dashboard Plan. Materialize through the shared Custom Code page builder with populated control artifacts; no generic dataset/header fallback. Keep the existing Core issued-ID, source-binding and standalone wrapper gates.
+
+## Collection content density
+
+Follow `docs/standards/native-collection-density-standard.md`. For native Table/Card Collections, plan field-aware widths after actual container placement, using native `cw/cwu`; limit narrative Dynamic fields through `t-len` only with a complete-value route. Collection selection rows accept optional `Column widths` (JSON map), `Text lengths` (JSON map) and `Full value access` (`source-list`, `record-detail`, `none`). The real materializer consumes these fields and rejects invalid overrides. Keep 10-record defaults, choice styles, scoped toolbar/menu behavior, sorting, source bindings and mobile card content intact. Pixel/percentage examples are mapping evidence, not universal layout defaults.

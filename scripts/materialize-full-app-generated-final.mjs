@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {applyNativeCollectionDensity, inferCollectionLayoutContext} from "./lib/collection-native-density.cjs";
 import { applyDashboardCollectionPagination } from "./lib/dashboard-collection-presentation.mjs";
 import {configureCollectionRowMenu, applyDarkMenuButtonStyle} from "./lib/collection-toolbar-style.mjs";
 import { normalizeFilterBinding } from "./lib/normalize-filter-binding.mjs";
@@ -1833,7 +1834,7 @@ function collectDashboardAnalyticsRecords(planText) {
   return uniqueDashboardAnalyticsRecords(records);
 }
 
-function collectDashboardDatasetRecords(planText) {
+export function collectDashboardDatasetRecords(planText) {
   const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
   if (!section.trim()) return [];
   const lines = section.split(/\r?\n/);
@@ -1858,11 +1859,15 @@ function collectDashboardDatasetRecords(planText) {
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source list", "source resource", "data source", "source data", "source"]);
     const displayFieldsColumn = findHeaderIndex(normalizedHeaders, ["display fields", "visible fields", "table columns", "collection fields", "item fields", "columns"]);
     const recordsPerPageColumn = findHeaderIndex(normalizedHeaders, ["records per page", "page size"]);
+    const columnWidthsColumn = findHeaderIndex(normalizedHeaders, ["column widths"]);
+    const textLengthsColumn = findHeaderIndex(normalizedHeaders, ["text lengths"]);
+    const fullValueColumn = findHeaderIndex(normalizedHeaders, ["full value access"]);
     const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
     if (templateColumn === -1 || regionColumn === -1 || sourceColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
-      const cells = splitTableLine(lines[rowIndex]);
+      const rawCells = splitMarkdownTableRow(lines[rowIndex]);
+      const cells = rawCells.map(cleanResourceName);
       const raw = lines[rowIndex];
       const selectedTemplateId = extractApprovedCollectionTemplateId(raw);
       if (selectedTemplateId) {
@@ -1873,6 +1878,9 @@ function collectDashboardDatasetRecords(planText) {
           sourceResource: cleanResourceName(cells[sourceColumn]),
           displayFields: displayFieldsColumn === -1 ? "" : cleanResourceName(cells[displayFieldsColumn]),
           recordsPerPage: recordsPerPageColumn === -1 ? undefined : cleanResourceName(cells[recordsPerPageColumn]),
+          columnWidths: columnWidthsColumn === -1 ? undefined : cleanStructuredPlanCell(rawCells[columnWidthsColumn]),
+          textLengths: textLengthsColumn === -1 ? undefined : cleanStructuredPlanCell(rawCells[textLengthsColumn]),
+          fullValueAccess: fullValueColumn === -1 ? undefined : cleanResourceName(cells[fullValueColumn]),
           selectedTemplateId,
           retiredTemplateId,
           raw: raw.trim(),
@@ -6183,6 +6191,20 @@ export function buildMaterialDashboardResource({ name, layoutId, customCodeCompo
     slot.children = Array.isArray(slot.children) ? slot.children : [];
     slot.children = slot.children.filter((child) => hasMeaningfulBusinessContent(child));
     slot.children.push(collectionRoot);
+    const densityRecord = recordsForTemplateMaterialization[index] || {};
+    const densityMeta = listMetaByName?.get(normKey(densityRecord.sourceResource)) || sourceListMeta;
+    const access = densityRecord.fullValueAccess || (densityMeta?.listId && densityMeta?.detailLayoutId ? "source-list" : "none");
+    if (!["source-list", "record-detail", "none"].includes(access)) throw new Error("COLLECTION_DENSITY_FULL_VALUE_ACCESS_INVALID");
+    for (const nativeCollection of findDescendants(collectionRoot, n => n.type === "collection" && Array.isArray(n.attrs?.tablecols))) {
+      const density = applyNativeCollectionDensity(nativeCollection, {
+        fields: fieldsForDynamicControls(densityMeta),
+        context: inferCollectionLayoutContext(resource, nativeCollection),
+        columnWidths: densityRecord.columnWidths,
+        textLengths: densityRecord.textLengths,
+        fullValueAccess: access !== "none",
+      });
+      nativeCollection.collectionDensityPolicy = {version: 1, context: density.context, fullValueAccess: access, warnings: density.warnings};
+    }
   }
   const contentArea = datasetSlots[0] || findBusinessSectionContentArea(resource);
   const analyticsRuntimeContracts = materializeDashboardAnalytics(resource, {
@@ -7864,7 +7886,7 @@ function buildCollectionTemplateInstance({ templateId, migratedFromTemplateId = 
     if (control.type !== "dynamic-user") replaceUserLikeDynamicFieldText(control, field.displayName);
   }
   if ((templateId === "collection_control_responsive" || templateId === "collection_control_responsive_multiple_select") && collection) {
-    mapResponsiveCollectionTableColumns(collection, { fields: plannedDisplayFields, listId, listName, skipLeadingSelectionColumn: templateId === "collection_control_responsive_multiple_select" });
+    mapResponsiveCollectionTableColumns(collection, { fields: plannedDisplayFields, listId, listName, skipLeadingSelectionColumn: templateId === "collection_control_responsive_multiple_select", replanDensity: true });
     mapResponsiveCollectionCardView(collection, { fields: plannedDisplayFields, listId, listName });
     enforceResponsiveCollectionMobileOperationWidth(root, { templateId });
     assertResponsiveCollectionDesignerColumnContract(collection, { templateId });
@@ -7923,7 +7945,7 @@ function resolvePlannedCollectionDisplayFields({ displayFields, listMeta, dashbo
   return resolved;
 }
 
-function mapResponsiveCollectionTableColumns(collection, { fields, listId, listName, skipLeadingSelectionColumn = false }) {
+function mapResponsiveCollectionTableColumns(collection, { fields, listId, listName, skipLeadingSelectionColumn = false, replanDensity = false }) {
   const columns = Array.isArray(collection?.attrs?.tablecols) ? collection.attrs.tablecols : [];
   const leadingSelectionColumn = skipLeadingSelectionColumn && columns.length ? columns[0] : null;
   const reusableColumns = columns.slice(leadingSelectionColumn ? 1 : 0);
@@ -7939,6 +7961,9 @@ function mapResponsiveCollectionTableColumns(collection, { fields, listId, listN
       ...(column.attrs || {}),
       title: { ...(column.attrs?.title || {}), value: field.displayName, variable: null },
     };
+    // Reference widths belong to sample fields. Re-plan after placement using the
+    // actual schema and container; never clone a sample Status width onto Title.
+    if (replanDensity) { delete column.attrs.cw; delete column.attrs.cwu; }
     if (column.attrs.sortingEnabled === true) column.attrs.sortingField = field.fieldName;
     else delete column.attrs.sortingField;
 
@@ -7958,6 +7983,7 @@ function mapResponsiveCollectionTableColumns(collection, { fields, listId, listN
           fieldName: field.fieldName,
         },
       };
+      if (replanDensity) delete control.attrs["t-len"];
       control.field = field.fieldName;
       control.FieldName = field.fieldName;
       control.name = field.displayName;

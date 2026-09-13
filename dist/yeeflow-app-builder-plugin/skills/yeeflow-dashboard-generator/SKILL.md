@@ -5,6 +5,10 @@ description: generate, inspect, validate, package, debug, and improve Yeeflow da
 
 # Yeeflow Dashboard Generator
 
+## Native Collection density
+
+Use `docs/standards/native-collection-density-standard.md` for Collection generation and content-density repairs. The shared materializer applies schema-aware native cw/cwu after slot placement and narrative t-len only with a complete-value route. Plan Column widths, Text lengths and Full value access when overriding defaults. Protect titles/IDs, user device settings, source/action/paging contracts and mobile children. Verify rendered widths and settled data rows; native text truncation is not a line clamp or full-text tooltip. Run the integrated density regression with native-rich and UI tests.
+
 ## Scoped Collection Toolbar Repair
 
 Collection choice-field and pagination policy: follow `docs/standards/dashboard-collection-choice-pagination-standard.md`. Prefer Container/Text Dynamic style for actual single/multiple-choice fields, with independently specified border/background/text and neutral unknown fallback. Single choice uses equality; proven scalar-array multi choice uses exact membership, with explicit per-option or conflict-resolution design and separate runtime proof. New ordinary Dashboard Collections default to attrs.data.ps = 10; explicit Records per page/Page size overrides win. Preserve existing configured instances, current-item detail 1, limited and print semantics. Use shared presentation helpers and run `scripts/test-dashboard-collection-presentation.mjs`.
@@ -14,7 +18,7 @@ For native Collection toolbar alignment and row-menu overflow/contrast, use `doc
 
 ## Native Collection Rich Content Learning
 
-For image-driven native Collection restyling, use `docs/standards/native-collection-rich-content-training.md` and `scripts/lib/collection-native-badge.mjs`. Inventory real fields and actions; preserve native tablecols and mobile children, single-caption ownership, actual-value badge fallback, and current bindings. Audit both control trees. Column identity warnings are advisory for historical exports. Width mappings and exhaustive select-filter options remain unresolved; CSS fallback requires scoped runtime verification. Edit labels do not prove edit mode, hover does not prove selection, and desktop proof does not prove mobile fidelity. Run `scripts/test-collection-native-rich-training.mjs` and related Collection gates before promoting this pattern.
+For image-driven native Collection restyling, use `docs/standards/native-collection-rich-content-training.md` and `scripts/lib/collection-native-badge.mjs`. Inventory real fields and actions; preserve native tablecols and mobile children, single-caption ownership, actual-value badge fallback, and current bindings. Audit both control trees. Column identity warnings are advisory for historical exports. Native width mappings now follow `docs/standards/native-collection-density-standard.md`; exhaustive select-filter options remain unresolved. Prefer native cw/cwu and dynamic-field t-len; CSS fallback requires a demonstrated native limitation and scoped runtime verification. Edit labels do not prove edit mode, hover does not prove selection, and desktop proof does not prove mobile fidelity. Run `scripts/test-collection-native-rich-training.mjs` and related Collection gates before promoting this pattern.
 
 
 ## Dashboard Set Variable

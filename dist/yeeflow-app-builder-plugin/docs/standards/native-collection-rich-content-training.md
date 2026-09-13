@@ -21,7 +21,7 @@ Choice-field composition and new Dashboard 10-record pagination follow `dashboar
 
 For toolbar height/alignment and row-menu clipping/contrast, follow `collection-toolbar-style-standard.md` in this directory and the opt-in `scripts/lib/collection-toolbar-style.mjs` helpers. Apply custom CSS to the owning Button or Select, not a broad card-level button selector. The native-rich training suite includes the focused toolbar regression.
 
-In the observed runtime, setting column attrs.width and attrs.minWidth alone still produced 200px col elements and a 1200px table. The exact native property mapping remains unresolved. Do not train those paths as a proven width solution.
+The earlier 200px equal-column failure came from using incorrect `attrs.width` / `attrs.minWidth` mappings. Designer samples and later persisted desktop verification resolved the native mapping: `tablecols[i].attrs.cw/cwu`. Dynamic field Text length is `attrs["t-len"]`. Follow `native-collection-density-standard.md` and the integrated generator; prefer native properties before CSS. Keep sample values separate from content-aware design choices.
 
 An observed fallback is `attrs.common.css` scoped with `selector`, using `.ant-table-thead>tr>th`, `.ant-table-tbody>tr>td`, and `table.ant-table-fixed` / col selectors. This can style header density, horizontal separators, hover, and widths. Keep it scoped to the target card, derive widths from its real columns, preserve narrow-screen scrolling, and verify DOM measurements after reload. Do not ship tenant-specific CSS classes or promote these implementation selectors as a stable platform API. Native style support and this fallback are distinct claims.
 

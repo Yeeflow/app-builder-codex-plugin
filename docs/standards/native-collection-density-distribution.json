@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "mirrors": [
+    {
+      "source": "scripts/lib/collection-native-density.cjs",
+      "destination": "scripts/lib/collection-native-density.cjs"
+    },
+    {
+      "source": "scripts/test-collection-native-density.mjs",
+      "destination": "scripts/test-collection-native-density.mjs"
+    },
+    {
+      "source": "scripts/materialize-full-app-generated-final.mjs",
+      "destination": "scripts/materialize-full-app-generated-final.mjs"
+    },
+    {
+      "source": "scripts/collection-control-generation-standard.js",
+      "destination": "scripts/collection-control-generation-standard.js"
+    },
+    {
+      "source": "scripts/test-collection-native-rich-training.mjs",
+      "destination": "scripts/test-collection-native-rich-training.mjs"
+    },
+    {
+      "source": "docs/standards/native-collection-density-standard.md",
+      "destination": "docs/standards/native-collection-density-standard.md"
+    },
+    {
+      "source": "docs/standards/native-collection-rich-content-training.md",
+      "destination": "docs/standards/native-collection-rich-content-training.md"
+    },
+    {
+      "source": "docs/standards/collection-control-generation-standard.md",
+      "destination": "docs/standards/collection-control-generation-standard.md"
+    },
+    {
+      "source": "docs/standards/dashboard-collection-choice-pagination-standard.md",
+      "destination": "docs/standards/dashboard-collection-choice-pagination-standard.md"
+    },
+    {
+      "source": "docs/standards/app-plan-standard-template.md",
+      "destination": "docs/standards/app-plan-standard-template.md"
+    },
+    {
+      "source": "docs/app-plan-generation-contract.md",
+      "destination": "docs/app-plan-generation-contract.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-dashboard-generator/SKILL.md",
+      "destination": "skills/yeeflow-dashboard-generator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-feature-learning-orchestrator/SKILL.md",
+      "destination": "skills/yeeflow-feature-learning-orchestrator/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md",
+      "destination": "skills/yeeflow-ui-generation-hard-gates/SKILL.md"
+    },
+    {
+      "source": "skills/installed/yeeflow-application-generator/scripts/collection-control-generation-standard.js",
+      "destination": "skills/yeeflow-application-generator/scripts/collection-control-generation-standard.js"
+    },
+    {
+      "source": "skills/installed/yeeflow-application-generator/scripts/lib/collection-native-density.cjs",
+      "destination": "skills/yeeflow-application-generator/scripts/lib/collection-native-density.cjs"
+    },
+    {
+      "source": "scripts/build-plugin-archive.mjs",
+      "destination": "scripts/build-plugin-archive.mjs"
+    },
+    {
+      "source": "scripts/test-product-14.5-distribution.mjs",
+      "destination": "scripts/test-product-14.5-distribution.mjs"
+    },
+    {
+      "source": "docs/standards/native-collection-density-distribution.json",
+      "destination": "docs/standards/native-collection-density-distribution.json"
+    }
+  ]
+}

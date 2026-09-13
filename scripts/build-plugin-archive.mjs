@@ -30,6 +30,7 @@ const manifest = JSON.parse(readFileSync(resolve(root, "docs/standards/product-1
 const customDashboardManifest = JSON.parse(readFileSync(resolve(root, "docs/templates/dashboard-page-layouts-custom-code/distribution-files.json"), "utf8"));
 manifest.mirrors.push(...customDashboardManifest.mirrors);
 manifest.mirrors.push(...JSON.parse(readFileSync(resolve(root, "docs/standards/product-schema/distribution-files.json"), "utf8")).mirrors);
+manifest.mirrors.push(...JSON.parse(readFileSync(resolve(root, "docs/standards/native-collection-density-distribution.json"), "utf8")).mirrors);
 const files = new Set([...tracked.map(file => relative(distRoot, resolve(root, file))), ...manifest.mirrors.map(entry => entry.destination)]);
 const stage = mkdtempSync(resolve(tmpdir(), "yeeflow-plugin-archive-"));
 try {

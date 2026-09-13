@@ -1,3 +1,4 @@
+const {inspectNativeCollectionDensity} = require("./lib/collection-native-density.cjs");
 const { spawnSync } = require("child_process");
 const zlib = require("zlib");
 
@@ -524,6 +525,9 @@ function validateCollectionControls(options) {
 
   for (const { control, pointer } of collectionControls) {
     const attrs = control.attrs || {};
+    for (const finding of inspectNativeCollectionDensity(control, {requireWidths: control.collectionDensityPolicy?.version === 1 || options.requireNativeCollectionDensity === true})) {
+      emit(finding.code, "Native Collection widths require responsive cw/cwu; text length uses dynamic-field t-len. See native-collection-density-standard.md.", {pointer, column: finding.column});
+    }
     const data = attrs.data || {};
     const list = data.list || {};
     const listId = safeString(list.ListID);

@@ -5,9 +5,13 @@ description: Enforce Yeeflow UI generation hard gates before package validation.
 
 # Yeeflow UI Generation Hard Gates
 
+## Native Collection density
+
+Use `docs/standards/native-collection-density-standard.md` for Collection generation and content-density repairs. The shared materializer applies schema-aware native cw/cwu after slot placement and narrative t-len only with a complete-value route. Plan Column widths, Text lengths and Full value access when overriding defaults. Protect titles/IDs, user device settings, source/action/paging contracts and mobile children. Verify rendered widths and settled data rows; native text truncation is not a line clamp or full-text tooltip. Run the integrated density regression with native-rich and UI tests.
+
 ## Native Collection Rich Content Learning
 
-For image-driven native Collection restyling, use `docs/standards/native-collection-rich-content-training.md` and `scripts/lib/collection-native-badge.mjs`. Inventory real fields and actions; preserve native tablecols and mobile children, single-caption ownership, actual-value badge fallback, and current bindings. Audit both control trees. Column identity warnings are advisory for historical exports. Width mappings and exhaustive select-filter options remain unresolved; CSS fallback requires scoped runtime verification. Edit labels do not prove edit mode, hover does not prove selection, and desktop proof does not prove mobile fidelity. Run `scripts/test-collection-native-rich-training.mjs` and related Collection gates before promoting this pattern.
+For image-driven native Collection restyling, use `docs/standards/native-collection-rich-content-training.md` and `scripts/lib/collection-native-badge.mjs`. Inventory real fields and actions; preserve native tablecols and mobile children, single-caption ownership, actual-value badge fallback, and current bindings. Audit both control trees. Column identity warnings are advisory for historical exports. Native width mappings now follow `docs/standards/native-collection-density-standard.md`; exhaustive select-filter options remain unresolved. Prefer native cw/cwu and dynamic-field t-len; CSS fallback requires a demonstrated native limitation and scoped runtime verification. Edit labels do not prove edit mode, hover does not prove selection, and desktop proof does not prove mobile fidelity. Run `scripts/test-collection-native-rich-training.mjs` and related Collection gates before promoting this pattern.
 
 
 ## Purpose

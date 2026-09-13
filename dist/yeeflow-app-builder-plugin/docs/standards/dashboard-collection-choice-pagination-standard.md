@@ -27,3 +27,7 @@ Use `applyDashboardCollectionPagination` for new datasets. The full-app Dashboar
 Toolbar scope, Select alignment, automatic menu placement and foreground contrast follow `collection-toolbar-style-standard.md`. Generated known dark row menus now use the tested autoposition and scoped foreground helper. Add/Select height fallback remains opt-in on the owning control rather than being applied to every template.
 
 Proof: previous desktop toolbar save/readback/render observations remain valid only for that live repair. This round is local training and generated-resource regression. New page-size runtime navigation, multi-choice badges, hover/active states and mobile behavior are separate acceptance items. No plugin publication or live dashboard change is implied.
+
+## Collection content density
+
+Follow `docs/standards/native-collection-density-standard.md`. For native Table/Card Collections, plan field-aware widths after actual container placement, using native `cw/cwu`; limit narrative Dynamic fields through `t-len` only with a complete-value route. Collection selection rows accept optional `Column widths` (JSON map), `Text lengths` (JSON map) and `Full value access` (`source-list`, `record-detail`, `none`). The real materializer consumes these fields and rejects invalid overrides. Keep 10-record defaults, choice styles, scoped toolbar/menu behavior, sorting, source bindings and mobile card content intact. Pixel/percentage examples are mapping evidence, not universal layout defaults.
