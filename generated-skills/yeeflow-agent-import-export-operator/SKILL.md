@@ -70,3 +70,12 @@ When inspecting app-level exports, decode read-only, preserve large numeric IDs 
 
 `Spark & AI (1).yap` adds a data-list workflow invocation case: the host list registers the workflow in `FlowMappings[]`, the workflow `AI` node maps an `icon-upload` list field into Agent input `label_image`, and native `ListDataID` into a row-ID input for same-item update behavior. When inspecting similar exports, redact uploaded-image details and record payloads, and separately map any application-resource access tool that can update app data.
 <!-- scheduled-workflow-ai-assistant-learning:end -->
+
+<!-- plugin-resource-access -->
+## Portable access to bundled resources
+
+Resolve this plugin's root from the current host-provided skill location: a skill is under `<plugin-root>/skills/<skill-name>`. Never hardcode a developer checkout, a macOS home directory, a Linux cache path, or a particular plugin version.
+
+Use the skill-resource reader for files within the selected skill subtree. Shared references such as `docs/reference/...`, root validators and `core/...` are relative to the plugin root, not the current working directory. When the resource reader cannot read outside the skill subtree, read the existing shared file through the host's filesystem tools at its resolved plugin-root path. A resource-interface error alone does not prove the bundled file is missing. If no filesystem reader is available, report that access limitation; do not invent reference contents.
+
+Resolve scripts relative to the mounted plugin and run with the host's available Node runtime. The application-generator validator entrypoint delegates to the root validator so shared dependencies resolve from the same package, including when launched from a temporary directory. Do not install dependencies or call remote write tools merely to read a template. Keep skill reads, script validation, live MCP reads, and business runtime acceptance as separate evidence.

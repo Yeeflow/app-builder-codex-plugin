@@ -5,6 +5,8 @@ import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { applyHostProfile } from "./plugin-host-profile.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packageManifest = readJson("package.json");
 const pluginManifestPath = "dist/yeeflow-app-builder-plugin/.codex-plugin/plugin.json";
@@ -318,6 +320,8 @@ mirrors.push(["skills/installed/yeeflow-feature-learning-orchestrator/SKILL.md",
 for (const entry of readJson("docs/standards/native-collection-density-distribution.json").mirrors) mirrors.push([entry.source, entry.destination]);
 mirrors.push(["docs/releases/yeeflow-app-builder-v1.16.0.md", "docs/releases/yeeflow-app-builder-v1.16.0.md"]);
 
+for (const file of ["docs/standards/plugin-resource-access.md", "docs/standards/plugin-host-build-profiles.md", "scripts/test-skill-entrypoint-compat.mjs", "docs/releases/yeeflow-app-builder-v1.16.1.md"]) mirrors.push([file, file]);
+
 for (const [sourcePath, destinationPath] of mirrors) {
   const destination = resolve(root, "dist/yeeflow-app-builder-plugin", destinationPath);
   mkdirSync(dirname(destination), { recursive: true });
@@ -329,6 +333,8 @@ for (const [sourcePath, destinationPath] of mirrors) {
 
 const normalization = spawnSync(process.execPath, [resolve(root, "scripts/normalize-plugin-distribution.mjs"), resolve(root, "dist/yeeflow-app-builder-plugin")], { encoding: "utf8" });
 if (normalization.status !== 0) throw new Error(`PLUGIN_DISTRIBUTION_NORMALIZATION_FAILED ${normalization.stderr || normalization.stdout}`);
+
+applyHostProfile(resolve(root, "dist/yeeflow-app-builder-plugin"), root, { profile: "codex" }, null);
 
 console.log(`PLUGIN_PATCH_RELEASE_PREPARED version=${packageManifest.version} mirroredFiles=${mirrors.length}`);
 

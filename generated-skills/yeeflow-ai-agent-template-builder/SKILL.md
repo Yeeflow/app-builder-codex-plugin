@@ -66,3 +66,12 @@ When an Agent is intended for workflow AI Assistant use, define input and output
 
 `Spark & AI (1).yap` proves a second workflow-host pattern for the same mechanism: a data-list workflow can pass a current-row image field into Agent input `type = "img"` and pass native `ListDataID` into a text input for same-row update behavior. It also proves a current application-resource access tool shape with `Components[].Type = 2`, `SubType = 10`, `Settings.Data.Value = <current app/listset id>`, and scoped list access in `Settings.resources.dataLists.items[]`. Reusable templates should describe this as a binding requirement unless the target app/list/workflow graph is explicit.
 <!-- scheduled-workflow-ai-assistant-learning:end -->
+
+<!-- plugin-resource-access -->
+## Portable access to bundled resources
+
+Resolve this plugin's root from the current host-provided skill location: a skill is under `<plugin-root>/skills/<skill-name>`. Never hardcode a developer checkout, a macOS home directory, a Linux cache path, or a particular plugin version.
+
+Use the skill-resource reader for files within the selected skill subtree. Shared references such as `docs/reference/...`, root validators and `core/...` are relative to the plugin root, not the current working directory. When the resource reader cannot read outside the skill subtree, read the existing shared file through the host's filesystem tools at its resolved plugin-root path. A resource-interface error alone does not prove the bundled file is missing. If no filesystem reader is available, report that access limitation; do not invent reference contents.
+
+Resolve scripts relative to the mounted plugin and run with the host's available Node runtime. The application-generator validator entrypoint delegates to the root validator so shared dependencies resolve from the same package, including when launched from a temporary directory. Do not install dependencies or call remote write tools merely to read a template. Keep skill reads, script validation, live MCP reads, and business runtime acceptance as separate evidence.

@@ -814,3 +814,12 @@ For barcode-capable identifiers such as ISBN, plan a normal Data List Text/input
 Read `docs/standards/product-14.5/incremental-alignment.md` and its versioned `capabilities.json` for the fixed reviewed commit. Run `node scripts/validate-product-14.5.mjs <fields|filters|sublist|formreport> <local-contract.json>` for the applicable local validation input before completing generation. These are local planning/validation contracts, not new MCP save payloads. Product-supported and locally tested rules do not prove online behavior.
 
 Use validateField/patchField from the product contract module for explicit field updates. The 20 declared defaults remain strings; do not invent encodings for non-string input or delete values on the 7 undeclared types. Retain other export-backed field types. IsFilter and IsSort are distinct: an IsFilter update without confirmed transport support fails explicitly. Keep DataList Sublist host-specific lowering and editor choices intact.
+
+<!-- plugin-resource-access -->
+## Portable access to bundled resources
+
+Resolve this plugin's root from the current host-provided skill location: a skill is under `<plugin-root>/skills/<skill-name>`. Never hardcode a developer checkout, a macOS home directory, a Linux cache path, or a particular plugin version.
+
+Use the skill-resource reader for files within the selected skill subtree. Shared references such as `docs/reference/...`, root validators and `core/...` are relative to the plugin root, not the current working directory. When the resource reader cannot read outside the skill subtree, read the existing shared file through the host's filesystem tools at its resolved plugin-root path. A resource-interface error alone does not prove the bundled file is missing. If no filesystem reader is available, report that access limitation; do not invent reference contents.
+
+Resolve scripts relative to the mounted plugin and run with the host's available Node runtime. The application-generator validator entrypoint delegates to the root validator so shared dependencies resolve from the same package, including when launched from a temporary directory. Do not install dependencies or call remote write tools merely to read a template. Keep skill reads, script validation, live MCP reads, and business runtime acceptance as separate evidence.

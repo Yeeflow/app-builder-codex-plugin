@@ -1,4 +1,4 @@
-name: Yeeflow App Builder v1.7.2 RC verification
+name: Yeeflow App Builder archive verification
 
 on:
   workflow_dispatch:
@@ -26,8 +26,8 @@ jobs:
           node scripts/test-responsive-collection-default-routing.mjs
           node scripts/test-retired-collection-template-migrations.mjs
       - name: Build tracked payload archive
-        run: node scripts/build-plugin-archive.mjs --tracked-only --output /tmp/yeeflow-app-builder-plugin-1.7.2-rc.zip
+        run: node scripts/build-plugin-archive.mjs --tracked-only --output /tmp/yeeflow-app-builder-plugin.zip
       - name: Verify archive and plugin metadata
         run: |
-          unzip -t /tmp/yeeflow-app-builder-plugin-1.7.2-rc.zip
-          node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.7.2
+          unzip -t /tmp/yeeflow-app-builder-plugin.zip
+          node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version "$(node -p 'require("./package.json").version')"

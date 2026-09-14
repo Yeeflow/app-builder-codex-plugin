@@ -1,6 +1,6 @@
 # App Builder Codex Plugin
 
-Release **1.16.0**, based on stable **v1.15.7**. Adds field-aware native Collection column sizing and safe narrative text limits, with container-aware planning and generation validation; see [release notes](docs/releases/yeeflow-app-builder-v1.16.0.md).
+Release **1.16.1**, based on stable **v1.16.0**. Adds Codex and ChatGPT Web build profiles, validated App mappings, portable bundled-resource access and repaired validator entrypoints; see [release notes](docs/releases/yeeflow-app-builder-v1.16.1.md).
 
 Official Yeeflow App Builder Codex plugin repository.
 
@@ -12,7 +12,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.16.0`
+- Version: `1.16.1`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
 Version `1.10.6` previously removed stale OAuth/REST references from the bundled skills and adds an OpenAI plugin submission packet. Live Yeeflow work uses the four scoped hosted MCP services, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.
@@ -32,13 +32,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 1.16.0
+Version: 1.16.1
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.16.0
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.16.1
 ```
 
 ## Collection generation rules
@@ -112,3 +112,7 @@ Release packaging and cache smoke must use tracked files as the source of truth.
 The legacy repository used marketplace `yeeflow-internal`, plugin `yeeflow-builder`, and dist path `dist/yeeflow-builder-plugin`. That identity has repeatedly materialized stale Codex App cache entries such as `0.5.8`. This repository intentionally uses `yeeflow` / `yeeflow-app-builder` and `dist/yeeflow-app-builder-plugin`.
 
 Do not use the legacy repo or legacy identity for current installs unless explicitly testing migration behavior.
+
+## Host-specific builds
+
+The archive builder supports Codex (direct MCP) and ChatGPT Web (registered Apps), retaining all 27 skills and shared references. See [build profiles and verification](docs/standards/plugin-host-build-profiles.md). Run `npm run test:plugin-host-profiles` before releasing either package.
