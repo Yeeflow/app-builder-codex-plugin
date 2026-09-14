@@ -24,6 +24,7 @@ pluginManifest.version = packageManifest.version;
 writeFileSync(resolve(root, pluginManifestPath), `${JSON.stringify(pluginManifest, null, 2)}\n`);
 
 const mirrors = [
+  "scripts/inspect-codex-plugin-cache-metadata.mjs",
   "docs/releases/yeeflow-app-builder-v1.16.2.md",
   "docs/releases/yeeflow-app-builder-v1.15.3.md",
   "scripts/test-set-variable-golden-reference-gates.mjs",
