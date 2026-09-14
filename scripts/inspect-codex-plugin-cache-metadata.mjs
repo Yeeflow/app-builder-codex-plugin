@@ -18,7 +18,7 @@ const expectedVersion = argValue("--expect-version", "0.6.40");
 const expectedMarketplaceId = argValue("--expect-marketplace-id", "yeeflow");
 const expectedMarketplaceLabel = argValue("--expect-marketplace-label", "Yeeflow");
 const expectedPluginId = argValue("--expect-plugin-id", "yeeflow-app-builder");
-const expectedPluginName = argValue("--expect-plugin-name", "Yeeflow App Builder");
+const expectedPluginName = argValue("--expect-plugin-name", "Yeeflow");
 const rootMode = pluginRootMode(root);
 const installedCacheRoot = rootMode === "installed-cache-root";
 

@@ -1,3 +1,7 @@
+# 1.16.2 — Yeeflow branding
+
+Use the Yeeflow public name and official blue logo; broaden descriptions and starter prompts to existing business, task, builder and administrator capabilities. Preserve technical identity, services and authentication.
+
 # Changelog
 
 ## 1.16.1 — 2026-09-14

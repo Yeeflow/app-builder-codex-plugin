@@ -1,8 +1,8 @@
-# App Builder Codex Plugin
+# Yeeflow Plugin
 
-Release **1.16.1**, based on stable **v1.16.0**. Adds Codex and ChatGPT Web build profiles, validated App mappings, portable bundled-resource access and repaired validator entrypoints; see [release notes](docs/releases/yeeflow-app-builder-v1.16.1.md).
+Release **1.16.2**, based on stable **v1.16.1**. Updates the public name to Yeeflow, the official logo, and business-user, builder and administrator descriptions; see [release notes](docs/releases/yeeflow-app-builder-v1.16.2.md).
 
-Official Yeeflow App Builder Codex plugin repository.
+Official Yeeflow plugin repository. Work with business data, manage tasks, and build apps in Yeeflow.
 
 This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It preserves the useful scripts, schemas, validators, studies, generated skills, and plugin distribution assets while using a new non-colliding Codex plugin identity.
 
@@ -10,9 +10,9 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 
 - Marketplace: Yeeflow
 - Marketplace ID: `yeeflow`
-- Plugin: Yeeflow App Builder
+- Plugin: Yeeflow
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.16.1`
+- Version: `1.16.2`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
 Version `1.10.6` previously removed stale OAuth/REST references from the bundled skills and adds an OpenAI plugin submission packet. Live Yeeflow work uses the four scoped hosted MCP services, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.
@@ -31,14 +31,14 @@ Expected installed identity:
 
 ```text
 Marketplace: Yeeflow
-Plugin: Yeeflow App Builder
-Version: 1.16.1
+Plugin: Yeeflow
+Version: 1.16.2
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.16.1
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.16.2
 ```
 
 ## Collection generation rules

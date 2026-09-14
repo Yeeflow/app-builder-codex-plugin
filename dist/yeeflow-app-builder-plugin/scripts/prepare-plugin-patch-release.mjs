@@ -16,10 +16,16 @@ if (!/^\d+\.\d+\.\d+$/u.test(packageManifest.version || "")) {
   throw new Error("PLUGIN_PATCH_RELEASE_VERSION_INVALID");
 }
 
+// Keep the active compact icons byte-identical to the approved official symbol.
+for (const target of ["icon.png", "logo.png"]) {
+  copyFileSync(resolve(root, "dist/yeeflow-app-builder-plugin/assets/yeeflow-logo-only-blue.png"), resolve(root, "dist/yeeflow-app-builder-plugin/assets", target));
+}
 pluginManifest.version = packageManifest.version;
 writeFileSync(resolve(root, pluginManifestPath), `${JSON.stringify(pluginManifest, null, 2)}\n`);
 
 const mirrors = [
+  "scripts/inspect-codex-plugin-cache-metadata.mjs",
+  "docs/releases/yeeflow-app-builder-v1.16.2.md",
   "docs/releases/yeeflow-app-builder-v1.15.3.md",
   "scripts/test-set-variable-golden-reference-gates.mjs",
   "docs/releases/yeeflow-app-builder-v1.15.2.md",
