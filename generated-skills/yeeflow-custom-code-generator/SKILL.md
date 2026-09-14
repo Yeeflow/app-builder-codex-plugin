@@ -484,3 +484,12 @@ Do:
 - Search/list behavior must handle multiple `queryItems` signatures, empty filtered results, broad fallback queries, nested row shapes, and field-key casing differences.
 
 For the v1.4 Dashboard Query Data temp-JSON pattern, prefer standard controls and `JSONStringfy` when plain text is enough. Collection and Data Table cannot directly consume the Query Data temp JSON payload. Only when a real business requirement needs custom tabular transformation/display, generate a `codein` control that reads the declared temp value with `context.getTempVar('<temp-id>')`, accepts either a JSON string or already-parsed array, validates the array shape, and renders explicit empty/error states. Keep React 15.6, Ant Design 2.13, and TypeScript compatibility. Treat Custom Code rendering as separate runtime proof from Query Data structural validation.
+
+<!-- plugin-resource-access -->
+## Portable access to bundled resources
+
+Resolve this plugin's root from the current host-provided skill location: a skill is under `<plugin-root>/skills/<skill-name>`. Never hardcode a developer checkout, a macOS home directory, a Linux cache path, or a particular plugin version.
+
+Use the skill-resource reader for files within the selected skill subtree. Shared references such as `docs/reference/...`, root validators and `core/...` are relative to the plugin root, not the current working directory. When the resource reader cannot read outside the skill subtree, read the existing shared file through the host's filesystem tools at its resolved plugin-root path. A resource-interface error alone does not prove the bundled file is missing. If no filesystem reader is available, report that access limitation; do not invent reference contents.
+
+Resolve scripts relative to the mounted plugin and run with the host's available Node runtime. The application-generator validator entrypoint delegates to the root validator so shared dependencies resolve from the same package, including when launched from a temporary directory. Do not install dependencies or call remote write tools merely to read a template. Keep skill reads, script validation, live MCP reads, and business runtime acceptance as separate evidence.

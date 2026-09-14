@@ -6,7 +6,12 @@ import { execFileSync } from "node:child_process";
 import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { profileOptions, validateApps, applyHostProfile } from "./plugin-host-profile.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const options = profileOptions(process.argv.slice(2));
+const apps = options.appsPath ? validateApps(JSON.parse(readFileSync(resolve(options.appsPath), "utf8"))) : null;
+const archiveFolder = options.profile === "chatgpt-web" ? options.name : "yeeflow-app-builder-plugin";
 const CORE_DISTRIBUTION_COMPATIBILITY_VERSION = "1.0.0";
 const index = process.argv.indexOf("--output");
 const trackedOnly = process.argv.includes("--tracked-only");
@@ -39,15 +44,16 @@ try {
     const input = resolve(distRoot, file);
     if (relative(distRoot, input).startsWith("..")) throw new Error(`PLUGIN_ARCHIVE_PATH_REJECTED: ${file}`);
     if (!lstatSync(input).isFile()) throw new Error(`PLUGIN_ARCHIVE_FILE_INVALID: ${file}`);
-    const destination = resolve(stage, "yeeflow-app-builder-plugin", file);
+    const destination = resolve(stage, archiveFolder, file);
     mkdirSync(dirname(destination), { recursive: true });
     copyFileSync(input, destination);
   }
+  applyHostProfile(resolve(stage, archiveFolder), root, options, apps);
   mkdirSync(dirname(outputPath), { recursive: true });
   rmSync(outputPath, { force: true });
-  execFileSync("zip", ["-qr", outputPath, "yeeflow-app-builder-plugin"], { cwd: stage });
+  execFileSync("zip", ["-qr", outputPath, archiveFolder], { cwd: stage });
 } finally {
   rmSync(stage, { recursive: true, force: true });
 }
 if (!existsSync(outputPath)) throw new Error("CORE_DISTRIBUTION_ARTIFACT_MISSING");
-console.log(`PLUGIN_ARCHIVE_BUILT ${outputPath} trackedOnly=${trackedOnly}`);
+console.log(`PLUGIN_ARCHIVE_BUILT ${outputPath} trackedOnly=${trackedOnly} profile=${options.profile}`);

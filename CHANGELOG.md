@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.16.1 — 2026-09-14
+
+- Add explicit Codex and ChatGPT Web archive profiles with four validated registered App mappings for Web.
+- Preserve all 27 skills and shared templates while avoiding direct-MCP autodiscovery in Web packages.
+- Resolve bundled references from the active host mount and repair application validator dependency resolution from arbitrary working directories.
+- Apply shared repairs to both Marketplace distribution folders and ZIP archives; gate both hosts in CI with payload parity and synthetic validator regressions.
+
+
 ## 1.16.0 — 2026-09-14
 
 - Allocate native Collection column widths from actual field roles, schema choices and full-width versus constrained placement.
