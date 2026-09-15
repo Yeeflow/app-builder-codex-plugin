@@ -1,3 +1,5 @@
+> Historical submission packet, superseded for connection configuration by docs/standards/unified-mcp-migration.md. Its old server topology is not a current setup instruction.
+
 # OpenAI Plugin Submission Packet — Yeeflow App Builder v1.10.6
 
 ## Submission type

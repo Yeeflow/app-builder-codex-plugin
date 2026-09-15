@@ -27,10 +27,7 @@ assert.equal((manifestText.match(/"capabilities"/g) ?? []).length, 1, "plugin ma
 
 assert.deepEqual(Object.keys(mcpManifest), ["mcpServers"]);
 const expectedMcpServers = {
-  yeeflow_app_builder_mcp: "https://api.yeeflow.com/v1/mcp/app-builder",
-  yeeflow_operations_mcp: "https://api.yeeflow.com/v1/mcp/operations",
-  yeeflow_admin_mcp: "https://api.yeeflow.com/v1/mcp/admin",
-  yeeflow_service_portal_mcp: "https://api.yeeflow.com/v1/mcp/service-portal",
+  yeeflow_mcp: "https://api.yeeflow.com/v1/mcp",
 };
 assert.deepEqual(Object.keys(mcpManifest.mcpServers ?? {}), Object.keys(expectedMcpServers));
 for (const [serverName, url] of Object.entries(expectedMcpServers)) {
@@ -42,7 +39,7 @@ for (const [serverName, url] of Object.entries(expectedMcpServers)) {
   assert.equal(endpoint.search, "");
   assert.equal(endpoint.hash, "");
   assert.equal(endpoint.hostname, "api.yeeflow.com");
-  assert.match(endpoint.pathname, /^\/v1\/mcp\/(app-builder|operations|admin|service-portal)$/);
+  assert.equal(endpoint.pathname, "/v1/mcp");
 }
 
 if (sourceCheckout) {

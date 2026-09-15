@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder-core-incubation",
-  "version": "1.16.2",
+  "version": "1.16.3",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "scripts": {
@@ -248,7 +248,8 @@
     "test:dashboard-dataset-composition": "node scripts/test-dashboard-dataset-composition.mjs",
     "build:plugin:codex": "node scripts/build-plugin-archive.mjs --profile codex",
     "build:plugin:web": "node scripts/build-plugin-archive.mjs --profile chatgpt-web",
-    "test:plugin-host-profiles": "node scripts/test-plugin-host-profiles.mjs"
+    "test:plugin-host-profiles": "node scripts/test-plugin-host-profiles.mjs",
+    "test:unified-mcp": "node scripts/test-unified-mcp-migration.mjs"
   },
   "devDependencies": {
     "typescript": "5.7.3"

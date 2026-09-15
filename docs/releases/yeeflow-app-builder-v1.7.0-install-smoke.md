@@ -1,3 +1,5 @@
+> Historical release evidence. Current connection configuration is documented in the 1.16.3 unified MCP migration standard; do not use this version's server topology for new installations.
+
 # Yeeflow App Builder Plugin v1.7.0 RC Install Smoke
 
 Date: 2026-08-08

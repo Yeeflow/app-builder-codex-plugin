@@ -11,10 +11,11 @@ const temp=mkdtempSync(resolve(tmpdir(),'yeeflow-host-profiles-'));
 const apps={apps:Object.fromEntries(services.map((key,i)=>[key,{id:`asdk_app_fixture${i}`}]))};
 assert.deepEqual(validateApps(apps),apps);
 for(const id of ['plugin_asdk_app_bad','asdk_app_','asdk_app_/bad','asdk_app_bad.value']) {
- const bad=structuredClone(apps);bad.apps.admin.id=id;assert.throws(()=>validateApps(bad),/PLUGIN_APP_ID_INVALID/);
+ const bad=structuredClone(apps);bad.apps.yeeflow.id=id;assert.throws(()=>validateApps(bad),/PLUGIN_APP_ID_INVALID/);
 }
-const missing=structuredClone(apps);delete missing.apps.admin;assert.throws(()=>validateApps(missing),/SERVICE_SET/);
-const dup=structuredClone(apps);dup.apps.admin.id=dup.apps.operations.id;assert.throws(()=>validateApps(dup),/DUPLICATE/);
+const missing=structuredClone(apps);delete missing.apps.yeeflow;assert.throws(()=>validateApps(missing),/SERVICE_SET/);
+const legacy={apps:Object.fromEntries(['app-builder','operations','admin','service-portal'].map((k,i)=>[k,{id:`asdk_app_old${i}`}]))};assert.throws(()=>validateApps(legacy),/SERVICE_SET/);
+const extra=structuredClone(apps);extra.apps.admin={id:'asdk_app_extra'};assert.throws(()=>validateApps(extra),/SERVICE_SET/);
 assert.throws(()=>profileOptions(['--profile','other']),/PROFILE_INVALID/);
 assert.throws(()=>profileOptions(['--profile','chatgpt-web']),/APPS_REQUIRED/);
 assert.throws(()=>profileOptions(['--profile','chatgpt-web','--apps','x','--name','../escape']),/NAME_INVALID/);

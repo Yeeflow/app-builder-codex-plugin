@@ -1,3 +1,5 @@
+> Historical release evidence. Current connection configuration is documented in the 1.16.3 unified MCP migration standard; do not use this version's server topology for new installations.
+
 # Yeeflow App Builder Plugin v1.13.1
 
 This local candidate incrementally aligns filters, Workflow Sublists, field validation and FormReport capability/dependency checks with the fixed reviewed Product 14.5 commit `41bdac08a55204bb033acea54cf3af8d7ca2f740`. Release validation covers offline contracts, packaging and Marketplace installation; tenant runtime verification remains separate.

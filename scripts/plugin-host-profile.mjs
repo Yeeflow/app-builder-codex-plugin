@@ -1,10 +1,10 @@
 import { readFileSync, writeFileSync, readdirSync, rmSync, existsSync, copyFileSync } from "node:fs";
 import { resolve } from "node:path";
-export const services = ["app-builder", "admin", "operations", "service-portal"];
+export const services = ["yeeflow"];
 export function validateApps(value) {
   if (!value || !value.apps || Object.keys(value).some(k => k !== "apps") ||
       Object.keys(value.apps).sort().join() !== [...services].sort().join())
-    throw new Error("PLUGIN_APPS_SERVICE_SET_INVALID: exactly four Yeeflow service mappings required");
+    throw new Error("PLUGIN_APPS_SERVICE_SET_INVALID: exactly one unified Yeeflow mapping required");
   const ids = services.map(key => {
     const app = value.apps[key];
     if (!app || Object.keys(app).join() !== "id" || typeof app.id !== "string" ||
@@ -43,6 +43,11 @@ export function applyHostProfile(stageRoot, repoRoot, options, apps) {
     const body = readFileSync(file, "utf8");
     const marker = "<!-- plugin-resource-access -->";
     writeFileSync(file, body.split(marker)[0].trimEnd() + "\n\n" + marker + "\n" + guidance);
+  }
+  if (options.profile === "codex") {
+    delete manifest.apps;
+    rmSync(resolve(stageRoot, ".app.json"), { force: true });
+    manifest.mcpServers = "./.mcp.json";
   }
   if (options.profile === "chatgpt-web") {
     validateApps(apps);
