@@ -375,7 +375,7 @@ Consider these areas before package generation:
 - Integrations: Connections, HTTP API, OAuth, OpenAPI/REST tools, external calls, post-import configuration, credential safety, and whether execution is deferred.
 - Runtime and validation: expected import proof, runtime proof, render-only proof, validation-only areas, validators to run, and artifacts/private data that must never be committed.
 
-For authorized organization-reference lookup, use read-only `yeeflow_admin_mcp` tools. Do not require local credentials or use a standalone API Operator.
+For authorized organization-reference lookup, use read-only `yeeflow_mcp` tools. Do not require local credentials or use a standalone API Operator.
 
 The plan should include these subsections:
 
@@ -836,7 +836,7 @@ Treat `GenerateDocument`, `ConvertToPdf`, `AddWatermark`, and `DocumentRecogniti
 
 Workflow assignment rule: generated app packages must not hardcode tenant-specific direct users in approval task `usertaskassignment`. A direct `method: "users"` or `method: "direct"` assignment with a local user ID/title can import but fail publish if the user is not valid in the target tenant. Prefer requester/current-user expression assignment or require an explicit export-backed user mapping.
 
-For authorized organization-reference lookup, use read-only `yeeflow_admin_mcp` tools. Do not require local credentials or use a standalone API Operator.
+For authorized organization-reference lookup, use read-only `yeeflow_mcp` tools. Do not require local credentials or use a standalone API Operator.
 
 Assignee expression serialization is shared across Approval, Data List, and Scheduled workflow materialization. Use `scripts/lib/workflow-assignee-expression-utils.cjs` and `docs/standards/workflow-assignee-expression-serialization-standard.md`; do not create per-surface Expression Button builders or directly wrap `JSON.stringify()` output as `data="${...}"`. Generated-final must reject `${{...}}`, plain JSON manager `param.id`, unparseable nested expressions, title/value expression drift, and unresolved workflow user variables before signing.
 
@@ -1144,3 +1144,9 @@ Resolve this plugin's root from the current host-provided skill location: a skil
 Use the skill-resource reader for files within the selected skill subtree. Shared references such as `docs/reference/...`, root validators and `core/...` are relative to the plugin root, not the current working directory. When the resource reader cannot read outside the skill subtree, read the existing shared file through the host's filesystem tools at its resolved plugin-root path. A resource-interface error alone does not prove the bundled file is missing. If no filesystem reader is available, report that access limitation; do not invent reference contents.
 
 Resolve scripts relative to the mounted plugin and run with the host's available Node runtime. The application-generator validator entrypoint delegates to the root validator so shared dependencies resolve from the same package, including when launched from a temporary directory. Do not install dependencies or call remote write tools merely to read a template. Keep skill reads, script validation, live MCP reads, and business runtime acceptance as separate evidence.
+
+## Unified Yeeflow MCP connection
+
+Use the single `yeeflow_mcp` connection at `https://api.yeeflow.com/v1/mcp` for all live Yeeflow work. App Builder, Operations, Admin and Service Portal are capability domains within this connection, not separate servers or logins. Discover the current host-exposed tool names and schemas; do not invent namespace prefixes or assume tool contracts stayed identical after migration.
+
+A single OAuth connection does not grant additional permissions. Operations serves business users; application structure/settings and resource creation require the appropriate application-administrator rights. Organization administration and Service Portal capabilities retain their own permission and context checks. Editor/Visitor access is not application-administrator access. On authentication failure reconnect this unified endpoint through the host; on permission denial stop the denied action without falling back to a former endpoint or another identity. Keep existing confirmation, readback, pagination, RowVersion and data-minimization rules.

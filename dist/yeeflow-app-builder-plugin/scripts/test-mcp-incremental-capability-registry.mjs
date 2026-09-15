@@ -27,7 +27,7 @@ const expectedByCategory = {
   application_configuration: ["Portal", "Navigation", "Permissions"]
 };
 const expectedOperationKeys = ["discoverContract", "listOrGetExisting", "allocateIds", "save", "getReadback", "delete"];
-const forbiddenToolBindingPatterns = [/yeeflow_app_builder_mcp/iu, /mcp__/iu, /component_save/iu, /component_get/iu];
+const forbiddenToolBindingPatterns = [/yeeflow_(?:app_builder_mcp|mcp)/iu, /mcp__/iu, /component_save/iu, /component_get/iu];
 const forbiddenSensitiveFieldPatterns = [/(?:api[_-]?key|access[_-]?token|refresh[_-]?token|bearer|authorization|client[_-]?secret|password|cookie|private[_-]?key|secret[_-]?(?:value|material))/iu];
 
 function walk(value, visit, path = "$") {

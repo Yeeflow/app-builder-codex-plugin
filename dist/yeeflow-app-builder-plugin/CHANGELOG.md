@@ -1,5 +1,12 @@
 # 1.16.2 — Yeeflow branding
 
+## 1.16.3
+
+- Replace four hosted MCP connections with one OAuth endpoint: `https://api.yeeflow.com/v1/mcp`.
+- Update all bundled Skills to unified discovery and preserve domain-specific permissions.
+- Require one unified registered App in Web builds; reject legacy four-App mappings.
+- Add migration/packaging regression checks. Historical release notes describe their original versions.
+
 Use the Yeeflow public name and official blue logo; broaden descriptions and starter prompts to existing business, task, builder and administrator capabilities. Preserve technical identity, services and authentication.
 
 # Changelog

@@ -4,6 +4,9 @@ description: generate, inspect, validate, and document Yeeflow expression editor
 ---
 
 # Yeeflow Expression Generator
++## Hosted MCP-Only Yeeflow Access
+
+For live Yeeflow work, use only the appropriate hosted MCP tool. Its service negotiates authentication; standalone OAuth, local REST/API helpers, API-key fallbacks, profile/environment configuration, and direct endpoint calls are retired and must not be used. `workspace_list` is the sole workspace-discovery route. Require explicit confirmation for writes, and treat MCP acceptance as distinct from materialization and runtime proof.
 
 Business Travel workflow-publish practice: expression-bearing workflow surfaces must resolve variable IDs before packaging. Sequence-flow conditions, assignment expressions, Set Variable values/targets, form bindings, and sub-list summary bindings cannot reference deleted or undeclared variables. If a summary-bound variable is renamed, update every `conditioninfo`, binding, and expression-token reference together. Treat unresolved workflow variables as publish blockers, not cosmetic warnings.
 
@@ -120,7 +123,7 @@ Use the context-specific wrapper only when export-backed. The nested expression 
 - Form actions: button click actions use `action_button.attrs.control_action`, page load actions use `page.formdef.formAction.onLoad`, Set variable steps store expressions in `setvar_val` or `setvar_array[].value`, Confirm steps store message tokens in `confirm_qs`, and Phase 2 Query data result expressions can read temp query collections such as `__temp_var_CollectionofQueryItems`.
 - Form action step conditions use normal expression-token arrays in `steps[].condition`. When a conditional warning/confirm/check step should be skipped without stopping the action flow, set step-level `continue: true`; this is the export-backed shape for `Continue next step when condition is not met`.
 - Approval task-form Submit form steps can use workflow-variable expression arrays for task comments and user-picker-driven task operations. `Workflow Actions Runtime Baseline (2)_Task forms.yap` proves `attrs.comment` and `attrs.remark` can reference a text workflow variable, while `attrs.forword` and `attrs.assignee` can reference a user workflow variable for reassign/add-assignee. `Workflow Action Approval Test.ywf` confirms the corrected Add others button binding to the add-assignee Submit form action. Preserve the export spelling `forword`. This is export-proven only; task-operation execution requires focused runtime proof.
-For authorized organization-reference lookup, use read-only `yeeflow_admin_mcp` tools. Do not require local credentials or use a standalone API Operator.
+For authorized organization-reference lookup, use read-only `yeeflow_mcp` tools. Do not require local credentials or use a standalone API Operator.
 - Workflow assignee Expression Buttons use Yeeflow variable JSON, not ordinary JSON interpolation. Generate outer data as `${ key:value... }`; never `${{...}}`. Property chains such as Applicant `LineManager`, Applicant Department `Manager`, or workflow-variable `LineManager` require nested `${...}` in `param.id`. Use `scripts/lib/workflow-assignee-expression-utils.cjs` for generation and recursive parsing, and apply `docs/standards/workflow-assignee-expression-serialization-standard.md` before treating an assignee expression as export-compatible.
 
 ## User/Profile Expression Recipes
@@ -210,3 +213,9 @@ Resolve this plugin's root from the current host-provided skill location: a skil
 Use the skill-resource reader for files within the selected skill subtree. Shared references such as `docs/reference/...`, root validators and `core/...` are relative to the plugin root, not the current working directory. When the resource reader cannot read outside the skill subtree, read the existing shared file through the host's filesystem tools at its resolved plugin-root path. A resource-interface error alone does not prove the bundled file is missing. If no filesystem reader is available, report that access limitation; do not invent reference contents.
 
 Resolve scripts relative to the mounted plugin and run with the host's available Node runtime. The application-generator validator entrypoint delegates to the root validator so shared dependencies resolve from the same package, including when launched from a temporary directory. Do not install dependencies or call remote write tools merely to read a template. Keep skill reads, script validation, live MCP reads, and business runtime acceptance as separate evidence.
+
+## Unified Yeeflow MCP connection
+
+Use the single `yeeflow_mcp` connection at `https://api.yeeflow.com/v1/mcp` for all live Yeeflow work. App Builder, Operations, Admin and Service Portal are capability domains within this connection, not separate servers or logins. Discover the current host-exposed tool names and schemas; do not invent namespace prefixes or assume tool contracts stayed identical after migration.
+
+A single OAuth connection does not grant additional permissions. Operations serves business users; application structure/settings and resource creation require the appropriate application-administrator rights. Organization administration and Service Portal capabilities retain their own permission and context checks. Editor/Visitor access is not application-administrator access. On authentication failure reconnect this unified endpoint through the host; on permission denial stop the denied action without falling back to a former endpoint or another identity. Keep existing confirmation, readback, pagination, RowVersion and data-minimization rules.

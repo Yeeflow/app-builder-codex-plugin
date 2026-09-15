@@ -1,3 +1,5 @@
+> Historical release evidence. Current connection configuration is documented in the 1.16.3 unified MCP migration standard; do not use this version's server topology for new installations.
+
 # Yeeflow 1.16.2
 
 Branding patch based on stable 1.16.1.

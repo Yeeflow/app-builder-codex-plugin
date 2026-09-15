@@ -14,4 +14,4 @@ jobs:
         with:
           node-version: 24
       - name: Verify both archived host profiles and validator entrypoints
-        run: npm run test:plugin-host-profiles
+        run: npm run test:plugin-mcp-integration && npm run test:unified-mcp && npm run test:plugin-host-profiles

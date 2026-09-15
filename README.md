@@ -1,6 +1,6 @@
 # Yeeflow Plugin
 
-Release **1.16.2**, based on stable **v1.16.1**. Updates the public name to Yeeflow, the official logo, and business-user, builder and administrator descriptions; see [release notes](docs/releases/yeeflow-app-builder-v1.16.2.md).
+Release **1.16.3**, based on stable **v1.16.2**. Consolidates all four capability domains into one OAuth MCP connection and retains all 27 skills; see [release notes](docs/releases/yeeflow-app-builder-v1.16.3.md).
 
 Official Yeeflow plugin repository. Work with business data, manage tasks, and build apps in Yeeflow.
 
@@ -12,10 +12,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow
 - Plugin ID: `yeeflow-app-builder`
-- Version: `1.16.2`
+- Version: `1.16.3`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Version `1.10.6` previously removed stale OAuth/REST references from the bundled skills and adds an OpenAI plugin submission packet. Live Yeeflow work uses the four scoped hosted MCP services, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.
+Version `1.10.6` previously removed stale OAuth/REST references from the bundled skills and adds an OpenAI plugin submission packet. Live Yeeflow work uses the unified hosted MCP service, with server-negotiated authentication and no bundled credentials. Configuration readback remains separate from Designer/runtime proof.
 
 ## Install In Codex App
 
@@ -32,13 +32,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow
-Version: 1.16.2
+Version: 1.16.3
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.16.2
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 1.16.3
 ```
 
 ## Collection generation rules
@@ -68,7 +68,7 @@ See the [native column width and density standard](docs/standards/native-collect
 
 Use the plugin to plan, incrementally build, generate, inspect, validate, and harden Yeeflow applications and packages. A normal requirement-to-live-application request defaults to the confirmation-gated MCP incremental path; package generation is an explicit delivery choice. The current package preserves support for:
 
-- Hosted Yeeflow MCP tools through the scoped App Builder (`/v1/mcp/app-builder`), Operations (`/v1/mcp/operations`), Admin (`/v1/mcp/admin`), and Service Portal (`/v1/mcp/service-portal`) endpoints, with OAuth negotiated by Codex and no credentials embedded in the Plugin.
+- Hosted Yeeflow MCP tools for App Builder, Operations, Admin and Service Portal through the unified `https://api.yeeflow.com/v1/mcp` endpoint, with OAuth negotiated by Codex and no credentials embedded in the Plugin.
 - YAP/YAPK/YDL/YWF validators and wrapper helpers.
 - Application plan conformance, navigation checks, runtime-binding lessons, and release hygiene.
 - Generated-final YAPK hard gates for API-issued ID provenance, complete navigation runtime metadata, and App Plan resource completeness.
@@ -91,7 +91,7 @@ Proof boundaries remain separate:
 
 ## Yeeflow Access
 
-All live Yeeflow operations use the four hosted MCP services declared in the plugin. Authentication is negotiated by the service; the plugin has no local OAuth flow, REST CLI, API-key configuration, or workspace environment variables. Use `workspace_list` to inspect workspaces and the matching scoped MCP tool for every read or confirmed write. Do not paste credentials, tokens, cookies, or passwords into chat.
+All live Yeeflow operations use the unified hosted MCP service declared in the plugin. Authentication is negotiated by the service; the plugin has no local OAuth flow, REST CLI, API-key configuration, or workspace environment variables. Use `workspace_list` to inspect workspaces and the matching capability tool on the unified connection for every read or confirmed write. Do not paste credentials, tokens, cookies, or passwords into chat.
 
 ## Development Assets
 
