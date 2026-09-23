@@ -3,7 +3,10 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const NAV_GROUPS = [
   { title: "Workspace", items: ["Projects", "Resources", "Collections", "Reports", "Requests"] },
@@ -107,13 +110,13 @@ function writeJson(dir, name, obj) {
 
 function runValidator(planFile, packageFile, extra = []) {
   const result = spawnSync(process.execPath, [
-    "scripts/validate-app-plan-conformance.mjs",
+    path.join(ROOT, "scripts/validate-app-plan-conformance.mjs"),
     "--plan",
     planFile,
     "--package",
     packageFile,
     ...extra,
-  ], { encoding: "utf8", maxBuffer: 24 * 1024 * 1024 });
+  ], { cwd: ROOT, encoding: "utf8", maxBuffer: 24 * 1024 * 1024 });
   let parsed;
   try {
     parsed = JSON.parse(result.stdout || "{}");
@@ -125,7 +128,7 @@ function runValidator(planFile, packageFile, extra = []) {
 
 function runInspector(planFile, packageFile) {
   const result = spawnSync(process.execPath, [
-    "scripts/inspect-generated-app-quality.mjs",
+    path.join(ROOT, "scripts/inspect-generated-app-quality.mjs"),
     "--plan",
     planFile,
     "--package",
@@ -134,7 +137,7 @@ function runInspector(planFile, packageFile) {
     "focused-runtime-repair",
     "--repair-scope",
     "plan-conformance-regression",
-  ], { encoding: "utf8", maxBuffer: 24 * 1024 * 1024 });
+  ], { cwd: ROOT, encoding: "utf8", maxBuffer: 24 * 1024 * 1024 });
   try {
     return JSON.parse(result.stdout || "{}");
   } catch (error) {
