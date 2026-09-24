@@ -5,9 +5,11 @@ import os from "node:os";
 import path from "node:path";
 import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const DEFAULT_PACKAGE = "/Users/Renger/Downloads/vendor-onboarding-compliance-management.v1.15-yapk-portalinfo-null.yapk";
-const SCHEMA = path.resolve("schemas/yapk-schema.json");
+const DEFAULT_PACKAGE = "";
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const SCHEMA = path.join(ROOT, "schemas/yapk-schema.json");
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
 
 function quoteLargeIntegers(jsonText) {
@@ -84,9 +86,9 @@ function writePackage(dir, name, wrapper, decoded) {
 
 function runValidator(file, validator = "validate-yapk-package.js") {
   const args = validator === "standard"
-    ? ["scripts/validate-standard-package-schema.mjs", file, "--yapk-schema", SCHEMA]
-    : [validator, file];
-  const result = spawnSync(process.execPath, args, { encoding: "utf8", maxBuffer: 24 * 1024 * 1024 });
+    ? [path.join(ROOT, "scripts/validate-standard-package-schema.mjs"), file, "--yapk-schema", SCHEMA]
+    : [path.join(ROOT, validator), file];
+  const result = spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", maxBuffer: 24 * 1024 * 1024 });
   return `${result.stdout}\n${result.stderr}`;
 }
 

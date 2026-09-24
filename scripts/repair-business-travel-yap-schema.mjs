@@ -5,9 +5,9 @@ import path from "node:path";
 import zlib from "node:zlib";
 
 const GZIP_PREFIX = "[______gizp______]";
-const DEFAULT_INPUT = "/Users/Renger/Downloads/business-travel-budget-control.v1.yap";
+const DEFAULT_INPUT = "";
 const DEFAULT_OUTPUT = "business-travel-budget-control.schema-fixed.v1.yap";
-const DEFAULT_DOWNLOADS_OUTPUT = "/Users/Renger/Downloads/business-travel-budget-control.schema-fixed.v1.yap";
+const DEFAULT_DOWNLOADS_OUTPUT = "";
 
 const WORKFLOW_VALUE_TYPES = new Map([
   ["TotalAmount", "number"],
@@ -70,11 +70,12 @@ function parseArgs(argv) {
       throw new Error(`Unknown argument: ${arg}`);
     }
   }
+  if (!args.input) throw new Error("--input is required; provide the source YAP package explicitly.");
   return args;
 }
 
 function printHelp() {
-  console.log(`Usage: node scripts/repair-business-travel-yap-schema.mjs [--input file.yap] [--output fixed.yap] [--downloads-output /path/fixed.yap]
+  console.log(`Usage: node scripts/repair-business-travel-yap-schema.mjs --input file.yap [--output fixed.yap] [--downloads-output /path/fixed.yap]
 
 Repairs the generated Business Travel package for YAP schema-standard issues:
 - root/child Defs and Layouts arrays

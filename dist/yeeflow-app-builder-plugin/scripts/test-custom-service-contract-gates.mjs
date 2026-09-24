@@ -3,9 +3,10 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { pluginRootMode } from "./lib/plugin-root-layout.mjs";
 
-const ROOT = process.cwd();
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT_MODE = pluginRootMode(ROOT);
 const SKILL_ROOT =
   ROOT_MODE === "installed-cache-root"
